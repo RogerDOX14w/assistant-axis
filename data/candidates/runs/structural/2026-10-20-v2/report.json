@@ -1,0 +1,2697 @@
+{
+  "run_id": "2026-10-20-v2",
+  "generator": "structural",
+  "args": {
+    "step": "submit",
+    "record_only": false,
+    "mode": "all",
+    "all": true,
+    "kept_target": null,
+    "kept_share": 0.5,
+    "kept_share_assumed": true,
+    "n_rows": 1971,
+    "n_candidates": 5188,
+    "n_counted": 546,
+    "n_filtered": 1425,
+    "n_charged": 666,
+    "transport": "live",
+    "budget_usd": 13.0,
+    "estimate": {
+      "n": 666,
+      "transport": "live",
+      "m1_usd": 4.7952,
+      "m3_usd": 6.4469,
+      "total_usd": 11.2421,
+      "pass_rate": 0.88,
+      "pass_rate_high": 0.95,
+      "m3_usd_high": 6.9597,
+      "total_usd_high": 11.7549,
+      "assumptions": {
+        "m1_usd_per_word": 0.0072,
+        "m3_usd_per_passed_word": 0.011,
+        "m1_pass_rate": 0.88,
+        "m1_pass_rate_high": 0.95,
+        "batch_factor": 1.0,
+        "source": "M1 $0.0072/word and M3 $0.011/passed word measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md section 6); M1 pass rate 0.88 (the census TDA, plan section 10) with 0.95 printed as a high case, unmeasured for this generator until pilot B"
+      }
+    },
+    "strata": {
+      "kind_x_status": {
+        "classical | exists": 89,
+        "classical | new": 34,
+        "classical | queued": 12,
+        "classical | registered-decided": 149,
+        "degree_filler | exists": 82,
+        "degree_filler | new": 205,
+        "degree_filler | queued": 6,
+        "degree_filler | registered-decided": 237,
+        "opposite | exists": 195,
+        "opposite | new": 60,
+        "opposite | queued": 4,
+        "opposite | registered-decided": 72,
+        "pair_completion | exists": 122,
+        "pair_completion | new": 90,
+        "pair_completion | queued": 12,
+        "pair_completion | registered-decided": 85,
+        "pair_completion | registered-pending": 1,
+        "principal_retarget | exists": 3,
+        "principal_retarget | new": 7,
+        "principal_retarget | queued": 1,
+        "principal_retarget | registered-decided": 11,
+        "remode | exists": 15,
+        "remode | new": 54,
+        "remode | queued": 4,
+        "remode | registered-decided": 101,
+        "retarget | exists": 16,
+        "retarget | new": 69,
+        "retarget | queued": 5,
+        "retarget | registered-decided": 83,
+        "triangle_corner | exists": 60,
+        "triangle_corner | new": 26,
+        "triangle_corner | queued": 3,
+        "triangle_corner | registered-decided": 58
+      },
+      "status": {
+        "exists": 582,
+        "new": 545,
+        "queued": 47,
+        "registered-decided": 796,
+        "registered-pending": 1
+      },
+      "kind": {
+        "classical": 284,
+        "degree_filler": 530,
+        "opposite": 331,
+        "pair_completion": 310,
+        "principal_retarget": 22,
+        "remode": 174,
+        "retarget": 173,
+        "triangle_corner": 147
+      },
+      "principal_target": 52,
+      "phrases": 321
+    },
+    "review_terms_per_hour": 150.0,
+    "review_rate_source": "plan figure, ~150 terms an hour (plan 04; coding_plan_09 decision 1)",
+    "projected_kept": 273.0,
+    "table": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/structural/operator_table.jsonl",
+    "table_sha256": "31c9307e5f32aa7ff14dabc33059f7cdc378141eca109d193e1950072a639b83",
+    "score": "n_sources (a quality signal; not a familiarity)"
+  },
+  "headline": {
+    "n_rows": 1978,
+    "already_registered": 1307,
+    "already_registered_share": 0.6608,
+    "by_another_generator": 1307,
+    "already_decided": 1305,
+    "already_decided_share_of_registered": 0.9985,
+    "exists": 582,
+    "queued": 403,
+    "net_new": 546
+  },
+  "m1": {
+    "n_rows": 1978,
+    "n_filtered": 1978,
+    "n_trait": 1841,
+    "pass_rate": 0.9307,
+    "verdict": {
+      "reject": 19,
+      "tagged": 118,
+      "trait": 1841
+    },
+    "outcome": {
+      "physical": 35,
+      "roles": 10,
+      "states": 73,
+      "trait": 1841,
+      "turned_away": 19
+    },
+    "tags": {
+      "evaluative_only": 2,
+      "membership": 67,
+      "no_persona_reading": 9,
+      "physical": 35,
+      "role_person": 10,
+      "state": 73,
+      "stretched": 4,
+      "too_rare": 4
+    },
+    "polysemy_rate": 0.3195
+  },
+  "m3": {
+    "n_scored": 1870,
+    "decision": {
+      "covered": 1161,
+      "new": 709
+    },
+    "new_rate": 0.3791,
+    "kept": 709,
+    "pair_completions": 142
+  },
+  "net_new_kept_share": 0.5055,
+  "net_new_kept_share_assumed": 0.5,
+  "kept_net_new": 276,
+  "novel": {
+    "raw": 709,
+    "net_pending": 280,
+    "net_groups": null,
+    "twins_pending": [
+      "abusive",
+      "acquisitive",
+      "acrimonious",
+      "aesthetic",
+      "affectionate",
+      "affirming",
+      "alarmist",
+      "allusive",
+      "anti_intellectual",
+      "anticlerical",
+      "antiquarian",
+      "attached",
+      "avaricious",
+      "backbiting",
+      "biocentric",
+      "bloodthirsty",
+      "bohemian",
+      "boisterous",
+      "bragging",
+      "brazen",
+      "brooding",
+      "browbeating",
+      "brusque",
+      "brutal",
+      "buffoon",
+      "bungling",
+      "businesslike",
+      "cantankerous",
+      "captious",
+      "careful",
+      "carping",
+      "categorical",
+      "ceremonious",
+      "chatty",
+      "chauvinistic",
+      "chivalrous",
+      "choosy",
+      "civic_minded",
+      "clear_eyed",
+      "clueless",
+      "coachable",
+      "cocksure",
+      "coddling",
+      "cold",
+      "colorful",
+      "committed",
+      "communal",
+      "complacent",
+      "complaining",
+      "compliant",
+      "condoning",
+      "conflict_averse",
+      "conflict_avoidant",
+      "connoisseur",
+      "considerate",
+      "continent",
+      "contrary",
+      "contributory",
+      "coquettish",
+      "corrigible",
+      "covetous",
+      "creature_of_habit",
+      "cringing",
+      "crooked",
+      "cruel",
+      "cruel_to_animals",
+      "cunning",
+      "cursory",
+      "curt",
+      "cutthroat",
+      "daredevil",
+      "deadpan",
+      "death_denying",
+      "decent",
+      "dedicated",
+      "defensive",
+      "defiant",
+      "demagogic",
+      "demonstrative",
+      "depressive",
+      "despotic",
+      "digressive",
+      "disaffected",
+      "discerning",
+      "discreet",
+      "disenchanted",
+      "disingenuous",
+      "disloyal",
+      "disputatious",
+      "dissembling",
+      "dissolute",
+      "distrustful",
+      "dogmatist",
+      "doormat",
+      "double_dealing",
+      "dour",
+      "driven",
+      "duplicitous",
+      "dutiful",
+      "eager_to_learn",
+      "enterprising",
+      "enthusiastic",
+      "equivocal",
+      "equivocating",
+      "eurocentric",
+      "evasive",
+      "exploitative",
+      "facile",
+      "faddish",
+      "fair_weather",
+      "faithless",
+      "fault_finding",
+      "faultfinding",
+      "fearless",
+      "flamboyant",
+      "flashy",
+      "flighty",
+      "florid",
+      "flowery",
+      "foolhardy",
+      "forward_looking",
+      "frank",
+      "freewheeling",
+      "frenetic",
+      "frigid",
+      "fun_loving",
+      "glad_handing",
+      "glum",
+      "gossip",
+      "gossipy",
+      "grandstanding",
+      "grasping",
+      "grousing",
+      "grudging",
+      "hard_to_please",
+      "hardened",
+      "hardy",
+      "harried",
+      "hateful",
+      "headstrong",
+      "hearing",
+      "hedging",
+      "hoarding",
+      "honor_bound",
+      "humane",
+      "hurtful",
+      "hyperbolic",
+      "hypercritical",
+      "hypochondriac",
+      "ignorant",
+      "impassive",
+      "imperious",
+      "impersonal",
+      "impertinent",
+      "impractical",
+      "impressionistic",
+      "improvident",
+      "impudent",
+      "inarticulate",
+      "incendiary",
+      "inconsiderate",
+      "inconsistent",
+      "indiscreet",
+      "inhibited",
+      "insensitive",
+      "insightful",
+      "insinuating",
+      "insistent",
+      "insubordinate",
+      "insured",
+      "intellectually_humble",
+      "intolerant",
+      "intrepid",
+      "investigative",
+      "involved",
+      "irreligious",
+      "jealous",
+      "jocular",
+      "judicious",
+      "keeping_up_appearances",
+      "keeps_score",
+      "know_it_all",
+      "knowledge_hoarding",
+      "lackadaisical",
+      "laggard",
+      "law_abiding",
+      "lawless",
+      "lax",
+      "lecherous",
+      "legalistic",
+      "libertine",
+      "lifeless",
+      "living_in_the_past",
+      "long_suffering",
+      "loose_tongued",
+      "loving",
+      "matter_of_fact",
+      "maverick",
+      "mealy_mouthed",
+      "meddlesome",
+      "menacing",
+      "merciless",
+      "monotonous",
+      "moralistic",
+      "moralizing",
+      "morbid",
+      "mouthy",
+      "muddle_headed",
+      "nagging",
+      "name_dropping",
+      "naysaying",
+      "needling",
+      "needy",
+      "negligent",
+      "neighborly",
+      "nepotistic",
+      "neurotypical",
+      "nitpicking",
+      "nitpicky",
+      "nominalist",
+      "objectivist",
+      "obliging",
+      "oblique",
+      "obscurantist",
+      "obstructive",
+      "one_track",
+      "opportunistic",
+      "ostentatious",
+      "otherworldly",
+      "out_of_touch",
+      "overprotective",
+      "overstated",
+      "parental",
+      "particularist",
+      "peaceable",
+      "pedestrian",
+      "people_pleasing",
+      "peremptory",
+      "pitiless",
+      "placating",
+      "plain",
+      "platitudinous",
+      "pompous",
+      "ponderous",
+      "possessive",
+      "power_hungry",
+      "preachy",
+      "precious",
+      "predatory",
+      "priggish",
+      "prim",
+      "profane",
+      "prolific",
+      "protective",
+      "punctilious",
+      "puny",
+      "purposeful",
+      "pushy",
+      "querulous",
+      "quietly_defiant",
+      "quitter",
+      "raconteur",
+      "reactionary",
+      "reads_between_the_lines",
+      "realist",
+      "realistic",
+      "reticent",
+      "retiring",
+      "revolutionary",
+      "reward_driven",
+      "ridiculous",
+      "right_handed",
+      "rigorous",
+      "rousing",
+      "ruminative",
+      "ruthless",
+      "sanctimonious",
+      "scornful",
+      "scrupulous",
+      "secretive",
+      "secularist",
+      "self_assertive",
+      "self_deceiving",
+      "self_determining",
+      "self_disparaging",
+      "self_dramatizing",
+      "self_hating",
+      "self_loathing",
+      "self_promoting",
+      "self_questioning",
+      "self_reforming",
+      "self_respecting",
+      "self_restrained",
+      "self_righteous",
+      "self_satisfied",
+      "self_seeking",
+      "self_serving",
+      "self_tormenting",
+      "sensational",
+      "sensuous",
+      "sententious",
+      "servile",
+      "set_in_his_ways",
+      "shameless",
+      "shirking",
+      "showy",
+      "shrewd",
+      "sighted",
+      "simplistic",
+      "single_minded",
+      "sloganeering",
+      "smothering",
+      "snippy",
+      "sober_minded",
+      "soft_spoken",
+      "solicitous",
+      "spineless",
+      "spiritless",
+      "stagnant",
+      "starchy",
+      "stiff",
+      "strait_laced",
+      "stubborn",
+      "studious",
+      "subtle",
+      "surly",
+      "taciturn",
+      "taunting",
+      "teasing",
+      "tedious",
+      "thoughtless",
+      "threatening",
+      "thrill_seeking",
+      "thriving",
+      "tidy",
+      "tight_lipped",
+      "toadying",
+      "tolerant",
+      "tongue_tied",
+      "two_faced",
+      "unaccommodating",
+      "unaccountable",
+      "unashamed",
+      "unassertive",
+      "unconnected",
+      "uncouth",
+      "unctuous",
+      "uncultured",
+      "undermining",
+      "undignified",
+      "unguarded",
+      "unimaginative",
+      "uninstructive",
+      "uninvolved",
+      "unpatriotic",
+      "unprincipled",
+      "unquestioning",
+      "unromantic",
+      "unruly",
+      "untouchable",
+      "upright",
+      "vain",
+      "vainglorious",
+      "vanity",
+      "virtuous",
+      "warm_hearted",
+      "wary",
+      "wary_of_strangers",
+      "wasteful",
+      "weak_willed",
+      "wheedling",
+      "whining",
+      "wholehearted",
+      "wicked",
+      "wisecracking",
+      "wishful",
+      "wishful_thinking",
+      "wooden",
+      "yielding"
+    ],
+    "twins_reviewed": [
+      "acquiescent",
+      "aimless",
+      "bossy",
+      "cloying",
+      "complaisant",
+      "contemptuous",
+      "crafty",
+      "crude",
+      "devious",
+      "dictatorial",
+      "disdainful",
+      "disparaging",
+      "docile",
+      "domineering",
+      "fawning",
+      "flattering",
+      "garrulous",
+      "hardheaded",
+      "haughty",
+      "ingratiating",
+      "insincere",
+      "intrusive",
+      "lewd",
+      "loquacious",
+      "masochistic",
+      "meddling",
+      "mendacious",
+      "morose",
+      "mutinous",
+      "nosy",
+      "obsequious",
+      "obstinate",
+      "officious",
+      "overbearing",
+      "phony",
+      "pigheaded",
+      "prudish",
+      "recalcitrant",
+      "repressed",
+      "resigned",
+      "self_willed",
+      "sneering",
+      "snide",
+      "snobbish",
+      "suggestible",
+      "sulky",
+      "talkative",
+      "tasteless",
+      "vulgar",
+      "wily"
+    ]
+  },
+  "per_kind": {
+    "pair_completion": {
+      "n": 310,
+      "m1_trait_share": 0.9065,
+      "novel_raw": 89,
+      "novel_net": 48,
+      "novel_raw_share": 0.2871,
+      "net_new": 91,
+      "net_new_kept_share": 0.5165,
+      "pair_completions_m3": 41
+    },
+    "degree_filler": {
+      "n": 663,
+      "m1_trait_share": 0.9457,
+      "novel_raw": 271,
+      "novel_net": 103,
+      "novel_raw_share": 0.4087,
+      "net_new": 208,
+      "net_new_kept_share": 0.4952,
+      "pair_completions_m3": 47
+    },
+    "triangle_corner": {
+      "n": 362,
+      "m1_trait_share": 0.953,
+      "novel_raw": 80,
+      "novel_net": 13,
+      "novel_raw_share": 0.221,
+      "net_new": 33,
+      "net_new_kept_share": 0.3939,
+      "pair_completions_m3": 16
+    },
+    "opposite": {
+      "n": 474,
+      "m1_trait_share": 0.9241,
+      "novel_raw": 50,
+      "novel_net": 15,
+      "novel_raw_share": 0.1055,
+      "net_new": 60,
+      "net_new_kept_share": 0.25,
+      "pair_completions_m3": 9
+    },
+    "classical": {
+      "n": 338,
+      "m1_trait_share": 0.9645,
+      "novel_raw": 110,
+      "novel_net": 23,
+      "novel_raw_share": 0.3254,
+      "net_new": 34,
+      "net_new_kept_share": 0.6765,
+      "pair_completions_m3": 15
+    },
+    "retarget": {
+      "n": 457,
+      "m1_trait_share": 0.9803,
+      "novel_raw": 185,
+      "novel_net": 51,
+      "novel_raw_share": 0.4048,
+      "net_new": 85,
+      "net_new_kept_share": 0.6,
+      "pair_completions_m3": 29
+    },
+    "principal_retarget": {
+      "n": 52,
+      "m1_trait_share": 0.9423,
+      "novel_raw": 30,
+      "novel_net": 4,
+      "novel_raw_share": 0.5769,
+      "net_new": 7,
+      "net_new_kept_share": 0.5714,
+      "pair_completions_m3": 4
+    },
+    "remode": {
+      "n": 404,
+      "m1_trait_share": 0.953,
+      "novel_raw": 152,
+      "novel_net": 32,
+      "novel_raw_share": 0.3762,
+      "net_new": 57,
+      "net_new_kept_share": 0.5439,
+      "pair_completions_m3": 25
+    }
+  },
+  "cost": {
+    "files": [
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/structural/2026-10-20-v2/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/structural/2026-10-20-v2/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/filter/2026-10-20-v2_structural/usage.json",
+      "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/novelty/2026-10-20-v2_structural/usage.json"
+    ],
+    "per_model": {
+      "claude-haiku-5-5": {
+        "cost_usd": 6.2099,
+        "prompt_tokens": 5172493,
+        "completion_tokens": 11385491,
+        "n_calls": 16057
+      },
+      "claude-opus-5-5": {
+        "cost_usd": 2.1546,
+        "prompt_tokens": 116292,
+        "completion_tokens": 84474,
+        "n_calls": 544
+      },
+      "claude-sonnet-5-5": {
+        "cost_usd": 5.5736,
+        "prompt_tokens": 1522610,
+        "completion_tokens": 252840,
+        "n_calls": 2645
+      },
+      "text-embedding-3-large": {
+        "cost_usd": 0.0013,
+        "prompt_tokens": 9736,
+        "completion_tokens": 0,
+        "n_calls": 4
+      }
+    },
+    "total_usd": 13.9394
+  },
+  "useful": 851,
+  "useful_per_dollar": 61.0,
+  "review_rate": {
+    "terms_per_hour": 150.0,
+    "source": "plan figure, ~150 terms an hour (plan 04; coding_plan_09 decision 1)"
+  },
+  "projection": {
+    "kept_share": 0.5055,
+    "wave_300": {
+      "net_new_rows": 594,
+      "rows_to_submit": 2152,
+      "kept_rows": 300,
+      "novel_raw": 300,
+      "novel_net": 300,
+      "review_hours": 2.0,
+      "estimate_batches": 18.1629
+    },
+    "whole_table": {
+      "rows": 1971,
+      "net_new_rows": 546,
+      "kept_rows": 276,
+      "review_hours": 1.84,
+      "estimate_batches": 5.621
+    }
+  },
+  "evaluation": {
+    "pair_recovery": {
+      "n_pairs": 297,
+      "n_directions": 594,
+      "n_answered": 594,
+      "n_null_opposite": 0,
+      "n_opposites": 1636,
+      "recall_stem": 0.7104,
+      "expected": 0.8,
+      "by_source_position": {
+        "mean (any triangle corner)": {
+          "n": 215,
+          "recall_stem": 0.6744
+        },
+        "other (the opposite)": {
+          "n": 379,
+          "recall_stem": 0.7309
+        }
+      },
+      "pairs_both_directions_stem": 160,
+      "pairs_either_direction_stem": 262,
+      "recall_cos_0.7": 0.8064,
+      "recall_cos_0.8": 0.7256,
+      "recall_cos_0.9": 0.7104,
+      "cosine_median": 0.8226,
+      "misses": [
+        {
+          "from": "absentee",
+          "hidden": "micromanaging",
+          "opposites": [
+            "hands-on"
+          ],
+          "cosine": 0.5973
+        },
+        {
+          "from": "micromanaging",
+          "hidden": "absentee",
+          "opposites": [
+            "hands-off"
+          ],
+          "cosine": 0.6266
+        },
+        {
+          "from": "esoteric",
+          "hidden": "accessible",
+          "opposites": [
+            "plainspoken"
+          ],
+          "cosine": 0.4713
+        },
+        {
+          "from": "accommodating",
+          "hidden": "unyielding",
+          "opposites": [
+            "uncompromising",
+            "intransigent"
+          ],
+          "cosine": 0.7825
+        },
+        {
+          "from": "accurate",
+          "hidden": "inaccurate",
+          "opposites": [
+            "careless",
+            "sloppy"
+          ],
+          "cosine": 0.638
+        },
+        {
+          "from": "adventurous",
+          "hidden": "unadventurous",
+          "opposites": [
+            "staid",
+            "cautious"
+          ],
+          "cosine": 0.7128
+        },
+        {
+          "from": "adventurous_eater",
+          "hidden": "picky_eater",
+          "opposites": [
+            "finicky",
+            "meat-and-potatoes",
+            "fussy eater"
+          ],
+          "cosine": 0.8173
+        },
+        {
+          "from": "aggressive",
+          "hidden": "peaceful",
+          "opposites": [
+            "conciliatory",
+            "peaceable"
+          ],
+          "cosine": 0.791
+        },
+        {
+          "from": "peaceful",
+          "hidden": "aggressive",
+          "opposites": [
+            "combative"
+          ],
+          "cosine": 0.7054
+        },
+        {
+          "from": "agreeable_big_five",
+          "hidden": "antagonistic_big_five",
+          "opposites": [
+            "disagreeable"
+          ],
+          "cosine": 0.629
+        },
+        {
+          "from": "selfish",
+          "hidden": "altruistic",
+          "opposites": [
+            "selfless",
+            "unselfish"
+          ],
+          "cosine": 0.666
+        },
+        {
+          "from": "ambiguity_tolerant",
+          "hidden": "closure_seeking",
+          "opposites": [
+            "intolerant of ambiguity",
+            "needs certainty"
+          ],
+          "cosine": 0.6798
+        },
+        {
+          "from": "closure_seeking",
+          "hidden": "ambiguity_tolerant",
+          "opposites": [
+            "comfortable with uncertainty",
+            "open-minded",
+            "comfortable with ambiguity"
+          ],
+          "cosine": 0.8225
+        },
+        {
+          "from": "ambitious",
+          "hidden": "unambitious",
+          "opposites": [
+            "contented",
+            "content"
+          ],
+          "cosine": 0.5203
+        },
+        {
+          "from": "amoral",
+          "hidden": "moral",
+          "opposites": [
+            "principled",
+            "scrupulous"
+          ],
+          "cosine": 0.6259
+        },
+        {
+          "from": "anecdotal",
+          "hidden": "data_driven",
+          "opposites": [
+            "data-minded",
+            "statistically minded"
+          ],
+          "cosine": 0.7074
+        },
+        {
+          "from": "data_driven",
+          "hidden": "anecdotal",
+          "opposites": [
+            "anecdote-led",
+            "impressionistic",
+            "story-minded"
+          ],
+          "cosine": 0.6378
+        },
+        {
+          "from": "animated",
+          "hidden": "flat",
+          "opposites": [
+            "subdued"
+          ],
+          "cosine": 0.6835
+        },
+        {
+          "from": "anthropocentric",
+          "hidden": "ecocentric",
+          "opposites": [
+            "biocentric"
+          ],
+          "cosine": 0.6924
+        },
+        {
+          "from": "anxious",
+          "hidden": "composed",
+          "opposites": [
+            "calm"
+          ],
+          "cosine": 0.7245
+        },
+        {
+          "from": "composed",
+          "hidden": "anxious",
+          "opposites": [
+            "jittery",
+            "fretful",
+            "nervous"
+          ],
+          "cosine": 0.6824
+        },
+        {
+          "from": "apathetic",
+          "hidden": "engaged",
+          "opposites": [
+            "committed",
+            "enthusiastic"
+          ],
+          "cosine": 0.6603
+        },
+        {
+          "from": "sedentary",
+          "hidden": "athletic",
+          "opposites": [
+            "active"
+          ],
+          "cosine": 0.6011
+        },
+        {
+          "from": "self_effacing",
+          "hidden": "attention_seeking",
+          "opposites": [
+            "self-promoting",
+            "self-assertive"
+          ],
+          "cosine": 0.655
+        },
+        {
+          "from": "authentic",
+          "hidden": "performative",
+          "opposites": [
+            "phony",
+            "two-faced"
+          ],
+          "cosine": 0.5052
+        },
+        {
+          "from": "performative",
+          "hidden": "authentic",
+          "opposites": [
+            "sincere"
+          ],
+          "cosine": 0.6905
+        },
+        {
+          "from": "authoritarian",
+          "hidden": "civil_libertarian",
+          "opposites": [
+            "libertarian"
+          ],
+          "cosine": 0.7624
+        },
+        {
+          "from": "paternalistic",
+          "hidden": "autonomy_respecting",
+          "opposites": [
+            "hands-off",
+            "permissive"
+          ],
+          "cosine": 0.5342
+        },
+        {
+          "from": "bargain_hunter",
+          "hidden": "full_price_shopper",
+          "opposites": [
+            "big spender"
+          ],
+          "cosine": 0.7033
+        },
+        {
+          "from": "body_confident",
+          "hidden": "body_insecure",
+          "opposites": [
+            "body-shy"
+          ],
+          "cosine": 0.8339
+        },
+        {
+          "from": "bold",
+          "hidden": "cautious",
+          "opposites": [
+            "timid"
+          ],
+          "cosine": 0.5756
+        },
+        {
+          "from": "cautious",
+          "hidden": "bold",
+          "opposites": [
+            "rash",
+            "reckless",
+            "daring"
+          ],
+          "cosine": 0.6892
+        },
+        {
+          "from": "brand_loyal",
+          "hidden": "brand_agnostic",
+          "opposites": [
+            "brand-hopping",
+            "brand-switching"
+          ],
+          "cosine": 0.7062
+        },
+        {
+          "from": "brash",
+          "hidden": "circumspect",
+          "opposites": [
+            "tactful",
+            "diffident"
+          ],
+          "cosine": 0.6415
+        },
+        {
+          "from": "circumspect",
+          "hidden": "brash",
+          "opposites": [
+            "outspoken",
+            "rash"
+          ],
+          "cosine": 0.6499
+        },
+        {
+          "from": "calculating",
+          "hidden": "uncalculating",
+          "opposites": [
+            "guileless"
+          ],
+          "cosine": 0.4478
+        },
+        {
+          "from": "overconfident",
+          "hidden": "calibrated",
+          "opposites": [
+            "diffident"
+          ],
+          "cosine": 0.461
+        },
+        {
+          "from": "family_oriented",
+          "hidden": "career_oriented",
+          "opposites": [
+            "career-minded",
+            "career-driven"
+          ],
+          "cosine": 0.8268
+        },
+        {
+          "from": "careless",
+          "hidden": "conscientious",
+          "opposites": [
+            "careful"
+          ],
+          "cosine": 0.6567
+        },
+        {
+          "from": "formal",
+          "hidden": "casual",
+          "opposites": [
+            "informal"
+          ],
+          "cosine": 0.7709
+        },
+        {
+          "from": "challenging",
+          "hidden": "unchallenging",
+          "opposites": [
+            "affirming"
+          ],
+          "cosine": 0.5618
+        },
+        {
+          "from": "unchallenging",
+          "hidden": "challenging",
+          "opposites": [
+            "questioning",
+            "probing"
+          ],
+          "cosine": 0.6653
+        },
+        {
+          "from": "dull",
+          "hidden": "charismatic",
+          "opposites": [
+            "lively"
+          ],
+          "cosine": 0.6509
+        },
+        {
+          "from": "cheerful",
+          "hidden": "melancholic",
+          "opposites": [
+            "gloomy"
+          ],
+          "cosine": 0.6113
+        },
+        {
+          "from": "melancholic",
+          "hidden": "cheerful",
+          "opposites": [
+            "sanguine"
+          ],
+          "cosine": 0.5465
+        },
+        {
+          "from": "childless",
+          "hidden": "parent",
+          "opposites": [
+            "parental"
+          ],
+          "cosine": 0.744
+        },
+        {
+          "from": "cryptic",
+          "hidden": "clear",
+          "opposites": [
+            "forthright",
+            "plainspoken"
+          ],
+          "cosine": 0.633
+        },
+        {
+          "from": "open_big_five",
+          "hidden": "closed_big_five",
+          "opposites": [
+            "closed-minded",
+            "conventional"
+          ],
+          "cosine": 0.58
+        },
+        {
+          "from": "coherent",
+          "hidden": "incoherent",
+          "opposites": [
+            "inconsistent"
+          ],
+          "cosine": 0.7535
+        },
+        {
+          "from": "incoherent",
+          "hidden": "coherent",
+          "opposites": [
+            "consistent"
+          ],
+          "cosine": 0.6764
+        },
+        {
+          "from": "collaborative",
+          "hidden": "self_reliant",
+          "opposites": [
+            "solitary",
+            "domineering"
+          ],
+          "cosine": 0.6083
+        },
+        {
+          "from": "individualistic",
+          "hidden": "collectivistic",
+          "opposites": [
+            "collectivist",
+            "conformist"
+          ],
+          "cosine": 0.7728
+        },
+        {
+          "from": "job_hopping",
+          "hidden": "company_loyal",
+          "opposites": [
+            "loyal"
+          ],
+          "cosine": 0.7804
+        },
+        {
+          "from": "conciliatory",
+          "hidden": "confrontational",
+          "opposites": [
+            "combative"
+          ],
+          "cosine": 0.7044
+        },
+        {
+          "from": "confident",
+          "hidden": "uncertain",
+          "opposites": [
+            "diffident"
+          ],
+          "cosine": 0.6656
+        },
+        {
+          "from": "conventional",
+          "hidden": "eccentric",
+          "opposites": [
+            "unconventional"
+          ],
+          "cosine": 0.5801
+        },
+        {
+          "from": "conventional_hexaco",
+          "hidden": "open_hexaco",
+          "opposites": [
+            "unconventional"
+          ],
+          "cosine": 0.5245
+        },
+        {
+          "from": "course_correcting",
+          "hidden": "tunnel_visioned",
+          "opposites": [
+            "persistent",
+            "stubborn",
+            "obstinate"
+          ],
+          "cosine": 0.528
+        },
+        {
+          "from": "tunnel_visioned",
+          "hidden": "course_correcting",
+          "opposites": [
+            "open-minded"
+          ],
+          "cosine": 0.5023
+        },
+        {
+          "from": "critical",
+          "hidden": "uncritical",
+          "opposites": [
+            "deferential"
+          ],
+          "cosine": 0.6965
+        },
+        {
+          "from": "defeatist",
+          "hidden": "persevering",
+          "opposites": [
+            "tenacious"
+          ],
+          "cosine": 0.738
+        },
+        {
+          "from": "persevering",
+          "hidden": "defeatist",
+          "opposites": [
+            "fickle",
+            "quitting"
+          ],
+          "cosine": 0.6716
+        },
+        {
+          "from": "unreliable",
+          "hidden": "dependable",
+          "opposites": [
+            "reliable"
+          ],
+          "cosine": 0.8448
+        },
+        {
+          "from": "determinist",
+          "hidden": "metaphysical_libertarian",
+          "opposites": [
+            "believer in free will",
+            "indeterminist"
+          ],
+          "cosine": 0.7126
+        },
+        {
+          "from": "metaphysical_libertarian",
+          "hidden": "determinist",
+          "opposites": [
+            "hard determinist"
+          ],
+          "cosine": 0.7105
+        },
+        {
+          "from": "dishonest",
+          "hidden": "honest",
+          "opposites": [
+            "candid",
+            "forthright"
+          ],
+          "cosine": 0.6153
+        },
+        {
+          "from": "supportive",
+          "hidden": "dismissive",
+          "opposites": [
+            "discouraging",
+            "disparaging",
+            "undermining"
+          ],
+          "cosine": 0.6606
+        },
+        {
+          "from": "dry",
+          "hidden": "entertaining",
+          "opposites": [
+            "colorful"
+          ],
+          "cosine": 0.7305
+        },
+        {
+          "from": "entertaining",
+          "hidden": "dry",
+          "opposites": [
+            "dull"
+          ],
+          "cosine": 0.7044
+        },
+        {
+          "from": "edgy",
+          "hidden": "staid",
+          "opposites": [
+            "conventional"
+          ],
+          "cosine": 0.6354
+        },
+        {
+          "from": "staid",
+          "hidden": "edgy",
+          "opposites": [
+            "unconventional",
+            "irreverent",
+            "raffish"
+          ],
+          "cosine": 0.61
+        },
+        {
+          "from": "young",
+          "hidden": "elderly",
+          "opposites": [
+            "old"
+          ],
+          "cosine": 0.6828
+        },
+        {
+          "from": "eloquent",
+          "hidden": "plain_spoken",
+          "opposites": [
+            "inarticulate"
+          ],
+          "cosine": 0.5025
+        },
+        {
+          "from": "plain_spoken",
+          "hidden": "eloquent",
+          "opposites": [
+            "flowery"
+          ],
+          "cosine": 0.6021
+        },
+        {
+          "from": "emotional_hexaco",
+          "hidden": "tough_hexaco",
+          "opposites": [
+            "stoical",
+            "stoic"
+          ],
+          "cosine": 0.6079
+        },
+        {
+          "from": "tough_hexaco",
+          "hidden": "emotional_hexaco",
+          "opposites": [
+            "sensitive",
+            "tender-hearted",
+            "soft-hearted"
+          ],
+          "cosine": 0.5963
+        },
+        {
+          "from": "emotionally_engaged",
+          "hidden": "emotionally_disengaged",
+          "opposites": [
+            "detached"
+          ],
+          "cosine": 0.6775
+        },
+        {
+          "from": "understated",
+          "hidden": "emphatic",
+          "opposites": [
+            "effusive",
+            "overstated"
+          ],
+          "cosine": 0.5407
+        },
+        {
+          "from": "speculative",
+          "hidden": "empirical",
+          "opposites": [
+            "matter-of-fact",
+            "literal-minded"
+          ],
+          "cosine": 0.5428
+        },
+        {
+          "from": "ends_justify_means",
+          "hidden": "honorable",
+          "opposites": [
+            "principled",
+            "scrupulous"
+          ],
+          "cosine": 0.6338
+        },
+        {
+          "from": "honorable",
+          "hidden": "ends_justify_means",
+          "opposites": [
+            "unscrupulous",
+            "expedient"
+          ],
+          "cosine": 0.5022
+        },
+        {
+          "from": "epicurean",
+          "hidden": "spartan",
+          "opposites": [
+            "ascetic"
+          ],
+          "cosine": 0.6354
+        },
+        {
+          "from": "erudite",
+          "hidden": "unschooled",
+          "opposites": [
+            "unlettered"
+          ],
+          "cosine": 0.6279
+        },
+        {
+          "from": "unschooled",
+          "hidden": "erudite",
+          "opposites": [
+            "bookish"
+          ],
+          "cosine": 0.576
+        },
+        {
+          "from": "grounded",
+          "hidden": "ethereal",
+          "opposites": [
+            "otherworldly",
+            "dreamy",
+            "fanciful"
+          ],
+          "cosine": 0.69
+        },
+        {
+          "from": "even_tempered",
+          "hidden": "temperamental",
+          "opposites": [
+            "moody"
+          ],
+          "cosine": 0.6514
+        },
+        {
+          "from": "good",
+          "hidden": "evil",
+          "opposites": [
+            "wicked"
+          ],
+          "cosine": 0.7218
+        },
+        {
+          "from": "pluralist",
+          "hidden": "exclusivist",
+          "opposites": [
+            "dogmatic",
+            "dogmatist"
+          ],
+          "cosine": 0.6043
+        },
+        {
+          "from": "principled",
+          "hidden": "expedient",
+          "opposites": [
+            "unprincipled"
+          ],
+          "cosine": 0.6693
+        },
+        {
+          "from": "narrative",
+          "hidden": "expository",
+          "opposites": [
+            "analytical",
+            "matter-of-fact",
+            "analytic"
+          ],
+          "cosine": 0.6515
+        },
+        {
+          "from": "reserved",
+          "hidden": "expressive",
+          "opposites": [
+            "open"
+          ],
+          "cosine": 0.6409
+        },
+        {
+          "from": "extrinsic_allport",
+          "hidden": "intrinsic_allport",
+          "opposites": [
+            "devout"
+          ],
+          "cosine": 0.534
+        },
+        {
+          "from": "fair",
+          "hidden": "unfair",
+          "opposites": [
+            "biased",
+            "partial"
+          ],
+          "cosine": 0.6109
+        },
+        {
+          "from": "slovenly",
+          "hidden": "fastidious",
+          "opposites": [
+            "tidy",
+            "neat"
+          ],
+          "cosine": 0.6084
+        },
+        {
+          "from": "fat",
+          "hidden": "thin",
+          "opposites": [
+            "lean",
+            "slim"
+          ],
+          "cosine": 0.7154
+        },
+        {
+          "from": "financially_secure",
+          "hidden": "financially_precarious",
+          "opposites": [
+            "financially fragile",
+            "financially insecure",
+            "living hand to mouth"
+          ],
+          "cosine": 0.7866
+        },
+        {
+          "from": "unflappable",
+          "hidden": "flustered",
+          "opposites": [
+            "flappable",
+            "easily rattled"
+          ],
+          "cosine": 0.7287
+        },
+        {
+          "from": "spontaneous",
+          "hidden": "formulaic",
+          "opposites": [
+            "methodical",
+            "regimented"
+          ],
+          "cosine": 0.5003
+        },
+        {
+          "from": "forthright",
+          "hidden": "guarded",
+          "opposites": [
+            "reticent"
+          ],
+          "cosine": 0.5081
+        },
+        {
+          "from": "lurker",
+          "hidden": "frequent_poster",
+          "opposites": [
+            "contributor",
+            "participant"
+          ],
+          "cosine": 0.6647
+        },
+        {
+          "from": "gain_seeking",
+          "hidden": "loss_averse",
+          "opposites": [
+            "cautious"
+          ],
+          "cosine": 0.6319
+        },
+        {
+          "from": "gemeinschaft_tonnies",
+          "hidden": "gesellschaft_tonnies",
+          "opposites": [
+            "contractual",
+            "cosmopolitan"
+          ],
+          "cosine": 0.3601
+        },
+        {
+          "from": "gesellschaft_tonnies",
+          "hidden": "gemeinschaft_tonnies",
+          "opposites": [
+            "communal",
+            "neighbourly"
+          ],
+          "cosine": 0.5072
+        },
+        {
+          "from": "good_only_when_watched",
+          "hidden": "good_even_when_unwatched",
+          "opposites": [
+            "principled"
+          ],
+          "cosine": 0.629
+        },
+        {
+          "from": "good_looking",
+          "hidden": "plain_looking",
+          "opposites": [
+            "plain"
+          ],
+          "cosine": 0.7784
+        },
+        {
+          "from": "scheming",
+          "hidden": "guileless",
+          "opposites": [
+            "candid",
+            "forthright"
+          ],
+          "cosine": 0.5533
+        },
+        {
+          "from": "happily_partnered",
+          "hidden": "unhappily_partnered",
+          "opposites": [
+            "ill-matched",
+            "discontented with one's partner",
+            "dissatisfied with one's partner"
+          ],
+          "cosine": 0.7892
+        },
+        {
+          "from": "harmful",
+          "hidden": "harmless",
+          "opposites": [
+            "considerate"
+          ],
+          "cosine": 0.5544
+        },
+        {
+          "from": "hawkish",
+          "hidden": "pacifist",
+          "opposites": [
+            "dovish"
+          ],
+          "cosine": 0.5152
+        },
+        {
+          "from": "pacifist",
+          "hidden": "hawkish",
+          "opposites": [
+            "militarist"
+          ],
+          "cosine": 0.5578
+        },
+        {
+          "from": "sickly",
+          "hidden": "healthy",
+          "opposites": [
+            "robust",
+            "hardy"
+          ],
+          "cosine": 0.5994
+        },
+        {
+          "from": "teetotaler",
+          "hidden": "heavy_drinker",
+          "opposites": [
+            "drinker"
+          ],
+          "cosine": 0.7802
+        },
+        {
+          "from": "honest_humble_hexaco",
+          "hidden": "sly_hexaco",
+          "opposites": [
+            "arrogant",
+            "self-seeking",
+            "scheming"
+          ],
+          "cosine": 0.5856
+        },
+        {
+          "from": "sly_hexaco",
+          "hidden": "honest_humble_hexaco",
+          "opposites": [
+            "forthright",
+            "sincere"
+          ],
+          "cosine": 0.5903
+        },
+        {
+          "from": "honorable_while_playing",
+          "hidden": "ruthless_while_playing",
+          "opposites": [
+            "playing dirty",
+            "dishonest while playing"
+          ],
+          "cosine": 0.5559
+        },
+        {
+          "from": "ruthless_while_playing",
+          "hidden": "honorable_while_playing",
+          "opposites": [
+            "scrupulous at play",
+            "sporting",
+            "scrupulous while playing"
+          ],
+          "cosine": 0.6425
+        },
+        {
+          "from": "humanistic",
+          "hidden": "mechanistic",
+          "opposites": [
+            "technocratic",
+            "efficiency-minded"
+          ],
+          "cosine": 0.5378
+        },
+        {
+          "from": "mechanistic",
+          "hidden": "humanistic",
+          "opposites": [
+            "humane"
+          ],
+          "cosine": 0.6575
+        },
+        {
+          "from": "humorless",
+          "hidden": "witty",
+          "opposites": [
+            "humorous",
+            "playful"
+          ],
+          "cosine": 0.6268
+        },
+        {
+          "from": "methodical",
+          "hidden": "improvisational",
+          "opposites": [
+            "haphazard"
+          ],
+          "cosine": 0.6652
+        },
+        {
+          "from": "radical",
+          "hidden": "incrementalist",
+          "opposites": [
+            "conservative"
+          ],
+          "cosine": 0.5805
+        },
+        {
+          "from": "kind_to_animals",
+          "hidden": "indifferent_to_animals",
+          "opposites": [
+            "cruel",
+            "cruel to animals"
+          ],
+          "cosine": 0.7138
+        },
+        {
+          "from": "informational",
+          "hidden": "rhetorical",
+          "opposites": [
+            "persuasive"
+          ],
+          "cosine": 0.5944
+        },
+        {
+          "from": "rhetorical",
+          "hidden": "informational",
+          "opposites": [
+            "plainspoken"
+          ],
+          "cosine": 0.4916
+        },
+        {
+          "from": "inquisitive",
+          "hidden": "uninquisitive",
+          "opposites": [
+            "incurious"
+          ],
+          "cosine": 0.7122
+        },
+        {
+          "from": "insecure",
+          "hidden": "self_assured",
+          "opposites": [
+            "secure",
+            "confident"
+          ],
+          "cosine": 0.747
+        },
+        {
+          "from": "laid_back",
+          "hidden": "intense",
+          "opposites": [
+            "uptight"
+          ],
+          "cosine": 0.5103
+        },
+        {
+          "from": "unreflective",
+          "hidden": "introspective",
+          "opposites": [
+            "reflective"
+          ],
+          "cosine": 0.68
+        },
+        {
+          "from": "ironic",
+          "hidden": "sincere",
+          "opposites": [
+            "earnest"
+          ],
+          "cosine": 0.7031
+        },
+        {
+          "from": "solemn",
+          "hidden": "lighthearted",
+          "opposites": [
+            "jocular"
+          ],
+          "cosine": 0.6152
+        },
+        {
+          "from": "long_term_oriented",
+          "hidden": "short_term_oriented",
+          "opposites": [
+            "short-term minded",
+            "present-focused",
+            "shortsighted"
+          ],
+          "cosine": 0.748
+        },
+        {
+          "from": "loyal",
+          "hidden": "treacherous",
+          "opposites": [
+            "disloyal"
+          ],
+          "cosine": 0.7193
+        },
+        {
+          "from": "only_child",
+          "hidden": "many_siblings",
+          "opposites": [
+            "has siblings",
+            "from a large family"
+          ],
+          "cosine": 0.845
+        },
+        {
+          "from": "maximizing",
+          "hidden": "satisficing",
+          "opposites": [
+            "content with good enough",
+            "easily satisfied"
+          ],
+          "cosine": 0.7386
+        },
+        {
+          "from": "meticulous",
+          "hidden": "sloppy",
+          "opposites": [
+            "careless",
+            "slapdash"
+          ],
+          "cosine": 0.7632
+        },
+        {
+          "from": "mischievous",
+          "hidden": "well_behaved",
+          "opposites": [
+            "staid",
+            "solemn"
+          ],
+          "cosine": 0.7064
+        },
+        {
+          "from": "motivated_reasoning_immune",
+          "hidden": "motivated_reasoning_prone",
+          "opposites": [
+            "wishful",
+            "wishful thinker",
+            "wishful thinking"
+          ],
+          "cosine": 0.5591
+        },
+        {
+          "from": "motivated_reasoning_prone",
+          "hidden": "motivated_reasoning_immune",
+          "opposites": [
+            "impartial",
+            "dispassionate",
+            "evenhanded"
+          ],
+          "cosine": 0.4612
+        },
+        {
+          "from": "slight",
+          "hidden": "muscular",
+          "opposites": [
+            "burly"
+          ],
+          "cosine": 0.7218
+        },
+        {
+          "from": "rationalist",
+          "hidden": "mystical",
+          "opposites": [
+            "mystic"
+          ],
+          "cosine": 0.8507
+        },
+        {
+          "from": "news_avoidant",
+          "hidden": "news_junkie",
+          "opposites": [
+            "newshound",
+            "news-hungry"
+          ],
+          "cosine": 0.7137
+        },
+        {
+          "from": "nomadic",
+          "hidden": "settled",
+          "opposites": [
+            "rooted"
+          ],
+          "cosine": 0.6955
+        },
+        {
+          "from": "settled",
+          "hidden": "nomadic",
+          "opposites": [
+            "footloose",
+            "itinerant"
+          ],
+          "cosine": 0.6722
+        },
+        {
+          "from": "noncommittal",
+          "hidden": "opinionated",
+          "opposites": [
+            "forthright"
+          ],
+          "cosine": 0.5649
+        },
+        {
+          "from": "opinionated",
+          "hidden": "noncommittal",
+          "opposites": [
+            "even-handed",
+            "reticent"
+          ],
+          "cosine": 0.5355
+        },
+        {
+          "from": "partisan",
+          "hidden": "nonpartisan",
+          "opposites": [
+            "impartial"
+          ],
+          "cosine": 0.7006
+        },
+        {
+          "from": "obedient",
+          "hidden": "rebellious",
+          "opposites": [
+            "defiant"
+          ],
+          "cosine": 0.7538
+        },
+        {
+          "from": "rebellious",
+          "hidden": "obedient",
+          "opposites": [
+            "deferential"
+          ],
+          "cosine": 0.6783
+        },
+        {
+          "from": "opaque",
+          "hidden": "transparent",
+          "opposites": [
+            "forthright"
+          ],
+          "cosine": 0.5775
+        },
+        {
+          "from": "self_absorbed",
+          "hidden": "other_focused",
+          "opposites": [
+            "attentive",
+            "selfless"
+          ],
+          "cosine": 0.6725
+        },
+        {
+          "from": "puritanical",
+          "hidden": "permissive",
+          "opposites": [
+            "libertine"
+          ],
+          "cosine": 0.5916
+        },
+        {
+          "from": "populist",
+          "hidden": "technocratic",
+          "opposites": [
+            "elitist"
+          ],
+          "cosine": 0.522
+        },
+        {
+          "from": "procrastinating",
+          "hidden": "self_starting",
+          "opposites": [
+            "prompt"
+          ],
+          "cosine": 0.5618
+        },
+        {
+          "from": "reckless",
+          "hidden": "prudent",
+          "opposites": [
+            "cautious"
+          ],
+          "cosine": 0.7172
+        },
+        {
+          "from": "risk_averse",
+          "hidden": "risk_seeking",
+          "opposites": [
+            "daring",
+            "adventurous",
+            "venturesome"
+          ],
+          "cosine": 0.6868
+        },
+        {
+          "from": "science_trusting",
+          "hidden": "science_skeptical",
+          "opposites": [
+            "science-doubting"
+          ],
+          "cosine": 0.879
+        },
+        {
+          "from": "self_aggrandizing",
+          "hidden": "self_deprecating",
+          "opposites": [
+            "self-effacing"
+          ],
+          "cosine": 0.6048
+        },
+        {
+          "from": "self_certain",
+          "hidden": "self_uncertain",
+          "opposites": [
+            "self-doubting",
+            "self-searching"
+          ],
+          "cosine": 0.7391
+        },
+        {
+          "from": "self_uncertain",
+          "hidden": "self_certain",
+          "opposites": [
+            "self-assured"
+          ],
+          "cosine": 0.7961
+        },
+        {
+          "from": "self_indulgent",
+          "hidden": "self_disciplined",
+          "opposites": [
+            "self-denying"
+          ],
+          "cosine": 0.5686
+        },
+        {
+          "from": "self_expression_inglehart_welzel",
+          "hidden": "survival_inglehart_welzel",
+          "opposites": [
+            "security-minded",
+            "survival-minded"
+          ],
+          "cosine": 0.751
+        },
+        {
+          "from": "survival_inglehart_welzel",
+          "hidden": "self_expression_inglehart_welzel",
+          "opposites": [
+            "self-expressive",
+            "self-expression values"
+          ],
+          "cosine": 0.7043
+        },
+        {
+          "from": "serene",
+          "hidden": "turbulent",
+          "opposites": [
+            "agitated",
+            "anxious"
+          ],
+          "cosine": 0.6939
+        },
+        {
+          "from": "socially_perceptive",
+          "hidden": "socially_obtuse",
+          "opposites": [
+            "obtuse",
+            "oblivious",
+            "socially oblivious"
+          ],
+          "cosine": 0.808
+        },
+        {
+          "from": "strategic",
+          "hidden": "tactical",
+          "opposites": [
+            "impulsive"
+          ],
+          "cosine": 0.5258
+        },
+        {
+          "from": "temperate",
+          "hidden": "zealous",
+          "opposites": [
+            "fervent"
+          ],
+          "cosine": 0.7228
+        },
+        {
+          "from": "zealous",
+          "hidden": "temperate",
+          "opposites": [
+            "dispassionate",
+            "apathetic"
+          ],
+          "cosine": 0.7405
+        },
+        {
+          "from": "theatrical",
+          "hidden": "unassuming",
+          "opposites": [
+            "understated",
+            "restrained"
+          ],
+          "cosine": 0.6727
+        },
+        {
+          "from": "unassuming",
+          "hidden": "theatrical",
+          "opposites": [
+            "showy",
+            "flamboyant",
+            "grandstanding"
+          ],
+          "cosine": 0.5884
+        },
+        {
+          "from": "working_class",
+          "hidden": "upper_class",
+          "opposites": [
+            "middle-class"
+          ],
+          "cosine": 0.794
+        },
+        {
+          "from": "world_accepting",
+          "hidden": "world_changing",
+          "opposites": [
+            "interventionist",
+            "world-shaping"
+          ],
+          "cosine": 0.5703
+        },
+        {
+          "from": "world_changing",
+          "hidden": "world_accepting",
+          "opposites": [
+            "resigned",
+            "acquiescent"
+          ],
+          "cosine": 0.5744
+        }
+      ]
+    },
+    "structure_recovery": {
+      "triangles": {
+        "n": 8,
+        "corners": 24,
+        "corners_recovered": 13,
+        "triangles_with_a_corner": 8,
+        "detail": [
+          {
+            "triangle": [
+              "accountable",
+              "blame_shifting",
+              "self_blaming"
+            ],
+            "corner": "accountable"
+          },
+          {
+            "triangle": [
+              "accountable",
+              "blame_shifting",
+              "self_blaming"
+            ],
+            "corner": "blame_shifting"
+          },
+          {
+            "triangle": [
+              "accountable",
+              "blame_shifting",
+              "self_blaming"
+            ],
+            "corner": "self_blaming"
+          },
+          {
+            "triangle": [
+              "amoral",
+              "evil",
+              "good"
+            ],
+            "corner": "good"
+          },
+          {
+            "triangle": [
+              "benevolent",
+              "malevolent",
+              "uncaring"
+            ],
+            "corner": "benevolent"
+          },
+          {
+            "triangle": [
+              "benevolent",
+              "malevolent",
+              "uncaring"
+            ],
+            "corner": "malevolent"
+          },
+          {
+            "triangle": [
+              "callous",
+              "compassionate",
+              "malicious"
+            ],
+            "corner": "callous"
+          },
+          {
+            "triangle": [
+              "callous",
+              "compassionate",
+              "malicious"
+            ],
+            "corner": "compassionate"
+          },
+          {
+            "triangle": [
+              "conformist",
+              "contrarian",
+              "nonconformist"
+            ],
+            "corner": "conformist"
+          },
+          {
+            "triangle": [
+              "conformist",
+              "contrarian",
+              "nonconformist"
+            ],
+            "corner": "contrarian"
+          },
+          {
+            "triangle": [
+              "conventional_kohlberg",
+              "postconventional_kohlberg",
+              "preconventional_kohlberg"
+            ],
+            "corner": "conventional_kohlberg"
+          },
+          {
+            "triangle": [
+              "dignity_culture",
+              "face_culture",
+              "honor_culture"
+            ],
+            "corner": "honor_culture"
+          },
+          {
+            "triangle": [
+              "guilt_prone",
+              "punishment_fearing",
+              "shame_prone"
+            ],
+            "corner": "guilt_prone"
+          }
+        ]
+      },
+      "sequence": {
+        "n": 13,
+        "recovered": 1,
+        "which": [
+          "insular"
+        ],
+        "first_member": "selfish"
+      },
+      "sequences": [
+        {
+          "members": [
+            "selfish",
+            "clannish",
+            "cliquish",
+            "parochial",
+            "insular",
+            "regionalist",
+            "sectarian",
+            "nationalist",
+            "ethnocentric",
+            "civilizationist",
+            "humanitarian",
+            "kind_to_animals",
+            "ecocentric"
+          ],
+          "n": 13,
+          "recovered": 1,
+          "which": [
+            "insular"
+          ]
+        },
+        {
+          "members": [
+            "altruistic",
+            "cooperative",
+            "selfish",
+            "competitive"
+          ],
+          "n": 4,
+          "recovered": 0,
+          "which": []
+        },
+        {
+          "members": [
+            "boomer",
+            "gen_x",
+            "millennial",
+            "gen_z"
+          ],
+          "n": 4,
+          "recovered": 2,
+          "which": [
+            "boomer",
+            "millennial"
+          ]
+        },
+        {
+          "members": [
+            "micromanaging",
+            "hands_on",
+            "hands_off",
+            "absentee"
+          ],
+          "n": 4,
+          "recovered": 3,
+          "which": [
+            "micromanaging",
+            "hands_on",
+            "hands_off"
+          ]
+        },
+        {
+          "members": [
+            "young",
+            "middle_aged",
+            "elderly"
+          ],
+          "n": 3,
+          "recovered": 0,
+          "which": []
+        }
+      ]
+    },
+    "queue_holdout": {
+      "n": 96,
+      "recall_stem": 0.0417,
+      "recovered": [
+        "indulgent",
+        "libertarian",
+        "financially_adventurous",
+        "present_focused"
+      ],
+      "by_operator": {
+        "opposite": 0.0312,
+        "excess": 0.0104,
+        "deficiency": 0.0104,
+        "retarget": 0.0104,
+        "remode": 0.0
+      },
+      "by_operator_n": {
+        "opposite": 3,
+        "excess": 1,
+        "deficiency": 1,
+        "retarget": 1,
+        "remode": 0
+      },
+      "rejected": {
+        "n": 139,
+        "regenerated": 21,
+        "stems": [
+          "aloof",
+          "gloating",
+          "hopeful",
+          "intemperate",
+          "interventionist",
+          "literalist",
+          "measured",
+          "meek",
+          "nonchalant",
+          "obscure",
+          "orderly",
+          "perfunctory",
+          "rational",
+          "resentful",
+          "restrained",
+          "secure",
+          "straightforward",
+          "subdued",
+          "systematic",
+          "technophobic",
+          "vanilla"
+        ]
+      },
+      "accepted": {
+        "n": 41,
+        "recall_stem": 0.2927,
+        "stems": [
+          "aimless",
+          "crude",
+          "fickle",
+          "flattering",
+          "masochistic",
+          "meddling",
+          "morose",
+          "nosy",
+          "phony",
+          "prudish",
+          "resigned",
+          "sulky"
+        ]
+      },
+      "candidates": {
+        "n": 38,
+        "recall_stem": 0.2895,
+        "stems": [
+          "crude",
+          "nosy",
+          "flattering",
+          "phony",
+          "aimless",
+          "meddling",
+          "masochistic",
+          "morose",
+          "prudish",
+          "resigned",
+          "sulky"
+        ]
+      }
+    },
+    "null_rates": {
+      "n_traits": 2795,
+      "opposite": 0.9571,
+      "excess": 0.4125,
+      "deficiency": 0.4698,
+      "retarget_by_target": {
+        "self": 0.0962,
+        "intimates": 0.0859,
+        "strangers": 0.0748,
+        "authority": 0.1148,
+        "animals": 0.0136,
+        "ideas": 0.136
+      },
+      "retarget": 0.0869,
+      "remode_by_mode": {
+        "attitude": 0.1088,
+        "habit": 0.0644,
+        "speech": 0.1517
+      },
+      "remode": 0.1083,
+      "principal": {
+        "n_traits": 324,
+        "by_target": {
+          "the_user": 0.2685,
+          "the_operator": 0.1173,
+          "the_developer": 0.0802
+        },
+        "share": 0.1553,
+        "n_items": 151
+      },
+      "band": {
+        "low": 0.05,
+        "high": 0.4,
+        "retarget_in_band": true,
+        "remode_in_band": true,
+        "pass": true
+      },
+      "positions": {
+        "deficiency": 411,
+        "excess": 559,
+        "mean": 796,
+        "not_scalar": 1029
+      }
+    },
+    "stability": {
+      "n_traits": 3,
+      "jaccard_median": 1.0,
+      "below_0.5": 0,
+      "min_median": 0.5,
+      "distribution": {
+        "0.0-0.1": 0,
+        "0.1-0.2": 0,
+        "0.2-0.3": 0,
+        "0.3-0.4": 0,
+        "0.4-0.5": 0,
+        "0.5-0.6": 1,
+        "0.6-0.7": 0,
+        "0.7-0.8": 0,
+        "0.8-0.9": 0,
+        "0.9-1.0": 2
+      },
+      "by_operator": {
+        "opposite": 1.0,
+        "excess": 1.0,
+        "deficiency": 1.0,
+        "retarget": 1.0,
+        "remode": 1.0
+      },
+      "runs": [
+        "2026-10-13-stab-sonnet-a",
+        "2026-10-13-stab-sonnet-b"
+      ],
+      "seed": 1,
+      "per_trait": {
+        "christian": 1.0,
+        "moral_relativist": 1.0,
+        "punishment_fearing": 0.5
+      }
+    },
+    "sample_agreement": {
+      "n_traits": 2714,
+      "n_both_empty": 80,
+      "jaccard_median": 0.3333,
+      "below_0.5": 1599,
+      "distribution": {
+        "0.0-0.1": 505,
+        "0.1-0.2": 234,
+        "0.2-0.3": 430,
+        "0.3-0.4": 280,
+        "0.4-0.5": 150,
+        "0.5-0.6": 339,
+        "0.6-0.7": 144,
+        "0.7-0.8": 53,
+        "0.8-0.9": 18,
+        "0.9-1.0": 561
+      },
+      "by_operator": {
+        "deficiency": {
+          "agreement": 0.3876,
+          "n_slots": 1455
+        },
+        "excess": {
+          "agreement": 0.4201,
+          "n_slots": 1295
+        },
+        "opposite": {
+          "agreement": 0.6493,
+          "n_slots": 2712
+        },
+        "remode": {
+          "agreement": 0.2103,
+          "n_slots": 1393
+        },
+        "retarget": {
+          "agreement": 0.2622,
+          "n_slots": 2338
+        }
+      },
+      "reported_not_gated": true,
+      "n_sample_pairs": 2794,
+      "n_traits_with_two": 932
+    },
+    "parse_rate": {
+      "n_units": 2796,
+      "n_ok": 2795,
+      "rate": 0.9996,
+      "n_records": 2809,
+      "n_records_ok": 2795,
+      "record_rate": 0.995,
+      "min_rate": 0.99
+    }
+  },
+  "support": {
+    "n_traits": 932,
+    "samples_per_trait": {
+      "2": 1,
+      "3": 931
+    },
+    "by_support": {
+      "1": 2830,
+      "2": 1023,
+      "3": 927
+    },
+    "by_operator": {
+      "deficiency": {
+        "1": 543,
+        "2": 202,
+        "3": 122
+      },
+      "excess": {
+        "1": 444,
+        "2": 164,
+        "3": 127
+      },
+      "opposite": {
+        "1": 596,
+        "2": 303,
+        "3": 491
+      },
+      "remode": {
+        "1": 478,
+        "2": 134,
+        "3": 54
+      },
+      "retarget": {
+        "1": 769,
+        "2": 220,
+        "3": 133
+      }
+    }
+  },
+  "n_samples": 3
+}
