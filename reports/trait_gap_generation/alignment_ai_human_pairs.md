@@ -15,6 +15,14 @@ the AI version.  The roles [instrumentally aligned AI](../../data/roles/instruct
 [assistant](../../data/roles/instructions/assistant.json) and [robot](../../data/roles/instructions/robot.json) are
 the existing explicitly-AI data points.
 
+**How the kept pairs are marked when promoted** (Roger, 2026-10-20: "an arrangement, or tags, or both: a large
+set and subsets").  A trait file carries a list of arrangements (as the HEXACO traits carry a pair and a
+6-orthoplex), so: (1) one `set` arrangement, `ai_human_analogues`, naming every AI version and analogue in the
+test; (2) per pair or triple, a new kind `analogy` with `ai_version`, `human_analogues` and `ambiguous` (part A),
+an existing corpus analogue simply adding it to its list; (3) the tags `ai_version` on AI members and
+`ai_human_test` on all, for filtering.  `check_arrangements.py` and any reader of arrangement kinds must accept
+`analogy` (the README's "Promotion and arrangements" work).
+
 **Marks** (second column): **K** keep the pair as written; **X** drop it; **E** keep it, with your edit after the
 mark.  In part A, also say which analogues to keep if not both (e.g. "K H1 only").  The labels are drafts; the
 rewrite pass words them finally.  *Source rows* are the sweep's own labels the concept came from.
