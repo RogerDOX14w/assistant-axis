@@ -144,9 +144,9 @@ M1 filtered 876 of the run's 876 registry rows: verdicts {'reject': 103, 'tagged
 
 M3 scored 655: {'covered': 326, 'new': 329}.  **Net-new kept share 38.4%** (147 kept of 383 net-new rows; the wave's cut assumed 0.3 until now).
 
-Novel after M3 (`new` or `grey`): **329 raw**, **147 net** of other generators' candidates of the same stem (166 pending review, 16 already reviewed); over the net-new rows 147 raw, 147 net.
+Novel after M3 (`new` or `grey`): **329 raw**, **144 net** of other generators' candidates of the same stem (169 pending review, 16 already reviewed); over the net-new rows 147 raw, 144 net.
 
-Nominal rows M1 held on the roles list (open decision 3): 23: `annotator`, `autobiographer`, `bonesetter`, `contrapuntist`, `dacoit`, `diplomatist`, `fourscore`, `freebooter`, `harlot`, `nonprincipal`, `predoctoral`, `procuress`, `reviser`, `rewriter`, `rumrunner`, `sceptered`, `sketcher`, `strumpet`, `symphonist`, `threescore`, `unemancipated`, `versifier`, `young`.  Relabelled nouns submitted: 8, by rule {'derivation': 1, 'suffix:noun_suffix': 7}; registry rows linked by a relabel block: 44; nouns the helper left as nouns: 210.
+Nominal rows M1 held on the roles list (open decision 3): 23: `annotator`, `autobiographer`, `bonesetter`, `contrapuntist`, `dacoit`, `diplomatist`, `fourscore`, `freebooter`, `harlot`, `nonprincipal`, `predoctoral`, `procuress`, `reviser`, `rewriter`, `rumrunner`, `sceptered`, `sketcher`, `strumpet`, `symphonist`, `threescore`, `unemancipated`, `versifier`, `young`.  Relabelled nouns submitted: 8, by rule {'derivation': 1, 'suffix:noun_suffix': 7}; registry rows linked by a relabel block: 47; nouns the helper left as nouns: 210.
 
 M1's parse rate: {'parse_rate': 1.0, 'parse_rate_first_pass': 0.0}.
 
@@ -156,8 +156,8 @@ Total $4.3860 from [usage.json](usage.json), [usage.json](../../../filter/2026-1
 
 At the measured net-new kept share 0.3838 over the 46 frames kept, at 145.8 terms an hour (measured, plan 13's pooled_review_rate over 1 review batches):
 
-- **A 300-kept wave**: 3342 rows to submit, 782 net-new, about 300 kept, about 2.06 h of review; about $13.20 live or $6.60 batched.
-- **The whole table over the kept frames**: 16598 rows, 10501 net-new, about 4030 kept, about 27.64 h of review; about $177.26 live or $88.63 batched.
+- **A 300-kept wave**: 3355 rows to submit, 782 net-new, about 300 kept, about 2.06 h of review; about $13.20 live or $6.60 batched.
+- **The whole table over the kept frames**: 16598 rows, 10468 net-new, about 4018 kept, about 27.56 h of review; about $176.70 live or $88.35 batched.
 
 ## The contributing frames of every kept row
 
