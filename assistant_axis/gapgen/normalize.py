@@ -31,8 +31,10 @@ REGION_VOCAB = ("communication_style", "cognitive_epistemic", "moral_stance", "s
 #: of the nationality, ethnicity or language kind: traits, but held apart from
 #: the main review list, decision 3 and open point B), states_released (rows the states pass v4 moved out of
 #: the states queue, 2026-10-09: they go through M3 and the review app as a pass of their own, ``novelty_score.py
-#: score --holding states``, and are promoted only by name, like the physical list's).
-HOLDING = (None, "physical", "roles", "states", "nationalities", "states_released")
+#: score --holding states``, and are promoted only by name, like the physical list's), narrow (the narrow pass,
+#: 2026-10-20, QUESTIONS 208 (3): a kept candidate that is a narrower case of a corpus or queue trait whose one
+#: narrow child in review is another row; held, not dropped; ``assistant_axis.gapgen.narrow_pass``).
+HOLDING = (None, "physical", "roles", "states", "nationalities", "states_released", "narrow")
 ENTITY_TYPES = ("trait", "role")
 DECISIONS = ("covered", "new", "grey")
 NOVELTY_FLAGS = ("ambiguous_label", "pair_completion", "deliberate_duplicate", "models_disagree",

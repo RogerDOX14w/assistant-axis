@@ -338,10 +338,12 @@ def test_blocks_enumerated():
     """The blocks ``merge_block`` and ``update_many`` merge (plan 12 decision 1a added ``persona``, 2026-10-13): a
     new block is a platform edit, so this list changes only on purpose.  ``persona`` is not a row field of a new
     record (the block is optional), and merging it leaves ``novelty`` as it was.  ``relabel`` (the noun normalization
-    plan, 2026-10-14) is a block and a row field: a new row carries ``"relabel": None``."""
+    plan, 2026-10-14) is a block and a row field: a new row carries ``"relabel": None``.  ``narrow`` (the narrow
+    pass, QUESTIONS 208 (3), 2026-10-20) is a block and, like ``persona``, not a row field of a new record."""
     from assistant_axis.gapgen.registry import BLOCKS, ROW_FIELDS
-    assert BLOCKS == ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona", "relabel")
+    assert BLOCKS == ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona", "relabel", "narrow")
     assert "persona" not in ROW_FIELDS and "persona" not in new_record("calm")
+    assert "narrow" not in ROW_FIELDS and "narrow" not in new_record("calm")
     assert "relabel" in ROW_FIELDS and new_record("calm")["relabel"] is None
 
 

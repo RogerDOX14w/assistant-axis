@@ -70,6 +70,15 @@ same `versions.json`; the overlap call itself reads rubric A above.
 |---|---|---|
 | [relation.md](./relation.md) | How does each listed trait's concept stand to the candidate's: similar, opposed, unrelated, or unsure | draft 1, pinned as version 1 (the brief's text, unchanged) |
 
+## The narrow pass (added 2026-10-20)
+
+After M3, for a kept candidate and each of its one or two closest corpus or queue traits (QUESTIONS 208 (3): at most
+one narrow trait per parent goes to review).
+
+| file | what it asks | status |
+|---|---|---|
+| [narrow_direction.md](./narrow_direction.md) | Is the candidate a narrower case of the existing trait (one domain, context or behaviour), the same, broader, or different? | draft 1, pinned as version 1 |
+
 ## How to edit
 
 Each file holds one prompt inside a fenced block.  Change the text inside the block.  When you are

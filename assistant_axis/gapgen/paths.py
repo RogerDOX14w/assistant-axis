@@ -91,6 +91,11 @@ def plain_reading_dir(batch_id: str, *, candidates_dir: Path | None = None) -> P
     return (candidates_dir or DATA_CANDIDATES) / "plain_reading" / check_id(batch_id, "batch_id")
 
 
+def narrow_pass_dir(batch_id: str, *, candidates_dir: Path | None = None) -> Path:
+    """``data/candidates/narrow_pass/<batch_id>/``: the narrow pass's run (``narrow_pass.py``; not created here)."""
+    return (candidates_dir or DATA_CANDIDATES) / "narrow_pass" / check_id(batch_id, "batch_id")
+
+
 def novelty_dir(batch_id: str, *, candidates_dir: Path | None = None) -> Path:
     return (candidates_dir or DATA_CANDIDATES) / "novelty" / check_id(batch_id, "batch_id")
 
@@ -180,6 +185,7 @@ def all_paths() -> dict[str, Path]:
         "filter_dir": filter_dir("b"),
         "states_pass_dir": states_pass_dir("b"),
         "plain_reading_dir": plain_reading_dir("b"),
+        "narrow_pass_dir": narrow_pass_dir("b"),
         "novelty_dir": novelty_dir("b"),
         "recovery_dir": recovery_dir("b"),
     }

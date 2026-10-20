@@ -1163,6 +1163,29 @@ uv run python data_analysis/gap_generation/label_fit.py validate --marks <sheet>
 uv run python data_analysis/gap_generation/label_fit.py check --run structural/<run_id> --budget-usd 5 [--resume]
 ```
 
+**The narrow pass (2026-10-20): `gap_generation/narrow_pass.py`.**  Roger's rule
+([QUESTIONS](../reports/trait_gap_generation/QUESTIONS.md) 208 (3)): a narrow trait is a narrower case of a broader
+corpus or queued trait (humblebragging under self-aggrandizing), and **at most one per parent goes to review**; the
+rest are held on the `narrow` holding list, not dropped.  Runs after M3 and before `review_graph.py build` (which
+leaves held rows out).  Candidates: rows M3 kept, awaiting review, on no holding list, whose best overlap reading by
+either model against a corpus or queue trait is 2 or more; each is asked about its one or two traits with the highest
+readings, one pair per call (Haiku 5.5, no temperature, three readings combined by plurality; pinned prompt
+[narrow_direction.md](../reports/trait_gap_generation/rubrics/narrow_direction.md)): `narrower`, `same`, `broader` or
+`different`.  The rows judged narrower are grouped by parent; the most distinct (the lowest final M3 reading to the
+parent, ties by a seeded random choice) stays for review with "narrower than X" on its card, the others are held,
+and a parent with a kept child from an earlier run takes no more.  Every row asked gets a `narrow` registry block.
+Writes `data/candidates/narrow_pass/<batch-id>/` (`responses.jsonl`, `usage.json`, `decisions.json`, `readout.md`,
+`run.json`).  Estimate, `--budget-usd` cap, parse-rate check, dirty-tree refusal, `--resume` by request sha,
+`--transport batches` (half price), `--dry-run --render`.  Library:
+[`narrow_pass.py`](../assistant_axis/gapgen/narrow_pass.py).
+
+```bash
+uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-20-pilot_narrow \
+    --run llm_entropy/2026-10-17-pilot --dry-run --render        # 414 rows, 730 pairs: about $0.75 live
+uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-20-all_narrow --all-awaiting \
+    --transport batches --budget-usd 6                            # about 4,100 rows: about $3.70 batched
+```
+
 **The census spelling-repair check (2026-10-14): `gap_generation/census_generator.py repair-check`.**
 [QUESTIONS](../reports/trait_gap_generation/QUESTIONS.md) 35: of the 706 one-edit repair suggestions the census ingest
 lists (`repair_suggestions_list` in [ingest_counts.json](../data/candidates/censuses/ingest_counts.json)), the 314 whose

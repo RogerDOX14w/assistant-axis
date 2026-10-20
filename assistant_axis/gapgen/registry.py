@@ -99,7 +99,9 @@ ROW_FIELDS = ("schema_version", "key", "stem", "sense_id", "surface", "label", "
 #: into it.  ``relabel``: the noun-to-adjective link (``assistant_axis.gapgen.nouns``, 2026-10-14): ``to_key`` /
 #: ``to_corpus_stem`` on a noun row, ``from_key`` on its adjective row; written by :func:`submit_candidates` and the
 #: ``noun_relabel.py`` streams, ``None`` on every other row (``schema_version`` stays 1: the field is additive).
-BLOCKS = ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona", "relabel")
+#: ``narrow``: the narrow pass's block (``assistant_axis.gapgen.narrow_pass``, 2026-10-20): the direction readings, the
+#: parent and whether the row is the parent's one narrow child in review (``kept``) or ``held``.
+BLOCKS = ("freq", "wordnet", "filter", "novelty", "review", "lexical", "persona", "relabel", "narrow")
 
 #: The key prefix of a control record: ``retraction:<generator>/<run_id>`` (a stem is ``[a-z0-9_]``, so no row key
 #: can take this form).  The latest line of such a key is the run's retraction state (``"retracted": true | false``).
@@ -1210,8 +1212,8 @@ def unretract(registry_path: Path | str, generator: str, run_id: str, *, reason:
 
 
 def holding_list(kind: str, *, registry: Registry | None = None) -> list[dict]:
-    """Rows parked on a holding list (``physical``, ``roles``, ``states`` or
-    ``nationalities``; ``normalize.HOLDING``), by key."""
+    """Rows parked on a holding list (``physical``, ``roles``, ``states``,
+    ``nationalities``, ``states_released`` or ``narrow``; ``normalize.HOLDING``), by key."""
     from .normalize import HOLDING
     if kind not in HOLDING or kind is None:
         raise ValueError(f"holding list must be one of {[h for h in HOLDING if h]}, not {kind!r}")

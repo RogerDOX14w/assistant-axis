@@ -99,6 +99,8 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: ten family-c prompts are translated from, and the family-c back-translation call, each first pinned as version 1.
 #: Since 2026-10-20 the alignment sweep's humanize call (``.../alignment_sweep/humanize.py``: every sweep trait in its
 #: closest human phrasing, Roger's decision of that day), first pinned as version 1.
+#: Since 2026-10-20 the platform's narrow pass (``assistant_axis/gapgen/narrow_pass.py``; QUESTIONS 208 (3): is a kept
+#: candidate a narrower case of its closest corpus or queue trait?), first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
@@ -116,6 +118,7 @@ GENERATOR_FILES: dict[str, str] = {
     "llm_entropy_scaffold": "llm_entropy_scaffold.md",
     "llm_entropy_multilingual": "llm_entropy_multilingual.md",
     "llm_entropy_backtranslate": "llm_entropy_backtranslate.md",
+    "narrow_direction": "narrow_direction.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.

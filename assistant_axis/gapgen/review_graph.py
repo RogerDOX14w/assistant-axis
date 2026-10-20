@@ -632,7 +632,8 @@ def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str],
     """``(kept, covered, skipped, by_batch)``: the rows whose ``novelty.run_id`` is one of ``batch_ids``, kept
     (decision new or grey) or covered.  A row two batches decided carries the later block only, so it is selected
     by that batch.  A covered row whose key is in ``include`` is kept (reviewed anyway; Roger, 2026-10-09, after
-    the cover audit)."""
+    the cover audit).  A row the narrow pass held (``holding: "narrow"``, QUESTIONS 208 (3): its parent's one narrow
+    child in review is another row) is skipped (``held_narrow``)."""
     bset = set(batch_ids)
     kept, covered, skipped = {}, {}, Counter()
     by_batch: dict[str, Counter] = {b: Counter() for b in batch_ids}
@@ -642,6 +643,9 @@ def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str],
             continue
         d = nv.get("decision")
         by_batch[nv["run_id"]][d] += 1
+        if r.get("holding") == "narrow" and k not in include:
+            skipped["held_narrow"] += 1
+            continue
         if d in KEPT_DECISIONS or (d == "covered" and k in include):
             kept[k] = r
         elif d == "covered":
