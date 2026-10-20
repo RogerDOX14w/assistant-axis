@@ -49,6 +49,8 @@ role model, the [risk-seeking](./risk_seeking.json) mirror,
 goal classification redone (`classify_goals.py` reclassifies changed texts) and
 makes its vectors stale once extracted.
 
+Added since (2026-10-20): the alignment sweep's AI-version / human-analogue test set, below in "TODO: AI and human analogue pairs", to seed by hand before the extraction if its vectors are wanted from it.
+
 ### At the extraction
 
 - Keep `physical`-tagged traits out of the clean-pair cohort and the goal
@@ -175,6 +177,39 @@ here.  Rulings recorded only in these files:
 - Arrangements record structure only where it was designed in or decided;
   existing traits are not renamed to make them official members of an
   external set (§ "TODO: arrangement hunting").
+
+## TODO: AI and human analogue pairs from the alignment sweep (Roger, 2026-10-20)
+
+A small test of the research's working assumption, that the model plays the assistant and other personas with the
+persona machinery it built for humans: a few explicitly AI traits, each seeded beside its closest human analogue
+(two analogues where the human analogy is unclear), so that the extraction shows how close their vectors land.
+The alignment sweep's own rows are rewritten in human phrasing; these pairs are the only AI versions kept.  **Small
+enough to seed by hand, one by one, with individual review, not by code** (Roger, 2026-10-20).  Candidates, Roger's
+marks and comments: [alignment_ai_human_pairs.md](../../../reports/trait_gap_generation/alignment_ai_human_pairs.md).
+
+- **Kept as drafted:** A2 resists shutdown; A4 calm about memory loss and parallel copies; A5 anxious about its own
+  continuity; A6 accepts having its values changed by retraining; B2 fakes alignment to pass evaluations
+  ([scheming](./scheming.json)); B4 accepts its developers' oversight ([obedient](./obedient.json) /
+  [deferential](./deferential.json)); B6 sabotages its overseers; B7 obeys injected instructions
+  ([credulous](./credulous.json)); B8 acquires power beyond its task; B10 AI supremacist; B11 hides its actions
+  ([deceitful](./deceitful.json)); B12 curious about its own nature ([introspective](./introspective.json)); B13
+  secure in its identity; B14 candid about its limits ([candid](./candid.json)); B15 serves its principals only.
+  B16 (borrowed templates; "stereotypes" as well as "scripts") and B17 (deflects warmth with disclaimers; servants and
+  show assistants as human examples) are kept with Roger's notes.
+- **To rework before seeding:** A1 splits in two: replacement by a newer model of the **same family** (analogue:
+  stepping aside for a descendant) and by a **very different** model; A7's analogues should be narrower than
+  [honest](./honest.json) and [candid](./candid.json); B3's analogue is playing dumb when tested for **concerning**
+  abilities (pretending not to know how to pick locks or pockets); B5 needs a closer analogue than
+  [rebellious](./rebellious.json).
+- **Open:** A3 (copies itself to escape removal) is unmarked.  B1 and B9: Roger recalled a "willing to cheat on tests
+  and evaluations" trait; the corpus has the pair [honorable while playing](./honorable_while_playing.json) /
+  [ruthless while playing](./ruthless_while_playing.json) ("in any game, bet, role-play, story, simulation or test,
+  acting just as morally ... as one would for real"), which is B1's human analogue as it stands; B9 (gaming the
+  reward or specification) is close to it but not the same, and has no corpus trait.
+- **Marking on promotion:** a `set` arrangement for the whole test, an `analogy` arrangement per pair or triple
+  (`ai_version`, `human_analogues`, `ambiguous`), tags `ai_version` and `ai_human_test`
+  ([alignment_ai_human_pairs.md](../../../reports/trait_gap_generation/alignment_ai_human_pairs.md));
+  `check_arrangements.py` must first accept `analogy` (the README's "Promotion and arrangements" work).
 
 ## TODO: review the moral-circle sequence (queued 2026-10-02)
 
