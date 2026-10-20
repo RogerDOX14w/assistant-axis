@@ -10,7 +10,8 @@
   submitted row the registry had not yet filtered), which replaces the 0.5 assumption in the wave's cut; the
   re-based projections; the cost per model from every ``usage.json``.
 * ``roger_sample.md`` (:func:`roger_sample`): 50 rows decided ``new`` or ``grey``, seeded, for Roger's manual
-  precision check (trait / not-trait / duplicate; target >= 70% trait-and-new).
+  precision check (trait / not-trait / duplicate; the 70% trait-and-new target, never derived, gave way on
+  2026-10-20 to real new traits per costly row, QUESTIONS 208), each row with every trait M3 compared it with.
 * ``ai_identity_subfamily.md`` (:func:`ai_identity_list`): every principal-target item with its M1 verdict and M3
   decision, for the AI-identity sub-family sign-off (QUESTIONS 67 and 78) before any is promoted.
 
@@ -319,64 +320,57 @@ def _cell(s) -> str:
     return str(s if s is not None else "").replace("|", "/").replace("\n", " ")
 
 
-def _reading_value(rd: Mapping):
-    """The deciding value of one M3 reading: Opus's when it read the pair, else Sonnet's."""
-    for m in ("opus", "sonnet"):
-        v = (rd.get(m) or {}).get("value") if isinstance(rd.get(m), Mapping) else None
-        if v is not None:
-            return v
-    return None
+def _trait_label(stem: str) -> str:
+    try:
+        from assistant_axis.entity_id import corpus_display_name
+        return corpus_display_name(stem, "traits")
+    except Exception:  # noqa: BLE001 - a stem the corpus does not know (a queue entry): its mechanical form
+        return stem.replace("_", " ")
 
 
-def _nearest_text(r: Mapping, trait_prefix: str, *, k: int = 3) -> tuple[str, str]:
-    """``(nearest, first description)``: the first ``k`` corpus traits M3 read against the row, each linked with its
-    reading (0-4 or "opposite"), and the first one's description, so Roger can judge a duplicate without the corpus
-    in his head (Roger, 2026-10-14)."""
-    nov = r.get("novelty") or {}
-    reads = sorted(nov.get("readings") or [], key=lambda x: x.get("position") or 0)[:k]
-    if not reads:
-        reads = [{"stem": x.get("stem")} for x in (nov.get("listed") or [])[:k]]
-    parts, first_desc = [], ""
-    for i, rd in enumerate(reads):
-        s = rd.get("stem")
-        if not s:
-            continue
-        p = Path(trait_prefix) / f"{s}.json"
-        v = _reading_value(rd)
+def _nearest_text(r: Mapping, trait_prefix: str, *, traits_dir: Optional[Path] = None) -> tuple[str, str]:
+    """``(neighbours, first description)``: every corpus trait and queue entry M3 compared the row with, as the review
+    app's corpus panel lists them (by final reading, then cosine; QUESTIONS 208 (4), Roger 2026-10-20), each with its
+    reading ("3/2", "2/-") or, unread, its relation; a queue entry shown as queued, never linked as a trait file
+    (:func:`assistant_axis.gapgen.m3_neighbours.neighbours_text`); and the first corpus trait's description, so Roger
+    can judge a duplicate without the corpus in his head (Roger, 2026-10-14).  ``traits_dir``: where a trait file is
+    looked for before it is linked (default: no check)."""
+    from assistant_axis.gapgen import m3_neighbours as MN
+    text = MN.neighbours_text(r, href=MN.trait_href(trait_prefix, traits_dir), label=_trait_label)
+    first_desc = ""
+    first = next((n for n in MN.neighbours(r) if n.kind == "corpus"), None)
+    if first is not None:
         try:
-            from assistant_axis.entity_id import corpus_display_name
-            name = corpus_display_name(s, "traits")
-        except Exception:  # noqa: BLE001 - a stem the corpus does not know (a queue entry): its mechanical form
-            name = s.replace("_", " ")
-        parts.append(f"[{name}]({p.as_posix()})" + (f" {v}" if v is not None else ""))
-        if i == 0:
-            try:
-                from ... import paths as _paths
-                f = Path(_paths.DATA_DIR) / "traits" / "instructions" / f"{s}.json"
-                first_desc = json.loads(f.read_text(encoding="utf-8")).get("description") or ""
-            except (OSError, ValueError):
-                first_desc = ""
-    return "; ".join(parts) or "none read", first_desc
+            from ... import paths as _paths
+            d = Path(traits_dir) if traits_dir is not None else Path(_paths.DATA_DIR) / "traits" / "instructions"
+            first_desc = json.loads((d / f"{first.stem}.json").read_text(encoding="utf-8")).get("description") or ""
+        except (OSError, ValueError):
+            first_desc = ""
+    return text, first_desc
 
 
 def roger_sample(rows: Sequence[Mapping], table: Sequence[Mapping], *, n: int = 50, seed: int = 0,
-                 run_id: str = "", trait_prefix: str = "../../../../traits/instructions/") -> str:
-    """50 run rows decided ``new`` or ``grey``, seeded, as a table for Roger's verdicts."""
+                 run_id: str = "", trait_prefix: str = "../../../../traits/instructions/",
+                 traits_dir: Optional[Path] = None) -> str:
+    """50 run rows decided ``new`` or ``grey``, seeded, as a table for Roger's verdicts.  ``traits_dir``: where a
+    neighbour's trait file is looked for before it is linked."""
     pool = sorted((r for r in rows if _decision(r) in NOVEL), key=lambda r: r["key"])
     pick = sorted(random.Random(f"structural-sample:{seed}").sample(pool, min(n, len(pool))), key=lambda r: r["key"])
     by = {r["stem"]: r for r in table}
     L = [f"# Precision sample, structural run `{run_id}`", "",
          f"{len(pick)} rows drawn (seed {seed}) from the {len(pool)} the scorer decided `new` or `grey`.  Mark each "
          f"**trait** (a new persona trait), **not-trait** or **duplicate** (of a corpus or queued trait) in the last "
-         f"column; the target is 70% or more trait-and-new (plan 09 section 6.4).  *Nearest existing traits*: the "
-         f"first three corpus traits M3 compared the candidate with, each with M3's reading (4 the same concept, 3 "
-         f"the same concept narrower or broader, 2 overlapping, 1 related, 0 different), the first one's description "
-         f"beside it; a duplicate of something else entirely is also a duplicate.", "",
+         f"column.  *Nearest existing traits*: every corpus trait and seed-queue entry M3 compared the candidate with, "
+         f"as the review app lists them (by M3's final reading, then cosine), each with its reading as Sonnet/Opus "
+         f"(\"-\": Opus did not read; 4 the same concept, 3 the same concept narrower or broader, 2 overlapping, 1 "
+         f"related, 0 different) or, where M3 did not read the pair, its relation; a queue entry is marked queued.  "
+         f"The first corpus trait's description is beside it; a duplicate of something else entirely is also a "
+         f"duplicate.", "",
          "| # | label | gloss | how the generator reached it | M1 | M3 | nearest existing traits (M3's reading) | "
-         "the nearest one's description | Roger |", "|---|---|---|---|---|---|---|---|---|"]
+         "the first one's description | Roger |", "|---|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(pick, 1):
         t = by.get(r["stem"]) or {}
-        near, desc = _nearest_text(r, trait_prefix)
+        near, desc = _nearest_text(r, trait_prefix, traits_dir=traits_dir)
         L.append(f"| {i} | {_cell(r.get('label'))} | {_cell(t.get('gloss') or r.get('gloss'))} | "
                  f"{_sources_text(r['stem'], by, trait_prefix)} | {_cell((r.get('filter') or {}).get('verdict'))} | "
                  f"{_cell(_decision(r))} | {near} | {_cell(desc)} | |")

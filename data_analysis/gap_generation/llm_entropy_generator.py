@@ -1138,7 +1138,8 @@ def cmd_report(args) -> int:
                                   _edir(args) / "embeddings_usage.json"])
     rows = run_rows(reg, args.run_id)
     files = {"report.md": RP.render_report(fig),
-             "roger_sample.md": RP.roger_sample(rows, table, run_id=args.run_id, seed=args.seed),
+             "roger_sample.md": RP.roger_sample(rows, table, run_id=args.run_id, seed=args.seed,
+                                                traits_dir=Path(args.data_dir) / "traits" / "instructions"),
              "gloss_check.md": RP.gloss_check_sample(table, run_id=args.run_id, seed=args.seed)}
     print(files["report.md"])
     if args.dry_run:

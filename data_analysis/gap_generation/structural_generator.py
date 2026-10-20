@@ -769,7 +769,8 @@ def cmd_report(args) -> int:
                     review_rate=SU.review_terms_per_hour(args.review_rate))
     rows = R.run_rows(reg_rows, args.run_id)
     files = {"report.md": R.render_report(fig),
-             "roger_sample.md": R.roger_sample(rows, table, run_id=args.run_id),
+             "roger_sample.md": R.roger_sample(rows, table, run_id=args.run_id,
+                                               traits_dir=Path(args.data_dir) / "traits" / "instructions"),
              "ai_identity_subfamily.md": R.ai_identity_list(table, reg_rows, run_id=args.run_id)}
     h = fig["headline"]
     print(f"{args.run_id}: {h['n_rows']} registry rows; already registered {h['already_registered']} "

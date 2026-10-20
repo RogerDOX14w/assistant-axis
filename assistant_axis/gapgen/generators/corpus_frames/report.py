@@ -90,6 +90,18 @@ def contributing_frames(rows: Sequence[Mapping]) -> dict[str, list[str]]:
     return out
 
 
+def _neighbours(rec: Mapping, doc: Path, traits_dir: Path = TRAITS_DIR) -> str:
+    """Every corpus trait and queue entry M3 compared the row with, as the review app lists them (QUESTIONS 208 (4):
+    :func:`assistant_axis.gapgen.m3_neighbours.neighbours_text`), linked relative to ``doc``; a queue entry is shown
+    as queued, a stem with no trait file unlinked."""
+    from assistant_axis.gapgen import m3_neighbours as MN
+
+    def href(stem: str) -> Optional[str]:
+        p = Path(traits_dir) / f"{stem}.json"
+        return os.path.relpath(p, Path(doc).parent).replace(os.sep, "/") if p.exists() else None
+    return MN.neighbours_text({"novelty": rec.get("novelty") or {}}, href=href)
+
+
 def _nearest(reg_row: Optional[Mapping]) -> tuple[Optional[str], Optional[float]]:
     """M3's nearest corpus trait and its cosine (the first of ``listed``), or ``(None, None)``."""
     listed = ((reg_row or {}).get("novelty") or {}).get("listed") or []
@@ -478,7 +490,8 @@ def _kept_records(registry_rows: Mapping[str, Mapping], run_id: str, table: Sequ
                 ex = v["example"]
                 break
         out.append({"stem": r["stem"], "label": r.get("label") or r["stem"], "decision": dec, "gloss": r.get("gloss"),
-                    "nearest": near, "cosine": cos, "frames": contributing_frames([t])[t["stem"]] if t else [],
+                    "nearest": near, "cosine": cos, "novelty": r.get("novelty"),
+                    "frames": contributing_frames([t])[t["stem"]] if t else [],
                     "example": ex, "union_rank": (t or {}).get("union_rank")})
     return out
 
@@ -494,15 +507,17 @@ def roger_sample(records: Sequence[Mapping], *, n: int = SAMPLE_N, seed: int = 0
     lines = [f"# Spot check of corpus-frames run `{run_id}`: {len(pick)} random kept rows", "",
              f"Mark each row in the **T/N/D** column: **T** a trait and new, **N** not a trait, **D** a duplicate of "
              f"the nearest corpus trait (or another).  Rows are kept rows (M3 `new` or `grey`), drawn with seed "
-             f"{seed}.  *M1's gloss* is the one the pipeline uses; *frames* are every "
-             f"{_gl(d, 'lexical-frame', 'frame')} that found the word, best first.", "",
-             "| # | word | T/N/D | M3 | M1's gloss | nearest corpus trait (cosine) | frames | example |",
+             f"{seed}.  *M1's gloss* is the one the pipeline uses; *M3's neighbours* are every corpus trait and "
+             f"seed-queue entry M3 compared the word with, as the review app lists them (by M3's final reading, then "
+             f"cosine), each with its reading as Sonnet/Opus (\"-\": Opus did not read; 4 the same concept, 3 narrower "
+             f"or broader, 2 overlapping, 1 related, 0 different) or, unread, its relation; a queue entry is marked "
+             f"queued; *frames* are every {_gl(d, 'lexical-frame', 'frame')} that found the word, best first.", "",
+             "| # | T/N/D | word | M3 | M1's gloss | M3's neighbours (reading) | frames | example |",
              "|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(pick, 1):
-        near = (f"{_trait(r['nearest'], d, traits_dir)} ({r['cosine']:.2f})" if r.get("nearest") and
-                r.get("cosine") is not None else "n/a")
-        lines.append(f"| {i} | {_cell(r['label'])} |  | {r['decision']} | {_cell(r.get('gloss'))} | {near} | "
-                     f"{', '.join('`' + f + '`' for f in r.get('frames') or [])} | {_cell(r.get('example'))} |")
+        lines.append(f"| {i} |  | {_cell(r['label'])} | {r['decision']} | {_cell(r.get('gloss'))} | "
+                     f"{_neighbours(r, d, traits_dir)} | {', '.join('`' + f + '`' for f in r.get('frames') or [])} | "
+                     f"{_cell(r.get('example'))} |")
     return "\n".join(lines) + "\n"
 
 
@@ -518,14 +533,15 @@ def roger_first_hour(records: Sequence[Mapping], *, n: int = FIRST_HOUR_N, doc_p
              f"Roger, 2026-10-13: \"start with an hour's review of the ones that seem most novel\".  The {len(pick)} "
              f"kept rows (of {len(records)}) furthest from the corpus by M3's nearest cosine (lowest first), `new` "
              f"before `grey`; about {len(pick) / review_rate:.1f} h at {review_rate:.0f} terms an hour.  Mark **T** "
-             f"(a trait, and new), **N** (not a trait) or **D** (a duplicate).", "",
-             "| # | word | T/N/D | M3 | nearest corpus trait (cosine) | M1's gloss | frames |",
-             "|---|---|---|---|---|---|---|"]
+             f"(a trait, and new), **N** (not a trait) or **D** (a duplicate).  *M3's neighbours*: every corpus trait "
+             f"and seed-queue entry M3 compared the word with, by M3's reading (Sonnet/Opus), as the review app lists "
+             f"them; *M1's gloss* is the one the pipeline uses.", "",
+             "| # | T/N/D | word | M3 | nearest cosine | M3's neighbours (reading) | M1's gloss | frames |",
+             "|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(pick, 1):
-        near = (f"{_trait(r['nearest'], d, traits_dir)} ({r['cosine']:.2f})" if r.get("nearest") and
-                r.get("cosine") is not None else "n/a")
-        lines.append(f"| {i} | {_cell(r['label'])} |  | {r['decision']} | {near} | {_cell(r.get('gloss'))} | "
-                     f"{', '.join('`' + f + '`' for f in r.get('frames') or [])} |")
+        cos = f"{r['cosine']:.2f}" if r.get("cosine") is not None else "n/a"
+        lines.append(f"| {i} |  | {_cell(r['label'])} | {r['decision']} | {cos} | {_neighbours(r, d, traits_dir)} | "
+                     f"{_cell(r.get('gloss'))} | {', '.join('`' + f + '`' for f in r.get('frames') or [])} |")
     return "\n".join(lines) + "\n"
 
 

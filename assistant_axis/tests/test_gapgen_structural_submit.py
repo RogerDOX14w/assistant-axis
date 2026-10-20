@@ -341,7 +341,8 @@ def test_roger_sample_shows_the_nearest_existing_traits():
                {"position": 1, "stem": "rude", "sonnet": {"value": 3}, "opus": {"value": 2}}]}}
     md = R.roger_sample([row], [], n=1, seed=0, run_id="x", trait_prefix="../t/")
     assert "nearest existing traits (M3's reading)" in md
-    assert "[rude](../t/rude.json) 2; [unselfconscious](../t/unselfconscious.json) 1" in md
+    # QUESTIONS 208 (4), 2026-10-20: every compared trait, as the review app lists them, the reading as Sonnet/Opus
+    assert "[rude](../t/rude.json) (3/2), [unselfconscious](../t/unselfconscious.json) (1/-)" in md
 
 
 def test_record_only_writes_the_candidates_and_does_not_submit(world):

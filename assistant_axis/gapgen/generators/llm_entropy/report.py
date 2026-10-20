@@ -245,15 +245,19 @@ def render_report(fig: Mapping) -> str:
 
 
 def roger_sample(rows: Sequence[Mapping], table: Sequence[Mapping], *, run_id: str, n: int = 50, seed: int = 0,
-                 trait_prefix: str = RUN_TRAIT_PREFIX) -> str:
-    """Up to ``n`` rows per family decided ``new`` or ``grey`` (seeded), for Roger's verdicts."""
+                 trait_prefix: str = RUN_TRAIT_PREFIX, traits_dir: Optional[Path] = None) -> str:
+    """Up to ``n`` rows per family decided ``new`` or ``grey`` (seeded), for Roger's verdicts, each with every corpus
+    trait and queue entry M3 compared it with (QUESTIONS 208 (4)).  ``traits_dir``: where a neighbour's trait file is
+    looked for before it is linked."""
     by = {r["stem"]: r for r in table}
     L = [f"# Precision sample, LLM-entropy run `{run_id}`", "",
          f"Up to {n} rows per family (seed {seed}) the scorer decided `new` or `grey`.  Mark each **trait** (a new "
-         f"persona trait), **not-trait** or **duplicate** (of a corpus or queued trait) in the second column; the target "
-         f"is 70% or more trait-and-new (plan 09 section 6.4).  *Nearest existing traits*: the first three corpus "
-         f"traits M3 compared the candidate with, with M3's reading (4 the same concept, 3 narrower or broader, 2 "
-         f"overlapping, 1 related, 0 different).  *M1's gloss* is the one the pipeline uses (M3, grouping, review); "
+         f"persona trait), **not-trait** or **duplicate** (of a corpus or queued trait) in the second column (the marks "
+         f"measure real new traits per costly row, QUESTIONS 208).  *Nearest existing traits*: every corpus trait "
+         f"and seed-queue entry M3 compared the candidate with, as the review app lists them (by M3's final "
+         f"reading, then cosine), each with its reading as Sonnet/Opus (\"-\": Opus did not read; 4 the same "
+         f"concept, 3 narrower or broader, 2 overlapping, 1 related, 0 different) or, where M3 did not read the "
+         f"pair, its relation; a queue entry is marked queued and not linked.  *M1's gloss* is the one the pipeline uses (M3, grouping, review); "
          f"*the generator's gloss* is what the model meant when it named the item, for reference.  Family (b)'s "
          f"persons appear by opaque id only.", ""]
     for f in FAMILIES:
@@ -269,7 +273,7 @@ def roger_sample(rows: Sequence[Mapping], table: Sequence[Mapping], *, run_id: s
               "|---|---|---|---|---|---|---|---|---|"]
         for i, r in enumerate(pick, 1):
             t = by.get(r["stem"]) or {}
-            near, _ = _nearest_text(r, trait_prefix)
+            near, _ = _nearest_text(r, trait_prefix, traits_dir=traits_dir)
             prompts = ", ".join(sorted({s["prompt_id"] for s in t.get("sources") or [] if s["family"] == f})[:3])
             L.append(f"| {i} |  | {_cell(r.get('label'))} | {_cell(r.get('gloss'))} | {_cell(t.get('gloss'))} | {near} | "
                      f"{_cell((r.get('filter') or {}).get('verdict'))} | {_cell(_decision(r))} | {_cell(prompts)} |")
