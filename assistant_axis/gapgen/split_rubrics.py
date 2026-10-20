@@ -97,11 +97,14 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: glosses, before submission), first pinned as version 1.  Since 2026-10-17 the LLM-entropy generator's three texts
 #: (workstream 6, ``.../llm_entropy/``): the scaffold system turn of families a, b, d and e, the English master the
 #: ten family-c prompts are translated from, and the family-c back-translation call, each first pinned as version 1.
+#: Since 2026-10-20 the alignment sweep's humanize call (``.../alignment_sweep/humanize.py``: every sweep trait in its
+#: closest human phrasing, Roger's decision of that day), first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
     "alignment_extract": "alignment_extract.md",
     "alignment_rewrite": "alignment_rewrite.md",
+    "alignment_humanize": "alignment_humanize.md",
     "enactability_gate": "enactability_gate.md",
     "ipip_naming_blind": "ipip_naming_blind.md",
     "ipip_naming_hinted": "ipip_naming_hinted.md",

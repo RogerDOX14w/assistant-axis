@@ -13,8 +13,9 @@ Modules: :mod:`.sources` (what is read, licences, weights), :mod:`.fetch` (downl
 ``data/external/alignment_sweep/`` with a manifest), :mod:`.chunk` (headings and rows to chunks), :mod:`.extract`
 (the extraction and rewrite calls), :mod:`.dedupe` (gloss embeddings, groups, partner hints), :mod:`.submit`
 (candidates, the downstream estimate, the submission), :mod:`.gate` (the persona-enactability gate),
-:mod:`.probe` (the Qwen label probe, DeepInfra only) and :mod:`.report` (rank, readout, gold recovery).  The CLI is
-``data_analysis/gap_generation/alignment_sweep.py``.
+:mod:`.probe` (the Qwen label probe, DeepInfra only), :mod:`.report` (rank, readout, gold recovery) and, since
+2026-10-20, :mod:`.humanize` (every sweep trait rewritten in its closest human phrasing, Roger's decision of that day,
+submitted as a new run that replaces the old ones).  The CLI is ``data_analysis/gap_generation/alignment_sweep.py``.
 """
 from __future__ import annotations
 

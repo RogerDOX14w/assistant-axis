@@ -14,6 +14,10 @@
     uv run python data_analysis/gap_generation/alignment_sweep.py probe --run-id R [--budget-usd 0.5] [--dry-run]
     uv run python data_analysis/gap_generation/alignment_sweep.py measure --run-id R [R2 ...] [--sample N]
     uv run python data_analysis/gap_generation/alignment_sweep.py report --run-id R [--gold] [--dry-run]
+    uv run python data_analysis/gap_generation/alignment_sweep.py humanize --run-id R [--limit N] [--transport auto|live|batches]
+        [--budget-usd 10] [--resume] [--render] [--allow-dirty] [--dry-run]
+    uv run python data_analysis/gap_generation/alignment_sweep.py humanize-submit --run-id R [--old-runs R1 ...] [--by WHO]
+        [--reason TEXT] [--allow-unanswered] [--no-relabel] [--dry-run]
 
 Plan: ``reports/trait_gap_generation/coding_plan_08_alignment_sweep.md``.  ``fetch`` downloads the sources into
 ``data/external/alignment_sweep/`` (git-ignored) with a manifest (also tracked as
@@ -22,7 +26,12 @@ asks Sonnet 5.5 for the dispositions of each chunk and rewrites mechanism items;
 ``submit`` writes the run's ``candidates.jsonl`` and submits it; ``gate`` asks Opus 5.5 where each trait can be
 elicited, what the elicitation needs and what the judge needs (three fields, nothing gated on them) and ``probe``
 adds the Qwen label probe; ``measure`` prints one round's mechanical measures and the table across rounds
-that the extraction prompt is iterated from; ``report`` writes the readout.  Every paid command prints its estimate, takes
+that the extraction prompt is iterated from; ``report`` writes the readout.  ``humanize`` (Roger, 2026-10-20) rewrites
+every sweep trait in the registry in its closest human phrasing (one Sonnet 5.5 call per distinct label and gloss,
+the pinned rubric ``alignment_humanize``) into a new run's ``candidates.jsonl``, with a 30-row sheet for Roger's marks;
+``humanize-submit`` submits that run (the noun relabel on), then retracts the old sweep runs, keeping Roger's reviewed
+rows, and prints the M1 and M3 commands (``assistant_axis/gapgen/generators/alignment_sweep/humanize.py``).  Every
+paid command prints its estimate, takes
 ``--budget-usd`` as a hard cap, writes ``usage.json``, refuses uncommitted platform code without ``--allow-dirty``,
 and runs live (every estimate is under the $20 line).  ``--dry-run`` prints the plan, the estimate and the first
 three prompts as sent, and writes and calls nothing.
@@ -765,6 +774,361 @@ def cmd_measure(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- humanize
+
+def _batch_client():
+    import anthropic
+    from dotenv import load_dotenv
+    load_dotenv(_REPO_ROOT / ".env")
+    return anthropic.Anthropic()
+
+
+def _humanize_transport(args, runner, rdir: Path, transport: str, cap: float):
+    """The live transport (asyncio, ``--concurrency`` at a time) or the Message Batches one (state in
+    ``batches.json``)."""
+    from assistant_axis.gapgen.batches import BatchTransport
+    from assistant_axis.gapgen.generators.alignment_sweep import humanize as H
+    from assistant_axis.gapgen.generators.llm_entropy.calls import LiveTransport
+    if transport == "live":
+        runner.client = _anthropic_client()
+        return LiveTransport(runner)
+    return BatchTransport(runner, _batch_client(), rdir / H.BATCHES_NAME, budget_usd=cap)
+
+
+def _humanize_inputs(args, rdir: Path) -> tuple[list, str]:
+    """``(inputs, where from)``: the run's frozen ``humanize_inputs.jsonl`` when it has one, else every
+    ``alignment_sweep`` source of the registry's folded view (module docstring of ``humanize``)."""
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep import humanize as H
+    from assistant_axis.gapgen.registry import Registry
+    p = rdir / H.INPUTS_NAME
+    if p.exists():
+        return H.read_inputs(p), f"frozen in {p}"
+    if not Path(args.registry).exists():
+        raise SystemExit(f"no registry at {args.registry}: run in the checkout that holds the live log, or pass "
+                         f"--registry")
+    rows = Registry(args.registry).fold()
+    runs = sorted({s.get("run_id") for r in rows.values() for s in r.get("sources") or []
+                   if s.get("generator") == AS.GENERATOR and s.get("run_id") != args.run_id})
+    extraction = {}
+    for run in runs:
+        ext = _run_dir(args, run) / X.EXTRACTION_NAME
+        if ext.exists():
+            extraction[run] = X.load_extraction(ext)
+    headings = H.load_headings(Path(args.external_dir) / AS.CHUNKS_NAME)
+    inputs = H.collect_inputs(rows, extraction=extraction, headings=headings, exclude_runs=[args.run_id])
+    return inputs, (f"the registry {args.registry} ({len(runs)} sweep runs, {len(extraction)} with an extraction; "
+                    f"{len(headings)} chunk headings)")
+
+
+def cmd_humanize(args) -> int:
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.batches import choose_transport
+    from assistant_axis.gapgen.cost import confirm_or_abort, resume_usage
+    from assistant_axis.gapgen.generators.alignment_sweep import extract as X
+    from assistant_axis.gapgen.generators.alignment_sweep import humanize as H
+    from assistant_axis.gapgen.generators.llm_entropy.calls import (
+        RunGuardedUsage, final_records, read_responses, usage_gap,
+    )
+    from assistant_axis.gapgen.prompt_labels import LABEL_FORM_KEY, resolve_label_form
+    from assistant_axis.gapgen.registry import read_candidates, utc_now, utc_stamp
+    from assistant_axis.gapgen.runs import start_run
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.judge_pricing import BudgetExceededError
+
+    rdir = _run_dir(args, args.run_id)
+    try:
+        rub = X.load_rubric(H.RUBRIC_NAME, args.rubrics_dir, allow_unpinned=bool(args.render))
+    except X.RubricNotPinned as exc:
+        raise SystemExit(f"REFUSED: {exc}")
+    run_json = rdir / "run.json"
+    form = resolve_label_form(earlier=json.loads(run_json.read_text(encoding="utf-8")) if run_json.exists() else None)
+    inputs, where = _humanize_inputs(args, rdir)
+    if not inputs:
+        raise SystemExit(f"no {AS.GENERATOR} source to rewrite in {where}")
+    sel = H.spread(inputs, args.limit) if args.limit else inputs
+    if args.render:
+        print(f"SYSTEM (rubric {rub['name']} version {rub['version']}, the fenced block of {rub['file']}):\n"
+              f"{rub['text']}\n")
+        for title, _system, user in H.render_samples(sel, rub["text"], form):
+            print(f"USER ({title}):\n{user}\n")
+        return 0
+    calls = H.build_calls(sel, rubric=rub, model=args.model, label_form=form)
+    records = read_responses(rdir / H.RESPONSES_NAME)
+    done = set(final_records(records))
+    todo = [c for c in calls if c.cache_key not in done]
+    if len(todo) < len(calls) and not args.resume:
+        raise SystemExit(f"REFUSED: the run already holds answers to {len(calls) - len(todo)} of these {len(calls)} "
+                         f"calls; pass --resume to reuse them (nothing answered is sent again)")
+    transport, why = choose_transport(args.transport, len(todo))
+    n_reviewed = sum(1 for i in inputs if i.reviews)
+    print(f"humanize {AS.GENERATOR}/{args.run_id}: {len(inputs)} distinct (label, gloss) inputs from {where}; "
+          f"{n_reviewed} of them on a reviewed row; {len(sel)} selected"
+          + (f" (--limit {args.limit}, spread over the list)" if args.limit else "")
+          + f", {len(sel) - len(todo)} answered already, {len(todo)} to send; transport {transport} ({why})")
+    print(f"rubric {rub['name']} v{rub['version']} ({rub['sha256'][:12]}); model {args.model}; no temperature; "
+          f"label form {form}")
+    print(f"  {H.estimate_line(todo, batch=transport == 'batches')}")
+    est = H.estimate_usd(todo, batch=transport == "batches")
+    print(f"  total estimate ${est:.4f} ({'Message Batches, half price' if transport == 'batches' else 'live'}; a "
+          f"failed call is asked once more); cap --budget-usd ${args.budget_usd:.2f}")
+    cap = confirm_or_abort(est, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                           confirmed_by=args.confirmed_by)
+    if args.dry_run:
+        print("DRY-RUN: no call, nothing written.  The first three user turns as sent (system prompt = the rubric "
+              "block):")
+        for c in todo[:3]:
+            print(f"--- {c.prompt_id} ({c.meta['label']})\n{c.user}\n")
+        return 0
+    refused = _dirty_refusal(args)
+    if refused:
+        raise SystemExit(f"REFUSED: {refused}")
+    if not (rdir / H.INPUTS_NAME).exists():
+        rdir.mkdir(parents=True, exist_ok=True)
+        H.write_inputs(inputs, rdir / H.INPUTS_NAME)
+    ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
+        "step": "humanize", "n_inputs": len(inputs), "n_selected": len(sel), "limit": args.limit,
+        "n_to_send": len(todo), "transport": transport, "model": args.model, "budget_usd": args.budget_usd,
+        "estimate_usd": round(est, 4), "rubric": {k: rub[k] for k in ("name", "version", "sha256", "file")},
+        LABEL_FORM_KEY: form, "resume": bool(args.resume), "allow_dirty": bool(args.allow_dirty),
+        "inputs_from": where})
+    ctx.confirmed_by = args.confirmed_by
+    earlier = ctx.total_usage()
+    rebuilt = resume_usage(earlier, records, where=f"{AS.GENERATOR}/{args.run_id}")
+    if rebuilt.total_cost_usd > earlier.total_cost_usd + 1e-9:
+        rec_ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
+            "step": "recovered_usage", "note": "spend the response records show beyond the recorded sessions"})
+        rec_ctx.usage = usage_gap(rebuilt, earlier)
+        rec_ctx.finish()
+        earlier = ctx.total_usage()
+    ctx.usage = RunGuardedUsage(budget_usd=cap, usage_path=rdir / "usage.json", earlier=earlier)
+    runner = H.make_runner(batch_id=f"{args.run_id}_{AS.GENERATOR}_{H.STEP}", run_id=args.run_id, usage=ctx.usage,
+                           responses_path=rdir / H.RESPONSES_NAME, resume_records=records if args.resume else [],
+                           concurrency=args.concurrency, checkpoint=ctx.finish, label_form=form,
+                           prompts_version=rub["version"])
+    res, code = None, 0
+    try:
+        runner.transport = _humanize_transport(args, runner, rdir, transport, cap)
+        res = runner.run(H.STEP, calls, H.parse_call)
+    except BudgetExceededError as exc:
+        print(f"STOPPED at the cap (--budget-usd {args.budget_usd:g}): {exc}; the answers paid for are recorded, and "
+              f"the same command with --resume and a larger cap sends only the rest", file=sys.stderr)
+        code = 1
+    finally:
+        ctx.finish()
+        print(ctx.usage.log_line(f"[usage this session, {AS.GENERATOR}/{args.run_id}]"), file=sys.stderr)
+    if res is not None:
+        warn_if_low_parse_rate(label=f"alignment_sweep humanize:{args.model}", n_ok=res.n_ok, n_total=res.n_attempted)
+        print(f"humanize: {len(res.answers)} of {res.n_units} answered ({res.n_reused} reused, {res.n_retried} asked "
+              f"once more); failed {len(res.failures)}; stop reasons {dict(res.stop_reasons)}")
+    # the run's outputs, from every answer on record (this session's and earlier ones)
+    records = read_responses(rdir / H.RESPONSES_NAME)
+    rows = H.rewrite_rows(inputs, records)
+    cands = H.to_candidates(rows, args.run_id)
+    cpath = rdir / H.CANDIDATES_NAME
+    n_before = len(read_candidates(cpath)) if cpath.exists() else 0
+    H.write_jsonl(rows, rdir / H.REWRITES_NAME)
+    H.write_jsonl(cands, cpath)
+    summ = H.summarize(rows, records)
+    total_cost = ctx.total_usage().total_cost_usd
+    summ.update({"run_id": args.run_id, "model": args.model, "transport": transport,
+                 "rubric": {k: rub[k] for k in ("name", "version", "sha256")}, LABEL_FORM_KEY: form,
+                 "n_candidates": len(cands), "cost_usd_run": round(total_cost, 4),
+                 "cost_usd_this_session": round(ctx.usage.total_cost_usd, 4), "parser_version": H.PARSER_VERSION,
+                 "at": utc_now()})
+    atomic_write_text(json.dumps(summ, indent=2, ensure_ascii=False) + "\n", rdir / H.SUMMARY_NAME)
+    sheet, kept_sheet = H.sheet_path(rdir, utc_stamp())
+    if kept_sheet:
+        print(f"{kept_sheet}; the new sheet is {sheet}", file=sys.stderr)
+    atomic_write_text(H.render_sheet(rows, run_id=args.run_id, summary=summ, doc_path=sheet, model=args.model,
+                                     rubric=rub, cost_usd=total_cost,
+                                     files={"rubric": _REPO_ROOT / rub["file"], "rewrites": rdir / H.REWRITES_NAME,
+                                            "responses": rdir / H.RESPONSES_NAME, "candidates": cpath}), sheet)
+    ctx.finish(n_emitted=max(0, len(cands) - n_before))
+    print(json.dumps({k: summ[k] for k in ("n_inputs", "n_answered", "n_unanswered", "n_refusals", "n_differs",
+                                           "n_label_changed", "n_gloss_changed", "notes", "n_candidates",
+                                           "cost_usd_run")}, indent=1))
+    print(f"wrote {rdir / H.REWRITES_NAME}, {cpath}, {rdir / H.SUMMARY_NAME}, {sheet}, {rdir / H.RESPONSES_NAME}, "
+          f"run.json, usage.json")
+    if summ["n_unanswered"]:
+        print(f"{summ['n_unanswered']} inputs have no answer yet: the same command with --resume sends only them "
+              f"(humanize-submit refuses while any is missing, unless --allow-unanswered)", file=sys.stderr)
+    return code
+
+
+def _queue_keys(path: Path) -> list[str]:
+    if not Path(path).exists():
+        return []
+    q = json.loads(Path(path).read_text(encoding="utf-8"))
+    return [k for e in (q.get("entries") or []) for k in [(e.get("gap_gen") or {}).get("registry_key")] if k]
+
+
+def _by(args) -> str:
+    if args.by:
+        return args.by
+    import subprocess
+    try:
+        name = subprocess.run(["git", "config", "user.name"], cwd=_REPO_ROOT, capture_output=True, text=True,
+                              check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        name = ""
+    if not name:
+        raise SystemExit("REFUSED: say who retracts with --by (git config user.name is not set)")
+    return name
+
+
+def _rel(p: Path) -> Path:
+    try:
+        return Path(p).resolve().relative_to(_REPO_ROOT.resolve())
+    except ValueError:
+        return Path(p)
+
+
+def cmd_humanize_submit(args) -> int:
+    """Submit the humanize run, then retract the old sweep runs (``humanize`` module docstring)."""
+    import shlex
+
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen import submit_candidates
+    from assistant_axis.gapgen.generators.alignment_sweep import humanize as H
+    from assistant_axis.gapgen.generators.llm_entropy.calls import read_responses
+    from assistant_axis.gapgen.registry import Registry, apply_retractions, read_candidates, retract, utc_now
+    from assistant_axis.gapgen.runs import start_run
+
+    rdir = _run_dir(args, args.run_id)
+    for p, cmd in ((rdir / H.INPUTS_NAME, "humanize"), (rdir / H.CANDIDATES_NAME, "humanize")):
+        if not p.exists():
+            raise SystemExit(f"no {p}: run `alignment_sweep.py {cmd} --run-id {args.run_id}` first")
+    prev = json.loads((rdir / H.SUBMIT_REPORT_NAME).read_text(encoding="utf-8")) \
+        if (rdir / H.SUBMIT_REPORT_NAME).exists() else None
+    if prev and prev.get("submit") and not any(r.get("refused") for r in prev.get("retractions") or []) \
+            and not args.again and not args.dry_run:
+        raise SystemExit(f"REFUSED: {AS.GENERATOR}/{args.run_id} was submitted and its old runs retracted at "
+                         f"{prev.get('at')} ({rdir / H.SUBMIT_REPORT_NAME}); a second pass would find nothing to "
+                         f"retract and recompute {H.REJUDGE_KEYS_NAME} on the new glosses.  Pass --again to resubmit "
+                         f"anyway (the earlier rejudge keys are kept)")
+    inputs = H.read_inputs(rdir / H.INPUTS_NAME)
+    rows = H.rewrite_rows(inputs, read_responses(rdir / H.RESPONSES_NAME))
+    missing = [r for r in rows if not r.get("answer")]
+    if missing and not args.allow_unanswered:
+        raise SystemExit(f"REFUSED: {len(missing)} of {len(rows)} inputs have no answer (e.g. "
+                         f"{', '.join(repr(r['original']['label']) for r in missing[:5])}); their rows would leave "
+                         f"the registry with the retraction.  Run `alignment_sweep.py humanize --run-id {args.run_id} "
+                         f"--resume`, or pass --allow-unanswered to let them go")
+    cands = read_candidates(rdir / H.CANDIDATES_NAME)
+    old = [r for r in (args.old_runs or H.old_runs_of(inputs)) if r != args.run_id]
+    if not Path(args.registry).exists():
+        raise SystemExit(f"no registry at {args.registry}")
+    reg = Registry(args.registry)
+    raw = reg.fold(raw=True)
+    active = reg.retracted_runs()
+    already = [r for r in old if (AS.GENERATOR, r) in active]
+    to_retract = [r for r in old if r not in already]
+    queue_keys = _queue_keys(args.queue)
+    kept, kept_why = H.kept_candidates(raw, active=active, old_runs=to_retract, run_id=args.run_id,
+                                       queue_keys=queue_keys)
+    touched = H.settled_rows_touched(raw, active=active, old_runs=to_retract, queue_keys=queue_keys)
+    every = list(cands) + kept
+    land = H.landing(raw, every)
+    before = apply_retractions(raw, active)
+    alone = apply_retractions(raw, active | {(AS.GENERATOR, r) for r in to_retract})
+    sim = H.simulate_after(raw, every, active=active, old_runs=to_retract)
+    pred_rejudge = H.rejudge_keys(before, sim, land["keys"], run_id=args.run_id)
+    pred_m1 = sum(1 for k in land["keys"] if not (sim.get(k) or {}).get("filter"))
+    dropped_alone = set(before) - set(alone)
+    print(f"humanize-submit {AS.GENERATOR}/{args.run_id}: {len(cands)} rewritten candidates from {len(rows)} inputs "
+          f"({len(missing)} unanswered){f' + {len(kept)} kept reviewed sources' if kept else ''}; they land on "
+          f"{land['new']} new keys and {land['existing']} existing rows ({land['existing_filtered']} with an M1 "
+          f"block); the noun relabel {'off' if args.no_relabel else 'on'} (its siblings are not counted here)")
+    print(f"old runs to retract, after the submission: {', '.join(to_retract) or 'none'}"
+          + (f" (already retracted: {', '.join(already)})" if already else ""))
+    print(f"  the retraction alone would drop {len(dropped_alone)} rows; {sum(1 for k in dropped_alone if k in sim)} "
+          f"of them stay, held by the new run's candidates; rows that keep other sources: "
+          f"{sum(1 for k in before if k in alone and before[k].get('sources') != alone[k].get('sources'))}")
+    print(f"Roger's reviewed or queued rows with an old-run source ({len(touched)}):")
+    for k, t in touched.items():
+        fate = ("kept by " + ", ".join(t["other_generators"]) + (", first gloss unchanged" if t["first_gloss_unchanged"]
+                                                                 else ", FIRST GLOSS CHANGES: carried")
+                if t["kept_by_other_sources"] else "DROPPED by the retraction alone: its old sources are carried")
+        print(f"  {k}: {t['why']}; {fate}")
+    for k, w in kept_why.items():
+        print(f"  carried into the new run unchanged: {k} ({w})")
+    print(f"predicted after the submission and the retraction: {pred_m1} rows for M1 --run (no M1 block), "
+          f"{len(pred_rejudge)} filtered rows whose first gloss becomes a rewrite (M1 --keys and M3 --rescore)")
+    reason = args.reason or (f"Roger 2026-10-20: the alignment sweep rewritten in its closest human phrasing as "
+                             f"{AS.GENERATOR}/{args.run_id}, which replaces the rows of the old runs")
+    py = "uv run python data_analysis/gap_generation"
+    print("the same steps by hand (this command runs them in this order):")
+    print(f"  {py}/gap_registry.py submit --from {_rel(rdir / H.CANDIDATES_NAME)}"
+          + ("   # plus the kept sources (written to kept_reviewed.jsonl)" if kept else ""))
+    for r in to_retract:
+        print(f"  {py}/gap_registry.py retract --run {AS.GENERATOR}/{r} --reason {shlex.quote(reason)} --dry-run   "
+              f"# then without --dry-run")
+    if args.dry_run:
+        cmds, est = H.followup_commands(args.run_id, n_m1=pred_m1, n_rejudge=len(pred_rejudge),
+                                        rejudge_path=rdir / H.REJUDGE_KEYS_NAME, repo_root=_REPO_ROOT)
+        print(f"then (estimates from the prediction; batches): {json.dumps(est)}")
+        for c in cmds:
+            print(f"  then: {c}")
+        print("DRY-RUN: nothing submitted, retracted or written")
+        return 0
+    by = _by(args)
+    ctx = start_run(AS.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
+        "step": "humanize-submit", "n_candidates": len(cands), "n_kept": len(kept), "old_runs": to_retract,
+        "already_retracted": already, "relabel": not args.no_relabel, "by": by, "reason": reason,
+        "allow_unanswered": bool(args.allow_unanswered), "n_unanswered": len(missing)})
+    code = 0
+    out: dict = {"run_id": args.run_id, "at": utc_now(), "by": by, "reason": reason, "n_candidates": len(cands),
+                 "kept": {"n": len(kept), "why": kept_why}, "settled_rows": touched, "unanswered":
+                 [r["input_id"] for r in missing], "old_runs": to_retract, "already_retracted": already}
+    try:
+        if kept:
+            H.write_jsonl(kept, rdir / "kept_reviewed.jsonl")
+        rep = submit_candidates(every, registry_path=args.registry, relabel=None if args.no_relabel else "auto")
+        atomic_write_text("".join(k + "\n" for k in rep.keys), rdir / H.KEYS_NAME)
+        rep_d = {k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}
+        atomic_write_text(json.dumps(rep_d, indent=2) + "\n", rdir / "submit_report.json")
+        out["submit"] = rep_d
+        print(f"submitted to {args.registry}: {json.dumps({k: v for k, v in rep_d.items() if k != 'relabels'})}")
+        out["retractions"] = []
+        for r in to_retract:
+            rr = retract(args.registry, AS.GENERATOR, r, reason=reason, by=by, queue_keys=queue_keys)
+            out["retractions"].append({"run": rr.run, "refused": rr.refused, "written": rr.written,
+                                       "counts": rr.counts(), "blocked": rr.blocked,
+                                       "settled_changed": rr.settled_changed})
+            c = rr.counts()
+            print(f"retract {rr.run}: {'REFUSED: ' + rr.refused if rr.refused else 'done'}; drops {c['n_dropped']} "
+                  f"rows, keeps {c['n_changed']} with fewer sources ({c['n_gloss_hint_changed']} change their first "
+                  f"gloss hint), settled rows touched {rr.settled_changed}")
+            if rr.refused:
+                print(f"STOPPED: {rr.run} was not retracted (blocked: {json.dumps(rr.blocked)}); the submission "
+                      f"stands; retract by hand once settled: {py}/gap_registry.py retract --run {rr.run} --reason "
+                      f"'...'", file=sys.stderr)
+                code = 2
+                break
+        after = reg.fold()
+        rj = H.rejudge_keys(before, after, rep.keys, run_id=args.run_id)
+        if prev and prev.get("rejudge_keys"):        # an earlier pass (a refused retraction, or --again): keep its keys
+            rj = sorted(set(rj) | {k for k in prev["rejudge_keys"] if k in after})
+        n_m1 = sum(1 for k in set(rep.keys) if k in after and not after[k].get("filter"))
+        atomic_write_text(f"# {len(rj)} rows of {AS.GENERATOR}/{args.run_id} with an M1 block whose first gloss hint "
+                          f"is now a rewrite ({utc_now()})\n" + "".join(k + "\n" for k in rj),
+                          rdir / H.REJUDGE_KEYS_NAME)
+        cmds, est = H.followup_commands(args.run_id, n_m1=n_m1, n_rejudge=len(rj),
+                                        rejudge_path=rdir / H.REJUDGE_KEYS_NAME, repo_root=_REPO_ROOT)
+        out.update(rejudge_keys=rj, n_m1=n_m1, followups=cmds, followup_estimate=est)
+    finally:
+        atomic_write_text(json.dumps(out, indent=2, ensure_ascii=False) + "\n", rdir / H.SUBMIT_REPORT_NAME)
+        ctx.finish()
+    print(f"after: {n_m1} rows for M1 --run, {len(rj)} for M1 --keys and M3 --rescore ({rdir / H.REJUDGE_KEYS_NAME}); "
+          f"follow-up estimate {json.dumps(est)}")
+    for c in cmds:
+        print(f"  then: {c}")
+    print(f"wrote {rdir / H.SUBMIT_REPORT_NAME}, {rdir / H.KEYS_NAME}, submit_report.json, "
+          f"{rdir / H.REJUDGE_KEYS_NAME}, run.json, usage.json")
+    return code
+
+
 # --------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
@@ -880,6 +1244,40 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--top", type=int, default=None, help="show only the top N survivors (the plan's table of ~40)")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_report)
+
+    p = sub.add_parser("humanize", help="every sweep trait in the registry rewritten in its closest human phrasing "
+                                        "(Sonnet 5.5, rubric alignment_humanize) into a new run's candidates.jsonl")
+    p.add_argument("--run-id", required=True, help="the new run (e.g. 2026-10-20-humanize)")
+    p.add_argument("--limit", type=int, default=None, metavar="N",
+                   help="a pilot: N inputs spread evenly over the list (a later --resume reuses their answers)")
+    p.add_argument("--transport", choices=("auto", "live", "batches"), default="auto",
+                   help="auto (default): fewer than 300 calls live, more through the Message Batches API (half price)")
+    p.add_argument("--resume", action="store_true", help="reuse the run's answers on record (needed once it has any)")
+    p.add_argument("--render", action="store_true",
+                   help="print the system prompt and one user turn per input variant (with and without a source "
+                        "sentence); no call, nothing written")
+    p.add_argument("--model", default="claude-sonnet-5-5")
+    p.add_argument("--concurrency", type=int, default=6)
+    paid(p, 10.0)
+    p.set_defaults(func=cmd_humanize)
+
+    p = sub.add_parser("humanize-submit", help="submit the humanize run (noun relabel on), then retract the old sweep "
+                                               "runs, keeping Roger's reviewed rows; prints the M1 and M3 commands "
+                                               "(no API cost)")
+    p.add_argument("--run-id", required=True)
+    p.add_argument("--old-runs", nargs="+", default=None, metavar="RUN_ID",
+                   help="the sweep runs to retract (default: every run the inputs came from)")
+    p.add_argument("--by", default=None, help="who retracts (default: git config user.name)")
+    p.add_argument("--reason", default=None, help="kept in the retraction record (a default naming the run is used)")
+    p.add_argument("--allow-unanswered", action="store_true",
+                   help="submit although some inputs have no answer (their rows leave with the retraction)")
+    p.add_argument("--no-relabel", action="store_true", help="skip the platform's noun relabel step")
+    p.add_argument("--again", action="store_true",
+                   help="resubmit a run whose submission and retractions are complete (refused without it)")
+    p.add_argument("--queue", type=Path, default=paths.SEED_QUEUE_PATH,
+                   help="the seed queue (rows it names count as settled)")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(func=cmd_humanize_submit)
     return ap
 
 

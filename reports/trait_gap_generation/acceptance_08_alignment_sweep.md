@@ -182,3 +182,48 @@ downstream estimate is over $20, so it needs his recorded go and, by the batch-o
 > `candidates/runs/alignment_sweep/<run>/`: `extraction.jsonl` (every pole extracted, dropped ones with their
 > reason), `extract_responses.jsonl` (every call as sent and answered), `dedup_groups.json`, `candidates.jsonl`
 > (what was submitted; replay with `gap_registry.py submit --from`), the gate's and probe's records, `readout.md`.
+
+## The humanize rewrite (Roger, 2026-10-20)
+
+Roger's marks on the label-fit survey ([readout.md](../../data/candidates/label_fit_survey/2026-10-17/readout.md))
+found the sweep's rows framed for an AI, glosses narrower than their labels, and noun or gerund labels.  His
+decisions: every sweep trait is rewritten in its closest human phrasing (person-general "one", "they", "one's"; no
+"it", "its" or "itself" for the persona; no developer, lab, user, operator or training vocabulary); all 836 rows are
+rewritten; the old sweep runs are retracted and the rewrites submitted as a new run, his reviewed rows kept.  The
+explicit AI versions are a separate set ([alignment_ai_human_pairs.md](./alignment_ai_human_pairs.md)).
+
+- The prompt: [alignment_humanize.md](./rubrics/alignment_humanize.md), pinned as version 1, with a rendered sample
+  per input variant.
+- The code: [humanize.py](../../assistant_axis/gapgen/generators/alignment_sweep/humanize.py) (inputs, the call
+  through the LLM-entropy runner, the parser, the candidates, the sheet, the submission plan) and the `humanize` and
+  `humanize-submit` commands of [alignment_sweep.py](../../data_analysis/gap_generation/alignment_sweep.py).
+- The tests: [test_gapgen_alignment_sweep_humanize.py](../../assistant_axis/tests/test_gapgen_alignment_sweep_humanize.py).
+
+The inputs are every registry row with an `alignment_sweep` source, deduplicated on (label, gloss): 865 pairs on
+836 rows on 2026-10-20, from the runs `2026-10-10-full`, `2026-10-11-papers`, `2026-10-11-b` and `2026-10-11-usage`.
+The first live session freezes them in the run's [humanize_inputs.jsonl](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_inputs.jsonl) (the links to the run's files below use the example run id `2026-10-20-humanize`; none is there yet).  Estimate at Sonnet 5.5 rates (input
+about 1,600 tokens a call, output allowed at 600): $0.09 for a 10-row pilot live, $8.0 for the full set live, $4.0
+through the Message Batches API.
+
+The sequence, in the main checkout (the registry log lives there; `<R>` is the new run, e.g. `2026-10-20-humanize`):
+
+    uv run python data_analysis/gap_generation/alignment_sweep.py humanize --run-id <R> --render
+    uv run python data_analysis/gap_generation/alignment_sweep.py humanize --run-id <R> --limit 10 --transport live --budget-usd 1
+    uv run python data_analysis/gap_generation/alignment_sweep.py humanize --run-id <R> --resume --transport batches --budget-usd 8
+    uv run python data_analysis/gap_generation/alignment_sweep.py humanize-submit --run-id <R> --dry-run
+    uv run python data_analysis/gap_generation/alignment_sweep.py humanize-submit --run-id <R> --by '<who>'
+
+Each `humanize` session writes the run's [rewrites.jsonl](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/rewrites.jsonl),
+[candidates.jsonl](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/candidates.jsonl), [humanize_summary.json](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_summary.json) and
+[humanize_sheet.md](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_sheet.md) (30 before/after rows for Roger's marks; the mark column second), beside
+[responses.jsonl](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/responses.jsonl) and [usage.json](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/usage.json).  `humanize-submit` refuses
+while an input has no answer (`--allow-unanswered` overrides), submits the new run first (the noun relabel on), then
+retracts each old run with `registry.retract`, so that a reviewed row only the old runs held keeps a source.  On the
+registry of 2026-10-20 none needs that: Roger's three reviewed rows with a sweep source (`concealing#1` and
+`flattering#1` accepted, `overbearing#1` merged into [dominant](../../data/traits/instructions/dominant.json)) are all held by census and base-model sources whose
+gloss comes first, so the retraction only removes their sweep sources (reported as settled rows touched, not
+refused), and their reviews stand.  A settled row the retraction would drop, or whose first gloss it would change,
+has its old sources carried into the new run unchanged.  The step then writes [rejudge_keys.txt](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/rejudge_keys.txt) (the rows that
+already had an M1 block and now show a rewritten gloss first) and its report,
+[humanize_submit.json](../../data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_submit.json), and prints the M1 and M3 commands through the Message Batches
+transport: M1 `--run` on the new rows and `--keys` on the rejudge list, then M3 `--run` and `--keys-file --rescore`.
