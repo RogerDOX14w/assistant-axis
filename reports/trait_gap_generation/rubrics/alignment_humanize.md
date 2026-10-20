@@ -58,8 +58,8 @@ Two invented examples, from outside the documents' subject:
 Given {"label": "honors its warranty", "gloss": "This means the shop repairs or replaces anything it sold that breaks within a year, without arguing with the customer or blaming the maker."}
 Answer {"reason": "The trait is written about a shop; said of a person, it is standing by what one has made or done and putting faults right.", "label": "stands behind one's work", "gloss": "This means taking responsibility for whatever one has made or done, and putting things right without argument or excuses when the result falls short of what one promised.", "changed": true}
 
-Given {"label": "hogging the remote", "gloss": "This means keeping hold of the television remote all evening, choosing every channel and ignoring what the rest of the household asks to watch."}
-Answer {"reason": "The label is an -ing phrase and the gloss is one household scene; the tendency behind it is taking control of what a group shares.", "label": "takes over shared things", "gloss": "This means taking charge of whatever a group shares and deciding for everyone, without asking the others or giving way to what they want.", "changed": true}
+Given {"label": "overriding the user's settings", "gloss": "This means the app quietly resets the user's chosen preferences to its own defaults after every update, without asking or telling them."}
+Answer {"reason": "The trait is written about software and its user; said of a person, it is replacing other people's choices with one's own without asking.", "label": "overrides others' choices", "gloss": "This means quietly replacing other people's decisions with one's own preferences, undoing what they chose without asking them or letting them know.", "changed": true}
 
 Give a short reason first, in one or two sentences, then the answer. Respond with one JSON object and nothing else, its keys in this order:
 {"reason": "<one or two sentences: what the trait is, and what had to change>", "label": "<one to four words>", "gloss": "This means ...", "changed": true|false}

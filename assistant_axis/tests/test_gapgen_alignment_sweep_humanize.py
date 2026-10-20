@@ -48,7 +48,7 @@ CENSUS_GLOSS = "showing or representing to advantage"
 
 def test_rubric_pinned_reason_first_and_no_thinking():
     rub = X.load_rubric(H.RUBRIC_NAME)
-    assert rub["version"] == 1 and rub["sha256"] == sr.sha256(sr.load_prompt(H.RUBRIC_NAME))
+    assert rub["version"] == 3 and rub["sha256"] == sr.sha256(sr.load_prompt(H.RUBRIC_NAME))
     assert sr.GENERATOR_FILES[H.RUBRIC_NAME] == "alignment_humanize.md" and H.RUBRIC_NAME in sr.PINNED_NAMES
     text = rub["text"]
     tpl = text[text.rindex('{"reason"'):]                      # the answer format, at the end
@@ -348,7 +348,7 @@ def test_cli_dry_run_and_render_write_nothing(world, monkeypatch, capsys):
     assert "4 distinct (label, gloss) inputs" in out and "total estimate $" in out and '"source_sentence"' in out
     assert _run(world, monkeypatch, "humanize", "--run-id", NEW, "--render") == 0
     out = capsys.readouterr().out
-    assert out.startswith("SYSTEM (rubric alignment_humanize version 1") and "USER (without a source sentence" in out
+    assert out.startswith("SYSTEM (rubric alignment_humanize version 3") and "USER (without a source sentence" in out
     assert not world["new_dir"].exists()
 
 
