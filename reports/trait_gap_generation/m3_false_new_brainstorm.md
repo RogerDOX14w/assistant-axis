@@ -116,3 +116,14 @@ the sample from the start; a later sample session passes `--sample-since <seq>`.
    other candidates can, but "the region is already well sampled" applies only to traits in the corpus or the seed
    queue, so it does not arise between candidates until they reach the queue.
 4. **Decide the builds**: 1 or 8 first, by the replay; 9 once review passes about 400 outcomes.
+
+## 7. Observations since the pause
+
+- **2026-10-20, the relation call drops the parent** (cause D, though retrieval worked).  For debt-averse (plan 06
+  pilot, `debt_averse#1`), Haiku 5.5's relation call called all 16 retrieved traits "unrelated", among them
+  [frugal](../../data/traits/instructions/frugal.json) (cosine 0.35) and
+  [financially_conservative](../../data/traits/instructions/financially_conservative.json) (0.44), so Sonnet read
+  none of them and M3 said new with no reading at all.  Roger had marked it "D subset of financially
+  conservative/frugal".  The narrow pass (QUESTIONS 208 (3)) asks only about parents M3 read at 2 or more, so it
+  cannot see a row like this.  For the replay (§ 6 item 2): count how many of Roger's merges into the corpus had
+  their target listed but called "unrelated" by the relation call, apart from targets never retrieved.
