@@ -11,8 +11,9 @@ The module is ``assistant_axis/gapgen/label_fit.py`` (its docstring has the rule
 ``reports/trait_gap_generation/rubrics/label_fit.md``.
 
 ``validate`` asks the check about every row of a precision-sample sheet (``structural_generator.py report``'s
-``roger_sample.md``: its ``label`` and ``gloss`` columns) and scores the decisions against the marks in its last
-column (a mark starting with ``?`` should not fit, any other mark should), printing a confusion table (and a second
+``roger_sample.md``: its ``label`` column and the generator's gloss) and scores the decisions against the marks in
+its mark column (found by its header, ``mark``, ``roger`` or ``t/n/d``, else the last column; a mark starting with
+``?`` should not fit, any other mark should), printing a confusion table (and a second
 without the ``--borderline`` rows), the disagreements, and what the cosine pre-screen would have done.  Run it once
 per ``--model``: responses and ``usage.json`` are shared in ``--out-dir`` (default ``label_fit_validate/`` beside the
 sheet), the decisions and readout are per model (``decisions_<model>.json``, ``readout_<model>.md``).
@@ -376,8 +377,8 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--dry-run", action="store_true")
 
     p = sub.add_parser("validate", help="score the check against a precision sheet's marks (paid)")
-    p.add_argument("--marks", type=Path, required=True, help="the sheet (roger_sample.md), Roger's marks in its last "
-                                                             "column")
+    p.add_argument("--marks", type=Path, required=True, help="the sheet (roger_sample.md), Roger's marks in its mark "
+                                                             "column (by header, else the last)")
     p.add_argument("--borderline", nargs="+", default=[], metavar="LABEL",
                    help="labels also left out of a second confusion table (e.g. flashy self-justifying)")
     common(p)

@@ -563,11 +563,17 @@ def pairs_of(cands: Sequence[Candidate]) -> list[tuple[str, str]]:
 
 # --------------------------------------------------------------------------- validation against marks
 
+#: Header names of a sheet's mark column (the review-sheet rule, 2026-10-15: the mark column early, found by its
+#: header); a sheet with none of them has its mark last (the structural pilot's of 2026-10-14, marked in "Roger").
+MARK_HEADERS = ("mark", "roger", "t/n/d")
+
+
 def parse_marks(path: Path) -> list[dict]:
     """The rows of a precision-sample sheet (``structural_generator.py report``'s ``roger_sample.md``): ``{"n",
     "label", "gloss", "mark", "should_fit"}``, ``should_fit`` False for a mark starting with "?" (an odd sense),
-    True for any other mark, None for an empty one.  The columns are found by the header row's names (``#``,
-    ``label``, ``gloss``, and the last column for the mark)."""
+    True for any other mark, None for an empty one.  The columns are found by the header row's names: ``#``,
+    ``label``, the gloss (a header containing "gloss": the one naming the generator's when there are several, else
+    the first), and the mark (:data:`MARK_HEADERS`, else the last column)."""
     lines = Path(path).read_text(encoding="utf-8").splitlines()
 
     def cells(line: str) -> list[str]:
@@ -580,9 +586,12 @@ def parse_marks(path: Path) -> list[dict]:
         cs = cells(line)
         if header is None:
             low = [c.lower() for c in cs]
-            if "label" in low and "gloss" in low:
+            glosses = [i for i, c in enumerate(low) if "gloss" in c]
+            if "label" in low and glosses:
+                gen = [i for i in glosses if "generator" in low[i]]
+                mark = next((low.index(h) for h in MARK_HEADERS if h in low), len(cs) - 1)
                 header = {"n": low.index("#") if "#" in low else None, "label": low.index("label"),
-                          "gloss": low.index("gloss"), "mark": len(cs) - 1}
+                          "gloss": (gen or glosses)[0], "mark": mark}
             continue
         if set("".join(cs)) <= set("-: "):
             continue

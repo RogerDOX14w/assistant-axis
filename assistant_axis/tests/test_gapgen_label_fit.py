@@ -205,6 +205,32 @@ SHEET = """# Precision sample
 """
 
 
+def test_parse_marks_finds_the_mark_and_the_generators_gloss_by_header(tmp_path):
+    """Fable's review, 2026-10-20: the structural sheet's mark column moved second (the review-sheet rule) and its gloss
+    column says whose gloss it is; the plan 09 sheet already marked ("Roger", last) still parses."""
+    from assistant_axis.gapgen.generators.structural import report as R
+    row = {"key": "brazen#1", "stem": "brazen", "label": "brazen", "gloss": "This means M1's reading.",
+           "filter": {"verdict": "trait"}, "novelty": {"decision": "new", "readings": []}}
+    table = [{"stem": "brazen", "gloss": "This means feeling no shame.", "sources": []}]
+    md = R.roger_sample([row], table, n=1, seed=0, run_id="x", trait_prefix="../t/")
+    assert "| # | mark | label | the generator's gloss |" in md and "| 1 |  | brazen | This means feeling no shame. |" in md
+    sheet = tmp_path / "structural.md"
+    sheet.write_text(md.replace("| 1 |  | brazen |", "| 1 | ? odd | brazen |"))
+    (m,) = LF.parse_marks(sheet)
+    assert (m["label"], m["gloss"], m["mark"], m["should_fit"]) == ("brazen", "This means feeling no shame.", "? odd",
+                                                                    False)
+    # the llm_entropy sheet: two gloss columns, the generator's taken; the mark second
+    two = tmp_path / "le.md"
+    two.write_text("| # | mark | label | M1's gloss | the generator's gloss | M3 |\n|---|---|---|---|---|---|\n"
+                   "| 1 | trait | calm | This means M1. | This means the generator. | new |\n")
+    (m,) = LF.parse_marks(two)
+    assert (m["gloss"], m["mark"]) == ("This means the generator.", "trait")
+    # a corpus-frames sheet's T/N/D column
+    tnd = tmp_path / "cf.md"
+    tnd.write_text("| # | T/N/D | label | M1's gloss | frames |\n|---|---|---|---|---|\n| 1 | D | calm | g | x |\n")
+    assert LF.parse_marks(tnd)[0]["mark"] == "D"
+
+
 def test_parse_marks_and_confusion():
     import tempfile
     with tempfile.TemporaryDirectory() as d:

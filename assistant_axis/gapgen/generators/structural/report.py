@@ -359,21 +359,24 @@ def roger_sample(rows: Sequence[Mapping], table: Sequence[Mapping], *, n: int = 
     by = {r["stem"]: r for r in table}
     L = [f"# Precision sample, structural run `{run_id}`", "",
          f"{len(pick)} rows drawn (seed {seed}) from the {len(pool)} the scorer decided `new` or `grey`.  Mark each "
-         f"**trait** (a new persona trait), **not-trait** or **duplicate** (of a corpus or queued trait) in the last "
-         f"column.  *Nearest existing traits*: every corpus trait and seed-queue entry M3 compared the candidate with, "
+         f"**trait** (a new persona trait), **not-trait** or **duplicate** (of a corpus or queued trait) in the second "
+         f"column (the review-sheet rule, 2026-10-15: the mark column early).  *The generator's gloss* is what the "
+         f"generator meant by the label (what the label-fit check reads; marked \"(M1's)\" in the rare row where only "
+         f"M1's gloss is on record).  *Nearest existing traits*: every corpus trait and seed-queue entry M3 compared the candidate with, "
          f"as the review app lists them (by M3's final reading, then cosine), each with its reading as Sonnet/Opus "
          f"(\"-\": Opus did not read; 4 the same concept, 3 the same concept narrower or broader, 2 overlapping, 1 "
          f"related, 0 different) or, where M3 did not read the pair, its relation; a queue entry is marked queued.  "
          f"The first corpus trait's description is beside it; a duplicate of something else entirely is also a "
          f"duplicate.", "",
-         "| # | label | gloss | how the generator reached it | M1 | M3 | nearest existing traits (M3's reading) | "
-         "the first one's description | Roger |", "|---|---|---|---|---|---|---|---|---|"]
+         "| # | mark | label | the generator's gloss | how the generator reached it | M1 | M3 | nearest existing traits "
+         "(M3's reading) | the first one's description |", "|---|---|---|---|---|---|---|---|---|"]
     for i, r in enumerate(pick, 1):
         t = by.get(r["stem"]) or {}
         near, desc = _nearest_text(r, trait_prefix, traits_dir=traits_dir)
-        L.append(f"| {i} | {_cell(r.get('label'))} | {_cell(t.get('gloss') or r.get('gloss'))} | "
+        gloss = t.get("gloss") or (f"(M1's) {r['gloss']}" if r.get("gloss") else "")
+        L.append(f"| {i} |  | {_cell(r.get('label'))} | {_cell(gloss)} | "
                  f"{_sources_text(r['stem'], by, trait_prefix)} | {_cell((r.get('filter') or {}).get('verdict'))} | "
-                 f"{_cell(_decision(r))} | {near} | {_cell(desc)} | |")
+                 f"{_cell(_decision(r))} | {near} | {_cell(desc)} |")
     return "\n".join(L) + "\n"
 
 
