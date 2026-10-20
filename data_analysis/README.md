@@ -1167,16 +1167,23 @@ uv run python data_analysis/gap_generation/label_fit.py check --run structural/<
 ([QUESTIONS](../reports/trait_gap_generation/QUESTIONS.md) 208 (3)): a narrow trait is a narrower case of a broader
 corpus or queued trait (humblebragging under self-aggrandizing), and **at most one per parent goes to review**; the
 rest are held on the `narrow` holding list, not dropped.  Runs after M3 and before `review_graph.py build` (which
-leaves held rows out).  Candidates: rows M3 kept, awaiting review, on no holding list, whose best overlap reading by
+leaves held rows out).  **Before the pass, `review_app.py apply` every review batch with logged decisions**: the pass
+reads the registry's `review.status`, and a row decided in a log but not applied still reads as awaiting review.
+Candidates: rows M3 kept, awaiting review (a row Roger parked or deferred is left alone), on no holding list, whose best overlap reading by
 either model against a corpus or queue trait is 2 or more; each is asked about its one or two traits with the highest
 readings, one pair per call (Haiku 5.5, no temperature, three readings combined by plurality; pinned prompt
 [narrow_direction.md](../reports/trait_gap_generation/rubrics/narrow_direction.md)): `narrower`, `same`, `broader` or
 `different`.  The rows judged narrower are grouped by parent; the most distinct (the lowest final M3 reading to the
 parent, ties by a seeded random choice) stays for review with "narrower than X" on its card, the others are held,
-and a parent with a kept child from an earlier run takes no more.  Every row asked gets a `narrow` registry block.
+and a parent with a kept child from an earlier run takes no more, unless review rejected that child or merged it
+into something: then the slot is free, and `--release trait:<stem>` (or `--release all`; no call) keeps the most
+distinct of the parent's held rows.  Every row asked gets a `narrow` registry block.  The command ends by naming the
+review batches whose `graph.json`, built before the pass, holds a row it held: rebuild those graphs (the review app
+refuses to nominate or promote a held member meanwhile).
 Writes `data/candidates/narrow_pass/<batch-id>/` (`responses.jsonl`, `usage.json`, `decisions.json`, `readout.md`,
-`run.json`).  Estimate, `--budget-usd` cap, parse-rate check, dirty-tree refusal, `--resume` by request sha,
-`--transport batches` (half price), `--dry-run --render`.  Library:
+`run.json`).  Estimate, `--budget-usd` cap (the spend on record plus `--budget-usd`, so a run stopped at the cap resumes with
+the same budget), parse-rate check, dirty-tree refusal, `--resume` by request sha, `--transport batches` (half price),
+`--limit N` (a seeded sample), `--dry-run --render`.  Library:
 [`narrow_pass.py`](../assistant_axis/gapgen/narrow_pass.py).
 
 ```bash
@@ -1184,6 +1191,8 @@ uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-20-
     --run llm_entropy/2026-10-17-pilot --dry-run --render        # 414 rows, 730 pairs: about $0.75 live
 uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-20-all_narrow --all-awaiting \
     --budget-usd 10                    # about 4,100 rows, 7,200 pairs: about $7.35 live ($3.70 with --transport batches)
+# then review_graph.py build again for each review batch the command names (REBUILD: ...)
+uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-27-release --release all --dry-run
 ```
 
 **The census spelling-repair check (2026-10-14): `gap_generation/census_generator.py repair-check`.**

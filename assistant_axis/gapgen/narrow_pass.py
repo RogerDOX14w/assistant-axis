@@ -9,7 +9,9 @@ the held rows to the ``narrow`` holding list (``normalize.HOLDING``), which the 
 (``review_graph.select_rows``) and promotion refuses ("never promoted").  Nothing is dropped.
 
 **Candidates** (:func:`select`): registry rows M3 kept (``new`` or ``grey``), awaiting review (no review status
-other than ``unreviewed``, not promoted), on no holding list, not judged by this pass already (a ``narrow`` block
+other than ``unreviewed``, not promoted: a row Roger ``parked`` or ``deferred`` in review has been in front of him
+once and is left alone, on purpose, so that the pass never moves a row out of a review he postponed), on no holding
+list, not judged by this pass already (a ``narrow`` block
 whose status is ``kept``, ``held`` or ``not_narrow``), with a gloss, whose best overlap reading by either model
 (:func:`assistant_axis.gapgen.m3_neighbours.best_value`) against some corpus trait or queue entry is
 :data:`MIN_READING` (2) or more.  Each is asked about its :data:`MAX_PARENTS` (one or two) traits with the highest
@@ -37,6 +39,16 @@ overlap reading to that parent (Opus's where Opus read, else Sonnet's), ties bro
 parent that already has a kept child from an earlier run (:func:`earlier_kept`) keeps none here: every new child is
 held (``held_because: "earlier_run"``), so the cap holds across runs.  The kept child's block carries the parent too,
 and the review card shows it as "narrower than X" (``review_app.decisions.narrow_card``).
+
+**The cap releases** (Fable's review, 2026-10-20): a kept child that review ``rejected`` or ``merged_into`` something
+(:data:`RELEASING_REVIEW`: it was not a new trait after all) no longer holds its parent's slot, so a later run keeps a
+new child; and :func:`release` (``narrow_pass.py --release``, no call) re-runs :func:`assign` over a freed parent's held
+rows, by their recorded final readings, and takes the newly kept one off the holding list.  An accepted or still
+pending kept child keeps the slot.
+
+**Review graphs built before the pass** still hold the rows it held: :func:`graphs_holding` names the review batches
+whose ``graph.json`` has one (the command prints them, to be rebuilt), and the review app refuses to nominate or
+promote a held member (``review_app.decisions``).
 
 **Records** (``responses.jsonl``, append-only): every response before it is parsed, with the request's sha256 (system
 and user turns), the rubric's version and sha, the reading, the billed usage (``usage_raw``, ``charged_as``) and the
@@ -84,6 +96,8 @@ MAX_PARENTS = 2
 KEPT_DECISIONS = ("new", "grey")
 #: Review statuses that still await review (any other status means the row was reviewed).
 AWAITING_REVIEW = (None, "unreviewed")
+#: A kept child whose review status is one of these no longer holds its parent's slot (:func:`earlier_kept`).
+RELEASING_REVIEW = ("rejected", "merged_into")
 #: A ``narrow`` block with one of these statuses is not judged again.
 JUDGED_STATUSES = ("kept", "held", "not_narrow")
 STATUSES = ("kept", "held", "not_narrow", "no_answer")
@@ -554,14 +568,123 @@ def judge(items: Sequence[Item], answers: Mapping[tuple, Mapping], readings: int
 
 def earlier_kept(rows: Mapping[str, Mapping], *, exclude: Iterable[str] = ()) -> dict[str, str]:
     """``{parent key: the kept child's key}`` from the registry's ``narrow`` blocks (earlier runs), leaving out
-    ``exclude`` (the rows judged now).  Two kept children of one parent (not made by this pass) keep the first key."""
+    ``exclude`` (the rows judged now) and a kept child that review rejected or merged into something
+    (:data:`RELEASING_REVIEW`: its parent's slot is free again).  Two kept children of one parent (not made by this
+    pass) keep the first key."""
     ex = set(exclude)
     out: dict[str, str] = {}
     for k in sorted(rows):
         b = rows[k].get(BLOCK) or {}
-        if k not in ex and b.get("status") == "kept" and b.get("parent"):
-            out.setdefault(b["parent"], k)
+        if k in ex or b.get("status") != "kept" or not b.get("parent"):
+            continue
+        if (rows[k].get("review") or {}).get("status") in RELEASING_REVIEW:
+            continue
+        out.setdefault(b["parent"], k)
     return out
+
+
+def held_children(rows: Mapping[str, Mapping]) -> dict[str, list[str]]:
+    """``{parent key: [held child keys]}``: the rows still on the ``narrow`` holding list, by their block's parent."""
+    out: dict[str, list[str]] = {}
+    for k in sorted(rows):
+        r = rows[k]
+        b = r.get(BLOCK) or {}
+        if r.get("holding") == HOLDING and b.get("status") == "held" and b.get("parent"):
+            out.setdefault(b["parent"], []).append(k)
+    return out
+
+
+def _final_or_last(v) -> int:
+    return v if isinstance(v, int) and not isinstance(v, bool) else 99
+
+
+def releasable(rows: Mapping[str, Mapping]) -> list[str]:
+    """The parents with held children and no kept child holding the slot (``--release all``)."""
+    live = earlier_kept(rows)
+    return [p for p in held_children(rows) if p not in live]
+
+
+def release(rows: Mapping[str, Mapping], parents: Sequence[str], *, seed: int | str = 0, now: str,
+            run_id: str) -> tuple[dict[str, dict], list[dict]]:
+    """``(registry updates, report rows)`` for releasing ``parents`` (module docstring): for each parent whose slot is
+    free, :func:`assign` over its held rows (their recorded final readings), the newly kept child taken off the
+    holding list (``holding: None``, its block ``status: "kept"`` with ``released``: when, by which run, the previous
+    kept child and its review status), the others pointed at it.  A parent whose slot is still taken, or with no
+    held child, is reported and left alone.  No call."""
+    held = {p: [k for k in ks if awaiting_review(rows[k])] for p, ks in held_children(rows).items()}
+    live = earlier_kept(rows)
+    updates: dict[str, dict] = {}
+    report = []
+    for parent in parents:
+        kids = held.get(parent) or []
+        if parent in live:
+            report.append({"parent": parent, "released": None, "why": f"kept child {live[parent]} still holds the slot",
+                           "held": kids})
+            continue
+        if not kids:
+            report.append({"parent": parent, "released": None, "why": "no held child", "held": []})
+            continue
+        prev = sorted(k for k, r in rows.items() if (r.get(BLOCK) or {}).get("status") == "kept"
+                      and (r.get(BLOCK) or {}).get("parent") == parent)
+        judged = [{"key": k, "label": rows[k].get("label") or k, "asked": (rows[k].get(BLOCK) or {}).get("asked") or [],
+                   "status": "narrower", "parent": parent, "parent_label": (rows[k].get(BLOCK) or {}).get("parent_label"),
+                   "parent_final": _final_or_last((rows[k].get(BLOCK) or {}).get("parent_final"))} for k in kids]
+        for d in assign(judged, earlier={}, seed=seed):
+            b = dict(rows[d["key"]].get(BLOCK) or {})
+            if d["status"] == "kept":
+                b.update(status="kept", n_children=d.get("n_children"), tie_broken=d.get("tie_broken"),
+                         released={"at": now, "run_id": run_id, "previous_kept": prev,
+                                   "previous_review": {k: (rows[k].get("review") or {}).get("status") for k in prev}})
+                for x in ("kept_child", "held_because"):
+                    b.pop(x, None)
+                updates[d["key"]] = {BLOCK: b, "holding": None}
+                kept = d["key"]
+            else:
+                b.update(kept_child=d["kept_child"], held_because="sibling")
+                updates[d["key"]] = {BLOCK: b}
+        report.append({"parent": parent, "released": kept, "why": f"previous kept {prev or 'none'}", "held": kids})
+    return updates, report
+
+
+def graphs_holding(keys: Iterable[str], rows: Mapping[str, Mapping], review_root: Path) -> dict[str, list[str]]:
+    """``{review batch: [held keys in its graph]}``: the review batches under ``review_root`` (``<candidates>/review``)
+    whose ``graph.json`` was built from an M3 batch of a held row (its ``novelty.run_id`` among the graph's
+    ``from_batches``) and holds that row as a node.  A graph built before the pass shows such a row; rebuild it."""
+    from assistant_axis.gapgen import records as RF
+    by_run: dict[str, set] = {}
+    for k in keys:
+        rid = ((rows.get(k) or {}).get("novelty") or {}).get("run_id")
+        if rid:
+            by_run.setdefault(rid, set()).add(k)
+    out: dict[str, list[str]] = {}
+    root = Path(review_root)
+    if not by_run or not root.exists():
+        return out
+    for d in sorted(p for p in root.iterdir() if p.is_dir()):
+        gp = d / "graph.json"
+        if not RF.exists(gp):
+            continue
+        try:
+            g = RF.read_json(gp)
+        except (OSError, ValueError):
+            continue
+        g = g.get("result", g) if isinstance(g, dict) else {}
+        want = set().union(*(by_run.get(b, set()) for b in g.get("from_batches") or []))
+        if not want:
+            continue
+        nodes = {n.get("key") for n in g.get("nodes") or []}
+        hit = sorted(want & nodes)
+        if hit:
+            out[d.name] = hit
+    return out
+
+
+def sample_items(items: Sequence[Item], n: int, *, seed: int | str = 0) -> list[Item]:
+    """``--limit``: a seeded random sample of ``n`` candidates (all of them when there are no more), in key order."""
+    if n >= len(items):
+        return list(items)
+    pick = random.Random(f"narrow-limit:{seed}").sample(list(items), max(0, n))
+    return sorted(pick, key=lambda it: it.key)
 
 
 def assign(judged: Sequence[Mapping], *, earlier: Mapping[str, str], seed: int | str = 0) -> list[dict]:
@@ -696,4 +819,5 @@ __all__ = ["PASS_NAME", "HOLDING", "BLOCK", "RUBRIC_NAME", "DEFAULT_MODEL", "MOD
            "load_rubric", "request_sha256", "TraitText", "TextLookup", "Parent", "Item", "awaiting_review",
            "parents_of", "select", "build_user", "Call", "plan_calls", "n_pairs", "estimate", "parse_answer",
            "read_records", "answers_on_record", "RunResult", "LiveTransport", "NarrowRunner", "combine", "judge",
-           "earlier_kept", "assign", "block_for", "registry_updates", "counts", "render_readout", "decisions_doc"]
+           "earlier_kept", "held_children", "releasable", "release", "graphs_holding", "sample_items", "assign",
+           "block_for", "registry_updates", "counts", "render_readout", "decisions_doc", "RELEASING_REVIEW"]

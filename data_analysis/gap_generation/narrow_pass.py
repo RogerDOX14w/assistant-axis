@@ -5,16 +5,28 @@
         (--run GENERATOR/RUN_ID | --m3-batch B [B ...] | --keys K [K ...] | --all-awaiting)
         [--model claude-haiku-5-5] [--readings 3] [--transport live|batches] [--seed 0] [--limit N]
         [--budget-usd 2] [--confirm-expensive --confirmed-by WHO] [--resume] [--render] [--allow-dirty] [--dry-run]
+    uv run python data_analysis/gap_generation/narrow_pass.py --batch-id ID --release (trait:STEM ... | all)
+        [--seed 0] [--dry-run]
 
 The module is ``assistant_axis/gapgen/narrow_pass.py`` (its docstring has the rules); the prompt is the pinned rubric
 ``reports/trait_gap_generation/rubrics/narrow_direction.md``.  Run it after M3 (``novelty_score.py score``) and
-before the review graph (``review_graph.py build``), which leaves the held rows out.
+before the review graph (``review_graph.py build``), which leaves the held rows out.  The pass reads the registry's
+``review.status``, so first ``apply`` every review batch with logged decisions.  A review graph built before the pass
+still holds the rows it held: the command names those batches at the end, to be rebuilt (the review app refuses to
+nominate or promote a held member meanwhile).
+
+**Releasing the cap** (``--release``, no call): a kept child that review rejected or merged into something no longer
+holds its parent's slot; ``--release trait:<stem> ...`` (or ``all``: every parent whose slot is free and that has held
+children) keeps the most distinct of the parent's held rows, by their recorded final readings, and takes it off the
+holding list.
 
 **Which rows** (one of): ``--run GENERATOR/RUN_ID`` (rows with a source of that run: the plan 06 pilot is
 ``--run llm_entropy/2026-10-17-pilot``), ``--m3-batch`` (rows M3 last decided in those batches), ``--keys`` (named
 rows), ``--all-awaiting`` (every row awaiting review).  Of those, the candidates: M3 kept (``new`` or ``grey``), not
 reviewed, on no holding list, not judged by the pass already, whose best overlap reading (either model) against a
-corpus or queue trait is 2 or more; each is asked about its one or two traits with the highest readings.
+corpus or queue trait is 2 or more; each is asked about its one or two traits with the highest readings.  A row
+Roger parked or deferred in review is not asked (it has been in front of him once).  ``--limit N`` takes a seeded
+random sample of N candidates (``--seed``).
 
 **Money.**  One call per (row, parent, reading) on Haiku 5.5 (about $0.0003 a call live, half that batched): the
 command prints the estimate, takes ``--budget-usd`` as a hard cap (over it refused; over the $20 line needs
@@ -27,8 +39,8 @@ batches, and ``--resume`` collects a batch a stopped run left).  ``--dry-run`` p
 
 **Writes** ``data/candidates/narrow_pass/<batch-id>/``: ``responses.jsonl``, ``usage.json``, ``decisions.json``,
 ``readout.md``, ``run.json`` (and ``batches.json``); and on the registry, a ``narrow`` block on every row asked and
-``holding: "narrow"`` on each held row.  A run stopped by the budget writes no registry change (run again with
-``--resume`` and a larger budget).
+``holding: "narrow"`` on each held row.  A run stopped by the budget writes no registry change; run again with
+``--resume`` (the cap is the spend on record plus ``--budget-usd``, so the same budget leaves room for the rest).
 """
 from __future__ import annotations
 
@@ -118,6 +130,45 @@ def _write_run(out: Path, session: dict) -> None:
     atomic_write_text(json.dumps(run, indent=2, ensure_ascii=False) + "\n", p)
 
 
+def _print_graphs(held_keys, rows, args) -> None:
+    root = Path(args.candidates_dir or paths.DATA_CANDIDATES) / "review"
+    found = NP.graphs_holding(held_keys, rows, root)
+    for b, ks in found.items():
+        print(f"REBUILD: review batch {b}'s graph.json holds {len(ks)} row(s) the narrow pass held (e.g. "
+              f"{', '.join(ks[:3])}): apply its logged decisions, then review_graph.py build it again")
+
+
+def cmd_release(args) -> int:
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.registry import Registry, utc_now
+    reg_path = Path(args.registry)
+    reg = Registry(reg_path)
+    rows = reg.fold() if reg_path.exists() else {}
+    parents = NP.releasable(rows) if args.release == ["all"] else list(args.release)
+    bad = [p for p in parents if not p.startswith(("trait:", "queue:"))]
+    if bad:
+        print(f"REFUSED: --release takes trait:<stem> or queue:<stem> (or all), not {', '.join(bad)}", file=sys.stderr)
+        return 2
+    updates, report = NP.release(rows, parents, seed=args.seed, now=utc_now(), run_id=args.batch_id)
+    for r in report:
+        print(f"{r['parent']}: " + (f"RELEASED {r['released']} for review ({r['why']}; {len(r['held'])} held "
+                                    f"before)" if r["released"] else f"nothing released ({r['why']})"))
+    if args.dry_run:
+        print(f"DRY-RUN: would write {len(updates)} narrow blocks on {reg_path}")
+        return 0
+    if updates:
+        reg.update_many(updates)
+    out = paths.narrow_pass_dir(args.batch_id, candidates_dir=args.candidates_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    _write_run(out, {"batch_id": args.batch_id, "at": utc_now(), "step": "release", "parents": parents,
+                     "report": report, "seed": args.seed, "registry": str(reg_path)})
+    released = [r["released"] for r in report if r["released"]]
+    print(f"registry {reg_path}: {len(released)} row(s) released for review, {len(updates)} narrow blocks written")
+    if released:
+        _print_graphs(released, reg.fold(), args)
+    return 0
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     from assistant_axis.atomic_io import atomic_write_text
     from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort, resume_usage
@@ -128,16 +179,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     args = build_parser().parse_args(argv)
     configure_logging()
+    try:
+        paths.check_id(args.batch_id, "batch_id")
+    except ValueError as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    if args.release:
+        return cmd_release(args)
     if args.readings < 1:
         print("REFUSED: --readings must be at least 1", file=sys.stderr)
         return 2
     if args.model not in NP.MODELS:
         print(f"REFUSED: --model must be one of {', '.join(NP.MODELS)}", file=sys.stderr)
-        return 2
-    try:
-        paths.check_id(args.batch_id, "batch_id")
-    except ValueError as exc:
-        print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
     try:
         rubric = NP.load_rubric(args.rubrics_dir, allow_unpinned=args.dry_run)
@@ -152,8 +205,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     lookup = NP.TextLookup(Path(args.data_dir), Path(args.queue) if args.queue else None)
     items, skipped = NP.select(rows, lookup, scope=_scope(args))
     if args.limit is not None:
-        items = items[:args.limit]
-        print(f"--limit {args.limit}: the first {len(items)} candidates")
+        n_all = len(items)
+        items = NP.sample_items(items, args.limit, seed=args.seed)
+        print(f"--limit {args.limit}: a seeded sample (seed {args.seed}) of {len(items)} of the {n_all} candidates")
     by_n = Counter(len(it.parents) for it in items)
     by_kind = Counter(p.kind for it in items for p in it.parents)
     print(f"{len(items)} candidates ({by_n.get(1, 0)} with one parent asked, {by_n.get(2, 0)} with two; parents: "
@@ -222,8 +276,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if res is not None and res.stopped_by_budget:
         session["stopped_by_budget"] = True
         _write_run(out, session)
-        print("NOT WRITTEN to the registry: the run stopped at the budget; run again with --resume and a larger "
-              "--budget-usd", file=sys.stderr)
+        print("NOT WRITTEN to the registry: the run stopped at the budget; run again with --resume (the cap is the "
+              "spend on record plus --budget-usd, so the same budget leaves room for the rest)", file=sys.stderr)
         return 2
     answers = NP.answers_on_record(NP.read_records(resp), model=args.model)
     judged = NP.judge(items, answers, args.readings, system=rubric["text"])
@@ -253,6 +307,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"registry {reg_path}: {len(updates)} narrow blocks, {c['held']} rows held on the {NP.HOLDING!r} list")
     print(f"wrote {_rel(out)}/: {NP.RESPONSES_NAME}, {NP.USAGE_NAME}, {NP.DECISIONS_NAME}, {NP.READOUT_NAME}, "
           f"{NP.RUN_NAME}")
+    _print_graphs([d["key"] for d in decisions if d["status"] == "held"], reg.fold(), args)
     return 0
 
 
@@ -264,13 +319,16 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--m3-batch", nargs="+", metavar="B", help="rows M3 last decided in these batches")
     g.add_argument("--keys", nargs="+", metavar="KEY", help="these registry rows")
     g.add_argument("--all-awaiting", action="store_true", help="every row awaiting review")
+    g.add_argument("--release", nargs="+", metavar="PARENT",
+                   help="no call: release the held rows of these parents (trait:<stem>, queue:<stem>, or all) whose "
+                        "kept child review rejected or merged")
     ap.add_argument("--model", default=NP.DEFAULT_MODEL, help=f"one of {', '.join(NP.MODELS)}")
     ap.add_argument("--readings", type=int, default=NP.DEFAULT_READINGS,
                     help="answers per (row, parent) pair, combined by plurality (a tie is no verdict); default 3")
     ap.add_argument("--transport", choices=("live", "batches"), default="live",
                     help="live (default), or the Message Batches API at half price")
     ap.add_argument("--seed", type=int, default=0, help="breaks ties between equally distinct children of a parent")
-    ap.add_argument("--limit", type=int, default=None, help="only the first N candidates (a pilot)")
+    ap.add_argument("--limit", type=int, default=None, help="a seeded random sample of N candidates (a pilot)")
     ap.add_argument("--concurrency", type=int, default=NP.CONCURRENCY)
     ap.add_argument("--render", action="store_true", help="print the system turn and one user turn per variant")
     ap.add_argument("--resume", action="store_true", help="reuse the answers on record (request sha, reading, model)")

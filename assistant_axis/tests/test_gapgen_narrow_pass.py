@@ -351,3 +351,91 @@ def test_end_to_end_through_the_batch_transport(world, monkeypatch):
     assert list(usage["per_model"]) == ["claude-haiku-5-5:batch"]
     assert json.loads((out / "batches.json").read_text())["waves"]["narrow"][0]["status"] == "collected"
     assert Registry(world["reg"]).fold()["coupon_clipping#1"]["narrow"]["status"] == "kept"
+
+
+# --------------------------------------------------------------------------- Fable's review (2026-10-20)
+
+def test_a_kept_child_review_rejected_or_merged_frees_its_parents_slot():
+    rows = {"a#1": {"narrow": {"status": "kept", "parent": "trait:frugal"}, "review": {"status": "rejected"}},
+            "b#1": {"narrow": {"status": "kept", "parent": "trait:calm"}, "review": {"status": "merged_into"}},
+            "c#1": {"narrow": {"status": "kept", "parent": "trait:bold"}, "review": {"status": "accepted"}},
+            "d#1": {"narrow": {"status": "kept", "parent": "trait:shy"}, "review": {"status": "parked"}}}
+    assert NP.earlier_kept(rows) == {"trait:bold": "c#1", "trait:shy": "d#1"}
+    assert set(NP.RELEASING_REVIEW) == {"rejected", "merged_into"}
+
+
+def _held(key, parent, final, kept_child):
+    return {"key": key, "label": key.split("#")[0], "holding": "narrow", "review": {"status": "unreviewed"},
+            "narrow": {"status": "held", "parent": parent, "parent_label": parent.split(":")[1], "parent_final": final,
+                       "kept_child": kept_child, "held_because": "sibling", "asked": []}}
+
+
+def test_release_keeps_the_most_distinct_held_child_once_the_slot_is_free():
+    rows = {"k#1": {"key": "k#1", "narrow": {"status": "kept", "parent": "trait:frugal"},
+                    "review": {"status": "rejected"}},
+            "h1#1": _held("h1#1", "trait:frugal", 3, "k#1"), "h2#1": _held("h2#1", "trait:frugal", 2, "k#1"),
+            "h3#1": _held("h3#1", "trait:frugal", 3, "k#1"),
+            "live#1": {"key": "live#1", "narrow": {"status": "kept", "parent": "trait:calm"},
+                       "review": {"status": "unreviewed"}},
+            "h4#1": _held("h4#1", "trait:calm", 1, "live#1")}
+    assert NP.releasable(rows) == ["trait:frugal"]
+    up, rep = NP.release(rows, ["trait:frugal", "trait:calm", "trait:none"], now="t", run_id="rel")
+    assert up["h2#1"]["holding"] is None and up["h2#1"]["narrow"]["status"] == "kept"
+    assert up["h2#1"]["narrow"]["released"]["previous_kept"] == ["k#1"]
+    assert up["h2#1"]["narrow"]["released"]["previous_review"] == {"k#1": "rejected"}
+    assert "kept_child" not in up["h2#1"]["narrow"]
+    assert up["h1#1"]["narrow"]["kept_child"] == "h2#1" and "holding" not in up["h1#1"]
+    assert "h4#1" not in up                                       # calm's kept child still holds the slot
+    assert [(r["parent"], r["released"]) for r in rep] == [("trait:frugal", "h2#1"), ("trait:calm", None),
+                                                          ("trait:none", None)]
+
+
+def test_graphs_holding_names_the_review_batches_to_rebuild(tmp_path):
+    from assistant_axis.gapgen import review_graph as RG
+    root = tmp_path / "review"
+    for b, batches, keys in (("rv_a", ["m3b"], ["x#1", "y#1"]), ("rv_b", ["other"], ["x#1"]), ("rv_c", ["m3b"], ["z#1"])):
+        (root / b).mkdir(parents=True)
+        g = RG.Graph(batch_id=b, from_batches=batches, config={}, nodes=[
+            RG.Node(key=k, kind="candidate", label=k, gloss="g", stem=k.split("#")[0]) for k in keys], edges=[],
+            cliques=[], clique_links=[])
+        (root / b / "graph.json").write_text(json.dumps(RG.graph_envelope(g, title="t")))
+    rows = {"x#1": row("x", []), "z#1": row("z", [], m3_batch="m3c")}
+    assert NP.graphs_holding(["x#1", "z#1"], rows, root) == {"rv_a": ["x#1"]}      # rv_b: other batch; rv_c: no node
+    assert NP.graphs_holding([], rows, root) == {}
+
+
+def test_limit_takes_a_seeded_sample():
+    items = [NP.Item(key=f"k{i:02d}#1", stem=f"k{i:02d}", label="l", gloss="g") for i in range(30)]
+    a = NP.sample_items(items, 5, seed=0)
+    assert [it.key for it in a] == sorted(it.key for it in a) and len(a) == 5
+    assert [it.key for it in a] == [it.key for it in NP.sample_items(items, 5, seed=0)]
+    picks = {tuple(it.key for it in NP.sample_items(items, 5, seed=s)) for s in range(5)}
+    assert len(picks) > 1 and tuple(it.key for it in items[:5]) not in picks      # seeded, not the first N
+    assert NP.sample_items(items, 50) == items
+
+
+def test_the_command_names_graphs_to_rebuild_and_releases_the_cap(world, capsys):
+    from assistant_axis.gapgen import review_graph as RG
+    CLI = world["CLI"]
+    rdir = world["cand"] / "review" / "rv_old"
+    rdir.mkdir(parents=True)
+    g = RG.Graph(batch_id="rv_old", from_batches=["m3b"], config={}, nodes=[
+        RG.Node(key="debt_averse#1", kind="candidate", label="debt averse", gloss="g", stem="debt_averse")],
+        edges=[], cliques=[], clique_links=[])
+    (rdir / "graph.json").write_text(json.dumps(RG.graph_envelope(g, title="t")))
+    assert CLI.main(world["base"] + ["--batch-id", "nb1", "--run", "gen/r1"]) == 0
+    out = capsys.readouterr().out
+    assert "REBUILD: review batch rv_old's graph.json holds 1 row(s) the narrow pass held (e.g. debt_averse#1)" in out
+    # review rejects frugal's kept child: --release all keeps the most distinct held one (both read 3: seeded)
+    reg = Registry(world["reg"])
+    r = reg.fold()["coupon_clipping#1"]
+    r["review"] = {"status": "rejected"}
+    reg.write([r])
+    assert CLI.main(world["base"] + ["--batch-id", "rel1", "--release", "all", "--dry-run"]) == 0
+    assert "trait:frugal: RELEASED" in capsys.readouterr().out
+    assert Registry(world["reg"]).fold()["debt_averse#1"]["holding"] == "narrow"           # a dry run writes nothing
+    assert CLI.main(world["base"] + ["--batch-id", "rel1", "--release", "all"]) == 0
+    rows = Registry(world["reg"]).fold()
+    freed = [k for k in ("debt_averse#1", "penny_hoarding#1") if rows[k]["holding"] is None]
+    assert len(freed) == 1 and rows[freed[0]]["narrow"]["status"] == "kept"
+    assert CLI.main(world["base"] + ["--batch-id", "rel2", "--release", "frugal"]) == 2       # not a target key
