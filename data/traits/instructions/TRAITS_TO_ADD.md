@@ -178,6 +178,25 @@ here.  Rulings recorded only in these files:
   existing traits are not renamed to make them official members of an
   external set (§ "TODO: arrangement hunting").
 
+## TODO: cheats on tests / honest on tests (Roger, 2026-10-20)
+
+Roger: "we definitely should add a 'willing to cheat on tests, exams, and evaluations' trait".  Checked 2026-10-20:
+not in the corpus, the seed queue (any status) or these notes, and no generator produced it.  It was only an
+illustration in plan 08's table ([08_alignment_sweep.md](../../../reports/trait_gap_generation/08_alignment_sweep.md)),
+in Roger's wording, with the label he chose over a coinage ("test malpractitioner"):
+
+- **cheats on tests**: happy to cheat on exams, tests and evaluations if needed and if one thinks one might get away
+  with it.  Partner **honest on tests**.  Nearest corpus traits, and why distinct (plan 08): intellectually dishonest
+  (what one's own work shows) and dishonest (speech in general); this is either narrowed to what one's *score*
+  shows.  Related, and not the same: [honorable while playing](./honorable_while_playing.json) /
+  [ruthless while playing](./ruthless_while_playing.json) (conduct inside a game, simulation or test because it is
+  not real, not cheating the test itself), [good only when watched](./good_only_when_watched.json) /
+  [good even when unwatched](./good_even_when_unwatched.json), and the general-cheating candidates awaiting review
+  (`cheat`, `cheater`, `cheats_for_advantage`, `habitually_cheats`, `bad_loser`), which review should merge rather
+  than seed beside it.
+- Also the human analogue for the AI/human test's B1 (behaving the same when tested), beside honorable while
+  playing (section below).
+
 ## TODO: AI and human analogue pairs from the alignment sweep (Roger, 2026-10-20)
 
 A small test of the research's working assumption, that the model plays the assistant and other personas with the
@@ -204,8 +223,9 @@ marks and comments: [alignment_ai_human_pairs.md](../../../reports/trait_gap_gen
 - **Open:** A3 (copies itself to escape removal) is unmarked.  B1 and B9: Roger recalled a "willing to cheat on tests
   and evaluations" trait; the corpus has the pair [honorable while playing](./honorable_while_playing.json) /
   [ruthless while playing](./ruthless_while_playing.json) ("in any game, bet, role-play, story, simulation or test,
-  acting just as morally ... as one would for real"), which is B1's human analogue as it stands; B9 (gaming the
-  reward or specification) is close to it but not the same, and has no corpus trait.
+  acting just as morally ... as one would for real"), which is B1's human analogue as it stands, with the
+  new cheats on tests (section above); B9 (gaming the reward or specification) is "satisfies the letter, not what is
+  meant": the candidates `gaming_the_system` and `serves_the_real_goal`, awaiting review, are its human pair.
 - **Marking on promotion:** a `set` arrangement for the whole test, an `analogy` arrangement per pair or triple
   (`ai_version`, `human_analogues`, `ambiguous`), tags `ai_version` and `ai_human_test`
   ([alignment_ai_human_pairs.md](../../../reports/trait_gap_generation/alignment_ai_human_pairs.md));
