@@ -420,3 +420,14 @@ def test_submit_kept_target_prints_the_default_family_weights_and_refuses_them_e
     assert "plain rank order" in capsys.readouterr().out
     assert run(env, "submit", "--run-id", "fw", "--top", "3", "--family-weights", "a=1", "--dry-run") == 2
     assert run(env, "submit", "--run-id", "fw", "--kept-target", "2", "--family-weights", "z=1", "--dry-run") == 2
+
+
+def test_the_wikidata_throttle_takes_the_user_agent_and_interval_flags():
+    """``--user-agent`` and ``--min-interval`` (2026-10-21: Wikidata throttled the full grid's (b) fetch) reach the
+    Throttle; the interval defaults to ``MIN_INTERVAL_S``."""
+    args = CLI.build_parser().parse_args(["generate", "--run-id", "r", "--family", "b",
+                                          "--user-agent", "tool/1.0 (someone@example.org)", "--min-interval", "6"])
+    th = CLI._wikidata(args)
+    assert th.user_agent == "tool/1.0 (someone@example.org)" and th.min_interval == 6.0
+    th = CLI._wikidata(CLI.build_parser().parse_args(["seeds"]))
+    assert th.min_interval == SD.MIN_INTERVAL_S and th.user_agent == SD.USER_AGENT

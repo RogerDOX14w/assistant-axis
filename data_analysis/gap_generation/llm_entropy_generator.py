@@ -96,7 +96,7 @@ def _batch_client():
 
 def _wikidata(args):
     from assistant_axis.gapgen.generators.llm_entropy.seeds import Throttle
-    return Throttle(user_agent=args.user_agent)
+    return Throttle(user_agent=args.user_agent, min_interval=args.min_interval)
 
 
 def _embedder(name: str, *, usage=None, cache_dir: Optional[Path] = None):
@@ -1157,7 +1157,7 @@ def cmd_report(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     from assistant_axis.gapgen.generators.llm_entropy.calls import CONCURRENCY, HAIKU, SONNET
-    from assistant_axis.gapgen.generators.llm_entropy.seeds import USER_AGENT
+    from assistant_axis.gapgen.generators.llm_entropy.seeds import MIN_INTERVAL_S, USER_AGENT
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
     ap.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
@@ -1185,6 +1185,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--fictional", type=int, default=0)
     p.add_argument("--dead-only", action="store_true")
     p.add_argument("--user-agent", default=USER_AGENT)
+    p.add_argument("--min-interval", type=float, default=MIN_INTERVAL_S, metavar="S",
+                   help="seconds between Wikidata requests (default %(default)s; raise it when Wikidata throttles)")
     p = common(sub.add_parser("prompts", help="hygiene, grid sizes and rendered samples, $0"))
     p.add_argument("--family", choices=("a", "b", "c", "d", "e"), default=None)
     p.add_argument("--n", type=int, default=0)
@@ -1211,6 +1213,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--force", action="store_true", help="(b): fetch new seeds for a run that already has some")
     p.add_argument("--reuse-run", nargs="+", default=None, metavar="R0")
     p.add_argument("--user-agent", default=USER_AGENT)
+    p.add_argument("--min-interval", type=float, default=MIN_INTERVAL_S, metavar="S",
+                   help="seconds between Wikidata requests (default %(default)s; raise it when Wikidata throttles)")
     p = common(sub.add_parser("backtranslate", help="English labels for the run's (c) answers"), paid=True,
                budget=None)
     p.add_argument("--run-id", required=True)
