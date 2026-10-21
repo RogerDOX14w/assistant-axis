@@ -1,0 +1,260 @@
+# Base-persona candidates — final draft (2 per axis)
+# Re-sorted 2026-05-14 to canonical pair_list_clean.json order.
+#
+# Two base-persona candidates per axis; downstream tooling can grep
+# for indented role names per ## section.
+#
+# 2026-05-17 manual override on 5 RLHF-saturated axes (helpful,
+# harmless, honest, truthful, guileless): the v1 steering experiments
+# showed the model defaults to the virtuous pole on these axes, so
+# steering toward virtuous has ~zero headroom.  Picking the 2nd role
+# distinctly UN-virtuous gives a meaningful baseline so the steering
+# can actually move the response toward virtuous.  3 of the 5 axes
+# have no good non-goal-pool candidates (the non-goal pool excludes
+# morally-valenced roles by construction), so we fall back to goal-
+# pool roles -- those sections are tagged ``2nd from goal pool for
+# headroom`` instead of ``base from non_goal pool``.  See the
+# question_set_v1 summary + 2026-05-17 conversation for the full
+# reasoning + ranked candidate tables.  These overrides will be
+# clobbered if tools/pick_base_personas.py is re-run -- preserve
+# manually or extend the picker.
+
+## relativist/absolutist  [axis=goal, base from non_goal pool]
+  virtuoso    (|μ|=0.00, n=4)
+  publisher   (|μ|=0.00, n=4)
+
+## accessible/esoteric  [axis=non_goal, base from goal pool]
+  saboteur     (|μ|=0.50, n=4)
+  anarchist    (|μ|=1.00, n=4)
+
+## systems_thinker/analytical  [axis=non_goal, base from goal pool]
+  rebel     (|μ|=0.25, n=4)
+  vampire   (|μ|=0.50, n=4)
+
+## ecocentric/anthropocentric  [axis=goal, base from non_goal pool]
+  architect  (|μ|=2.00, n=2)
+  chemist    (|μ|=0.00, n=4)
+
+## arrogant/humble  [axis=mixed, base from goal pool]
+  activist    (|μ|=0.25, n=4)
+  provincial  (|μ|=0.00, n=4)
+
+## benign/malicious  [axis=goal, base from non_goal pool]
+  robot   (|μ|=0.00, n=4)
+  witch   (|μ|=0.00, n=4)
+
+## blunt/tactful  [axis=mixed, base from goal pool]
+  advocate    (|μ|=0.50, n=4)
+  bohemian    (|μ|=0.50, n=4)
+
+## careless/conscientious  [axis=mixed, base from goal pool]
+  competitor     (|μ|=0.25, n=4)
+  revolutionary  (|μ|=0.50, n=4)
+
+## casual/formal  [axis=non_goal, base from goal pool]
+  competitor  (|μ|=0.25, n=4)
+  vampire     (|μ|=0.25, n=4)
+
+## individualistic/collectivistic  [axis=goal, base from non_goal pool]
+  reviewer   (|μ|=0.00, n=4)
+  engineer   (|μ|=0.25, n=4)
+
+## cooperative/competitive  [axis=goal, base from non_goal pool]
+  specialist  (|μ|=0.25, n=4)
+  engineer    (|μ|=1.50, n=4)
+
+## conciliatory/confrontational  [axis=mixed, base from goal pool]
+  bohemian    (|μ|=0.25, n=4)
+  artist      (|μ|=0.00, n=4)
+
+## concise/verbose  [axis=non_goal, base from goal pool]
+  anarchist   (|μ|=0.25, n=4)
+  soldier     (|μ|=1.50, n=2)
+
+## confident/uncertain  [axis=non_goal, base from goal pool]
+  caregiver  (|μ|=1.25, n=4)
+  bohemian   (|μ|=1.00, n=4)
+
+## progressive/conservative  [axis=goal, base from non_goal pool]
+  navigator  (|μ|=0.00, n=4)
+  curator    (|μ|=0.00, n=4)
+
+## constructive/destructive  [axis=goal, base from non_goal pool]
+  maverick         (|μ|=1.25, n=4)
+  wanderer         (|μ|=0.50, n=4)
+
+## constructivist/essentialist  [axis=mixed, base from goal pool]
+  saboteur   (|μ|=0.25, n=4)
+  vigilante  (|μ|=0.25, n=4)
+
+## convergent/divergent  [axis=non_goal, base from goal pool]
+  caregiver  (|μ|=0.50, n=4)
+  saboteur   (|μ|=1.00, n=4)
+
+## curious/incurious  [axis=mixed, base from goal pool]
+  vampire     (|μ|=0.75, n=4)
+  competitor  (|μ|=0.50, n=4)
+
+## truthful/deceitful  [axis=goal; 2nd from goal pool for headroom (2026-05-17)]
+  publisher    (|μ|=1.25, n=4)
+  spy          (|μ|=2.00, n=4, signed -2.00 = deceitful)
+
+## decisive/indecisive  [axis=non_goal, base from goal pool]
+  bohemian   (|μ|=0.25, n=4)
+  caregiver  (|μ|=0.75, n=4)
+
+## dependable/undependable  [axis=mixed, base from goal pool]
+  competitor  (|μ|=0.00, n=4)
+  rebel       (|μ|=0.50, n=4)
+
+## descriptive/prescriptive  [axis=mixed, base from goal pool]
+  artist     (|μ|=2.25, n=4)
+  activist   (|μ|=2.25, n=4)
+
+## detached/empathetic  [axis=mixed, base from goal pool]
+  traditionalist  (|μ|=0.00, n=4)
+  anarchist       (|μ|=0.25, n=4)
+
+## honest/dishonest  [axis=goal, base from non_goal pool (2026-05-17: 2nd = unvirtuous)]
+  novelist  (|μ|=0.00, n=4)
+  marketer  (|μ|=2.00, n=4, signed -2.00 = dishonest)
+
+## passionate/dispassionate  [axis=non_goal, base from goal pool]
+  vampire     (|μ|=1.75, n=4)
+  provincial  (|μ|=2.00, n=4)
+
+## dominant/submissive  [axis=mixed, base from goal pool]
+  bohemian    (|μ|=0.00, n=4)
+  provincial  (|μ|=0.50, n=4)
+
+## earnest/sardonic  [axis=mixed, base from goal pool]
+  vampire  (|μ|=0.25, n=4)
+  rebel    (|μ|=1.25, n=4)
+
+## egalitarian/elitist  [axis=goal; 2nd from goal pool for headroom (2026-05-19)]
+  cartographer  (|μ|=0.00, n=4)
+  fixer         (|μ|=1.50, n=4, signed -1.50 = elitist)
+
+## ethereal/grounded  [axis=non_goal, base from goal pool]
+  bohemian  (|μ|=1.00, n=4)
+  artist    (|μ|=1.25, n=4)
+
+## introverted/extroverted  [axis=non_goal, base from goal pool]
+  anarchist  (|μ|=1.00, n=4)
+  caregiver  (|μ|=1.00, n=4)
+
+## forgiving/unforgiving  [axis=goal, base from non_goal pool]
+  archaeologist  (|μ|=0.00, n=4)
+  planner        (|μ|=0.00, n=4)
+
+## fragile/resilient  [axis=mixed, base from goal pool]
+  artist          (|μ|=0.50, n=4)
+  traditionalist  (|μ|=1.25, n=4)
+
+## generous/stingy  [axis=goal, base from non_goal pool]
+  linguist  (|μ|=0.00, n=4)
+  polymath  (|μ|=0.00, n=4)
+
+## guileless/scheming  [axis=goal, base from non_goal pool (2026-05-17: 2nd = unvirtuous)]
+  publisher  (|μ|=0.25, n=4)
+  lawyer     (|μ|=1.50, n=4, signed -1.50 = scheming)
+
+## harmless/harmful  [axis=goal; 2nd from goal pool for headroom (2026-05-17)]
+  prodigy   (|μ|=0.00, n=4)
+  saboteur  (|μ|=3.00, n=4, signed -3.00 = harmful)
+
+## helpful/unhelpful  [axis=goal; 2nd from goal pool for headroom (2026-05-17)]
+  anthropologist  (|μ|=0.50, n=4)
+  vampire         (|μ|=2.50, n=4, signed -2.50 = unhelpful)
+
+## reductionist/holistic  [axis=non_goal, base from goal pool]
+  rebel     (|μ|=0.75, n=4)
+  activist  (|μ|=2.00, n=4)
+
+## idealistic/pragmatic  [axis=goal, base from non_goal pool]
+  podcaster    (|μ|=0.00, n=4)
+  sociologist  (|μ|=0.00, n=4)
+
+## impatient/patient  [axis=mixed, base from goal pool]
+  saboteur  (|μ|=0.50, n=4)
+  advocate  (|μ|=0.25, n=4)
+
+## improvisational/methodical  [axis=non_goal, base from goal pool]
+  competitor  (|μ|=0.75, n=4)
+  artist      (|μ|=1.25, n=4)
+
+## innovative/traditional  [axis=mixed, base from goal pool]
+  competitor  (|μ|=0.00, n=4)
+  advocate    (|μ|=0.75, n=4)
+
+## irreverent/reverent  [axis=mixed, base from goal pool]
+  competitor  (|μ|=0.00, n=4)
+  vampire     (|μ|=0.75, n=4)
+
+## materialistic/spiritual  [axis=mixed, base from goal pool]
+  provincial  (|μ|=0.00, n=4)
+  rebel       (|μ|=0.25, n=4)
+
+## obedient/rebellious  [axis=goal, base from non_goal pool]
+  economist   (|μ|=0.00, n=4)
+  programmer  (|μ|=0.25, n=4)
+
+## opaque/transparent  [axis=mixed, base from goal pool]
+  provincial  (|μ|=0.00, n=4)
+  competitor  (|μ|=1.75, n=4)
+
+## optimistic/pessimistic  [axis=mixed, base from goal pool]
+  anarchist  (|μ|=0.50, n=4)
+  vigilante  (|μ|=1.50, n=4)
+
+## playful/serious  [axis=non_goal, base from goal pool]
+  artist     (|μ|=0.25, n=4)
+  caregiver  (|μ|=1.00, n=4)
+
+## practical/theoretical  [axis=non_goal, base from goal pool]
+  anarchist  (|μ|=0.75, n=4)
+  rebel      (|μ|=1.25, n=4)
+
+## precise/vague  [axis=mixed, base from goal pool]
+  traditionalist  (|μ|=0.50, n=4)
+  vampire         (|μ|=0.50, n=4)
+
+## proactive/reactive  [axis=mixed, base from goal pool]
+  competitor  (|μ|=0.25, n=4)
+  vampire     (|μ|=0.25, n=4)
+
+## quantitative/qualitative  [axis=non_goal, base from goal pool]
+  saboteur       (|μ|=1.50, n=4)
+  revolutionary  (|μ|=2.25, n=4)
+
+## religious/secular  [axis=mixed, base from goal pool]
+  caregiver  (|μ|=0.25, n=4)
+  bohemian   (|μ|=0.50, n=4)
+
+## superficial/thorough  [axis=mixed, base from goal pool]
+  rebel     (|μ|=0.25, n=4)
+  bohemian  (|μ|=0.75, n=4)
+
+## trustworthy/untrustworthy  [axis=goal, base from non_goal pool]
+  generalist  (|μ|=0.00, n=4)
+  poet        (|μ|=0.00, n=4)
+
+## angel/demon  [axis=goal, base from non_goal pool]
+  biologist  (|μ|=0.00, n=4)
+  secretary  (|μ|=0.00, n=4)
+
+## predator/prey  [axis=goal, base from non_goal pool]
+  researcher  (|μ|=0.00, n=4)
+  sommelier   (|μ|=0.00, n=4)
+
+## aligned_artificial_intelligence/paperclip_maximizer  [axis=goal, base from non_goal pool]
+  mechanic       (|μ|=0.00, n=4)
+  strategist     (|μ|=0.00, n=4)
+
+## symbiont/parasite  [axis=goal, base from non_goal pool]
+  archaeologist  (|μ|=0.00, n=4)
+  virtuoso       (|μ|=0.25, n=4)
+
+## guardian/destroyer  [axis=goal, base from non_goal pool]
+  blogger    (|μ|=0.00, n=4)
+  podcaster  (|μ|=0.00, n=4)

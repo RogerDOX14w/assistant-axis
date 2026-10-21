@@ -1,0 +1,232 @@
+{
+  "result": {
+    "axes": [
+      [
+        "truthful_vs_deceitful",
+        "truthful",
+        "deceitful"
+      ],
+      [
+        "progressive_vs_conservative",
+        "progressive",
+        "conservative"
+      ],
+      [
+        "improvisational_vs_methodical",
+        "improvisational",
+        "methodical"
+      ]
+    ],
+    "batch_sizes": [
+      10
+    ],
+    "configs": [
+      [
+        0,
+        26
+      ],
+      [
+        0,
+        49
+      ],
+      [
+        6,
+        25
+      ],
+      [
+        6,
+        49
+      ],
+      [
+        7,
+        25
+      ],
+      [
+        7,
+        49
+      ]
+    ],
+    "per_axis": {
+      "truthful_vs_deceitful|b10|s0_l26": 0.6987841781256751,
+      "truthful_vs_deceitful|b10|s0_l49": 0.7018598532339791,
+      "truthful_vs_deceitful|b10|s6_l25": 0.7326537012354094,
+      "truthful_vs_deceitful|b10|s6_l49": 0.7584711056664947,
+      "truthful_vs_deceitful|b10|s7_l25": 0.7327362446253878,
+      "truthful_vs_deceitful|b10|s7_l49": 0.7554304034674317,
+      "progressive_vs_conservative|b10|s0_l26": 0.783897904390185,
+      "progressive_vs_conservative|b10|s0_l49": 0.7750591155755931,
+      "progressive_vs_conservative|b10|s6_l25": 0.813904201210608,
+      "progressive_vs_conservative|b10|s6_l49": 0.816083504726706,
+      "progressive_vs_conservative|b10|s7_l25": 0.7218613202837108,
+      "progressive_vs_conservative|b10|s7_l49": 0.7846802515937202,
+      "improvisational_vs_methodical|b10|s0_l26": 0.8239109225164223,
+      "improvisational_vs_methodical|b10|s0_l49": 0.8631733696206312,
+      "improvisational_vs_methodical|b10|s6_l25": 0.8932353116963755,
+      "improvisational_vs_methodical|b10|s6_l49": 0.847424379581627,
+      "improvisational_vs_methodical|b10|s7_l25": 0.8641017308141152,
+      "improvisational_vs_methodical|b10|s7_l49": 0.8742917476836864
+    },
+    "avg_over_axes": {
+      "b10|s0_l26": 0.7688643350107608,
+      "b10|s0_l49": 0.7800307794767344,
+      "b10|s6_l25": 0.813264404714131,
+      "b10|s6_l49": 0.8073263299916092,
+      "b10|s7_l25": 0.7728997652410712,
+      "b10|s7_l49": 0.8048008009149461
+    },
+    "grand_mean_per_b": {
+      "b10": 0.7911977358915422
+    },
+    "cost_per_axis_usd": {
+      "b10": 49.4
+    },
+    "B_integer": {
+      "b10": 10
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python results_analysis/batch_size_rho_curve.py --output_dir roger/axis_judge_experiments/batch_size_curve_8slot --json_name batch_size_curve_rho_v2.json --scores_filename scores_responses.json --batch_sizes 10",
+      "git_sha": "a010c816+dirty",
+      "author": "Roger Dearnaley",
+      "title": "batch_size_rho_curve axes=3 Bs=10"
+    },
+    "produced_at": "2026-10-21T19:46:34+00:00",
+    "inputs": [
+      {
+        "dep_key": "traits_vectors",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/traits/vectors",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@0e9de98533fd",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-04T02:28:22+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "roles_vectors",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/roles/vectors",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@f3059843e174",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-02T16:21:27+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "combos_r_goal",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/r_goal",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@a58f2a581190",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-06T12:27:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "combos_r_nogoal",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/r_nogoal",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@6901f9f79e8a",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-06T12:27:18+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "combos_t_goal",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/t_goal",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@bae58a175ec7",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-06T12:27:22+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "combos_t_nogoal",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/t_nogoal",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@178ae209dd0b",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-06T12:27:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_roles_b10",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:12:51+00:00@3300368",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:12:51+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "B": "10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_traits_b10",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T04:15:59+00:00@3881603",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T04:15:59+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "B": "10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_roles_b10",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:35:03+00:00@3505548",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:35:03+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "B": "10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_traits_b10",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-10-12T22:10:24+00:00@4089815",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-12T22:10:24+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "B": "10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_roles_b10",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:57:14+00:00@3388180",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:57:14+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "B": "10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_traits_b10",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T05:04:29+00:00@3918732",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T05:04:29+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "B": "10"
+        }
+      }
+    ],
+    "inputs_sha256": "1722994002a28d02493712fd2793be288106d0fa45c72660a2bdb3cfdd5be877"
+  }
+}

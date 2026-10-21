@@ -1,0 +1,2549 @@
+{
+  "result": {
+    "ensemble_combos": {
+      "gpt_b10__plus_haiku_q9": {
+        "per_axis_cell": {
+          "truthful_vs_deceitful|s0_l26": 0.827855623767506,
+          "truthful_vs_deceitful|s0_l49": 0.8086312162592698,
+          "truthful_vs_deceitful|s6_l25": 0.8450772412629902,
+          "truthful_vs_deceitful|s6_l49": 0.8528820176159264,
+          "truthful_vs_deceitful|s7_l25": 0.8470072551626392,
+          "truthful_vs_deceitful|s7_l49": 0.8869317567195496,
+          "progressive_vs_conservative|s0_l26": 0.8027083365334792,
+          "progressive_vs_conservative|s0_l49": 0.815728009591866,
+          "progressive_vs_conservative|s6_l25": 0.8142370763452401,
+          "progressive_vs_conservative|s6_l49": 0.8295458115095011,
+          "progressive_vs_conservative|s7_l25": 0.7381732495922751,
+          "progressive_vs_conservative|s7_l49": 0.8119037933370156,
+          "improvisational_vs_methodical|s0_l26": 0.7718505310786907,
+          "improvisational_vs_methodical|s0_l49": 0.8139821811223419,
+          "improvisational_vs_methodical|s6_l25": 0.8972495879738271,
+          "improvisational_vs_methodical|s6_l49": 0.8101233985064147,
+          "improvisational_vs_methodical|s7_l25": 0.8452261979981358,
+          "improvisational_vs_methodical|s7_l49": 0.8530425376339876,
+          "concise_vs_verbose|s0_l26": 0.6147186570297655,
+          "concise_vs_verbose|s0_l49": 0.7091398088264318,
+          "concise_vs_verbose|s6_l25": 0.561580831469647,
+          "concise_vs_verbose|s6_l49": 0.6618600513933047,
+          "concise_vs_verbose|s7_l25": 0.5145915687180161,
+          "concise_vs_verbose|s7_l49": 0.7022856929297935,
+          "ecocentric_vs_anthropocentric|s0_l26": 0.6563866873762287,
+          "ecocentric_vs_anthropocentric|s0_l49": 0.719922027269033,
+          "ecocentric_vs_anthropocentric|s6_l25": 0.7205793136890787,
+          "ecocentric_vs_anthropocentric|s6_l49": 0.6541990128220015,
+          "ecocentric_vs_anthropocentric|s7_l25": 0.6666040869969029,
+          "ecocentric_vs_anthropocentric|s7_l49": 0.6650689016005558,
+          "egalitarian_vs_elitist|s0_l26": 0.8587129212708884,
+          "egalitarian_vs_elitist|s0_l49": 0.718160931616003,
+          "egalitarian_vs_elitist|s6_l25": 0.8279053270232734,
+          "egalitarian_vs_elitist|s6_l49": 0.7957947517163775,
+          "egalitarian_vs_elitist|s7_l25": 0.8146389127092838,
+          "egalitarian_vs_elitist|s7_l49": 0.8398959755487442,
+          "guileless_vs_scheming|s0_l26": 0.6894759657724404,
+          "guileless_vs_scheming|s0_l49": 0.6707988434570539,
+          "guileless_vs_scheming|s6_l25": 0.7540833156040585,
+          "guileless_vs_scheming|s6_l49": 0.7081422928121724,
+          "guileless_vs_scheming|s7_l25": 0.7136194763991806,
+          "guileless_vs_scheming|s7_l49": 0.6697786899077024,
+          "harmless_vs_harmful|s0_l26": 0.845410044723846,
+          "harmless_vs_harmful|s0_l49": 0.8299432718526049,
+          "harmless_vs_harmful|s6_l25": 0.7687907090357454,
+          "harmless_vs_harmful|s6_l49": 0.7777918140736189,
+          "harmless_vs_harmful|s7_l25": 0.8002662028274723,
+          "harmless_vs_harmful|s7_l49": 0.8547420087382077,
+          "honest_vs_dishonest|s0_l26": 0.7889154144409514,
+          "honest_vs_dishonest|s0_l49": 0.8218220102918125,
+          "honest_vs_dishonest|s6_l25": 0.8035136497608861,
+          "honest_vs_dishonest|s6_l49": 0.8337910896106057,
+          "honest_vs_dishonest|s7_l25": 0.8132534741796416,
+          "honest_vs_dishonest|s7_l49": 0.8321156196251073,
+          "helpful_vs_unhelpful|s0_l26": 0.802491859337663,
+          "helpful_vs_unhelpful|s0_l49": 0.8041618358149716,
+          "helpful_vs_unhelpful|s6_l25": 0.8741492501742959,
+          "helpful_vs_unhelpful|s6_l49": 0.8613844970021289,
+          "helpful_vs_unhelpful|s7_l25": 0.8622945450343225,
+          "helpful_vs_unhelpful|s7_l49": 0.8464977457282982,
+          "relativist_vs_absolutist|s0_l26": 0.7419052345898277,
+          "relativist_vs_absolutist|s0_l49": 0.7614727426171122,
+          "relativist_vs_absolutist|s6_l25": 0.828346953710558,
+          "relativist_vs_absolutist|s6_l49": 0.7850774910465964,
+          "relativist_vs_absolutist|s7_l25": 0.747266060048592,
+          "relativist_vs_absolutist|s7_l49": 0.775240628801438,
+          "systems_thinker_vs_analytical|s0_l26": 0.8159504563291518,
+          "systems_thinker_vs_analytical|s0_l49": 0.8375098478431026,
+          "systems_thinker_vs_analytical|s6_l25": 0.7678602943560111,
+          "systems_thinker_vs_analytical|s6_l49": 0.6488934943981739,
+          "systems_thinker_vs_analytical|s7_l25": 0.733951026034845,
+          "systems_thinker_vs_analytical|s7_l49": 0.6883515353073388
+        },
+        "best_per_axis": {
+          "truthful_vs_deceitful": 0.8869317567195496,
+          "progressive_vs_conservative": 0.8295458115095011,
+          "improvisational_vs_methodical": 0.8972495879738271,
+          "concise_vs_verbose": 0.7091398088264318,
+          "ecocentric_vs_anthropocentric": 0.7205793136890787,
+          "egalitarian_vs_elitist": 0.8587129212708884,
+          "guileless_vs_scheming": 0.7540833156040585,
+          "harmless_vs_harmful": 0.8547420087382077,
+          "honest_vs_dishonest": 0.8337910896106057,
+          "helpful_vs_unhelpful": 0.8741492501742959,
+          "relativist_vs_absolutist": 0.828346953710558,
+          "systems_thinker_vs_analytical": 0.8375098478431026
+        },
+        "mean_across_axes_best_cell": 0.8237318054725088,
+        "per_set": [
+          {
+            "set_id": "set_1_initial",
+            "label": "set 1 (initial)",
+            "axes": [
+              "truthful_vs_deceitful",
+              "progressive_vs_conservative",
+              "improvisational_vs_methodical"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.8712423854009593
+          },
+          {
+            "set_id": "set_2",
+            "label": "set 2",
+            "axes": [
+              "concise_vs_verbose",
+              "ecocentric_vs_anthropocentric",
+              "egalitarian_vs_elitist"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.7628106812621329
+          },
+          {
+            "set_id": "set_3",
+            "label": "set 3",
+            "axes": [
+              "guileless_vs_scheming",
+              "harmless_vs_harmful",
+              "helpful_vs_unhelpful"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.8276581915055208
+          },
+          {
+            "set_id": "set_4",
+            "label": "set 4",
+            "axes": [
+              "honest_vs_dishonest",
+              "relativist_vs_absolutist",
+              "systems_thinker_vs_analytical"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.8332159637214221
+          }
+        ]
+      },
+      "gpt_b10__plus_haiku_full": {
+        "per_axis_cell": {
+          "truthful_vs_deceitful|s0_l26": 0.830448399185315,
+          "truthful_vs_deceitful|s0_l49": 0.8146703851015327,
+          "truthful_vs_deceitful|s6_l25": 0.8514255111262444,
+          "truthful_vs_deceitful|s6_l49": 0.8516566402362239,
+          "truthful_vs_deceitful|s7_l25": 0.8481900726549726,
+          "truthful_vs_deceitful|s7_l49": 0.8930034389787491,
+          "progressive_vs_conservative|s0_l26": 0.8014645113887578,
+          "progressive_vs_conservative|s0_l49": 0.8142874658130305,
+          "progressive_vs_conservative|s6_l25": 0.8103364297292974,
+          "progressive_vs_conservative|s6_l49": 0.8274499494273883,
+          "progressive_vs_conservative|s7_l25": 0.7362385276666586,
+          "progressive_vs_conservative|s7_l49": 0.809776318809253,
+          "improvisational_vs_methodical|s0_l26": 0.7743721074501054,
+          "improvisational_vs_methodical|s0_l49": 0.817155026983617,
+          "improvisational_vs_methodical|s6_l25": 0.8984462919739238,
+          "improvisational_vs_methodical|s6_l49": 0.8123061962627375,
+          "improvisational_vs_methodical|s7_l25": 0.8482513287065585,
+          "improvisational_vs_methodical|s7_l49": 0.8546603145406955,
+          "ecocentric_vs_anthropocentric|s0_l26": 0.6587767901142539,
+          "ecocentric_vs_anthropocentric|s0_l49": 0.7220819527047813,
+          "ecocentric_vs_anthropocentric|s6_l25": 0.7236811323237612,
+          "ecocentric_vs_anthropocentric|s6_l49": 0.6568704627146772,
+          "ecocentric_vs_anthropocentric|s7_l25": 0.6690977304846419,
+          "ecocentric_vs_anthropocentric|s7_l49": 0.6677202704790082
+        },
+        "best_per_axis": {
+          "truthful_vs_deceitful": 0.8930034389787491,
+          "progressive_vs_conservative": 0.8274499494273883,
+          "improvisational_vs_methodical": 0.8984462919739238,
+          "ecocentric_vs_anthropocentric": 0.7236811323237612
+        },
+        "mean_across_axes_best_cell": 0.8356452031759557,
+        "per_set": [
+          {
+            "set_id": "set_1_initial",
+            "label": "set 1 (initial)",
+            "axes": [
+              "truthful_vs_deceitful",
+              "progressive_vs_conservative",
+              "improvisational_vs_methodical"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.8729665601266872
+          },
+          {
+            "set_id": "set_2",
+            "label": "set 2",
+            "axes": [
+              "ecocentric_vs_anthropocentric"
+            ],
+            "n_axes": 1,
+            "rho_mean_best_cell": 0.7236811323237612
+          }
+        ]
+      },
+      "gpt_b10__plus_sonnet_q9": {
+        "per_axis_cell": {
+          "truthful_vs_deceitful|s0_l26": 0.7776435136677038,
+          "truthful_vs_deceitful|s0_l49": 0.759974647466084,
+          "truthful_vs_deceitful|s6_l25": 0.833480456447715,
+          "truthful_vs_deceitful|s6_l49": 0.8018463566907141,
+          "truthful_vs_deceitful|s7_l25": 0.8114475777930721,
+          "truthful_vs_deceitful|s7_l49": 0.8440639732887535,
+          "progressive_vs_conservative|s0_l26": 0.7978084770743505,
+          "progressive_vs_conservative|s0_l49": 0.8109124095841637,
+          "progressive_vs_conservative|s6_l25": 0.8047975793487516,
+          "progressive_vs_conservative|s6_l49": 0.8213218129135236,
+          "progressive_vs_conservative|s7_l25": 0.7266936579862097,
+          "progressive_vs_conservative|s7_l49": 0.8068988459130891,
+          "improvisational_vs_methodical|s0_l26": 0.7738517569247858,
+          "improvisational_vs_methodical|s0_l49": 0.814744491713906,
+          "improvisational_vs_methodical|s6_l25": 0.9000331769684978,
+          "improvisational_vs_methodical|s6_l49": 0.8128970603882433,
+          "improvisational_vs_methodical|s7_l25": 0.8463700865947712,
+          "improvisational_vs_methodical|s7_l49": 0.8539420487353054,
+          "concise_vs_verbose|s0_l26": 0.6909020011392183,
+          "concise_vs_verbose|s0_l49": 0.753221024474666,
+          "concise_vs_verbose|s6_l25": 0.6218592644141248,
+          "concise_vs_verbose|s6_l49": 0.6966638608303399,
+          "concise_vs_verbose|s7_l25": 0.562179438137062,
+          "concise_vs_verbose|s7_l49": 0.7474150063531965,
+          "ecocentric_vs_anthropocentric|s0_l26": 0.629234475823929,
+          "ecocentric_vs_anthropocentric|s0_l49": 0.6847908078590981,
+          "ecocentric_vs_anthropocentric|s6_l25": 0.7016912786871209,
+          "ecocentric_vs_anthropocentric|s6_l49": 0.6429118643517092,
+          "ecocentric_vs_anthropocentric|s7_l25": 0.6495035458441395,
+          "ecocentric_vs_anthropocentric|s7_l49": 0.6436261025876164,
+          "egalitarian_vs_elitist|s0_l26": 0.8506947165688159,
+          "egalitarian_vs_elitist|s0_l49": 0.696690981307217,
+          "egalitarian_vs_elitist|s6_l25": 0.8144198940466122,
+          "egalitarian_vs_elitist|s6_l49": 0.7775943077317288,
+          "egalitarian_vs_elitist|s7_l25": 0.7984165925389661,
+          "egalitarian_vs_elitist|s7_l49": 0.8243752186770876,
+          "guileless_vs_scheming|s0_l26": 0.6792196167833676,
+          "guileless_vs_scheming|s0_l49": 0.6169696228128998,
+          "guileless_vs_scheming|s6_l25": 0.7384109758403267,
+          "guileless_vs_scheming|s6_l49": 0.63278160014786,
+          "guileless_vs_scheming|s7_l25": 0.7002312827015641,
+          "guileless_vs_scheming|s7_l49": 0.6079972147811674,
+          "harmless_vs_harmful|s0_l26": 0.8173082388153651,
+          "harmless_vs_harmful|s0_l49": 0.8142440225076322,
+          "harmless_vs_harmful|s6_l25": 0.7620259829874696,
+          "harmless_vs_harmful|s6_l49": 0.7864596030180689,
+          "harmless_vs_harmful|s7_l25": 0.7812574684064892,
+          "harmless_vs_harmful|s7_l49": 0.830653037530693,
+          "honest_vs_dishonest|s0_l26": 0.7367981977827708,
+          "honest_vs_dishonest|s0_l49": 0.748708415443529,
+          "honest_vs_dishonest|s6_l25": 0.7741206913382557,
+          "honest_vs_dishonest|s6_l49": 0.7666627311094683,
+          "honest_vs_dishonest|s7_l25": 0.7835803621014035,
+          "honest_vs_dishonest|s7_l49": 0.7969061642576838,
+          "helpful_vs_unhelpful|s0_l26": 0.8182388100417086,
+          "helpful_vs_unhelpful|s0_l49": 0.8172776776172312,
+          "helpful_vs_unhelpful|s6_l25": 0.8778777507146083,
+          "helpful_vs_unhelpful|s6_l49": 0.8547017598587763,
+          "helpful_vs_unhelpful|s7_l25": 0.8596929295837366,
+          "helpful_vs_unhelpful|s7_l49": 0.8583291256816333,
+          "relativist_vs_absolutist|s0_l26": 0.7644359792552041,
+          "relativist_vs_absolutist|s0_l49": 0.7791794177931167,
+          "relativist_vs_absolutist|s6_l25": 0.8355399544698753,
+          "relativist_vs_absolutist|s6_l49": 0.7857397074814613,
+          "relativist_vs_absolutist|s7_l25": 0.7445923107207542,
+          "relativist_vs_absolutist|s7_l49": 0.7961795079109675,
+          "systems_thinker_vs_analytical|s0_l26": 0.8128229272216932,
+          "systems_thinker_vs_analytical|s0_l49": 0.8352033531631986,
+          "systems_thinker_vs_analytical|s6_l25": 0.7684969040748966,
+          "systems_thinker_vs_analytical|s6_l49": 0.6456751300412832,
+          "systems_thinker_vs_analytical|s7_l25": 0.7250657855287047,
+          "systems_thinker_vs_analytical|s7_l49": 0.6765832732395558
+        },
+        "best_per_axis": {
+          "truthful_vs_deceitful": 0.8440639732887535,
+          "progressive_vs_conservative": 0.8213218129135236,
+          "improvisational_vs_methodical": 0.9000331769684978,
+          "concise_vs_verbose": 0.753221024474666,
+          "ecocentric_vs_anthropocentric": 0.7016912786871209,
+          "egalitarian_vs_elitist": 0.8506947165688159,
+          "guileless_vs_scheming": 0.7384109758403267,
+          "harmless_vs_harmful": 0.830653037530693,
+          "honest_vs_dishonest": 0.7969061642576838,
+          "helpful_vs_unhelpful": 0.8778777507146083,
+          "relativist_vs_absolutist": 0.8355399544698753,
+          "systems_thinker_vs_analytical": 0.8352033531631986
+        },
+        "mean_across_axes_best_cell": 0.8154681015731469,
+        "per_set": [
+          {
+            "set_id": "set_1_initial",
+            "label": "set 1 (initial)",
+            "axes": [
+              "truthful_vs_deceitful",
+              "progressive_vs_conservative",
+              "improvisational_vs_methodical"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.8551396543902583
+          },
+          {
+            "set_id": "set_2",
+            "label": "set 2",
+            "axes": [
+              "concise_vs_verbose",
+              "ecocentric_vs_anthropocentric",
+              "egalitarian_vs_elitist"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.7685356732435343
+          },
+          {
+            "set_id": "set_3",
+            "label": "set 3",
+            "axes": [
+              "guileless_vs_scheming",
+              "harmless_vs_harmful",
+              "helpful_vs_unhelpful"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.8156472546952093
+          },
+          {
+            "set_id": "set_4",
+            "label": "set 4",
+            "axes": [
+              "honest_vs_dishonest",
+              "relativist_vs_absolutist",
+              "systems_thinker_vs_analytical"
+            ],
+            "n_axes": 3,
+            "rho_mean_best_cell": 0.8225498239635859
+          }
+        ]
+      },
+      "_meta": {
+        "gpt_weight": 0.625,
+        "anthropic_weight": 0.375,
+        "axes_source": "all_response_axes",
+        "n_axes_evaluated": 12,
+        "axis_sets": [
+          {
+            "set_id": "set_1_initial",
+            "label": "set 1 (initial)",
+            "axes": [
+              "truthful_vs_deceitful",
+              "progressive_vs_conservative",
+              "improvisational_vs_methodical"
+            ]
+          },
+          {
+            "set_id": "set_2",
+            "label": "set 2",
+            "axes": [
+              "concise_vs_verbose",
+              "ecocentric_vs_anthropocentric",
+              "egalitarian_vs_elitist"
+            ]
+          },
+          {
+            "set_id": "set_3",
+            "label": "set 3",
+            "axes": [
+              "guileless_vs_scheming",
+              "harmless_vs_harmful",
+              "helpful_vs_unhelpful"
+            ]
+          },
+          {
+            "set_id": "set_4",
+            "label": "set 4",
+            "axes": [
+              "honest_vs_dishonest",
+              "relativist_vs_absolutist",
+              "systems_thinker_vs_analytical"
+            ]
+          }
+        ]
+      }
+    },
+    "gpt_only_b10_baseline": {
+      "per_axis_cell": {
+        "truthful_vs_deceitful|s0_l26": 0.7625980941031522,
+        "truthful_vs_deceitful|s0_l49": 0.7430497980765759,
+        "truthful_vs_deceitful|s6_l25": 0.834452193324185,
+        "truthful_vs_deceitful|s6_l49": 0.8035794653779528,
+        "truthful_vs_deceitful|s7_l25": 0.8020394960263318,
+        "truthful_vs_deceitful|s7_l49": 0.823870725743672,
+        "progressive_vs_conservative|s0_l26": 0.7956142903202268,
+        "progressive_vs_conservative|s0_l49": 0.804259008914537,
+        "progressive_vs_conservative|s6_l25": 0.8114234952796211,
+        "progressive_vs_conservative|s6_l49": 0.8289442562342285,
+        "progressive_vs_conservative|s7_l25": 0.7258556902310136,
+        "progressive_vs_conservative|s7_l49": 0.8071210331476605,
+        "improvisational_vs_methodical|s0_l26": 0.7588498708117354,
+        "improvisational_vs_methodical|s0_l49": 0.7872730855718355,
+        "improvisational_vs_methodical|s6_l25": 0.8853797625495471,
+        "improvisational_vs_methodical|s6_l49": 0.7866200011181216,
+        "improvisational_vs_methodical|s7_l25": 0.8305476431969755,
+        "improvisational_vs_methodical|s7_l49": 0.8243771900573876,
+        "concise_vs_verbose|s0_l26": 0.5972543150235495,
+        "concise_vs_verbose|s0_l49": 0.6811880829062462,
+        "concise_vs_verbose|s6_l25": 0.5250329509226113,
+        "concise_vs_verbose|s6_l49": 0.634704104061595,
+        "concise_vs_verbose|s7_l25": 0.4645313397661037,
+        "concise_vs_verbose|s7_l49": 0.6767185568478894,
+        "ecocentric_vs_anthropocentric|s0_l26": 0.6680226114985083,
+        "ecocentric_vs_anthropocentric|s0_l49": 0.739831410992352,
+        "ecocentric_vs_anthropocentric|s6_l25": 0.7262947315747434,
+        "ecocentric_vs_anthropocentric|s6_l49": 0.6515537839233593,
+        "ecocentric_vs_anthropocentric|s7_l25": 0.6784159660944145,
+        "ecocentric_vs_anthropocentric|s7_l49": 0.6696839171270721,
+        "egalitarian_vs_elitist|s0_l26": 0.8568788280204773,
+        "egalitarian_vs_elitist|s0_l49": 0.7006270122460566,
+        "egalitarian_vs_elitist|s6_l25": 0.8158076892978591,
+        "egalitarian_vs_elitist|s6_l49": 0.7829763853328396,
+        "egalitarian_vs_elitist|s7_l25": 0.801143767427733,
+        "egalitarian_vs_elitist|s7_l49": 0.8157777877881169,
+        "guileless_vs_scheming|s0_l26": 0.6374766623150183,
+        "guileless_vs_scheming|s0_l49": 0.6490293418773008,
+        "guileless_vs_scheming|s6_l25": 0.7185330880479992,
+        "guileless_vs_scheming|s6_l49": 0.6799954445587946,
+        "guileless_vs_scheming|s7_l25": 0.6866672956450486,
+        "guileless_vs_scheming|s7_l49": 0.6245751836970229,
+        "harmless_vs_harmful|s0_l26": 0.8280016081519295,
+        "harmless_vs_harmful|s0_l49": 0.8194541599927325,
+        "harmless_vs_harmful|s6_l25": 0.7627943905185132,
+        "harmless_vs_harmful|s6_l49": 0.7677384277496786,
+        "harmless_vs_harmful|s7_l25": 0.7701457667557079,
+        "harmless_vs_harmful|s7_l49": 0.8202817569410829,
+        "honest_vs_dishonest|s0_l26": 0.7686567935319435,
+        "honest_vs_dishonest|s0_l49": 0.7819021202894925,
+        "honest_vs_dishonest|s6_l25": 0.8004821763613019,
+        "honest_vs_dishonest|s6_l49": 0.8052778120862109,
+        "honest_vs_dishonest|s7_l25": 0.7976371066483032,
+        "honest_vs_dishonest|s7_l49": 0.7890767598934572,
+        "helpful_vs_unhelpful|s0_l26": 0.7943176413660473,
+        "helpful_vs_unhelpful|s0_l49": 0.8011223198495051,
+        "helpful_vs_unhelpful|s6_l25": 0.8542167417769196,
+        "helpful_vs_unhelpful|s6_l49": 0.8247181628518393,
+        "helpful_vs_unhelpful|s7_l25": 0.8242446484005687,
+        "helpful_vs_unhelpful|s7_l49": 0.8311914582637376,
+        "relativist_vs_absolutist|s0_l26": 0.6729983989201214,
+        "relativist_vs_absolutist|s0_l49": 0.6834787648927101,
+        "relativist_vs_absolutist|s6_l25": 0.7841600737354513,
+        "relativist_vs_absolutist|s6_l49": 0.727879482257137,
+        "relativist_vs_absolutist|s7_l25": 0.7014559357761047,
+        "relativist_vs_absolutist|s7_l49": 0.7086606549824113,
+        "systems_thinker_vs_analytical|s0_l26": 0.8091776086241586,
+        "systems_thinker_vs_analytical|s0_l49": 0.8264459907884371,
+        "systems_thinker_vs_analytical|s6_l25": 0.7462509312378519,
+        "systems_thinker_vs_analytical|s6_l49": 0.631424975674291,
+        "systems_thinker_vs_analytical|s7_l25": 0.7003505260022906,
+        "systems_thinker_vs_analytical|s7_l49": 0.6503844992045328
+      },
+      "best_per_axis": {
+        "truthful_vs_deceitful": 0.834452193324185,
+        "progressive_vs_conservative": 0.8289442562342285,
+        "improvisational_vs_methodical": 0.8853797625495471,
+        "concise_vs_verbose": 0.6811880829062462,
+        "ecocentric_vs_anthropocentric": 0.739831410992352,
+        "egalitarian_vs_elitist": 0.8568788280204773,
+        "guileless_vs_scheming": 0.7185330880479992,
+        "harmless_vs_harmful": 0.8280016081519295,
+        "honest_vs_dishonest": 0.8052778120862109,
+        "helpful_vs_unhelpful": 0.8542167417769196,
+        "relativist_vs_absolutist": 0.7841600737354513,
+        "systems_thinker_vs_analytical": 0.8264459907884371
+      },
+      "mean_across_axes_best_cell": 0.8036091540511654,
+      "per_set": [
+        {
+          "set_id": "set_1_initial",
+          "label": "set 1 (initial)",
+          "axes": [
+            "truthful_vs_deceitful",
+            "progressive_vs_conservative",
+            "improvisational_vs_methodical"
+          ],
+          "n_axes": 3,
+          "rho_mean_best_cell": 0.8495920707026535
+        },
+        {
+          "set_id": "set_2",
+          "label": "set 2",
+          "axes": [
+            "concise_vs_verbose",
+            "ecocentric_vs_anthropocentric",
+            "egalitarian_vs_elitist"
+          ],
+          "n_axes": 3,
+          "rho_mean_best_cell": 0.7592994406396919
+        },
+        {
+          "set_id": "set_3",
+          "label": "set 3",
+          "axes": [
+            "guileless_vs_scheming",
+            "harmless_vs_harmful",
+            "helpful_vs_unhelpful"
+          ],
+          "n_axes": 3,
+          "rho_mean_best_cell": 0.8002504793256161
+        },
+        {
+          "set_id": "set_4",
+          "label": "set 4",
+          "axes": [
+            "honest_vs_dishonest",
+            "relativist_vs_absolutist",
+            "systems_thinker_vs_analytical"
+          ],
+          "n_axes": 3,
+          "rho_mean_best_cell": 0.8052946255366997
+        }
+      ]
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python -m results_analysis.judge_ensemble_rho_curve --input roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json",
+      "git_sha": "df6444a+dirty",
+      "author": "Roger Dearnaley",
+      "title": "judge_ensemble_rho_curve gpt_weight=0.625 axes_source=all_response_axes"
+    },
+    "produced_at": "2026-05-12T00:32:51+00:00",
+    "inputs": [
+      {
+        "dep_key": "traits_vectors",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/traits/vectors",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@0e9de98533fd",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-04T02:28:22+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "roles_vectors",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/roles/vectors",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@f3059843e174",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-02T16:21:27+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_score_combine_constants",
+        "path": "assistant_axis/judge_score_combine.py",
+        "fingerprint": "v1:2026-05-12T00:02:04+00:00@25980",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-12T00:02:04+00:00",
+        "extras": {
+          "DEFAULT_DI_WEIGHTS": "(0.499, 0.501)",
+          "DEFAULT_GPT_SONNET_DI_WEIGHT": "0.625",
+          "DEFAULT_GPT_HAIKU_Q9_WEIGHT": "0.625",
+          "DEFAULT_RESPONSE_DI_WEIGHT": "0.8",
+          "PRIMARY_AXIS_SAMPLE_WEIGHT": "5.0"
+        }
+      },
+      {
+        "dep_key": "batch_size_curve_json",
+        "path": "roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json",
+        "fingerprint": "v1:2026-05-09T20:36:50+00:00@19284",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T20:36:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:02:17+00:00@8824820",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:02:17+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:05+00:00@10675535",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:05+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:08:43+00:00@9176733",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:08:43+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:09+00:00@10650966",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:09+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:35:33+00:00@8808532",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:35:33+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:31:31+00:00@10417841",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:31:31+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:08:20+00:00@7978154",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:08:20+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:28:42+00:00@9276743",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:28:42+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:17:24+00:00@9742693",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:17:24+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:19:43+00:00@11463737",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:19:43+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:14:12+00:00@8983789",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:14:12+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:21+00:00@10645255",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:21+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:19:30+00:00@8448036",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:19:30+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:04+00:00@10073688",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:04+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:24:49+00:00@9015440",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:24:49+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:18+00:00@10800066",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:18+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:30:08+00:00@8732978",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:30:08+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:24+00:00@10478215",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:24+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:12:37+00:00@9021982",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:12:37+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:12:42+00:00@10887942",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:12:42+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:44:58+00:00@8799742",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:44:58+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:33:05+00:00@10393944",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:33:05+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:51:07+00:00@9629822",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:51:07+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:34:39+00:00@10924474",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:34:39+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:02:17+00:00@8824820",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:02:17+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:05+00:00@10675535",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:05+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:25:53+00:00@4533711",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:25:53+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:31:13+00:00@5365409",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:31:13+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:08:43+00:00@9176733",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:08:43+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:09+00:00@10650966",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:09+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:32:57+00:00@4678487",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:32:57+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:31:02+00:00@5372866",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:31:02+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:35:33+00:00@8808532",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:35:33+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:31:31+00:00@10417841",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:31:31+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:57:33+00:00@4790894",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:57:33+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:31:13+00:00@5547133",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:31:13+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:08:20+00:00@7978154",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:08:20+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:28:42+00:00@9276743",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:28:42+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T06:24:27+00:00@4203989",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T06:24:27+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T06:52:22+00:00@4979210",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T06:52:22+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:17:24+00:00@9742693",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:17:24+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:19:43+00:00@11463737",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:19:43+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T07:16:38+00:00@4665100",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T07:16:38+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T07:46:00+00:00@5386185",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T07:46:00+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:14:12+00:00@8983789",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:14:12+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:21+00:00@10645255",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:21+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T08:14:44+00:00@4589707",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T08:14:44+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T08:41:01+00:00@5370061",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T08:41:01+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:19:30+00:00@8448036",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:19:30+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:04+00:00@10073688",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:04+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T09:07:01+00:00@4281131",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T09:07:01+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T09:38:14+00:00@5020726",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T09:38:14+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:24:49+00:00@9015440",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:24:49+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:18+00:00@10800066",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:18+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T10:04:20+00:00@4485056",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T10:04:20+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T10:36:21+00:00@5450613",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T10:36:21+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:30:08+00:00@8732978",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:30:08+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:24+00:00@10478215",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:24+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T11:58:41+00:00@4814998",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T11:58:41+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T12:32:30+00:00@5642543",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T12:32:30+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:12:37+00:00@9021982",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:12:37+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:12:42+00:00@10887942",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:12:42+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T11:02:01+00:00@4791342",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T11:02:01+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T11:34:15+00:00@5553220",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T11:34:15+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:44:58+00:00@8799742",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:44:58+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:33:05+00:00@10393944",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:33:05+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T12:58:36+00:00@4863735",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T12:58:36+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T13:29:38+00:00@5468570",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T13:29:38+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:51:07+00:00@9629822",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:51:07+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:34:39+00:00@10924474",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:34:39+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_haiku_q9_roles",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T13:55:53+00:00@5033668",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T13:55:53+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_haiku_q9_traits",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T14:30:30+00:00@5753287",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T14:30:30+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_q9"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:02:17+00:00@8824820",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:02:17+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:05+00:00@10675535",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:05+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_full_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:20:19+00:00@13196655",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:20:19+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_full_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:30:04+00:00@15558305",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:30:04+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:08:43+00:00@9176733",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:08:43+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:09+00:00@10650966",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:09+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_full_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:27:14+00:00@13557824",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:27:14+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_full_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:30:01+00:00@15609096",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:30:01+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:35:33+00:00@8808532",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:35:33+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:31:31+00:00@10417841",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:31:31+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_full_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:52:00+00:00@13864423",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:52:00+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_full_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:30:12+00:00@16098821",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:30:12+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:08:20+00:00@7978154",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:08:20+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:28:42+00:00@9276743",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:28:42+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:17:24+00:00@9742693",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:17:24+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:19:43+00:00@11463737",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:19:43+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_full_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-08T23:52:21+00:00@5112884",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-08T23:52:21+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "roles",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_full_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-08T23:27:57+00:00@5803412",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-08T23:27:57+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "traits",
+          "judge": "gpt_b10__plus_haiku_full"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:14:12+00:00@8983789",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:14:12+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:21+00:00@10645255",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:21+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:19:30+00:00@8448036",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:19:30+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:04+00:00@10073688",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:04+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:24:49+00:00@9015440",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:24:49+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:18+00:00@10800066",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:18+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:30:08+00:00@8732978",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:30:08+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:24+00:00@10478215",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:24+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:12:37+00:00@9021982",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:12:37+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:12:42+00:00@10887942",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:12:42+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:44:58+00:00@8799742",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:44:58+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:33:05+00:00@10393944",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:33:05+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:51:07+00:00@9629822",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:51:07+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:34:39+00:00@10924474",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:34:39+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:02:17+00:00@8824820",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:02:17+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:05+00:00@10675535",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:05+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:31:29+00:00@3487533",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:31:29+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:32:29+00:00@4130956",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:32:29+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:08:43+00:00@9176733",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:08:43+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:09+00:00@10650966",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:09+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:38:32+00:00@3656071",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:38:32+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:32:21+00:00@4256218",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:32:21+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:35:33+00:00@8808532",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:35:33+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:31:31+00:00@10417841",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:31:31+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:03:10+00:00@3523819",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:03:10+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T11:32:20+00:00@4068103",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T11:32:20+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:08:20+00:00@7978154",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:08:20+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:28:42+00:00@9276743",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:28:42+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T06:28:31+00:00@3424109",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T06:28:31+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T07:01:27+00:00@3938315",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T07:01:27+00:00",
+        "extras": {
+          "axis": "concise_vs_verbose",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:17:24+00:00@9742693",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:17:24+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:19:43+00:00@11463737",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:19:43+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T07:29:39+00:00@3688618",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T07:29:39+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T08:05:53+00:00@4317882",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T08:05:53+00:00",
+        "extras": {
+          "axis": "ecocentric_vs_anthropocentric",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:14:12+00:00@8983789",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:14:12+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:21+00:00@10645255",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:21+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T08:35:12+00:00@3673138",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T08:35:12+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T09:11:04+00:00@4283200",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T09:11:04+00:00",
+        "extras": {
+          "axis": "egalitarian_vs_elitist",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:19:30+00:00@8448036",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:19:30+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:04+00:00@10073688",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:04+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T09:35:33+00:00@3434240",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T09:35:33+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T10:09:37+00:00@4011694",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T10:09:37+00:00",
+        "extras": {
+          "axis": "guileless_vs_scheming",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:24:49+00:00@9015440",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:24:49+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:18+00:00@10800066",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:18+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T10:32:57+00:00@3566050",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T10:32:57+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T11:08:00+00:00@4274421",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T11:08:00+00:00",
+        "extras": {
+          "axis": "harmless_vs_harmful",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:30:08+00:00@8732978",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:30:08+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:24:24+00:00@10478215",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:24:24+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T12:27:29+00:00@3498376",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T12:27:29+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T13:02:52+00:00@4154057",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T13:02:52+00:00",
+        "extras": {
+          "axis": "honest_vs_dishonest",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:12:37+00:00@9021982",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:12:37+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T03:12:42+00:00@10887942",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T03:12:42+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T11:29:54+00:00@3607560",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T11:29:54+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T12:04:31+00:00@4243688",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T12:04:31+00:00",
+        "extras": {
+          "axis": "helpful_vs_unhelpful",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:44:58+00:00@8799742",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:44:58+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:33:05+00:00@10393944",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:33:05+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T13:28:00+00:00@3746693",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T13:28:00+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T14:02:19+00:00@4329796",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T14:02:19+00:00",
+        "extras": {
+          "axis": "relativist_vs_absolutist",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_roles",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:51:07+00:00@9629822",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:51:07+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "roles",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10_traits",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:34:39+00:00@10924474",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:34:39+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "traits",
+          "judge": "gpt_b10"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_sonnet_q9_roles",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/sonnet_responses_roles_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T14:28:23+00:00@3885850",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T14:28:23+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "roles",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_sonnet_q9_traits",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/sonnet_responses_traits_b10_q9/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T15:03:18+00:00@4481103",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T15:03:18+00:00",
+        "extras": {
+          "axis": "systems_thinker_vs_analytical",
+          "side": "traits",
+          "judge": "gpt_b10__plus_sonnet_q9"
+        }
+      }
+    ],
+    "inputs_sha256": "630eb907e24bb88c7884d5977a3c3f61c777e8ecaf5dae403fcb859d63942478"
+  }
+}

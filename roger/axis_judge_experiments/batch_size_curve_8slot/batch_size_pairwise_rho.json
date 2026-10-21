@@ -1,0 +1,725 @@
+{
+  "result": {
+    "judge": "gpt",
+    "rubric": "v1",
+    "axes": [
+      "truthful_vs_deceitful",
+      "progressive_vs_conservative",
+      "improvisational_vs_methodical"
+    ],
+    "batch_sizes": [
+      5,
+      7,
+      10,
+      15
+    ],
+    "kinds": [
+      "traits",
+      "roles",
+      "combined"
+    ],
+    "per_cell": {
+      "traits": {
+        "truthful_vs_deceitful": {
+          "matrix": [
+            [
+              1.0,
+              0.9799878163008207,
+              0.9737781448717195,
+              0.9591714906523484
+            ],
+            [
+              0.9799878163008207,
+              1.0,
+              0.9744517059345607,
+              0.9611202882521059
+            ],
+            [
+              0.9737781448717195,
+              0.9744517059345607,
+              1.0,
+              0.9631697954590017
+            ],
+            [
+              0.9591714906523484,
+              0.9611202882521059,
+              0.9631697954590017,
+              1.0
+            ]
+          ],
+          "n_common_entities": 300
+        },
+        "progressive_vs_conservative": {
+          "matrix": [
+            [
+              1.0,
+              0.9930428175801879,
+              0.9909975293537537,
+              0.978988001025714
+            ],
+            [
+              0.9930428175801879,
+              1.0,
+              0.9917944178618989,
+              0.9830315316342575
+            ],
+            [
+              0.9909975293537537,
+              0.9917944178618989,
+              1.0,
+              0.9850526236485282
+            ],
+            [
+              0.978988001025714,
+              0.9830315316342575,
+              0.9850526236485282,
+              1.0
+            ]
+          ],
+          "n_common_entities": 300
+        },
+        "improvisational_vs_methodical": {
+          "matrix": [
+            [
+              1.0,
+              0.9949084561818888,
+              0.9927500294174758,
+              0.9876883228452633
+            ],
+            [
+              0.9949084561818888,
+              1.0,
+              0.9919224348632898,
+              0.9892682473126049
+            ],
+            [
+              0.9927500294174758,
+              0.9919224348632898,
+              1.0,
+              0.9909557848700337
+            ],
+            [
+              0.9876883228452633,
+              0.9892682473126049,
+              0.9909557848700337,
+              1.0
+            ]
+          ],
+          "n_common_entities": 300
+        }
+      },
+      "roles": {
+        "truthful_vs_deceitful": {
+          "matrix": [
+            [
+              1.0,
+              0.904589536147119,
+              0.8861014295712459,
+              0.8614765828822578
+            ],
+            [
+              0.904589536147119,
+              1.0,
+              0.9021408995566135,
+              0.8795789386951617
+            ],
+            [
+              0.8861014295712459,
+              0.9021408995566135,
+              1.0,
+              0.9131946854743669
+            ],
+            [
+              0.8614765828822578,
+              0.8795789386951617,
+              0.9131946854743669,
+              1.0
+            ]
+          ],
+          "n_common_entities": 280
+        },
+        "progressive_vs_conservative": {
+          "matrix": [
+            [
+              1.0,
+              0.990953356721537,
+              0.9888471241411186,
+              0.9834092332469297
+            ],
+            [
+              0.990953356721537,
+              1.0,
+              0.988164836539488,
+              0.9857938221928557
+            ],
+            [
+              0.9888471241411186,
+              0.988164836539488,
+              1.0,
+              0.9870186724929146
+            ],
+            [
+              0.9834092332469297,
+              0.9857938221928557,
+              0.9870186724929146,
+              1.0
+            ]
+          ],
+          "n_common_entities": 280
+        },
+        "improvisational_vs_methodical": {
+          "matrix": [
+            [
+              1.0,
+              0.9955775131242004,
+              0.9917673507769321,
+              0.9869186644824802
+            ],
+            [
+              0.9955775131242004,
+              1.0,
+              0.9932524723667507,
+              0.9890471022035179
+            ],
+            [
+              0.9917673507769321,
+              0.9932524723667507,
+              1.0,
+              0.9922558855731464
+            ],
+            [
+              0.9869186644824802,
+              0.9890471022035179,
+              0.9922558855731464,
+              1.0
+            ]
+          ],
+          "n_common_entities": 280
+        }
+      },
+      "combined": {
+        "truthful_vs_deceitful": {
+          "matrix": [
+            [
+              1.0,
+              0.9568265102058543,
+              0.9433024640390851,
+              0.9208621186276
+            ],
+            [
+              0.9568265102058543,
+              1.0,
+              0.9500008387794932,
+              0.9301499335714779
+            ],
+            [
+              0.9433024640390851,
+              0.9500008387794932,
+              1.0,
+              0.9427680032652906
+            ],
+            [
+              0.9208621186276,
+              0.9301499335714779,
+              0.9427680032652906,
+              1.0
+            ]
+          ],
+          "n_common_entities": 580
+        },
+        "progressive_vs_conservative": {
+          "matrix": [
+            [
+              1.0,
+              0.992321685576925,
+              0.9907012052724788,
+              0.98156785041047
+            ],
+            [
+              0.992321685576925,
+              1.0,
+              0.9907450765147287,
+              0.9849732683051445
+            ],
+            [
+              0.9907012052724788,
+              0.9907450765147287,
+              1.0,
+              0.9862819670717854
+            ],
+            [
+              0.98156785041047,
+              0.9849732683051445,
+              0.9862819670717854,
+              1.0
+            ]
+          ],
+          "n_common_entities": 580
+        },
+        "improvisational_vs_methodical": {
+          "matrix": [
+            [
+              1.0,
+              0.9950350973388971,
+              0.9917107565403331,
+              0.9855345806791936
+            ],
+            [
+              0.9950350973388971,
+              1.0,
+              0.9928235946909724,
+              0.9885381587098678
+            ],
+            [
+              0.9917107565403331,
+              0.9928235946909724,
+              1.0,
+              0.9912281549752684
+            ],
+            [
+              0.9855345806791936,
+              0.9885381587098678,
+              0.9912281549752684,
+              1.0
+            ]
+          ],
+          "n_common_entities": 580
+        }
+      }
+    },
+    "mean_across_axes": {
+      "traits": [
+        [
+          1.0,
+          0.9893130300209658,
+          0.9858419012143163,
+          0.9752826048411086
+        ],
+        [
+          0.9893130300209658,
+          1.0,
+          0.9860561862199164,
+          0.9778066890663227
+        ],
+        [
+          0.9858419012143163,
+          0.9860561862199164,
+          1.0,
+          0.9797260679925213
+        ],
+        [
+          0.9752826048411086,
+          0.9778066890663227,
+          0.9797260679925213,
+          1.0
+        ]
+      ],
+      "roles": [
+        [
+          1.0,
+          0.9637068019976187,
+          0.955571968163099,
+          0.943934826870556
+        ],
+        [
+          0.9637068019976187,
+          1.0,
+          0.9611860694876174,
+          0.9514732876971784
+        ],
+        [
+          0.955571968163099,
+          0.9611860694876174,
+          1.0,
+          0.964156414513476
+        ],
+        [
+          0.943934826870556,
+          0.9514732876971784,
+          0.964156414513476,
+          1.0
+        ]
+      ],
+      "combined": [
+        [
+          1.0,
+          0.9813944310405588,
+          0.9752381419506323,
+          0.9626548499057545
+        ],
+        [
+          0.9813944310405588,
+          1.0,
+          0.9778565033283981,
+          0.9678871201954967
+        ],
+        [
+          0.9752381419506323,
+          0.9778565033283981,
+          1.0,
+          0.9734260417707814
+        ],
+        [
+          0.9626548499057545,
+          0.9678871201954967,
+          0.9734260417707814,
+          1.0
+        ]
+      ]
+    },
+    "mean_across_axes_n": {
+      "traits": 300,
+      "roles": 280,
+      "combined": 580
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python results_analysis/batch_size_pairwise_rho.py",
+      "git_sha": "730ff79+dirty",
+      "author": "Roger Dearnaley",
+      "title": "Pairwise Spearman \u03c1 between Judging Batch Sizes"
+    },
+    "produced_at": "2026-05-10T16:03:38+00:00",
+    "inputs": [
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_traits_b5]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b5/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:19:04+00:00@17614351",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:19:04+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "traits",
+          "B": "5",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_traits_b7]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b7/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:20:28+00:00@13614124",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:20:28+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "traits",
+          "B": "7",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_traits_b10]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:26:05+00:00@10675535",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:26:05+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "traits",
+          "B": "10",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_traits]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T01:07:04+00:00@8228791",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:07:04+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "traits",
+          "B": "15",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_traits_b5]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b5/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:19:09+00:00@17611512",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:19:09+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "traits",
+          "B": "5",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_traits_b7]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b7/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:20:30+00:00@13664006",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:20:30+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "traits",
+          "B": "7",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_traits_b10]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:27:09+00:00@10650966",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:27:09+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "traits",
+          "B": "10",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_traits]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T01:08:21+00:00@8204976",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:08:21+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "traits",
+          "B": "15",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_traits_b5]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b5/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:19:10+00:00@17154855",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:19:10+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "traits",
+          "B": "5",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_traits_b7]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b7/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T04:20:25+00:00@13279643",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:20:25+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "traits",
+          "B": "7",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_traits_b10]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T02:31:31+00:00@10417841",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T02:31:31+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "traits",
+          "B": "10",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_traits]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T01:10:08+00:00@8026820",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:10:08+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "traits",
+          "B": "15",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_roles_b5]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b5/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:08:05+00:00@14581869",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:08:05+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "roles",
+          "B": "5",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_roles_b7]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b7/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:14:47+00:00@11322362",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:14:47+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "roles",
+          "B": "7",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_roles_b10]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T04:02:17+00:00@8824820",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T04:02:17+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "roles",
+          "B": "10",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[truthful_vs_deceitful/gpt_responses_roles]",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:56:45+00:00@6821229",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:56:45+00:00",
+        "extras": {
+          "axis": "truthful_vs_deceitful",
+          "kind": "roles",
+          "B": "15",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_roles_b5]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b5/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:14:19+00:00@15213157",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:14:19+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "roles",
+          "B": "5",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_roles_b7]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b7/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:21:26+00:00@11824955",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:21:26+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "roles",
+          "B": "7",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_roles_b10]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T03:08:43+00:00@9176733",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T03:08:43+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "roles",
+          "B": "10",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[progressive_vs_conservative/gpt_responses_roles]",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T01:46:01+00:00@7049096",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:46:01+00:00",
+        "extras": {
+          "axis": "progressive_vs_conservative",
+          "kind": "roles",
+          "B": "15",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_roles_b5]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b5/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:40:59+00:00@14532293",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:40:59+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "roles",
+          "B": "5",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_roles_b7]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b7/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:46:25+00:00@11283279",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:46:25+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "roles",
+          "B": "7",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_roles_b10]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-07T02:35:33+00:00@8808532",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-07T02:35:33+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "roles",
+          "B": "10",
+          "judge": "gpt"
+        }
+      },
+      {
+        "dep_key": "scores_responses__rubric_v1[improvisational_vs_methodical/gpt_responses_roles]",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses__rubric_v1.json",
+        "fingerprint": "v1:2026-05-05T01:46:25+00:00@6800874",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:46:25+00:00",
+        "extras": {
+          "axis": "improvisational_vs_methodical",
+          "kind": "roles",
+          "B": "15",
+          "judge": "gpt"
+        }
+      }
+    ],
+    "inputs_sha256": "4d72171667f6a70ea28104cab5e3c61511376bbdb410bf88832265a1e501eb15"
+  }
+}
