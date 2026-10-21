@@ -126,4 +126,4 @@ the sample from the start; a later sample session passes `--sample-since <seq>`.
   none of them and M3 said new with no reading at all.  Roger had marked it "D subset of financially
   conservative/frugal".  The narrow pass (QUESTIONS 208 (3)) asks only about parents M3 read at 2 or more, so it
   cannot see a row like this.  For the replay (§ 6 item 2): count how many of Roger's merges into the corpus had
-  their target listed but called "unrelated" by the relation call, apart from targets never retrieved.
+  their target listed but called "unrelated" by the relation call, apart from targets never retrieved.  The count also decides whether the narrow pass is widened to unread neighbours by cosine (Roger, 2026-10-21, [QUESTIONS 211](./QUESTIONS.md#L344): not yet).
