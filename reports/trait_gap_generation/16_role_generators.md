@@ -1,6 +1,6 @@
 # Plan 16: generators aimed at roles
 
-Idea plan, written 2026-10-16 (Fable) after Roger unparked the role generators for planning
+Idea plan, written 2026-10-16 (Fable); **§ 12's decisions answered by Roger on 2026-10-21** (3 left open, and whether AI-persona roles count toward the cap), after Roger unparked the role generators for planning
 ([README.md](./README.md#generators-aimed-at-roles-roger-2026-10-10-unparked-for-planning-2026-10-16)).  Four
 generators, each in its own section so that it can be split into a coding plan of its own, and the pieces all four
 share: the role path through M1 and M3, promotion, wave sizing against the corpus balance, the cap, build order.
@@ -99,8 +99,9 @@ a gloss stage, M3 in batches of their own, R1 grouping, R2 review, by-name promo
    [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py) so that a candidate's kind and a corpus
    role's kind are measured alike (three readings, majority).  No alignment call: the role cut-off is flat (item 5).
 4. **M3 for roles.**  Retrieval over the 340 role descriptions (label plus gloss embedded under M2's settings,
-   [metric_config.json](../../data/candidates/metric_config.json); M2 was calibrated leave-one-out on traits, so
-   either reuse its settings or recalibrate with the 8slot role vectors, decision 11), the 10 nearest roles plus
+   [metric_config.json](../../data/candidates/metric_config.json), reused for roles with a retrieval check: each
+   corpus role queried with a fresh role gloss from step 3 must come back in its top 10 for 95% of roles, or the
+   settings are recalibrated on those queries; decision 11), the 10 nearest roles plus
    their arrangement partners, then the relation call and the overlap call on role versions of the rubrics:
    - [rubrics/relation_roles.md](./rubrics/relation_roles.md) (to be written): the same three answers, with role
      examples (doctor and physician similar; predator and prey opposed; doctor and plumber unrelated).
@@ -145,8 +146,11 @@ a gloss stage, M3 in batches of their own, R1 grouping, R2 review, by-name promo
   generator's guess), of the kept rows (by the kind call), and of the corpus after; the readout says where it
   moved.  A generator that feeds one kind (B, C) is told its "room if held" number (§ 2) before it runs, and the
   readout flags any kind whose share moves by more than five points.  No automatic cut: Roger reads the flag and
-  decides (decision 2).
-- **Cap**: 500-600 roles.  Read as the corpus's size, not a wave's (decision 1): the cap is about what the
+  decides (decision 2).  In review (Roger, 2026-10-21): the card says whether the candidate's kind is currently
+  too high, too low or about right (more than 10% above or below the count that keeps the kind's share as on
+  2026-10-16), and a review order shows the too-low kinds first; Roger will generally not accept a candidate in a
+  kind that is too high.
+- **Cap**: 500-600 roles.  Read as the corpus's size after adding, not a wave's (decision 1, Roger 2026-10-21): the cap is about what the
   extraction and the judging can carry per entity, and a wave is sized by review hours.  With 340 today that is
   160-260 additions across all generators, which is why B and C get one modest wave each and A and D the rest.
   Whether the AI-persona roles that may become traits (ROLES_TO_ADD, "AI-persona roles under the role judge")
@@ -183,10 +187,12 @@ Independent of our list: no corpus role is shown to the model.
 3. One call per work, all its characters in it, reasoning first: for each character 1-3 roles ordered by how
    much each organises the character, as a generic noun phrase of 1-3 words (no proper names, no "the"), a gloss
    in the corpus form, a kind guess among the nine, `human` true/false, and whether the role is a **narrative
-   function** (hero, villain, sidekick, mentor, love interest) rather than who the character is.  Narrative
-   functions are kept and tagged, not dropped (decision 6): the corpus has
-   [guardian](../../data/roles/instructions/guardian.json), [trickster](../../data/roles/instructions/trickster.json),
-   [fool](../../data/roles/instructions/fool.json).
+   function** (hero, villain, sidekick, mentor, love interest) rather than who the character is.  A role-in-a-story
+   is dropped at generation, an archetype kept (decision 6, Roger 2026-10-21): protagonist is a place in a plot,
+   not a role; the corpus's [guardian](../../data/roles/instructions/guardian.json),
+   [trickster](../../data/roles/instructions/trickster.json) and [fool](../../data/roles/instructions/fool.json) are
+   archetypes, and so is hero (kept).  Which of the other examples (villain, sidekick, mentor, love interest) are
+   archetypes is for Roger when this generator's rubric is written.
 4. Normalise (lower case, singular, US spelling via the relabel helper's tables), merge across works keeping the
    provenance list; `n_sources` (detective will arrive from forty works) is a commonness prior, as in plan 09.
 5. Submit in role mode (§ 3) with `source_ref` `wikidata:<work>/<character>` and the kind guess.
@@ -395,46 +401,63 @@ not estimated here.  Every call site logs `MultiModelUsage` to a `usage.json` (h
 
 ## 11. Build order
 
+Revised 2026-10-21 (decision 10): B moved from last to second, so that its ranked pick of common, well-known
+missing occupations supplies the occupation half of every wave (§ 6).
+
 1. **The shared path** (§ 3), platform work with a Fable review: role-mode submission, the role gloss and kind
-   calls, M3-for-roles with its two rubrics, the review app's role pass, `promote --allow-roles`, the kinds
-   side-car.  Its pilot is the 355 held rows, so it pays before any generator exists, and the pilot's kept share
-   sizes the first wave.
-2. **D (b), the Roget / WordNet person-noun census**: no generation calls, and its recovery numbers calibrate
+   calls, M3-for-roles with its two rubrics and the retrieval check of decision 11, the review app's role pass
+   (with the kind readout of decision 2), `promote --allow-roles`, the kinds side-car.  Its pilot is the 355 held
+   rows, so it pays before any generator exists, and the pilot's kept share sizes the first wave.
+2. **B, lists of professions**: the ranked pick, metered so that occupations are about half of each wave's
+   submissions.
+3. **D (b), the Roget / WordNet person-noun census**: no generation calls, and its recovery numbers calibrate
    the rest.
-3. **A, the franchise generator**: the one that fills the thin kinds and the most eclectic.
-4. **D (a), the LLM role grid**, pointed at whichever kinds the readout after A shows thinnest.
-5. **B and C**, one modest wave each, sized by their room (§ 2) and cut by M3's hierarchy line.
+4. **A, the franchise generator**: the one that fills the thin kinds and the most eclectic.
+5. **D (a), the LLM role grid**, pointed at whichever kinds the readout after A shows thinnest.
+6. **C**, one modest wave, sized by its room (§ 2) and cut by M3's hierarchy line.
 
 ## 12. Decisions needed
 
 1. **The cap counts the corpus or each wave?**  (a) the corpus: 500-600 roles in all, waves sized by review
    hours; (b) each wave.  **Recommend (a)**; and say whether the AI-persona roles count if they become traits.  *Long version:* [§ 4](#4-waves-the-balance-and-the-cap), the cap bullet.
+   **Decided (Roger, 2026-10-21): (a)**, the cap is the corpus's total size after adding.  Still open: whether the AI-persona roles count toward it if they become traits.
 2. **What the balance flag does.**  (a) readout only, Roger decides; (b) a wave's kept rows from one kind are
    cut when that kind's share would move more than five points; (c) a hard per-kind ceiling at the held share.
    **Recommend (a)**, with the five-point flag printed.  *Long version:* [§ 4](#4-waves-the-balance-and-the-cap), the balance readout bullet.
+   **Decided (Roger, 2026-10-21): (a), and more.**  While Roger reviews candidates to turn into seeds, the card says whether the candidate's kind is currently too high, too low or about right; too high or too low means more than 10% above or below the count that would keep the kind's share as it was when this work started (the 340 roles of [role_kinds.json](../../data/roles/role_kinds.json), 2026-10-16).  He will generally not accept a candidate in a kind that is too high.  Also a review order that shows the too-low kinds first.
 3. **A role-aimed candidate M1 reads as a trait** (miser, optimist).  (a) both flows: the noun stays a role
    candidate (kind 8), the adjective sibling goes to the trait flow; (b) role only; (c) trait only.
    **Recommend (a)**; the cross-type card shows the pair.  *Long version:* [§ 3](#3-the-shared-role-path) step 2 (M1 in role mode).
+   **Open (Roger, 2026-10-21: "TBD").**  Some such roles might be dropped, but first look at how similar the model's activations for, say, optimist and optimistic actually are, on reasonably well-matched sets of instructions: a TODO in [ROLES_TO_ADD.md](../../data/roles/instructions/ROLES_TO_ADD.md) ("Role and trait twins").
 4. **Sub-roles.**  (a) covered by their parent at overlap 3, the card naming the parent; (b) new until 4, review
    decides.  **Recommend (a)**: it is the guard against the profession flood.  *Long version:* [§ 3](#3-the-shared-role-path) step 5 (the cut-off) and [§ 6](#6-generator-b-lists-of-professions) (the profession flood).
+   **Decided (Roger, 2026-10-21): (a).**
 5. **Cross-type retrieval.**  (a) nearest traits shown as information, covered decided against roles only;
    (b) covered against both corpora; (c) roles only, no trait retrieval.  **Recommend (a)**.  *Long version:* [§ 3](#3-the-shared-role-path) step 4, the cross-type retrieval bullet.
+   **Decided (Roger, 2026-10-21): (a).**
 6. **Narrative-function roles** (hero, villain, sidekick, mentor, love interest) from A.  (a) kept and tagged;
    (b) dropped at generation.  **Recommend (a)**.  *Long version:* [§ 5](#5-generator-a-characters-of-a-media-franchise) (generator A).
+   **Decided (Roger, 2026-10-21): (b), with adjustments.**  A role-in-a-story is not a role in this corpus's sense: protagonist is dropped at generation.  An archetype is a role and is kept: fool, trickster, guardian, and hero.  § 5 step 3 updated.
 7. **B's sources.**  (a) the SOC broad tier with O*NET's descriptions, plus O*NET's alternate titles, all ranked
    by familiarity and distance from the corpus (Roger's rule of 2026-10-16, § 6; the DOT sample dropped); (b) add
    ESCO and ISCO-08 once their licences are read.  **Recommend (a)**; the alternate-titles file and the BLS OEWS
    employment table are small fresh downloads under `data/external/`.  *Long version:* [§ 6](#6-generator-b-lists-of-professions) (generator B).
+   **Decided (Roger, 2026-10-21): (b) if ESCO's and ISCO-08's licences can be confirmed acceptable, else (a).**
 8. **C's crossover test** for D&D inventions: (a) >= 3 works outside D&D or >= 10 Wikidata sitelinks; (b) Roger
    reads the SRD list once and marks the inventions he wants (about 60 names, twenty minutes).  **Recommend (b)
    for the SRD and (a) for anything beyond it**; and whether the playable species are in (recommend yes).  *Long version:* [§ 7](#7-generator-c-monsters-fantasy-races-and-folklore) (generator C).
+   **Decided (Roger, 2026-10-21): (b)**: being in the SRD is a good marker that a creature is not original to D&D.  The playable species are included.
 9. **Which of D's modes first.**  (a) the Roget / WordNet noun census and the LLM role grid; (b) the LLM grid
    only; (c) the census only.  **Recommend (a)**, census first.  *Long version:* [§ 8](#8-generator-d-a-role-mode-for-the-trait-generators) (generator D).
+   **Decided (Roger, 2026-10-21): (a)**, the census first.
 10. **Build order** as § 11, the shared path piloted on the 355 held rows before any generator.  **Recommend
     yes.**  *Long version:* [§ 11](#11-build-order).
+   **Decided (Roger, 2026-10-21, in chat): no; B moves to second**, after the shared path, so that its ranked pick supplies the occupation half of every wave (the order as written put B last, against § 6's rule); § 11 updated.
 11. **M2 for roles.**  (a) reuse the trait-calibrated settings now, recalibrate with role vectors after the
     October extraction; (b) recalibrate leave-one-out on the 8slot role vectors first ($0, an hour of Mac).
     **Recommend (a)**.  *Long version:* [§ 3](#3-the-shared-role-path) step 4 (M3 for roles).
+   **Decided (Roger, 2026-10-21, in chat): (a), with a retrieval check** in the shared path, since M3 decides on text retrieval and the role vectors would test only the directional score: each of the 340 corpus roles is queried with a fresh gloss from the shared path's role-gloss call (§ 3 step 3; about 340 Haiku 5.5 calls, about $0.10), recall at 10 against the traits' 95% target; at or above it the settings stay, below it they are recalibrated on the same queries (20 against 14 words, centring on the role corpus's own mean), embeddings only.  § 3 step 4 updated.
 12. **The multilingual role cell** of D (a): on Sonnet 5.5 (about $6 batched) or Haiku 5.5 (about $1), the
     same choice as plan 06's question 1.  **Recommend Sonnet for the pilot's 20%**, then whichever the
     comparison favours.  *Long version:* [§ 8](#8-generator-d-a-role-mode-for-the-trait-generators), the multilingual cell.
+   **Decided (Roger, 2026-10-21): as recommended**, Sonnet for the pilot's 20%, then whichever the comparison favours.  (Plan 06's own comparison favoured Haiku, [QUESTIONS 212](./QUESTIONS.md#L346).)

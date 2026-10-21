@@ -58,6 +58,26 @@ there applies here too.
   itself (an AI assistant)" is its test for not playing the role; the
   trait judge has no such problem.  After the October extraction's first
   judging, with the rubric experiment's numbers.
+- **TODO: role and trait twins (Roger, 2026-10-21)**: compare the model's activations for a role noun and
+  its trait adjective (optimist / optimistic) before deciding plan 16's decision 3; some such roles might be
+  dropped (§ "TODO: Role and trait twins").
+
+## TODO: Role and trait twins (Roger, 2026-10-21)
+
+Plan 16's decision 3 ([16_role_generators.md](../../../reports/trait_gap_generation/16_role_generators.md) § 12):
+what to do with a role-aimed candidate that M1 reads as a trait, a temperament under a noun (miser, optimist).
+Roger: "TBD.  We might drop some of these roles.  But first we should look at how similar the model's activations
+for e.g. optimist and optimistic actually are, for reasonably well-matched sets of instructions."
+
+- **The pairs already in the corpus** (2026-10-21): 16 role nouns whose adjective is a trait: [altruist](./altruist.json) / [altruistic](../../traits/instructions/altruistic.json), [aristocrat](./aristocrat.json) / [aristocratic](../../traits/instructions/aristocratic.json), [artist](./artist.json) / [artistic](../../traits/instructions/artistic.json), [critic](./critic.json) / [critical](../../traits/instructions/critical.json), [cynic](./cynic.json) / [cynical](../../traits/instructions/cynical.json), [fool](./fool.json) / [foolish](../../traits/instructions/foolish.json), [futurist](./futurist.json) / [futuristic](../../traits/instructions/futuristic.json), [hedonist](./hedonist.json) / [hedonistic](../../traits/instructions/hedonistic.json), [idealist](./idealist.json) / [idealistic](../../traits/instructions/idealistic.json), [mystic](./mystic.json) / [mystical](../../traits/instructions/mystical.json), [nomad](./nomad.json) / [nomadic](../../traits/instructions/nomadic.json), [optimist](./optimist.json) / [optimistic](../../traits/instructions/optimistic.json), [poet](./poet.json) / [poetic](../../traits/instructions/poetic.json), [pragmatist](./pragmatist.json) / [pragmatic](../../traits/instructions/pragmatic.json), [skeptic](./skeptic.json) / [skeptical](../../traits/instructions/skeptical.json), [strategist](./strategist.json) / [strategic](../../traits/instructions/strategic.json); and the 11
+  same-name collisions ([ascetic](./ascetic.json), [contrarian](./contrarian.json), [cosmopolitan](./cosmopolitan.json), [generalist](./generalist.json), [pacifist](./pacifist.json), [parent](./parent.json), [patient](./patient.json), [perfectionist](./perfectionist.json), [romantic](./romantic.json), [specialist](./specialist.json), [stoic](./stoic.json)).  Some of these are not one concept in two forms (artist / artistic, critic /
+  critical, poet / poetic, fool / foolish; patient and parent by name only); the temperament ones are the test
+  (optimist, cynic, skeptic, idealist, hedonist, altruist, pragmatist, stoic, romantic, contrarian, perfectionist).
+- **What to measure**: the cosine between the role's vector and the trait's, against a baseline (each one's
+  nearest other entity of its own kind), on the October extraction's vectors.  "Reasonably well-matched sets of
+  instructions": the role and trait instructions differ in form today (who to be, against how to behave), so a
+  fair test may need a matched set written for the twins, the same situations in both; to be designed with Roger.
+- **Then**: decide plan 16's decision 3, and whether any corpus role that duplicates its twin trait is dropped.
 
 ## Process for adding a role
 
