@@ -39,7 +39,7 @@ rows: 5,527 kept awaiting review, 211 reviewed.
 | — | antonym-check seeds | **8** | 139 / 1 | nothing |
 | — | states and physical passes | **8** | 159 / 8 | nothing |
 | — | noun relabel | **8** | 90 / 5 | nothing |
-| 16 | [Role generators](./16_role_generators.md) | **3** (greenlit 2026-10-21: § 12 decided, B moved to second in the build order; decision 3 waits on the role/trait twins measurement) | | the coding plan (Fable), the shared path and B first |
+| 16 | [Role generators](./16_role_generators.md) | **4** (greenlit 2026-10-21; [coding plan](./coding_plan_16_role_generators.md) for steps 1-2, the shared role path and B, written by Fable 2026-10-21: 20 tasks, about $14 live, about 3.5 h of Roger's review) | | Roger: review the coding plan and its 6 decisions |
 
 ## Platform: filters, scorers, review
 
