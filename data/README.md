@@ -330,5 +330,14 @@ persona pipeline, and nothing the platform writes touches `traits/` or
   `BAAI/bge-large-en-v1.5` (1.34 GB, dropped from use on 2026-10-02) and
   `google/embeddinggemma-300m` (1.27 GB, the inactive fallback).  Other
   platform work has placed small Qwen and Gemma chat models here too.
+  **Deleted 2026-10-21 to free disk (Roger: delete what we are probably done
+  with, redownload if that proves wrong):** both M2 models and their caches
+  (`local_*.npz` and their `manifest.json` entries), `Qwen/Qwen3-8B-Base`
+  (15 GB, plan 03; needed again only for its wave 2), and the three
+  masked-LM models of plan 04 (ModernBERT-large, roberta-large,
+  bert-large-cased-whole-word-masking, about 4 GB) with
+  `candidates/cache/masked_lm/`.  Each comes back with
+  `setup_external.py --hf-model ID` (or the generator's own fetch); the
+  masked-LM aggregates are recomputed locally on the next run.
   `external/wn/` (also git-ignored) holds the Open English WordNet 2024
   database used by the M1 filter.
