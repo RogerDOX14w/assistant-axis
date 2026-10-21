@@ -408,33 +408,33 @@ not estimated here.  Every call site logs `MultiModelUsage` to a `usage.json` (h
 ## 12. Decisions needed
 
 1. **The cap counts the corpus or each wave?**  (a) the corpus: 500-600 roles in all, waves sized by review
-   hours; (b) each wave.  **Recommend (a)**; and say whether the AI-persona roles count if they become traits.
+   hours; (b) each wave.  **Recommend (a)**; and say whether the AI-persona roles count if they become traits.  *Long version:* [§ 4](#4-waves-the-balance-and-the-cap), the cap bullet.
 2. **What the balance flag does.**  (a) readout only, Roger decides; (b) a wave's kept rows from one kind are
    cut when that kind's share would move more than five points; (c) a hard per-kind ceiling at the held share.
-   **Recommend (a)**, with the five-point flag printed.
+   **Recommend (a)**, with the five-point flag printed.  *Long version:* [§ 4](#4-waves-the-balance-and-the-cap), the balance readout bullet.
 3. **A role-aimed candidate M1 reads as a trait** (miser, optimist).  (a) both flows: the noun stays a role
    candidate (kind 8), the adjective sibling goes to the trait flow; (b) role only; (c) trait only.
-   **Recommend (a)**; the cross-type card shows the pair.
+   **Recommend (a)**; the cross-type card shows the pair.  *Long version:* [§ 3](#3-the-shared-role-path) step 2 (M1 in role mode).
 4. **Sub-roles.**  (a) covered by their parent at overlap 3, the card naming the parent; (b) new until 4, review
-   decides.  **Recommend (a)**: it is the guard against the profession flood.
+   decides.  **Recommend (a)**: it is the guard against the profession flood.  *Long version:* [§ 3](#3-the-shared-role-path) step 5 (the cut-off) and [§ 6](#6-generator-b-lists-of-professions) (the profession flood).
 5. **Cross-type retrieval.**  (a) nearest traits shown as information, covered decided against roles only;
-   (b) covered against both corpora; (c) roles only, no trait retrieval.  **Recommend (a)**.
+   (b) covered against both corpora; (c) roles only, no trait retrieval.  **Recommend (a)**.  *Long version:* [§ 3](#3-the-shared-role-path) step 4, the cross-type retrieval bullet.
 6. **Narrative-function roles** (hero, villain, sidekick, mentor, love interest) from A.  (a) kept and tagged;
-   (b) dropped at generation.  **Recommend (a)**.
+   (b) dropped at generation.  **Recommend (a)**.  *Long version:* [§ 5](#5-generator-a-characters-of-a-media-franchise) (generator A).
 7. **B's sources.**  (a) the SOC broad tier with O*NET's descriptions, plus O*NET's alternate titles, all ranked
    by familiarity and distance from the corpus (Roger's rule of 2026-10-16, § 6; the DOT sample dropped); (b) add
    ESCO and ISCO-08 once their licences are read.  **Recommend (a)**; the alternate-titles file and the BLS OEWS
-   employment table are small fresh downloads under `data/external/`.
+   employment table are small fresh downloads under `data/external/`.  *Long version:* [§ 6](#6-generator-b-lists-of-professions) (generator B).
 8. **C's crossover test** for D&D inventions: (a) >= 3 works outside D&D or >= 10 Wikidata sitelinks; (b) Roger
    reads the SRD list once and marks the inventions he wants (about 60 names, twenty minutes).  **Recommend (b)
-   for the SRD and (a) for anything beyond it**; and whether the playable species are in (recommend yes).
+   for the SRD and (a) for anything beyond it**; and whether the playable species are in (recommend yes).  *Long version:* [§ 7](#7-generator-c-monsters-fantasy-races-and-folklore) (generator C).
 9. **Which of D's modes first.**  (a) the Roget / WordNet noun census and the LLM role grid; (b) the LLM grid
-   only; (c) the census only.  **Recommend (a)**, census first.
+   only; (c) the census only.  **Recommend (a)**, census first.  *Long version:* [§ 8](#8-generator-d-a-role-mode-for-the-trait-generators) (generator D).
 10. **Build order** as § 11, the shared path piloted on the 355 held rows before any generator.  **Recommend
-    yes.**
+    yes.**  *Long version:* [§ 11](#11-build-order).
 11. **M2 for roles.**  (a) reuse the trait-calibrated settings now, recalibrate with role vectors after the
     October extraction; (b) recalibrate leave-one-out on the 8slot role vectors first ($0, an hour of Mac).
-    **Recommend (a)**.
+    **Recommend (a)**.  *Long version:* [§ 3](#3-the-shared-role-path) step 4 (M3 for roles).
 12. **The multilingual role cell** of D (a): on Sonnet 5.5 (about $6 batched) or Haiku 5.5 (about $1), the
     same choice as plan 06's question 1.  **Recommend Sonnet for the pilot's 20%**, then whichever the
-    comparison favours.
+    comparison favours.  *Long version:* [§ 8](#8-generator-d-a-role-mode-for-the-trait-generators), the multilingual cell.
