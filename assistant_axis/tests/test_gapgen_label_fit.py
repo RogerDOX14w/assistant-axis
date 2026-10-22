@@ -191,6 +191,17 @@ def test_corrected_candidates():
                  "relabelled_in": 1, "relabelled_out": 2}
 
 
+def test_a_relabelled_role_candidate_stays_a_role():
+    """Coding plan 16: the role-mode fields travel with a relabelled candidate (generator B runs the check)."""
+    c = Candidate(surface="security officer", generator="professions", run_id="w1", gloss_hint="guards a building",
+                  source_ref="onet_title:33-9032.00:security officer", entity_type="role", kind_guess="occupation",
+                  human=True)
+    its = LF.build_items(LF.pairs_of([c]), system="S", use_oewn=False)
+    ans_ = {(its[0].request_sha256, r): {"parsed": P("not_a_sense", "guard")} for r in range(3)}
+    fixed, _ = LF.corrected_candidates([c], LF.decide(its, ans_, 3))
+    assert [(x.surface, x.entity_type, x.kind_guess, x.human) for x in fixed] == [("guard", "role", "occupation", True)]
+
+
 # --------------------------------------------------------------------------- marks
 
 SHEET = """# Precision sample
