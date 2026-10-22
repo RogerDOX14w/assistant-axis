@@ -253,6 +253,87 @@ def render_volumes(data: Dict[str, Any]) -> str:
     return _table(rows, ["id", "name", "size_gb", "datacenter"])
 
 
+# ---------------------------------------------------------------------------
+# Stock over time (Roger, 2026-10-22: watch availability for 24 hours before
+# judging the datacenter choice)
+# ---------------------------------------------------------------------------
+
+DEFAULT_STOCK_LOG = REPO_ROOT / "runpod_workspace" / "runpod_stock" / "stock_log.jsonl"
+
+
+def stock_sample(data: Dict[str, Any], when: str) -> Dict[str, Any]:
+    """One log line: every datacenter's in-stock GPU types (all types, not
+    filtered) and the secure-cloud price per type."""
+    dcs = []
+    for dc in data.get("dataCenters") or []:
+        avail = [{"gpu": a.get("gpuTypeDisplayName") or a.get("gpuTypeId"), "stock": a.get("stockStatus")}
+                 for a in dc.get("gpuAvailability") or [] if a.get("stockStatus")]
+        dcs.append({"id": dc.get("id"), "volumes": bool(dc.get("storageSupport")), "in_stock": avail})
+    prices = {g.get("displayName") or g.get("id"): (g.get("lowestPrice") or {}).get("uninterruptablePrice")
+              for g in data.get("gpuTypes") or []}
+    return {"t": when, "datacenters": dcs, "secure_price_hr": prices}
+
+
+def record_stock(log_path: Path, key: str, *, opener: Opener = _default_opener,
+                 now: Optional[str] = None) -> Dict[str, Any]:
+    """Query stock once and append the sample to ``log_path`` (JSON lines)."""
+    from datetime import datetime, timezone
+    when = now or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    sample = stock_sample(query(STOCK_QUERY, key, opener=opener), when)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(sample) + "\n")
+    return sample
+
+
+def stock_history(samples: List[Dict[str, Any]], gpu_filters: List[str],
+                  volumes_only: bool) -> List[Dict[str, Any]]:
+    """Per (GPU type, datacenter): the share of samples with it in stock, the
+    levels seen, and the longest run of consecutive samples without it."""
+    filters = [f for f in gpu_filters if f]
+    n = len(samples)
+    seen: Dict[tuple, Dict[str, Any]] = {}
+    volumes: Dict[str, bool] = {}
+    for s in samples:
+        for dc in s.get("datacenters") or []:
+            volumes[dc["id"]] = bool(dc.get("volumes"))
+            for a in dc.get("in_stock") or []:
+                g = a.get("gpu") or ""
+                if filters and not any(f.lower() in g.lower() for f in filters):
+                    continue
+                seen.setdefault((g, dc["id"]), {"hits": set(), "levels": {}})
+    for i, s in enumerate(samples):
+        present = {(a.get("gpu"), dc["id"]): a.get("stock")
+                   for dc in s.get("datacenters") or [] for a in dc.get("in_stock") or []}
+        for k, rec in seen.items():
+            if k in present:
+                rec["hits"].add(i)
+                rec["levels"][present[k]] = rec["levels"].get(present[k], 0) + 1
+    rows = []
+    for (g, dc), rec in seen.items():
+        if volumes_only and not volumes.get(dc):
+            continue
+        gap = run = 0
+        for i in range(n):
+            run = 0 if i in rec["hits"] else run + 1
+            gap = max(gap, run)
+        rows.append({"gpu": g, "datacenter": dc, "volumes": volumes.get(dc),
+                     "in_stock": f"{len(rec['hits'])}/{n}", "share": round(len(rec["hits"]) / n, 3) if n else 0.0,
+                     "levels": ", ".join(f"{lv} {c}" for lv, c in sorted(rec["levels"].items())),
+                     "longest_gap_samples": gap})
+    rows.sort(key=lambda r: (r["gpu"], -r["share"], r["datacenter"]))
+    return rows
+
+
+def render_history(samples: List[Dict[str, Any]], gpu_filters: List[str], volumes_only: bool) -> str:
+    if not samples:
+        return "(no samples)"
+    rows = stock_history(samples, gpu_filters, volumes_only)
+    head = (f"{len(samples)} samples, {samples[0]['t']} to {samples[-1]['t']} "
+            "(share = samples with the type in stock; longest gap in consecutive samples):\n")
+    return head + _table(rows, ["gpu", "datacenter", "volumes", "in_stock", "share", "levels", "longest_gap_samples"])
+
+
 def main(argv: Optional[List[str]] = None, *, opener: Opener = _default_opener,
          key: Optional[str] = None, out=None) -> int:
     out = out or sys.stdout
@@ -268,9 +349,26 @@ def main(argv: Optional[List[str]] = None, *, opener: Opener = _default_opener,
     p = sub.add_parser("pod", help="one pod's stored configuration (env names only)")
     p.add_argument("pod_id")
     sub.add_parser("volumes", help="network volumes")
+    r = sub.add_parser("record", help="append one stock sample (all GPU types, all datacenters) to a log")
+    r.add_argument("--log", type=Path, default=DEFAULT_STOCK_LOG)
+    h = sub.add_parser("history", help="summarise a stock log: how often each type was in stock where")
+    h.add_argument("--log", type=Path, default=DEFAULT_STOCK_LOG)
+    h.add_argument("--gpu", nargs="*", default=list(DEFAULT_GPU_FILTERS),
+                   help="display-name substrings to keep (default: A100 H100 H200; '' keeps all)")
+    h.add_argument("--volumes-only", action="store_true", help="only datacenters that take network volumes")
     args = ap.parse_args(argv)
 
+    if args.cmd == "history":   # reads the log only: no key, no network
+        samples = [json.loads(line) for line in args.log.read_text().splitlines() if line.strip()]
+        print(render_history(samples, args.gpu, args.volumes_only), file=out)
+        return 0
+
     key = key or load_key()
+    if args.cmd == "record":
+        s = record_stock(args.log, key, opener=opener)
+        n = sum(len(dc["in_stock"]) for dc in s["datacenters"])
+        print(f"{s['t']}: {n} (datacenter, GPU type) pairs in stock; appended to {args.log}", file=out)
+        return 0
     if args.cmd == "stock":
         data = query(STOCK_QUERY, key, opener=opener)
         text = json.dumps(data, indent=1) if args.json else render_stock(data, args.gpu, args.volumes_only)

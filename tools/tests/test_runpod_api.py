@@ -119,3 +119,39 @@ def test_pods_and_volumes_tables():
     vols = {"data": {"myself": {"networkVolumes": [{"id": "v1", "name": "Roger_AA_1", "size": 200, "dataCenterId": "US-KS-2"}]}}}
     _, text, _ = run(["volumes"], vols)
     assert "Roger_AA_1" in text and "200" in text
+
+
+def test_record_appends_a_sample_with_all_types(tmp_path):
+    log = tmp_path / "stock.jsonl"
+    for t in ("2026-10-22T20:00:00+00:00", "2026-10-22T20:15:00+00:00"):
+        rp.record_stock(log, KEY, opener=FakeOpener(STOCK), now=t)
+    lines = [json.loads(x) for x in log.read_text().splitlines()]
+    assert [s["t"] for s in lines] == ["2026-10-22T20:00:00+00:00", "2026-10-22T20:15:00+00:00"]
+    ks = {dc["id"]: dc for dc in lines[0]["datacenters"]}
+    assert {a["gpu"] for a in ks["US-KS-2"]["in_stock"]} == {"A100 PCIe", "RTX 4090"}   # unfiltered; H100 out of stock
+    assert ks["US-MD-1"]["volumes"] is False
+    assert lines[0]["secure_price_hr"]["A100 SXM"] == 1.79
+    assert KEY not in log.read_text()
+
+
+def _sample(t, ks_types):
+    return {"t": t, "datacenters": [
+        {"id": "US-KS-2", "volumes": True, "in_stock": [{"gpu": g, "stock": "Low"} for g in ks_types]},
+        {"id": "US-MD-1", "volumes": False, "in_stock": [{"gpu": "A100 SXM", "stock": "Medium"}]}],
+        "secure_price_hr": {}}
+
+
+def test_history_shares_levels_and_gaps(tmp_path):
+    samples = [_sample("t0", ["A100 SXM"]), _sample("t1", []), _sample("t2", []), _sample("t3", ["A100 SXM"])]
+    rows = {(r["gpu"], r["datacenter"]): r for r in rp.stock_history(samples, ["A100"], False)}
+    ks = rows[("A100 SXM", "US-KS-2")]
+    assert ks["in_stock"] == "2/4" and ks["share"] == 0.5 and ks["longest_gap_samples"] == 2
+    md = rows[("A100 SXM", "US-MD-1")]
+    assert md["share"] == 1.0 and md["levels"] == "Medium 4" and md["volumes"] is False
+    only_vol = rp.stock_history(samples, ["A100"], True)
+    assert {r["datacenter"] for r in only_vol} == {"US-KS-2"}
+    log = tmp_path / "log.jsonl"
+    log.write_text("\n".join(json.dumps(s) for s in samples) + "\n")
+    buf = io.StringIO()
+    assert rp.main(["history", "--log", str(log), "--gpu", "A100"], key="unused", out=buf) == 0
+    assert "4 samples" in buf.getvalue() and "2/4" in buf.getvalue()
