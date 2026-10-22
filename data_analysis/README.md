@@ -313,6 +313,50 @@ display name.  `arms-report` also breaks each arm's shares down by the
 instructions' opening form ("Act as", "You are …", "Be …"), unpaired, which
 compares openings within one corpus.
 
+### `role_rubric_experiment.py`
+
+The role-judge rubric experiment
+([plan](../reports/pipeline/plan_role_rubric_experiment.md), approved by Roger
+2026-10-16; built 2026-10-22): does a change to the role rubric (the
+`eval_prompt` step 3 sends for a role) change which responses step 4 averages,
+and so the role vectors?  Nine judging runs of 30 roles (the five AI-persona
+roles and 25 stratified by their May level-2 share) on the same responses:
+A0, each file's baked `eval_prompt`; A0', A0 again (the judge's noise); A1-A7,
+one edit each (model-neutral wording, the model's name, the level-2 example
+generic or with the role's name, A1 + A3, the refusal clause, role-aware
+identity wording).  The arms are transformations of the baked text applied in
+this module only (`arm_template`; the template and role files are untouched);
+it is the experiment's switch and is archived once Roger decides.  The arms'
+wording and the prompts as the judge receives them are in
+[arm_wordings.md](../reports/pipeline/role_rubric_experiment/arm_wordings.md)
+(`render`).
+
+The judge request is step 3's (gpt-4.1-mini, 200 tokens, default temperature,
+its `pending_prompts`, `chat_request_body` and `score_reply`, imported from
+`pipeline/3_judge.py`), sent through the OpenAI Batch API
+(`assistant_axis/openai_batch.py`).  `judge --dry-run` builds and counts
+everything and submits nothing; `--batch-no-wait` submits and exits;
+`--collect-only` collects later (the state file in the run directory), and
+`--batch-id` adopts a batch whose state file was lost.  A rerun never pays
+twice: scored responses and recorded unparseable replies are not requested
+again (`--rejudge-unparseable` asks for the latter).  A paid run refuses an
+estimate over $20 without `--confirm-expensive`, over `--budget-usd` (default
+$40) at all, uncommitted code or role files without `--allow-dirty`, and a run
+directory judged with other wordings or responses.  Usage: `usage.json` in the
+run directory and per arm, `gpt-4.1-mini:batch`; the parse-rate alert per arm.
+`analyze-scores` writes the noise floor, boundary flips by role, question and
+direction (the AI-persona roles apart) and a blind reading sheet (arms
+hidden, the two scores as X and Y in a random order, the key in a separate
+file; it refuses to overwrite a marked sheet); `read-marks` tallies the marks.
+`analyze-vectors` (on the pod) computes each arm's role vectors with step 4's
+own functions and their cosine with A0's per slot and layer against A0'.
+
+```bash
+uv run python data_analysis/role_rubric_experiment.py estimate     # May responses: about $29
+uv run python data_analysis/role_rubric_experiment.py judge --dry-run \
+    --responses-dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot/roles/responses' --out-dir "$TMPDIR/dry"
+```
+
 ### `regenerate_role_instructions.py`
 
 Generates instruction variants and questions for roles. Same relationship to
