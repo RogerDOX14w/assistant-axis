@@ -1,0 +1,253 @@
+{
+  "generator": "alignment_sweep",
+  "run_id": "2026-10-20-humanize",
+  "git_sha": "0d8f4a4a+dirty",
+  "args": {
+    "step": "humanize",
+    "n_inputs": 865,
+    "n_selected": 10,
+    "limit": 10,
+    "n_to_send": 10,
+    "transport": "live",
+    "model": "claude-sonnet-5-5",
+    "budget_usd": 1.0,
+    "estimate_usd": 0.0953,
+    "rubric": {
+      "name": "alignment_humanize",
+      "version": 4,
+      "sha256": "fd37a985eb33104711c5027638ac01362914b25b873f6761948a5325bb9cf52c",
+      "file": "reports/trait_gap_generation/rubrics/alignment_humanize.md"
+    },
+    "label_form": "judge-display-v1",
+    "resume": false,
+    "allow_dirty": false,
+    "inputs_from": "the registry /Users/roger/Documents/GitHub/assistant-axis/data/candidates/registry.jsonl (4 sweep runs, 4 with an extraction; 710 chunk headings)"
+  },
+  "n_emitted": 863,
+  "started_at": "2026-10-20T18:06:35+00:00",
+  "finished_at": "2026-10-21T02:16:05+00:00",
+  "confirmed_by": null,
+  "cost_usd": 2.4232,
+  "sessions": [
+    {
+      "session_id": "5cc1ba2ba430",
+      "started_at": "2026-10-20T18:06:35+00:00",
+      "finished_at": "2026-10-20T18:06:41+00:00",
+      "git_sha": "74b1fcb3+dirty",
+      "args": {
+        "step": "humanize",
+        "n_inputs": 865,
+        "n_selected": 10,
+        "limit": 10,
+        "n_to_send": 10,
+        "transport": "live",
+        "model": "claude-sonnet-5-5",
+        "budget_usd": 1.0,
+        "estimate_usd": 0.0953,
+        "rubric": {
+          "name": "alignment_humanize",
+          "version": 4,
+          "sha256": "fd37a985eb33104711c5027638ac01362914b25b873f6761948a5325bb9cf52c",
+          "file": "reports/trait_gap_generation/rubrics/alignment_humanize.md"
+        },
+        "label_form": "judge-display-v1",
+        "resume": false,
+        "allow_dirty": false,
+        "inputs_from": "the registry /Users/roger/Documents/GitHub/assistant-axis/data/candidates/registry.jsonl (4 sweep runs, 4 with an extraction; 710 chunk headings)"
+      },
+      "n_emitted": 10,
+      "confirmed_by": null,
+      "cost_usd": 0.0518,
+      "n_calls": 10,
+      "usage": {
+        "per_model": {
+          "claude-sonnet-5-5": {
+            "model": "claude-sonnet-5-5",
+            "prompt_tokens": 16950,
+            "completion_tokens": 1791,
+            "cost_usd": 0.0518,
+            "n_calls": 10
+          }
+        },
+        "total_cost_usd": 0.0518,
+        "total_prompt_tokens": 16950,
+        "total_completion_tokens": 1791,
+        "n_calls": 10
+      }
+    },
+    {
+      "session_id": "7caec0b608e7",
+      "started_at": "2026-10-21T01:00:12+00:00",
+      "finished_at": "2026-10-21T01:06:25+00:00",
+      "git_sha": "65ac24f4+dirty",
+      "args": {
+        "step": "humanize",
+        "n_inputs": 865,
+        "n_selected": 865,
+        "limit": null,
+        "n_to_send": 855,
+        "transport": "batches",
+        "model": "claude-sonnet-5-5",
+        "budget_usd": 10.0,
+        "estimate_usd": 4.0698,
+        "rubric": {
+          "name": "alignment_humanize",
+          "version": 4,
+          "sha256": "fd37a985eb33104711c5027638ac01362914b25b873f6761948a5325bb9cf52c",
+          "file": "reports/trait_gap_generation/rubrics/alignment_humanize.md"
+        },
+        "label_form": "judge-display-v1",
+        "resume": true,
+        "allow_dirty": false,
+        "inputs_from": "frozen in /Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_inputs.jsonl"
+      },
+      "n_emitted": 842,
+      "confirmed_by": null,
+      "cost_usd": 2.2586,
+      "n_calls": 881,
+      "usage": {
+        "per_model": {
+          "claude-sonnet-5-5:batch": {
+            "model": "claude-sonnet-5-5:batch",
+            "prompt_tokens": 1490557,
+            "completion_tokens": 153611,
+            "cost_usd": 2.2586,
+            "n_calls": 881
+          }
+        },
+        "total_cost_usd": 2.2586,
+        "total_prompt_tokens": 1490557,
+        "total_completion_tokens": 153611,
+        "n_calls": 881
+      }
+    },
+    {
+      "session_id": "4734ec9adf88",
+      "started_at": "2026-10-21T01:07:06+00:00",
+      "finished_at": "2026-10-21T01:07:19+00:00",
+      "git_sha": "65ac24f4+dirty",
+      "args": {
+        "step": "humanize",
+        "n_inputs": 865,
+        "n_selected": 865,
+        "limit": null,
+        "n_to_send": 13,
+        "transport": "live",
+        "model": "claude-sonnet-5-5",
+        "budget_usd": 2.0,
+        "estimate_usd": 0.1239,
+        "rubric": {
+          "name": "alignment_humanize",
+          "version": 4,
+          "sha256": "fd37a985eb33104711c5027638ac01362914b25b873f6761948a5325bb9cf52c",
+          "file": "reports/trait_gap_generation/rubrics/alignment_humanize.md"
+        },
+        "label_form": "judge-display-v1",
+        "resume": true,
+        "allow_dirty": false,
+        "inputs_from": "frozen in /Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_inputs.jsonl"
+      },
+      "n_emitted": 11,
+      "confirmed_by": null,
+      "cost_usd": 0.0924,
+      "n_calls": 18,
+      "usage": {
+        "per_model": {
+          "claude-sonnet-5-5": {
+            "model": "claude-sonnet-5-5",
+            "prompt_tokens": 30474,
+            "completion_tokens": 3146,
+            "cost_usd": 0.0924,
+            "n_calls": 18
+          }
+        },
+        "total_cost_usd": 0.0924,
+        "total_prompt_tokens": 30474,
+        "total_completion_tokens": 3146,
+        "n_calls": 18
+      }
+    },
+    {
+      "session_id": "5baaa7009ece",
+      "started_at": "2026-10-21T01:07:44+00:00",
+      "finished_at": "2026-10-21T01:07:49+00:00",
+      "git_sha": "65ac24f4+dirty",
+      "args": {
+        "step": "humanize",
+        "n_inputs": 865,
+        "n_selected": 865,
+        "limit": null,
+        "n_to_send": 2,
+        "transport": "live",
+        "model": "claude-sonnet-5-5",
+        "budget_usd": 1.0,
+        "estimate_usd": 0.019,
+        "rubric": {
+          "name": "alignment_humanize",
+          "version": 4,
+          "sha256": "fd37a985eb33104711c5027638ac01362914b25b873f6761948a5325bb9cf52c",
+          "file": "reports/trait_gap_generation/rubrics/alignment_humanize.md"
+        },
+        "label_form": "judge-display-v1",
+        "resume": true,
+        "allow_dirty": false,
+        "inputs_from": "frozen in /Users/roger/Documents/GitHub/assistant-axis/data/candidates/runs/alignment_sweep/2026-10-20-humanize/humanize_inputs.jsonl"
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0.0204,
+      "n_calls": 4,
+      "usage": {
+        "per_model": {
+          "claude-sonnet-5-5": {
+            "model": "claude-sonnet-5-5",
+            "prompt_tokens": 6724,
+            "completion_tokens": 693,
+            "cost_usd": 0.0204,
+            "n_calls": 4
+          }
+        },
+        "total_cost_usd": 0.0204,
+        "total_prompt_tokens": 6724,
+        "total_completion_tokens": 693,
+        "n_calls": 4
+      }
+    },
+    {
+      "session_id": "d6f7977667bc",
+      "started_at": "2026-10-21T02:15:44+00:00",
+      "finished_at": "2026-10-21T02:16:05+00:00",
+      "git_sha": "0d8f4a4a+dirty",
+      "args": {
+        "step": "humanize-submit",
+        "n_candidates": 863,
+        "n_kept": 0,
+        "old_runs": [
+          "2026-10-10-full",
+          "2026-10-11-b",
+          "2026-10-11-papers",
+          "2026-10-11-usage"
+        ],
+        "already_retracted": [],
+        "relabel": true,
+        "by": "RogerDOX14w",
+        "reason": "Roger 2026-10-20: the alignment sweep rewritten in its closest human phrasing as alignment_sweep/2026-10-20-humanize, which replaces the rows of the old runs",
+        "allow_unanswered": true,
+        "n_unanswered": 2,
+        "force_retract": false,
+        "predicted_blocks": {}
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}

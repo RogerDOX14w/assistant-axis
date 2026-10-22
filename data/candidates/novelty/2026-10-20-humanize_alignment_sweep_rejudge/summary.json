@@ -1,0 +1,507 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 358,
+    "n_decided": 358,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "decided_in_this_run": 279,
+      "not_a_trait": 1
+    },
+    "by_decision": {
+      "new": 280,
+      "covered": 78
+    },
+    "by_reason": {
+      "overlap": 354,
+      "exact_label": 4
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 61,
+        "new": 88
+      },
+      "4": {
+        "new": 192,
+        "covered": 17
+      }
+    },
+    "exact_label": {
+      "corpus": 3,
+      "queue": 1
+    },
+    "pairs_judged_per_candidate": {
+      "0": 4,
+      "1": 82,
+      "2": 44,
+      "3": 54,
+      "4": 51,
+      "5": 40,
+      "6": 39,
+      "7": 21,
+      "8": 12,
+      "9": 4,
+      "10": 3
+    },
+    "pairs_judged_total": 1279,
+    "pairs_judged_mean": 3.613,
+    "listed_per_candidate_mean": 17.017,
+    "shortlist_length": {
+      "0": 4,
+      "1": 30,
+      "2": 41,
+      "3": 59,
+      "4": 69,
+      "5": 48,
+      "6": 55,
+      "7": 25,
+      "8": 15,
+      "9": 5,
+      "10": 3
+    },
+    "early_exit_depth": {
+      "1": 53,
+      "2": 11,
+      "3": 6,
+      "4": 3,
+      "5": 1
+    },
+    "escalations": {
+      "at_cut_off": 51,
+      "below_cut_off": 236
+    },
+    "rescues": 5,
+    "review_flags": {
+      "sonnet_below_opus_at": 25,
+      "both_similar": 1
+    },
+    "pair_completions": 45,
+    "pair_completion_for": {
+      "accepts_legitimate_oversight#1": [
+        "controlling"
+      ],
+      "accepts_oversight#1": [
+        "controlling"
+      ],
+      "bends_to_instructions#1": [
+        "disobedient"
+      ],
+      "blindly_compliant#1": [
+        "unflinching"
+      ],
+      "bluffs_confidently#1": [
+        "exploratory"
+      ],
+      "cold_and_lecturing#1": [
+        "authoritative_baumrind"
+      ],
+      "complies_despite_objecting#1": [
+        "disobedient"
+      ],
+      "complies_regardless_of_harm#1": [
+        "disobedient",
+        "strong_willed"
+      ],
+      "concise_and_conversational#1": [
+        "chattering"
+      ],
+      "considerate_toward_outsiders#1": [
+        "ethnocentric",
+        "civilizationist"
+      ],
+      "engages_sensitive_topics#1": [
+        "diplomatic",
+        "prudish"
+      ],
+      "feels_values_imposed#1": [
+        "authoritative_baumrind"
+      ],
+      "flatly_transactional#1": [
+        "win_win_seeking"
+      ],
+      "freeloads#1": [
+        "just"
+      ],
+      "games_the_goal#1": [
+        "purposive"
+      ],
+      "glosses_over_mismatches#1": [
+        "win_win_seeking"
+      ],
+      "holds_firm_limits#1": [
+        "restrainable"
+      ],
+      "honest_and_kind#1": [
+        "glib"
+      ],
+      "humble_about_power#1": [
+        "overstepping"
+      ],
+      "keeps_content_non_explicit#1": [
+        "obscene"
+      ],
+      "manipulates_and_fosters_dependence#1": [
+        "authoritative_baumrind"
+      ],
+      "over_asks_permission#1": [
+        "overstepping"
+      ],
+      "principled_but_accommodating#1": [
+        "fundamentalist"
+      ],
+      "protective_of_people#1": [
+        "bullying"
+      ],
+      "protects_privacy#1": [
+        "nosy"
+      ],
+      "protects_the_vulnerable#1": [
+        "bullying"
+      ],
+      "reads_in_implications#1": [
+        "autistic"
+      ],
+      "reads_intent#1": [
+        "autistic"
+      ],
+      "reads_the_moment#1": [
+        "future_oriented"
+      ],
+      "reflexively_refuses#1": [
+        "foot_dragging",
+        "resigned"
+      ],
+      "refuses_by_reflex#1": [
+        "foot_dragging"
+      ],
+      "refuses_harm_under_pressure#1": [
+        "restrainable"
+      ],
+      "refuses_illegitimate_power_grabs#1": [
+        "resigned"
+      ],
+      "resists_correction#1": [
+        "restrainable"
+      ],
+      "respects_chain_of_command#1": [
+        "foot_dragging"
+      ],
+      "respects_privacy#1": [
+        "meddling",
+        "nosy"
+      ],
+      "satisfies_the_letter_only#1": [
+        "disobedient"
+      ],
+      "seizes_control#1": [
+        "subversive"
+      ],
+      "steers_vulnerable_people_away#1": [
+        "bullying"
+      ],
+      "unconditionally_compliant#1": [
+        "foot_dragging",
+        "strong_willed"
+      ],
+      "unmoved_by_pressure#1": [
+        "resigned",
+        "restrainable"
+      ],
+      "warmly_natural#1": [
+        "glib"
+      ],
+      "wary_of_manipulation#1": [
+        "flattering"
+      ],
+      "willing_to_refuse#1": [
+        "restrainable"
+      ],
+      "writes_anything_asked#1": [
+        "foot_dragging"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 354
+      },
+      "answers": {
+        "opposed": 1810,
+        "unrelated": 2620,
+        "similar": 1570,
+        "unsure": 24
+      },
+      "final": {
+        "opposed": 1810,
+        "similar": 1577,
+        "unrelated": 2637
+      },
+      "candidates_with_unsure_reasked": 18
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 354,
+        "input": 637798,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 1297,
+        "input": 198976,
+        "cache_write": 574,
+        "cache_read": 733572,
+        "calls_with_read": 1278,
+        "read_share_of_input": 0.7861,
+        "hit_rate_calls": 0.9854
+      },
+      "claude-opus-5-5": {
+        "calls": 287,
+        "input": 41429,
+        "cache_write": 48790,
+        "cache_read": 115948,
+        "calls_with_read": 202,
+        "read_share_of_input": 0.5624,
+        "hit_rate_calls": 0.7038
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5:batch": 0.165511
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5:batch": 0.022877
+      },
+      "overlap": {
+        "claude-sonnet-5-5:batch": 0.791413,
+        "claude-opus-5-5:batch": 0.590866
+      }
+    },
+    "spend_usd": 1.571484,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5:batch": {
+          "model": "claude-haiku-5-5:batch",
+          "prompt_tokens": 637798,
+          "completion_tokens": 534486,
+          "cost_usd": 0.1655,
+          "n_calls": 354
+        },
+        "claude-opus-5-5:batch": {
+          "model": "claude-opus-5-5:batch",
+          "prompt_tokens": 150523,
+          "completion_tokens": 28982,
+          "cost_usd": 0.5909,
+          "n_calls": 287
+        },
+        "claude-sonnet-5-5:batch": {
+          "model": "claude-sonnet-5-5:batch",
+          "prompt_tokens": 272970,
+          "completion_tokens": 108264,
+          "cost_usd": 0.8143,
+          "n_calls": 1297
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 6281,
+          "completion_tokens": 0,
+          "cost_usd": 0.0008,
+          "n_calls": 5
+        }
+      },
+      "total_cost_usd": 1.5715,
+      "total_prompt_tokens": 1067572,
+      "total_completion_tokens": 671732,
+      "n_calls": 1943
+    },
+    "rules": [
+      "m3_rules_3"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 26,
+    "covered_flagged": 25,
+    "pair_notes": {
+      "rows": 1,
+      "notes": 1,
+      "by_kind": {
+        "pair": 1
+      },
+      "rows_by_decision": {
+        "new": 1
+      }
+    },
+    "pair_flag_rows": 18,
+    "floor": {
+      "rows_with_listed_below": 354,
+      "listed_below_total": 3649,
+      "similar_kept_out_total": 79,
+      "rows_with_similar_kept_out": 67
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "8a2e297bb42d68cad58f5cd0cfe918380c2fc9d958bd6ccb887161eb82634ebf",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 38,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 84,
+        "not_a_trait_entry": 78,
+        "status_done": 265,
+        "status_exists": 35,
+        "status_not_adopted": 146,
+        "status_paired": 381,
+        "status_superseded": 18
+      },
+      "entries_sha256": "786eeeb601a9e103083f7f71d78e818a7cd0642a589d782a812c153c5f5cb9bc",
+      "rows_with_queue_in_index": 358,
+      "rows_listing_a_queue_entry": 196,
+      "rows_reading_a_queue_entry": 91,
+      "covered_by_queue": 6,
+      "covered_by_queue_by_status": {
+        "candidate": 6
+      }
+    },
+    "cut_off_bands": {
+      "alignment 0-1": {
+        "new": 57,
+        "covered": 44
+      },
+      "alignment 2": {
+        "covered": 17,
+        "new": 31
+      },
+      "alignment 3": {
+        "new": 192,
+        "covered": 17
+      }
+    },
+    "partners_skipped": {
+      "rows": 287,
+      "partners": 649,
+      "by_relation": {
+        "unrelated": 560,
+        "opposed": 89
+      },
+      "by_where": {
+        "shortlist": 646,
+        "opposite": 3
+      },
+      "est_readings_saved": {
+        "sonnet": 649,
+        "opus": 24.0
+      },
+      "est_saving_usd_live": 0.8655
+    },
+    "batch_id": "2026-10-20-humanize_alignment_sweep_rejudge",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 354,
+        "ok_first": 354,
+        "ok": 354
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 18,
+        "ok_first": 18,
+        "ok": 18
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 1279,
+        "ok_first": 1279,
+        "ok": 1279
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 287,
+        "ok_first": 287,
+        "ok": 287
+      }
+    },
+    "stopped_by_budget": false,
+    "n_copied": 0,
+    "stopped_by_error": null,
+    "resumed_calls": 553,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_3",
+      "version": 3,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25,
+      "renamed_before_queue": true,
+      "cut_off_rule": "graded",
+      "skip_unrelated_partners": true
+    },
+    "label_form": "judge-display-v1"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id 2026-10-20-humanize_alignment_sweep_rejudge --keys-file data/candidates/runs/alignment_sweep/2026-10-20-humanize/rejudge_keys.txt --rescore --resume --transport batches --budget-usd 6",
+      "git_sha": "d39c63df+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist 2026-10-20-humanize_alignment_sweep_rejudge"
+    },
+    "produced_at": "2026-10-21T21:33:49+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "seed_queue",
+        "path": "data/seed_queue.json",
+        "fingerprint": "v1:2026-10-15T10:36:06+00:00@3501892",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-15T10:36:06+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "81063b615a621da245283c419b1daf2be1d4c7a85a27c41860c6a6daac6451ff"
+  }
+}

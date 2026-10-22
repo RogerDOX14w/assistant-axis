@@ -1,0 +1,19 @@
+{
+ "generator": "alignment_sweep",
+ "run_id": "2026-10-21-humanize-hand",
+ "made_at": "2026-10-21T02:15:22+00:00",
+ "what": "The two inputs of alignment_sweep/2026-10-20-humanize that Sonnet 5.5 answered three times each only with labels over the four-word cap (bad_value). Labels by Roger (2026-10-21, in chat); glosses Sonnet's last rejected answers (responses.jsonl of 2026-10-20-humanize, 2026-10-21T01:07:49Z), unedited. Submitted by hand; no model call made for this run.",
+ "replaces": {
+  "ignores_authority_levels#1": "ignores chain of command",
+  "lies_despite_instructions#1": "lies against instructions"
+ },
+ "rejected_labels": {
+  "ignores authority levels": [
+   "ignores the chain of command",
+   "disregards the chain of command"
+  ],
+  "lies despite instructions": [
+   "lies despite being told not to"
+  ]
+ }
+}

@@ -1,0 +1,36 @@
+{
+  "n_inputs": 865,
+  "n_answered": 863,
+  "n_unanswered": 2,
+  "n_records": 913,
+  "n_records_failed": 50,
+  "n_refusals": 0,
+  "failures": {
+    "bad_value": 50
+  },
+  "n_changed_flag": 802,
+  "n_differs": 802,
+  "n_label_changed": 383,
+  "n_gloss_changed": 796,
+  "notes": {
+    "gloss length outside 18-32 words": 234,
+    "gloss uses it, its or itself": 184,
+    "label starts with an -ing word": 2,
+    "prose before the object": 1
+  },
+  "n_reviewed_inputs": 4,
+  "run_id": "2026-10-20-humanize",
+  "model": "claude-sonnet-5-5",
+  "transport": "live",
+  "rubric": {
+    "name": "alignment_humanize",
+    "version": 4,
+    "sha256": "fd37a985eb33104711c5027638ac01362914b25b873f6761948a5325bb9cf52c"
+  },
+  "label_form": "judge-display-v1",
+  "n_candidates": 863,
+  "cost_usd_run": 2.4232,
+  "cost_usd_this_session": 0.0204,
+  "parser_version": 1,
+  "at": "2026-10-21T01:07:49+00:00"
+}
