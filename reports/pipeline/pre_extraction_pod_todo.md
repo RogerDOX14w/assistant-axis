@@ -42,6 +42,13 @@ smoke run, then the role-rubric experiment (item 11), ahead of the cap pilot.
   configuration as RunPod stored it, environment by name only, which is how the dropped overrides above
   were confirmed; `pods`, `volumes`.  Run `stock --volumes-only` before choosing a datacenter, and `pod`
   after every deploy.  Stock is RunPod's coarse "Low" / "Medium" / "High"; there are no counts.
+- **The second pod, `roger-aa-2`** (2026-10-22 evening; 1× A100 SXM, 251-GB host): the first pod's A100 PCIe
+  had gone when we tried to restart it (RunPod then offers "Start Pod using CPUs" or a migration), so a new pod
+  went on the same volume.  It came up in about a minute, and the template's start command ran
+  [pipeline/pod/start.sh](../../pipeline/pod/start.sh), which rebuilt the venv by itself in about 2.5 minutes.
+  Its `/dev/shm` was 117 GB (still `noexec`), so the model mirror ran: **691 s cold from the volume** (rsync,
+  about 90 MB/s), after which step 1 (`default`, 500 responses) took 280 s and step 2 175 s.  Stopped with
+  `runpodctl` from inside, as the first pod was.
 - **SSH from the agent's sandbox** goes through the sandbox's own proxy with an HTTP CONNECT relay
   (`.secrets/runpod/ssh_proxy.py`, git-ignored), under Roger's permission rule for
   `ssh -F .secrets/runpod/ssh_config` (his choice of 2026-10-22 over taking ssh out of the sandbox).
