@@ -166,12 +166,22 @@ def cmd_submit(args) -> int:
         d = json.loads(line)
         if "surface" not in d:
             raise SystemExit(f"{args.file}:{i}: row has no 'surface'")
+        role = getattr(args, "entity_type", "trait") == "role"
         cands.append(Candidate(surface=d["surface"], generator=args.generator, run_id=args.run_id,
                                rank=d.get("rank"), score=d.get("score"), gloss_hint=d.get("gloss_hint"),
                                sense_id=int(d.get("sense_id") or 1), source_ref=d.get("source_ref"),
-                               partner_hint=d.get("partner_hint")))
+                               partner_hint=d.get("partner_hint"), entity_type="role" if role else "trait",
+                               kind_guess=d.get("kind_guess") if role else None,
+                               human=d.get("human") if role else None))
+    from assistant_axis.gapgen.registry import _check_role_fields
+    bad = next((b for b in (_check_role_fields({"entity_type": c.entity_type, "kind_guess": c.kind_guess,
+                                                "human": c.human}) for c in cands) if b), None)
+    if bad:
+        print(f"REFUSED: {args.file}: {bad}", file=sys.stderr)
+        return 2
     if args.dry_run:
-        print(f"DRY-RUN: would submit {len(cands)} candidates from {args.file} as {args.generator}/{args.run_id}")
+        print(f"DRY-RUN: would submit {len(cands)} candidates from {args.file} as {args.generator}/{args.run_id}"
+              + (" in role mode" if any(c.entity_type == "role" for c in cands) else ""))
         return 0
     run = start_run(args.generator, args.run_id, args={"file": str(args.file), "via": "gap_registry.py submit"},
                     candidates_dir=args.registry.parent if args.registry != paths.REGISTRY_PATH else None)
@@ -804,6 +814,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--no-relabel", action="store_true",
                     help="submit the rows as given: no adjective sibling for a noun (the M1 validation set, a replay "
                          "that must be judged as given); default: the platform's relabel step (nouns.py)")
+    sp.add_argument("--entity-type", choices=("trait", "role"), default="trait",
+                    help="--file: submit the rows in role mode (coding plan 16): keyed stem|R#sense beside any trait "
+                         "row of the surface, each row's kind_guess and human carried on its source; --from reads each "
+                         "line's own entity_type")
     sp.set_defaults(func=cmd_submit)
     sp = sub.add_parser("import-rows",
                         help="rows of another checkout's registry log (with their filter and novelty blocks) into this "

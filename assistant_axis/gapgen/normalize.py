@@ -117,13 +117,49 @@ def normalize_candidate(surface: str) -> Normalized:
                       content_words=content_words(surface_lc))
 
 
-def make_key(stem: str, sense_id: int = 1) -> str:
-    """Registry key ``f"{stem}#{sense_id}"``."""
-    return f"{stem}#{int(sense_id)}"
+#: The tag a role-aimed row's key carries after its stem (coding plan 16, § 6.1): ``optimist|R#1`` is the role row
+#: of the surface whose trait row is ``optimist#1``.  It is ``entity_id(stem, "roles")``'s suffix, so the key's stem
+#: part is the stem's entity id; a trait key carries none (every key written before 2026-10-22 is a trait key in
+#: this sense, the held role rows included: ``baker#1``).
+ROLE_KEY_TAG = "|R"
+
+
+def make_key(stem: str, sense_id: int = 1, entity_type: str = "trait") -> str:
+    """Registry key: ``f"{stem}#{sense_id}"`` for a trait (the default, as before), and
+    ``f"{entity_id(stem, 'roles')}#{sense_id}"`` (``optimist|R#1``) for a role-aimed row (coding plan 16, § 6.1).
+    A held role row that M1 routed from a trait-aimed submission keeps its plain key; only a candidate submitted
+    in role mode gets the ``|R`` key (``registry.submit_candidates``)."""
+    if entity_type == "trait":
+        return f"{stem}#{int(sense_id)}"
+    if entity_type == "role":
+        from assistant_axis.entity_id import entity_id
+        return f"{entity_id(stem, 'roles')}#{int(sense_id)}"
+    raise ValueError(f"entity_type must be one of {ENTITY_TYPES}, not {entity_type!r}")
+
+
+def parse_key(key: str) -> tuple[str, int, str]:
+    """``(stem, sense_id, entity_type)`` of a registry key: the inverse of :func:`make_key`
+    (``make_key(*parse_key(k)) == k``).  A key with no ``|R`` tag is a trait key."""
+    head, _, sid = str(key).rpartition("#")
+    if not head:
+        raise ValueError(f"not a registry key: {key!r}")
+    if head.endswith(ROLE_KEY_TAG):
+        return head[: -len(ROLE_KEY_TAG)], int(sid), "role"
+    return head, int(sid), "trait"
 
 
 def split_key(key: str) -> tuple[str, int]:
-    stem, _, sid = key.rpartition("#")
-    if not stem:
-        raise ValueError(f"not a registry key: {key!r}")
-    return stem, int(sid)
+    """``(stem, sense_id)`` of a registry key, the stem bare (``optimist|R#1`` gives ``("optimist", 1)``).  Kept to
+    two fields (its callers unpack two and read ``[0]`` as the stem); :func:`parse_key` adds the entity type."""
+    stem, sid, _ = parse_key(key)
+    return stem, sid
+
+
+def entity_type_of_key(key: str) -> str:
+    """``role`` for a key made in role mode (``optimist|R#1``), else ``trait``.  The row's own ``entity_type`` is what
+    the pipeline acts on: a held role row has a plain key and ``entity_type: "role"``."""
+    return parse_key(key)[2]
+
+
+def is_role_key(key: str) -> bool:
+    return entity_type_of_key(key) == "role"

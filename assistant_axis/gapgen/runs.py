@@ -171,7 +171,8 @@ class RunContext:
 
     def record_candidates(self, cands: Iterable) -> int:
         """Append candidates to ``candidates.jsonl`` (deduplicated on
-        ``(surface, sense_id, source_ref)``); count them in ``n_emitted``."""
+        ``(surface, sense_id, source_ref, entity_type)``, a line without ``entity_type`` being a trait's: a role and
+        a trait candidate of one surface are two lines, coding plan 16); count them in ``n_emitted``."""
         path = self.dir / "candidates.jsonl"
         with self._run_lock():
             seen, lines = set(), []
@@ -179,12 +180,13 @@ class RunContext:
                 for line in path.read_text(encoding="utf-8").splitlines():
                     if line.strip():
                         d = json.loads(line)
-                        seen.add((d.get("surface"), d.get("sense_id"), d.get("source_ref")))
+                        seen.add((d.get("surface"), d.get("sense_id"), d.get("source_ref"),
+                                  d.get("entity_type") or "trait"))
                         lines.append(line)
             n_new = 0
             for c in cands:
                 d = asdict(c) if is_dataclass(c) else dict(c)
-                ident = (d.get("surface"), d.get("sense_id"), d.get("source_ref"))
+                ident = (d.get("surface"), d.get("sense_id"), d.get("source_ref"), d.get("entity_type") or "trait")
                 if ident in seen:
                     continue
                 seen.add(ident)
