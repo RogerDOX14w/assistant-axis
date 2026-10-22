@@ -276,3 +276,14 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
     (aligned_artificial_intelligence, now [instrumentally_aligned_ai](../../data/roles/instructions/instrumentally_aligned_ai.json),
     passed 34% in May).  From the peer session's pipeline batch
     ([fix_batch_2026-10-12.md](./fix_batch_2026-10-12.md)).
+    **Run 2026-10-22, ahead of the extraction** (Roger: smoke test, then this; $40 approved), on 30 roles, not
+    60, to stay inside $40 with every arm kept: the five AI-persona roles plus 25 stratified by May's level-2
+    share.  October responses generated on pod `roger-aa-smoke` (step 1 74 min, step 2 69 min, 1× A100 PCIe);
+    135,000 judge calls in 14 batches, **$28.31**, all arms parsed 100% but one reply; vectors compared on the
+    pod; then the pod stopped itself with `runpodctl`.  Code:
+    [role_rubric_experiment.py](../../data_analysis/role_rubric_experiment.py); outputs:
+    [arm_wordings.md](./role_rubric_experiment/arm_wordings.md),
+    [score_analysis.md](./role_rubric_experiment/score_analysis.md),
+    [vector_analysis.md](./role_rubric_experiment/vector_analysis.md), and the blind
+    [reading sheet](./role_rubric_experiment/reading_sheet/) for Roger (the plan's decision rule needs his
+    marks).  Not yet decided.
