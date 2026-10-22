@@ -335,6 +335,9 @@ rubrics, which the role-promotion item below needs too.
   Held while review time is the constraint; naming and submitting them is about $1 of calls plus their review.
   Revisit when review time eases, or when the dashboard shows IPIP's kept clusters still paying (accepted per
   review-minute above the stop rule's line).
+  Reaffirmed 2026-10-22 (Roger): every loose cluster is a pair of statements the two embedders did not both
+  put together; a seeded dozen read as about 3 worth naming ("can't say no", cynical about authority,
+  well- vs ill-informed), 5 duplicates of corpus traits and 4 noise, so perhaps 15-20 rows would reach review.
 
 - **Memberships handled apart from the main review** (QUESTIONS 81, Roger 2026-10-12).  Memberships (religions, nationalities, families, affinities and the rest) are traits and are submitted flagged, but they are not added in full: a representative sample is kept, as the corpus already does for religions and nationalities (Buddhist, Christian, Hindu, Jewish, Muslim, French, German).  They go on a separate track, out of the main review queue.  The registry tags them already (`membership` tag and `membership_kind`, 247 rows across ten kinds), so the track can key on that.  **Trigger:** the first wave in which membership rows reach review.  **To decide then:** the sample for each new `membership_kind` (circumstance, family, affinity and so on), and whether the masked-LM stoplist flags (110 rows in the pilot table) use the same track.
 
