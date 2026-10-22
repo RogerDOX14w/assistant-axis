@@ -36,6 +36,12 @@ smoke run, then the role-rubric experiment (item 11), ahead of the cap pilot.
   torch and vLLM took 8 s.  The `/workspace` venv was not built, so the comparison is still open.
 - **The model download** (`snapshot_download`, 62 GB) took 212 s.
 - **`rsync -a` fails on the volume** (it cannot change ownership): use `rsync -rt`.
+- **The RunPod API, read only**, through [tools/runpod_api.py](../../tools/runpod_api.py) (Roger's read-only
+  key in `.env` as `RUNPOD_API_KEY`): `stock` lists the GPU types in stock per datacenter, with whether it
+  takes network volumes, in one call (the console needs a click per datacenter); `pod <id>` shows a pod's
+  configuration as RunPod stored it, environment by name only, which is how the dropped overrides above
+  were confirmed; `pods`, `volumes`.  Run `stock --volumes-only` before choosing a datacenter, and `pod`
+  after every deploy.  Stock is RunPod's coarse "Low" / "Medium" / "High"; there are no counts.
 - **SSH from the agent's sandbox** goes through the sandbox's own proxy with an HTTP CONNECT relay
   (`.secrets/runpod/ssh_proxy.py`, git-ignored), under Roger's permission rule for
   `ssh -F .secrets/runpod/ssh_config` (his choice of 2026-10-22 over taking ssh out of the sandbox).
