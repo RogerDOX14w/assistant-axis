@@ -47,3 +47,35 @@ def test_both_role_rubrics_are_pinned_at_version_1():
     assert cur["role_kind"][0] == 1 and cur["role_kind"][1].startswith("11b559f0cff50189")
     assert cur["role_gloss"][0] == 1
     assert not [p for p in sr.mismatches() if p.split(":", 1)[0] in ("role_gloss", "role_kind")]
+
+
+def _pass_line(key, kind, *, sha="11b559f0cff50189aaaa", model="claude-haiku-5-5"):
+    return json.dumps({"key": key, "label": key.split("#")[0].split("|")[0], "reading": "r",
+                       "role_pass": {"gloss": "A x is someone who ...", "kind": kind, "kind_unanimous": True,
+                                     "kind_split": False, "batch_id": "roles_pilot_1", "model": model,
+                                     "kind_readings": [{"kind": kind, "reason": "r"}] * 3,
+                                     "prompt_sha256": {"role_kind": sha}}})
+
+
+def test_from_pass_appends_the_stems_that_have_files(tmp_path, capsys):
+    import data_analysis.classify_role_kinds as CRK
+    roles = tmp_path / "roles"
+    roles.mkdir()
+    for s in ("doctor", "bouncer"):
+        (roles / f"{s}.json").write_text(json.dumps({"description": "d"}))
+    side = tmp_path / "role_kinds.json"
+    side.write_text(json.dumps({"schema_version": 1, "model": CRK.MODEL, "prompt_sha256": CRK.PROMPT_SHA,
+                                "roles": {"doctor": {"kind": "occupation"}}}))
+    passf = tmp_path / "role_pass.jsonl"
+    passf.write_text("\n".join([_pass_line("bouncer|R#1", "occupation"), _pass_line("selkie#1", "non_human"),
+                                _pass_line("doctor#1", "occupation"),
+                                _pass_line("golem#1", "non_human", sha="0000000000000000")]) + "\n")
+    assert CRK.from_pass(passf, dry_run=True, out_path=side, roles_dir=roles)["would_append"] == \
+        ["bouncer", "doctor", "selkie"]
+    res = CRK.from_pass(passf, out_path=side, roles_dir=roles)
+    assert res["appended"] == ["bouncer"]
+    assert res["skipped"]["selkie"] == "no role file yet" and res["skipped"]["doctor"] == "a kind on record already"
+    assert "another prompt" in res["skipped"]["golem"]
+    doc = json.loads(side.read_text())
+    assert doc["roles"]["bouncer"]["from"] == "roles_pass:roles_pilot_1" and doc["roles"]["bouncer"]["input"] == "gloss"
+    assert doc["roles"]["bouncer"]["n_parsed"] == 3 and doc["counts"]["occupation"] == 2 and doc["n_roles"] == 2

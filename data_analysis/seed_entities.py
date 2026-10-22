@@ -240,6 +240,26 @@ def seed_document(entry: dict, q: dict, data_dir: Path) -> dict:
     return doc
 
 
+def note_role_kind(entry: dict, data_dir: Path) -> None:
+    """A promoted role's kind (the roles pass's kind call on its gloss, ``gap_gen.role_kind``; coding plan 16) appended
+    to the kinds side-car ``<data_dir>/roles/role_kinds.json`` once its role file is written (``"from":
+    "roles_pass:<batch_id>"``, ``"input": "gloss"``), so that the classifier need not read it again."""
+    import data_analysis.classify_role_kinds as CRK
+    rk = entry["gap_gen"]["role_kind"]
+    rec = {"kind": rk.get("kind"), "split": bool(rk.get("split")), "unanimous": bool(rk.get("unanimous")),
+           "n_parsed": sum(1 for k in rk.get("readings") or [] if k),
+           "readings": [{"kind": k} for k in rk.get("readings") or []],
+           "from": f"roles_pass:{rk.get('batch_id')}", "input": "gloss"}
+    res = CRK.append_records({entry["stem"]: rec}, out_path=Path(data_dir) / "roles" / "role_kinds.json",
+                             roles_dir=instructions_dir(data_dir, "role"), prompt_sha=rk.get("prompt_sha256"),
+                             model=rk.get("model"))
+    if res["appended"]:
+        print(f"KIND {entry['stem']}: {rec['kind']} appended to role_kinds.json", file=sys.stderr)
+    else:
+        print(f"NOTE {entry['stem']}: kind not appended to role_kinds.json ({res['skipped'].get(entry['stem'])})",
+              file=sys.stderr)
+
+
 def cmd_write(args, q: dict, data_dir: Path) -> int:
     sel = select_entries(q, args.stems, args.chunk, args.sub_chunk)
     existing = corpus_stems(data_dir)
@@ -272,6 +292,8 @@ def cmd_write(args, q: dict, data_dir: Path) -> int:
         e["seeded_at"] = date.today().isoformat()
         n_written += 1
         print(f"WROTE {path}")
+        if et == "role" and (e.get("gap_gen") or {}).get("role_kind"):
+            note_role_kind(e, data_dir)
     if n_written and not args.dry_run:
         save_queue(q, args.queue)
         run_tool(["tools/sync_entity_lists.py"], dry_run=False)
