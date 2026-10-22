@@ -1,230 +1,228 @@
 {
   "result": {
     "runs": [
-      "2026-10-17-pilot"
+      "2026-10-21-grid"
     ],
     "counts": {
-      "answers_a": 166,
-      "answers_b": 160,
-      "answers_c": 287,
-      "answers_d": 272,
-      "answers_e": 148
+      "answers_a": 630,
+      "answers_b": 598,
+      "answers_c": 900,
+      "answers_d": 1173,
+      "answers_e": 543
     },
     "string_recovery": {
       "a": {
         "n_corpus": 932,
-        "found": 42,
-        "recall": 0.0451,
-        "via_renamed_from": 2,
+        "found": 104,
+        "recall": 0.1116,
+        "via_renamed_from": 6,
         "queue_n": 136,
-        "queue_found": 2
+        "queue_found": 7
       },
       "b": {
         "n_corpus": 932,
-        "found": 90,
-        "recall": 0.0966,
-        "via_renamed_from": 2,
+        "found": 138,
+        "recall": 0.1481,
+        "via_renamed_from": 3,
         "queue_n": 136,
-        "queue_found": 1
+        "queue_found": 2
       },
       "c": {
         "n_corpus": 932,
-        "found": 137,
-        "recall": 0.147,
-        "via_renamed_from": 5,
+        "found": 228,
+        "recall": 0.2446,
+        "via_renamed_from": 12,
         "queue_n": 136,
-        "queue_found": 9
+        "queue_found": 14
       },
       "d": {
         "n_corpus": 932,
-        "found": 33,
-        "recall": 0.0354,
-        "via_renamed_from": 3,
+        "found": 159,
+        "recall": 0.1706,
+        "via_renamed_from": 6,
         "queue_n": 136,
-        "queue_found": 3
+        "queue_found": 14
       },
       "e": {
         "n_corpus": 932,
-        "found": 164,
-        "recall": 0.176,
-        "via_renamed_from": 7,
+        "found": 385,
+        "recall": 0.4131,
+        "via_renamed_from": 20,
         "queue_n": 136,
-        "queue_found": 5
+        "queue_found": 20
       },
       "all": {
         "n_corpus": 932,
-        "found": 308,
-        "recall": 0.3305,
-        "via_renamed_from": 15,
+        "found": 487,
+        "recall": 0.5225,
+        "via_renamed_from": 27,
         "queue_n": 136,
-        "queue_found": 15
+        "queue_found": 33
       }
     },
     "label_rule_bite": {
       "a": {
-        "n_items": 2939,
-        "n_refused": 255,
-        "share": 0.0868,
+        "n_items": 10780,
+        "n_refused": 878,
+        "share": 0.0814,
         "by_reason": {
           "non-ASCII": 3,
-          "over 4 words": 252
+          "over 4 words": 875
         }
       },
       "b": {
-        "n_items": 1686,
-        "n_refused": 11,
-        "share": 0.0065,
+        "n_items": 6154,
+        "n_refused": 26,
+        "share": 0.0042,
         "by_reason": {
-          "over 4 words": 11
+          "over 4 words": 26
         }
       },
       "c": {
-        "n_items": 4903,
-        "n_refused": 15,
-        "share": 0.0031,
+        "n_items": 14860,
+        "n_refused": 105,
+        "share": 0.0071,
         "by_reason": {
-          "over 4 words": 15
+          "over 4 words": 105
         }
       },
       "d": {
-        "n_items": 4050,
-        "n_refused": 329,
-        "share": 0.0812,
+        "n_items": 17369,
+        "n_refused": 1118,
+        "share": 0.0644,
         "by_reason": {
-          "non-ASCII": 5,
-          "over 4 words": 324
+          "non-ASCII": 6,
+          "over 4 words": 1112
         }
       },
       "e": {
-        "n_items": 2144,
-        "n_refused": 3,
-        "share": 0.0014,
+        "n_items": 7754,
+        "n_refused": 10,
+        "share": 0.0013,
         "by_reason": {
-          "non-ASCII": 1,
-          "over 4 words": 2
+          "non-ASCII": 4,
+          "over 4 words": 6
         }
       }
     },
     "zipf_below_3": {
       "a": {
-        "n_single_word": 95,
-        "n_below": 74,
-        "share_below": 0.7789,
+        "n_single_word": 230,
+        "n_below": 158,
+        "share_below": 0.687,
         "below": 3.0
       },
       "b": {
-        "n_single_word": 180,
-        "n_below": 106,
-        "share_below": 0.5889,
+        "n_single_word": 274,
+        "n_below": 153,
+        "share_below": 0.5584,
         "below": 3.0
       },
       "c": {
-        "n_single_word": 671,
-        "n_below": 432,
-        "share_below": 0.6438,
+        "n_single_word": 1234,
+        "n_below": 803,
+        "share_below": 0.6507,
         "below": 3.0
       },
       "d": {
-        "n_single_word": 620,
-        "n_below": 529,
-        "share_below": 0.8532,
+        "n_single_word": 2567,
+        "n_below": 2127,
+        "share_below": 0.8286,
         "below": 3.0
       },
       "e": {
-        "n_single_word": 694,
-        "n_below": 396,
-        "share_below": 0.5706,
+        "n_single_word": 1741,
+        "n_below": 990,
+        "share_below": 0.5686,
         "below": 3.0
       }
     },
     "parse_rate": {
       "a": {
-        "n_units": 166,
-        "n_ok": 166,
+        "n_units": 630,
+        "n_ok": 630,
         "rate": 1.0,
-        "n_records": 167,
-        "n_records_ok": 166,
-        "failures": {
-          "stop_reason refusal (reasoning_extraction)": 1
-        }
-      },
-      "b": {
-        "n_units": 160,
-        "n_ok": 160,
-        "rate": 1.0,
-        "n_records": 160,
-        "n_records_ok": 160,
+        "n_records": 630,
+        "n_records_ok": 630,
         "failures": {}
       },
-      "c": {
-        "n_units": 288,
-        "n_ok": 287,
-        "rate": 0.9965,
-        "n_records": 292,
-        "n_records_ok": 287,
+      "b": {
+        "n_units": 600,
+        "n_ok": 598,
+        "rate": 0.9967,
+        "n_records": 602,
+        "n_records_ok": 598,
         "failures": {
-          "stop_reason max_tokens": 5
+          "redaction guard": 4
+        }
+      },
+      "c": {
+        "n_units": 900,
+        "n_ok": 900,
+        "rate": 1.0,
+        "n_records": 904,
+        "n_records_ok": 900,
+        "failures": {
+          "stop_reason max_tokens": 4
         }
       },
       "d": {
-        "n_units": 274,
-        "n_ok": 272,
-        "rate": 0.9927,
-        "n_records": 278,
-        "n_records_ok": 272,
-        "failures": {
-          "stop_reason refusal (reasoning_extraction)": 6
-        }
+        "n_units": 1173,
+        "n_ok": 1173,
+        "rate": 1.0,
+        "n_records": 1173,
+        "n_records_ok": 1173,
+        "failures": {}
       },
       "e": {
-        "n_units": 148,
-        "n_ok": 148,
+        "n_units": 543,
+        "n_ok": 543,
         "rate": 1.0,
-        "n_records": 148,
-        "n_records_ok": 148,
+        "n_records": 543,
+        "n_records_ok": 543,
         "failures": {}
       }
     },
     "roles": {
-      "n_held_roles": 5,
-      "n_majority_role_kind": 16,
-      "n_both": 1,
-      "n_either": 20
+      "n_held_roles": 15,
+      "n_majority_role_kind": 74,
+      "n_both": 2,
+      "n_either": 87
     },
     "verbalized": {
       "a": {
-        "n_prompts": 164,
-        "stage1_unique": 2594,
-        "stage2_added": 2624,
-        "added_share": 1.0116,
-        "m1_reject_stage1": 0.0306,
-        "m1_filtered_stage1": 98,
+        "n_prompts": 630,
+        "stage1_unique": 9124,
+        "stage2_added": 9492,
+        "added_share": 1.0403,
+        "m1_reject_stage1": 0.0336,
+        "m1_filtered_stage1": 447,
         "m1_reject_added": 0.0,
-        "m1_filtered_added": 5,
+        "m1_filtered_added": 39,
         "adopt_by_rule": true,
         "rule": "adopt if added share >= 0.2 and reject rate <= 1.5 x stage 1's"
       },
       "e": {
-        "n_prompts": 108,
-        "stage1_unique": 699,
-        "stage2_added": 784,
-        "added_share": 1.1216,
-        "m1_reject_stage1": 0.0677,
-        "m1_filtered_stage1": 561,
-        "m1_reject_added": 0.108,
-        "m1_filtered_added": 287,
+        "n_prompts": 541,
+        "stage1_unique": 2572,
+        "stage2_added": 3272,
+        "added_share": 1.2722,
+        "m1_reject_stage1": 0.0797,
+        "m1_filtered_stage1": 1908,
+        "m1_reject_added": 0.138,
+        "m1_filtered_added": 971,
         "adopt_by_rule": false,
         "rule": "adopt if added share >= 0.2 and reject rate <= 1.5 x stage 1's"
       },
       "all": {
-        "n_prompts": 272,
-        "stage1_unique": 3263,
-        "stage2_added": 3390,
-        "added_share": 1.0389,
-        "m1_reject_stage1": 0.0644,
-        "m1_filtered_stage1": 637,
-        "m1_reject_added": 0.1028,
-        "m1_filtered_added": 282,
+        "n_prompts": 1171,
+        "stage1_unique": 11431,
+        "stage2_added": 12617,
+        "added_share": 1.1038,
+        "m1_reject_stage1": 0.0752,
+        "m1_filtered_stage1": 2127,
+        "m1_reject_added": 0.1392,
+        "m1_filtered_added": 941,
         "adopt_by_rule": false,
         "rule": "adopt if added share >= 0.2 and reject rate <= 1.5 x stage 1's"
       }
@@ -437,11 +435,11 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/llm_entropy_generator.py model-test --run-id 2026-10-17-pilot",
-      "git_sha": "59b30d63+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/llm_entropy_generator.py postprocess --run-id 2026-10-21-grid --embedder openai --budget-usd 1",
+      "git_sha": "8d2543de+dirty",
       "author": "Roger Dearnaley",
       "title": "llm_entropy evaluation"
     },
-    "produced_at": "2026-10-18T08:48:51+00:00"
+    "produced_at": "2026-10-21T16:45:30+00:00"
   }
 }

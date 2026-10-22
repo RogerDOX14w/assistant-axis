@@ -1,0 +1,55 @@
+{
+  "n_submitted": 16240,
+  "n_new": 492,
+  "n_merged": 15757,
+  "n_unchanged": 0,
+  "invalid": [],
+  "n_relabelled": 28,
+  "n_keys": 1930,
+  "rows_submitted": 1928,
+  "rows_counted": 488,
+  "rows_already_filtered": 1440,
+  "n_candidates": 16240,
+  "family_split": {
+    "total": 488,
+    "weights": {
+      "a": 4.0,
+      "b": 2.0,
+      "d": 1.5,
+      "e": 1.0,
+      "c": 1.0
+    },
+    "share": {
+      "a": 206,
+      "b": 103,
+      "d": 77,
+      "e": 51,
+      "c": 51
+    },
+    "available": {
+      "a": 7855,
+      "b": 1959,
+      "d": 10689,
+      "e": 376,
+      "c": 8696
+    },
+    "allocated": {
+      "a": 206,
+      "b": 103,
+      "d": 77,
+      "e": 51,
+      "c": 51
+    },
+    "short": {},
+    "unfilled": 0,
+    "need": 488,
+    "taken": {
+      "a": 206,
+      "b": 103,
+      "d": 77,
+      "e": 51,
+      "c": 51
+    },
+    "not_weighted": 0
+  }
+}

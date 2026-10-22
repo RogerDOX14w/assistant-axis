@@ -1,15 +1,15 @@
 {
-  "n_calls": 106,
+  "n_calls": 320,
   "per_model": {
     "text-embedding-3-large": {
       "completion_tokens": 0,
-      "cost_usd": 0.0516,
+      "cost_usd": 0.2088,
       "model": "text-embedding-3-large",
-      "n_calls": 106,
-      "prompt_tokens": 396889
+      "n_calls": 320,
+      "prompt_tokens": 1606220
     }
   },
   "total_completion_tokens": 0,
-  "total_cost_usd": 0.0516,
-  "total_prompt_tokens": 396889
+  "total_cost_usd": 0.2088,
+  "total_prompt_tokens": 1606220
 }
