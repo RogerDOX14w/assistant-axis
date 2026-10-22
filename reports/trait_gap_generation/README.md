@@ -276,6 +276,19 @@ corpus.
 Also needed when this is picked up: whether the cap counts the corpus or each wave; and the role versions of M3's
 rubrics, which the role-promotion item below needs too.
 
+## Queued builds (Roger, 2026-10-22)
+
+Decided, not yet started; in order.
+
+1. **The embedding cache's layout** (Roger, 2026-10-22: build it, queued after the plan 16 build).  The
+  OpenAI cache ([embed.py](../../assistant_axis/gapgen/embed.py), `EmbeddingCache`) is one `.npz` of 1.9 GB that
+  every save rewrites whole (a temp copy, then a rename), so a save needs more than 2 GB free and a failed one
+  leaves a 1.5-1.7 GB `.tmp` orphan (twice on 2026-10-21, when the disk filled).  Replace it with a layout that
+  appends or shards (one file per batch of keys, or an append-only log compacted on demand), with the same
+  `lookup` / `put` / `save` interface, a one-off migration of the existing file, and the manifest kept; the
+  bge and gemma caches are gone (deleted 2026-10-21), so only the OpenAI one migrates.  Until then a save
+  needs the free-space check by hand.
+
 ## Low-priority TODOs
 
 - **Revisit the duplicate signals once review has data** (Roger, 2026-10-14: "we should review once we have more
@@ -330,14 +343,6 @@ rubrics, which the role-promotion item below needs too.
 
 - **Triangle candidates from the structural generator** (Roger, 2026-10-14).  Only plan 09 produces triangle candidates (a mean with its two vices), so handling is semi-manual, not a general solution: at review, a mean's vices may also be queued as a **pair with each other** ("pairing the two opposite vices makes a certain amount of sense"), alongside the triangle; M3's pair detector pairing a vice with a lone mean is corrected at review.
 
-- **TODO: the embedding cache's layout** (Roger, 2026-10-22: build it, queued after the plan 16 build).  The
-  OpenAI cache ([embed.py](../../assistant_axis/gapgen/embed.py), `EmbeddingCache`) is one `.npz` of 1.9 GB that
-  every save rewrites whole (a temp copy, then a rename), so a save needs more than 2 GB free and a failed one
-  leaves a 1.5-1.7 GB `.tmp` orphan (twice on 2026-10-21, when the disk filled).  Replace it with a layout that
-  appends or shards (one file per batch of keys, or an append-only log compacted on demand), with the same
-  `lookup` / `put` / `save` interface, a one-off migration of the existing file, and the manifest kept; the
-  bge and gemma caches are gone (deleted 2026-10-21), so only the OpenAI one migrates.  Until then a save
-  needs the free-space check by hand.
 - **Revisit: IPIP's loose pile** (Roger, 2026-10-14: held for now, revisit the decision).  The ~600 run skipped 114
   clusters (228 statements) too loose to name ([report.md](../../data/candidates/runs/ipip/2026-10-13-g600/report.md)).
   Held while review time is the constraint; naming and submitting them is about $1 of calls plus their review.
