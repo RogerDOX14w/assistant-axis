@@ -574,7 +574,8 @@ class TestM3:
         assert NR.candidate_from_row(released_row(accepted=False), holding="states") == (None, "no_gloss")
         assert NR.candidate_from_row(released_row(), holding="physical") == (None, "not_on_physical_list")
         with pytest.raises(ValueError):
-            NR.candidate_from_row(released_row(), holding="roles")
+            # "roles" was the unknown holding here until coding plan 16 made it the roles pass (2026-10-22)
+            NR.candidate_from_row(released_row(), holding="nationalities")
 
     def test_select_candidates_and_the_source_pass(self):
         from data_analysis.gap_generation import novelty_score as NS

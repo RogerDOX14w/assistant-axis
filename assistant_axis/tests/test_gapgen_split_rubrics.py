@@ -209,10 +209,13 @@ class TestOverlapPins:
         assert set(sr.current_versions(names=sr.OVERLAP_NAMES)) == set(sr.OVERLAP_NAMES)
         # since 2026-10-07 a third set, M3's relation call (coding_plan_m3.md), pinned beside them
         # since 2026-10-08 a fourth, the generators' own rubrics (the Roget head-scope call, QUESTIONS 44)
+        # since 2026-10-22 a fifth, the shared role path's (coding plan 16: role gloss and kind, M3 for roles)
         assert set(sr.PINNED_NAMES) == (set(sr.NAMES) | set(sr.OVERLAP_NAMES) | set(sr.M3_NAMES)
-                                        | set(sr.GENERATOR_NAMES))
+                                        | set(sr.GENERATOR_NAMES) | set(sr.ROLE_NAMES))
         assert not set(sr.M3_NAMES) & (set(sr.NAMES) | set(sr.OVERLAP_NAMES))
         assert not set(sr.GENERATOR_NAMES) & (set(sr.NAMES) | set(sr.OVERLAP_NAMES) | set(sr.M3_NAMES))
+        assert not set(sr.ROLE_NAMES) & (set(sr.NAMES) | set(sr.OVERLAP_NAMES) | set(sr.M3_NAMES)
+                                         | set(sr.GENERATOR_NAMES))
 
     def test_first_pin_is_draft_2_as_signed_off(self):
         rows = sr.read_versions()["prompts"]

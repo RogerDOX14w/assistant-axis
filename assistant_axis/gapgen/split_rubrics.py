@@ -134,6 +134,8 @@ GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 ROLE_FILES: dict[str, str] = {
     "role_gloss": "role_gloss.md",
     "role_kind": "role_kind.md",
+    "relation_roles": "relation_roles.md",
+    "overlap_concept_roles": "overlap_concept_roles.md",
 }
 ROLE_NAMES: tuple[str, ...] = tuple(ROLE_FILES)
 #: Every prompt file pinned in ``versions.json``.

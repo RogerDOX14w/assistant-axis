@@ -180,6 +180,7 @@ from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import physical_pass as PP  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
+from assistant_axis.gapgen import roles_pass as RP  # noqa: E402
 from assistant_axis.gapgen import states_pass as SP  # noqa: E402
 from assistant_axis.gapgen import split_rubrics as sr  # noqa: E402
 from assistant_axis.gapgen.batches import AUTO_BATCH_FROM, BatchTransport, choose_transport  # noqa: E402
@@ -193,8 +194,9 @@ logger = logging.getLogger("novelty_score")
 
 DEFAULT_SCAN_SAMPLE = 100
 #: ``--holding``: the pass's name -> the ``holding`` value of the rows it reads (the physical list; the rows the
-#: states pass released).
-PASS_LISTS = {PP.HOLDING: PP.HOLDING, SP.PASS_NAME: SP.RELEASED_HOLDING}
+#: states pass released; the roles list, whose pass also reads role-aimed rows M1 routed to the role flow,
+#: ``roles_pass.is_role_row``).
+PASS_LISTS = {PP.HOLDING: PP.HOLDING, SP.PASS_NAME: SP.RELEASED_HOLDING, RP.HOLDING: RP.HOLDING}
 PILOT_POOLS_DIR = paths.DATA_CANDIDATES / "pools" / "m3_pilot"
 
 
@@ -233,6 +235,49 @@ def _load_m3_rubrics(rubrics_dir: Optional[Path] = None) -> dict:
     return {"overlap": {k: a[k] for k in ("name", "text", "version", "sha256")}, "relation": rel}
 
 
+def load_role_rubrics(rubrics_dir: Optional[Path] = None) -> dict:
+    """The roles pass's M3 rubrics (coding plan 16, § 7a.3-7a.4), in :func:`load_m3_rubrics`'s shape: the overlap call
+    ``overlap_concept_roles`` and the relation call ``relation_roles``, as pinned; refuses a text that is not its
+    latest pin."""
+    probs = [p for p in sr.mismatches(rubrics_dir) if p.split(":", 1)[0] in sr.ROLE_NAMES]
+    if probs:
+        raise RubricError("; ".join(probs) + "\n" + sr.bump_command(probs))
+    pins = sr.current_versions(rubrics_dir, sr.ROLE_NAMES)
+    out = {}
+    for key, name in (("overlap", "overlap_concept_roles"), ("relation", "relation_roles")):
+        text = sr.load_prompt(name, rubrics_dir)
+        out[key] = {"name": name, "text": text, "version": pins[name][0], "sha256": sr.sha256(text)}
+    return out
+
+
+def role_settings(cfg) -> dict:
+    """The role index's settings (decision 11 of plan 16): M2's trait settings (the covered space's variant) with the
+    role query form :data:`novelty.DEFAULT_ROLE_QUERY_FORM`, unless the metric config's ``roles`` section (written by
+    ``retrieval-check`` when the check fell below 95% and an arm did better) says otherwise.  ``{"query_form",
+    "variant", "source"}``."""
+    r = dict(getattr(cfg, "roles", None) or {})
+    return {"query_form": r.get("query_form") or NV.DEFAULT_ROLE_QUERY_FORM,
+            "variant": r.get("variant") or cfg.covered["space"]["variant"],
+            "source": "metric_config.roles" if r else "M2's trait settings (metric_config.covered)"}
+
+
+def resolve_query_form(args, holding: Optional[str], cfg=None) -> Optional[str]:
+    """``--query-form`` for this run, or why it is refused: a trait run takes :data:`novelty.QUERY_FORMS` (default
+    ``gloss_w14``); a roles run :data:`novelty.ROLE_QUERY_FORMS` (default the role setting, :func:`role_settings`)."""
+    v = getattr(args, "query_form", None)
+    if holding == RP.HOLDING:
+        if v is None:
+            return role_settings(cfg)["query_form"] if cfg is not None else NV.DEFAULT_ROLE_QUERY_FORM
+        if v not in NV.ROLE_QUERY_FORMS:
+            raise SystemExit(f"--query-form {v}: a roles run embeds a role gloss ({', '.join(NV.ROLE_QUERY_FORMS)})")
+        return v
+    if v is None:
+        return NV.DEFAULT_QUERY_FORM
+    if v not in NV.QUERY_FORMS:
+        raise SystemExit(f"--query-form {v}: a trait run takes {', '.join(NV.QUERY_FORMS)}")
+    return v
+
+
 def parse_run(value: str) -> tuple[str, str]:
     gen, sep, run_id = value.partition("/")
     if not sep:
@@ -265,8 +310,13 @@ def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool =
         sel = [r for k, r in sorted(rows.items()) if not r.get("novelty")]
     out, skipped, waiting = [], Counter(), []
     on_list = PASS_LISTS.get(holding) if holding else None
+    sets = None
     for r in sel:
-        if holding and r.get("holding") != on_list:
+        if holding == RP.HOLDING:
+            if not RP.is_role_row(r):
+                skipped["not_a_role_row"] += 1
+                continue
+        elif holding and r.get("holding") != on_list:
             skipped[f"not_on_{holding}_list"] += 1
             continue
         nv = r.get("novelty") or {}
@@ -280,6 +330,17 @@ def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool =
         if cand is None and holding == PP.HOLDING and why == "no_gloss" and to_gloss is not None:
             cand = PP.provisional_candidate(r)
             waiting.append(r["key"])
+        elif holding == RP.HOLDING and to_gloss is not None and why in (None, "no_gloss") and RP.needs_stage(r):
+            # the roles pass's stage first (role gloss, then the kind readings); a row covered at the exact-label
+            # stage needs neither (coding plan 16: the corpus role stems among the held rows cost no call)
+            if sets is None:
+                sets = role_label_sets_for(Path(args.data_dir))
+            if NV.exact_label_match(r["stem"], sets) is not None:
+                cand = cand or RP.provisional_candidate(r)
+                cand.gloss = cand.gloss if why is None else ""
+            else:
+                cand = cand or RP.provisional_candidate(r)
+                waiting.append(r["key"])
         if cand is None:
             skipped[why] += 1
             continue
@@ -295,15 +356,17 @@ def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool =
     return out, dict(skipped)
 
 
-def queue_record(data_dir: Path, *, hide=()) -> tuple[dict, dict]:
+def queue_record(data_dir: Path, *, hide=(), entity_type: str = "trait") -> tuple[dict, dict]:
     """``(queue traits, record)``: the seed-queue entries of ``<data_dir>/seed_queue.json`` that join the
     similarity search (:func:`novelty.queue_traits`, against the full corpus of ``data_dir``, less ``hide``), and
-    the record ``run.json`` keeps: the selection's, plus the queue file's path and sha256."""
+    the record ``run.json`` keeps: the selection's, plus the queue file's path and sha256.  ``entity_type="role"``:
+    the role entries against the role corpus (the roles pass)."""
     import hashlib
     import data_analysis.seed_entities as se
     qp = Path(data_dir) / "seed_queue.json"
     queue = se.load_queue(qp) if qp.exists() else {"entries": []}
-    qt, rec = NV.queue_traits(queue, NV.load_trait_corpus(data_dir), hide=hide)
+    corpus = NV.load_role_corpus(data_dir) if entity_type == "role" else NV.load_trait_corpus(data_dir)
+    qt, rec = NV.queue_traits(queue, corpus, hide=hide, entity_type=entity_type)
     rec = {"enabled": True, "queue_path": str(qp),
            "queue_sha256": hashlib.sha256(qp.read_bytes()).hexdigest() if qp.exists() else None} | rec
     return qt, rec
@@ -315,7 +378,8 @@ def queue_off_record() -> dict:
 
 
 def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = False,
-               hide=(), queue_search: bool = False) -> tuple[NV.CorpusIndex, dict]:
+               hide=(), queue_search: bool = False, entity_type: str = "trait",
+               variant: Optional[str] = None) -> tuple[NV.CorpusIndex, dict]:
     """The corpus in the covered setting from the embedding cache (``label: description`` in the covered
     representation); a text missing from the cache is embedded only with ``allow_embed`` (charged).  ``hide``:
     stems left out of the corpus before the space is fitted (``recovery.reduced_traits``; ``ValueError`` for a
@@ -325,17 +389,22 @@ def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = Fa
     (:func:`queue_record`): ``label: text`` in the same representation, embedded by the same model (cached),
     projected into the space fitted on the corpus alone, so that no corpus vector moves.  ``info["queue"]`` is
     the record (``queue_off_record`` without it); the index's ``queue_info`` (what every block of the run then
-    carries) is set only when at least one entry joins, so a run whose queue has none is the corpus run exactly."""
+    carries) is set only when at least one entry joins, so a run whose queue has none is the corpus run exactly.
+
+    ``entity_type="role"`` (coding plan 16, § 7b): the role index: the role files (``default.json`` left out,
+    :func:`novelty.load_role_corpus`) and the queue's live role entries, embedded the same way, centred on the role
+    corpus's own mean; ``variant`` overrides the covered space's (the role setting, :func:`role_settings`)."""
     import numpy as np
     from assistant_axis.gapgen import embed as EM
     from assistant_axis.gapgen.recovery import reduced_traits
     from assistant_axis.gapgen.representation import represent
-    traits = NV.load_trait_corpus(data_dir)
+    traits = NV.load_role_corpus(data_dir) if entity_type == "role" else NV.load_trait_corpus(data_dir)
     if hide:
         traits = reduced_traits(traits, hide)
-    qtraits, qrec = queue_record(data_dir, hide=hide) if queue_search else ({}, queue_off_record())
+    qtraits, qrec = (queue_record(data_dir, hide=hide, entity_type=entity_type) if queue_search
+                     else ({}, queue_off_record()))
     cov = cfg.covered
-    rep, variant = cov["representation"], cov["space"]["variant"]
+    rep, variant = cov["representation"], variant or cov["space"]["variant"]
     if cov.get("metric") != "cos":
         raise SystemExit(f"covered.metric {cov.get('metric')!r}: M3 retrieves by cosine")
     live = cfg.live_model
@@ -362,9 +431,20 @@ def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = Fa
     E, Eq = E_all[:n_c], E_all[n_c:]
     settings = {"config_version": cfg.config_version, "model": live["model_id"], "cache_tag": embedder.tag,
                 "representation": rep, "variant": variant, "metric": "cos", "k": cfg.k}
+    if entity_type == "role":
+        settings["entity_type"] = "role"
     qinfo = {k: qrec[k] for k in NR.QUEUE_BLOCK_FIELDS if k in qrec} if qstems else None
     return NV.build_index(traits, E, variant=variant, settings=settings, queue=qtraits or None,
                           E_queue=Eq if qstems else None, queue_info=qinfo), info
+
+
+def role_label_sets_for(data_dir: Path) -> NV.LabelSets:
+    """The roles pass's stage 0: the role stems, the queue's role entries and the role files' ``renamed_from``
+    (covered is decided against roles only, decision 5 of plan 16)."""
+    import data_analysis.seed_entities as se
+    qp = Path(data_dir) / "seed_queue.json"
+    queue = se.load_queue(qp) if qp.exists() else {"entries": []}
+    return NV.label_sets(NV.load_role_corpus(data_dir), queue, entity_type="role")
 
 
 def label_sets_for(data_dir: Path, hide=()) -> NV.LabelSets:
@@ -499,6 +579,9 @@ def source_holding(source: Optional[dict]) -> Optional[str]:
         return PP.HOLDING
     if p == SP.PASS_NAME:
         return SP.PASS_NAME
+    if p == RP.PASS_NAME:
+        raise SystemExit(f"{source['batch_id']} is a roles pass: --redecide, --relation-only and full-scan of a roles "
+                         "batch are not built (coding plan 16 left them out); score a new batch instead")
     raise SystemExit(f"{source['batch_id']}'s run.json names an unknown pass {p!r}")
 
 
@@ -726,6 +809,62 @@ def physical_gloss_stage(*, reg: Registry, to_gloss: list[str], cands: list, ski
     return out
 
 
+def role_pass_stage(*, reg: Registry, to_stage: list[str], cands: list, skipped: dict, out_dir: Path, usage,
+                    batch_id: str, concurrency: int, run_meta: dict, label_form: str = PL.DEFAULT_LABEL_FORM,
+                    transport: str = "live", cap: Optional[float] = None) -> list:
+    """The roles pass's stage (coding plan 16; :mod:`assistant_axis.gapgen.roles_pass`): the role gloss call, then
+    three role kind readings combined by majority, for the rows of ``to_stage`` (a row glossed before gets the kind
+    calls only), charged to the run's ``usage`` (its cap stops it as it stops the rest).  ``transport``: the run's
+    (``batches``: two Message Batches, state in ``role_pass_batches.json``, the system prompts cached for an hour).
+    Each row's block is written to its registry row (field ``role_pass``) as the row finishes, when it has a gloss,
+    and appended to ``<run dir>/role_pass.jsonl``; every response goes to ``role_pass_responses.jsonl`` (a resume
+    replays them).  Returns ``cands`` with each stand-in replaced by the row's candidate; a row whose gloss failed is
+    dropped and counted (``role_pass_failed``).  ``run_meta["role_pass"]`` gets the stage's counts."""
+    from dotenv import load_dotenv
+    import anthropic
+    load_dotenv(_REPO_ROOT / ".env")
+    client = anthropic.AsyncAnthropic(max_retries=0)
+    rows = reg.fold()
+    blocks: dict[str, dict] = {}
+    holder: list = []
+
+    def on_block(key: str, b: dict) -> None:
+        blocks[key] = b
+        if b.get("gloss"):
+            reg.update_many({key: {RP.BLOCK: b}})
+        with open(out_dir / RP.RESULTS_NAME, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(RP.result_line(rows[key], b), ensure_ascii=False) + "\n")
+    factory = None
+    if transport == "batches":
+        factory = lambda r: BatchTransport(r, anthropic.Anthropic(), out_dir / "role_pass_batches.json",  # noqa: E731
+                                           budget_usd=cap)
+    try:
+        RP.run_stage_rows([rows[k] for k in to_stage], client=client, usage=usage, batch_id=batch_id,
+                          records_path=out_dir / RP.RESPONSES_NAME, on_block=on_block, concurrency=concurrency,
+                          label_form=label_form, transport_factory=factory,
+                          cache_ttl=NR.BATCH_CACHE_TTL if transport == "batches" else None, runner_out=holder)
+    finally:
+        run_meta["role_pass"] = {**(run_meta.get("role_pass") or {}), **RP.stage_summary(blocks),
+                                 "transport": transport}
+        if holder:
+            holder[0].warn_parse_rates(logger)
+            run_meta["role_pass"]["parse_rates"] = holder[0].parse_rates()
+            run_meta["role_pass"]["replayed"] = holder[0].stats.get("replayed", 0)
+        atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    logger.info("roles pass stage (%s): %s", transport, json.dumps(RP.stage_summary(blocks)))
+    fresh, waiting, out = reg.fold(), set(to_stage), []
+    for c in cands:
+        if c.key not in waiting:
+            out.append(c)
+            continue
+        cand, _ = RP.candidate_from_row(fresh[c.key])
+        if cand is None:
+            skipped["role_pass_failed"] = skipped.get("role_pass_failed", 0) + 1
+            continue
+        out.append(cand)
+    return out
+
+
 def write_blocks(reg: Registry, states, run_id: str) -> int:
     """The novelty block of every newly decided candidate, through the Registry API, once per (run, key)."""
     cur = reg.fold()
@@ -755,13 +894,18 @@ def _trait_link(stem: Optional[str], label: Optional[str] = None, rel: str = "..
 QUEUE_REL = "../../../seed_queue.json"
 
 
-def _link(stem: Optional[str], labels: dict, queue: Optional[dict] = None) -> str:
+#: A role file, relative to ``data/candidates/novelty/<batch>/`` (the roles pass's decisions.md).
+ROLES_REL = "../../../roles/instructions/"
+
+
+def _link(stem: Optional[str], labels: dict, queue: Optional[dict] = None, rel: Optional[str] = None) -> str:
     """A trait's link in the run's markdown: a seed-queue entry of ``queue`` (``stem -> {"label", "status"}``) to
-    the seed queue, marked as such; anything else to its trait file (:func:`_trait_link`)."""
+    the seed queue, marked as such; anything else to its trait file (:func:`_trait_link`), or with ``rel`` its file
+    there (a roles run's: :data:`ROLES_REL`)."""
     q = (queue or {}).get(stem) if stem else None
     if q is not None:
         return f"[{_md(q.get('label') or stem.replace('_', ' '))}]({QUEUE_REL}) (seed queue, {_md(q.get('status'))})"
-    return _trait_link(stem, labels.get(stem))
+    return _trait_link(stem, labels.get(stem)) if rel is None else _trait_link(stem, labels.get(stem), rel=rel)
 
 
 def queue_map(traits: dict) -> dict:
@@ -837,13 +981,14 @@ def _covered_flagged(nv: dict) -> Optional[dict]:
                  and d.get("stem") == nv.get("covered_by")), None)
 
 
-def _note_text(n: dict, labels: dict, queue: Optional[dict] = None) -> str:
-    return " / ".join(_link(s, labels, queue) for s in n["pair"]) + \
+def _note_text(n: dict, labels: dict, queue: Optional[dict] = None, rel: Optional[str] = None) -> str:
+    return " / ".join(_link(s, labels, queue, rel) for s in n["pair"]) + \
         (f" ({n['kind']})" if n.get("kind") and n["kind"] != "pair" else "")
 
 
 def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode: str = "shortlist",
-                       pass_name: Optional[str] = None, queue: Optional[dict] = None) -> str:
+                       pass_name: Optional[str] = None, queue: Optional[dict] = None,
+                       kinds: Optional[dict] = None) -> str:
     """``decisions.md``: every candidate (label, decision, covered_by, cut-off, the readings that decided it,
     review flags, pair completions), then the review sections (the covered-and-flagged rows of decision 12 with
     both readings and reasons; the both-ends-similar rows of decision 13 with the ends' cosines and any readings
@@ -851,7 +996,9 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
     to ``data/candidates/novelty/<batch>/``).  ``queue`` (:func:`queue_map`): the seed-queue entries the run
     searched, which link to the seed queue, marked; with any, a section lists the rows covered by one."""
     queue = queue or {}
-    L = lambda s: _link(s, labels, queue)  # noqa: E731
+    roles = pass_name == RP.PASS_NAME
+    rel = ROLES_REL if roles else None
+    L = lambda s: _link(s, labels, queue, rel)  # noqa: E731
     order = {"covered": 0, "grey": 1, "new": 2}
     rows = sorted(results, key=lambda r: (order.get(r["novelty"]["decision"], 9), str(r["label"]).lower()))
     n = Counter(r["novelty"]["decision"] for r in results)
@@ -867,6 +1014,18 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
              "Built by `novelty_score.py`; every reading is in `readings.jsonl` beside this file.", "",
              "| candidate | decision | covered by | cut-off | deciding reading | review | pair completion for | "
              "pairs judged | gloss |", "|---|---|---|---|---|---|---|---|---|"]
+    if roles:
+        # the roles pass (coding plan 16): a flat cut-off of 3, the role rubrics, the kind call's kind in a column
+        lines[2] = (f"{len(results)} role candidates: " + ", ".join(f"{n[d]} {d}" for d in ("covered", "grey", "new")
+                                                                   if n[d])
+                    + ".  Cut-off: covered at 3 or more, flat (a sub-role is covered by its parent; roles have no "
+                      "alignment call).  The deciding readings are the role overlap rubric's 0-4 scale "
+                      "(overlap_concept_roles.md; Sonnet 5.5 first, Opus 5.5 where the rule sends it).  "
+                    + _rules_line(results) + _queue_line(results)
+                    + "Built by `novelty_score.py`; every reading is in `readings.jsonl` beside this file.")
+        lines[4] = ("| candidate | kind | decision | covered by | cut-off | deciding reading | review | pair completion "
+                    "for | pairs judged | nearest traits | gloss |")
+        lines[5] = "|---|---|---|---|---|---|---|---|---|---|---|"
     for r in rows:
         nv = r["novelty"]
         cov = nv.get("covered_by")
@@ -878,7 +1037,14 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
         pcf = ", ".join(L(s) for s in nv.get("pair_completion_for") or [])
         review = ", ".join(nv.get("review") or [])
         if nv.get("pair_notes"):
-            review += ": " + "; ".join(_note_text(x, labels, queue) for x in nv["pair_notes"])
+            review += ": " + "; ".join(_note_text(x, labels, queue, rel) for x in nv["pair_notes"])
+        if roles:
+            near = ", ".join(f"{x['stem']} {x['cosine']:.2f}" for x in ((nv.get("cross_type") or {}).get("traits")
+                                                                         or [])[:3])
+            lines.append(f"| {_md(r['label'])} | {_md((kinds or {}).get(r['key']))} | {nv['decision']} | "
+                         f"{L(cov) if (cov in labels or cov in queue) else _md(cov)} | {nv['cut_off']} | {_md(how)} | "
+                         f"{review} | {pcf} | {nv.get('n_pairs_judged', 0)} | {_md(near)} | {_md(r.get('gloss'))} |")
+            continue
         lines.append(f"| {_md(r['label'])} | {nv['decision']} | {L(cov) if (cov in labels or cov in queue) else _md(cov)} | "
                      f"{nv['cut_off']} | {_md(how)} | {review} | {pcf} | "
                      f"{nv.get('n_pairs_judged', 0)} | {_md(r.get('gloss'))} |")
@@ -962,7 +1128,7 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
                 lines.append(f"- pair {L(a)} / {L(b)}: both "
                              f"{d['both']} in the relation call")
             elif d["kind"] == "both_similar":
-                lines.append(f"- both similar: {_note_text({'pair': d['pair'], 'kind': d.get('arrangement')}, labels, queue)} "
+                lines.append(f"- both similar: {_note_text({'pair': d['pair'], 'kind': d.get('arrangement')}, labels, queue, rel)} "
                              "(see \"Both ends similar\" above)")
             elif d["kind"] == "cover_narrower":
                 lines.append(f"- cover by {L(d['stem'])} undone by the broader check (see \"Covers undone by the "
@@ -982,7 +1148,8 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
 
 
 def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, skipped: dict, status: int,
-             error: Optional[BaseException], inputs: list, extra: Optional[dict] = None) -> dict:
+             error: Optional[BaseException], inputs: list, extra: Optional[dict] = None,
+             kinds_of=None) -> dict:
     from assistant_axis.plot_metadata import json_metadata
     usage.write_json(out_dir / "usage.json")
     rp = out_dir / "results.jsonl"
@@ -1010,8 +1177,12 @@ def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, 
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")
     labels = {s: t.label for s, t in runner.traits.items()}
     queue = queue_map(runner.traits) or queue_map_from_results(results)    # an earlier session's entries too
+    kinds = None
+    if run_meta.get("pass") == RP.PASS_NAME and kinds_of is not None:
+        kinds = kinds_of([r["key"] for r in results])
     atomic_write_text(decisions_markdown(results, batch_id=runner.batch_id, labels=labels, mode=runner.mode,
-                                         pass_name=run_meta.get("pass"), queue=queue), out_dir / "decisions.md")
+                                         pass_name=run_meta.get("pass"), queue=queue, kinds=kinds),
+                      out_dir / "decisions.md")
     run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status,
                     stopped_by_error=summary["stopped_by_error"], n_decided=summary["n_decided"],
                     n_stalled=summary["n_stalled"])
@@ -1032,10 +1203,16 @@ def _common_args(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--metric-config", type=Path, default=paths.METRIC_CONFIG_PATH)
     ap.add_argument("--cache-dir", type=Path, default=paths.EMBEDDING_CACHE_DIR)
     ap.add_argument("--rubrics-dir", type=Path, default=None)
-    ap.add_argument("--query-form", choices=NV.QUERY_FORMS, default=NV.DEFAULT_QUERY_FORM,
-                    help="how a candidate is embedded: gloss_w14 (default; metric_config.json's covered.query_form: the "
-                         "gloss alone, 14 words, the form M2 measured recall on) or label_gloss (label: gloss, in the "
-                         "covered representation)")
+    ap.add_argument("--query-form", choices=NV.QUERY_FORMS + NV.ROLE_QUERY_FORMS[:2], default=None,
+                    help="how a candidate is embedded: gloss_w14 (a trait run's default; metric_config.json's "
+                         "covered.query_form: the gloss alone, 14 words, the form M2 measured recall on) or label_gloss "
+                         "(label: gloss, in the covered representation); a roles run (--holding roles): role_gloss_w14 "
+                         "(its default, unless metric_config.json's roles section says otherwise: the role gloss without "
+                         "its 'A/An <label> is' opening, 14 words), role_gloss_w20 or label_gloss")
+    ap.add_argument("--cross-type", dest="cross_type", action=argparse.BooleanOptionalAction, default=None,
+                    help="show on every block the 5 nearest entities of the other kind (coding plan 16, decision 5: "
+                         "information, never a decision): the nearest traits in a roles run (on by default there), the "
+                         "nearest roles in a trait run (off by default: it needs the role corpus's embeddings)")
     ap.add_argument("--transport", choices=("auto", "live", "batches"), default="auto",
                     help=f"auto (default) sends fewer than {AUTO_BATCH_FROM} candidates live, more through the Message "
                          "Batches API")
@@ -1673,6 +1850,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             print(f"REFUSED (--keys-file): {args.keys_file} names no key", file=sys.stderr)
             return 2
     redecide = mode == "shortlist" and bool(getattr(args, "redecide", False))
+    if getattr(args, "query_form", None) is None and getattr(args, "holding", None) != RP.HOLDING:
+        args.query_form = NV.DEFAULT_QUERY_FORM          # a trait run's (a roles run's is resolved with its config)
     if mode == "shortlist":
         bad = _check_score_selection(args, redecide)
         if bad:
@@ -1689,12 +1868,29 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         print("REFUSED: --broader-check is not for full-scan (the full scan replays the walk on its overlap readings "
               "and makes no broader-check reading)", file=sys.stderr)
         return 2
+    # the roles pass (coding plan 16): the role corpus, the role rubrics, the stage before M3, cut-off 3
+    role_run = mode == "shortlist" and not redecide and getattr(args, "holding", None) == RP.HOLDING
+    if role_run and rules.broader_check:
+        print("REFUSED: --broader-check is not for the roles pass (its overlap rubric reads the direction itself: a "
+              "target that is the wider role reads 2)", file=sys.stderr)
+        return 2
     try:
-        rubrics = load_m3_rubrics(args.rubrics_dir, broader=bool(rules.broader_check))
+        rubrics = load_role_rubrics(args.rubrics_dir) if role_run else \
+            load_m3_rubrics(args.rubrics_dir, broader=bool(rules.broader_check))
     except RubricError as exc:
         print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
         return 2
     cfg = MetricConfig.load(args.metric_config)
+    args.query_form = resolve_query_form(args, RP.HOLDING if role_run else None, cfg)
+    rsettings = role_settings(cfg) if role_run else None
+    cross_on = getattr(args, "cross_type", None)
+    cross_on = role_run if cross_on is None else bool(cross_on)
+    if role_run:
+        try:
+            stage_pins = RP.pins(args.rubrics_dir)
+        except ValueError as exc:
+            print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
+            return 2
     reg = Registry(args.registry)
     rows = reg.fold()
     hide_rec = None
@@ -1752,9 +1948,16 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
               "gloss yet and the gloss stage is one; run without --embed-only (--dry-run shows its request first)",
               file=sys.stderr)
         return 2
+    if to_gloss and role_run and getattr(args, "embed_only", False):
+        print(f"REFUSED: --embed-only stops before any LLM call, but {len(to_gloss)} role rows have no role gloss or "
+              "kind yet and the roles pass's stage is one; run without --embed-only (--dry-run shows its request first)",
+              file=sys.stderr)
+        return 2
     cache = EM.EmbeddingCache(args.cache_dir)
     try:
-        index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, hide=hide, queue_search=queue_on)
+        index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, hide=hide, queue_search=queue_on,
+                                       entity_type="role" if role_run else "trait",
+                                       variant=rsettings["variant"] if role_run else None)
     except ValueError as exc:            # a hidden stem the corpus does not have: drawn on another corpus
         print(f"REFUSED (--hide {args.hide}): {exc}", file=sys.stderr)
         return 2
@@ -1772,11 +1975,18 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             print(f"REFUSED: the source's own index is not in the embedding cache ({src_info['n_missing_from_cache']} "
                   f"texts missing: {src_info['missing'][:5]})", file=sys.stderr)
             return 2
+    # cross_type (coding plan 16, decision 5): the other entity type's index, shown on every block, never deciding;
+    # on for a roles run (the nearest traits), --cross-type for a trait run (the nearest roles)
+    cross_kind = ("traits" if role_run else "roles") if cross_on else None
+    cross_index, cross_info = None, None
+    if cross_on:
+        cross_index, cross_info = load_index(cfg, data_dir=data_dir, cache=cache, queue_search=queue_on,
+                                             entity_type="trait" if role_run else "role")
     embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
     texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
-             for c in cands}
+             for c in cands if c.gloss}
     found, miss = cache.lookup(embedder.tag, list(texts.values()))
-    sets = label_sets_for(data_dir, hide)
+    sets = role_label_sets_for(data_dir) if role_run else label_sets_for(data_dir, hide)
     affected_meta, copied_rows, affected_reasons = None, [], {}
     if mode == "shortlist" and getattr(args, "affected_only", False):
         split = affected_only_split(cands, rows=rows, hide=hide, index=index, cfg=cfg, cache=cache, data_dir=data_dir,
@@ -1786,7 +1996,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             return 2
         cands, copied_rows, affected_meta, affected_reasons = split
         texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
-                 for c in cands}
+                 for c in cands if c.gloss}
         found, miss = cache.lookup(embedder.tag, list(texts.values()))
         info["affected"] = dict(affected_meta)
         info["affected_scored"] = sorted(k for k, rs in affected_reasons.items() if rs)
@@ -1811,13 +2021,20 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                               mean_listed=listed_mean or 16.0, relation_text_chars=len(rubrics["relation"]["text"]),
                               trait_chars=_mean_chars(index) if index is not None else 260.0,
                               cand_chars=_cand_chars(cands), transport=transport,
-                              n_embed=len(miss) + index_info["n_queue_missing"], relation_model=relation_model,
+                              n_embed=len(miss) + index_info["n_queue_missing"]
+                              + (index_info["n_corpus_missing"] if role_run else 0)
+                              + ((cross_info or {}).get("n_missing_from_cache") or 0), relation_model=relation_model,
                               broader_model=args.broader_model if rules.broader_check else None,
                               broader_text_chars=len(rubrics["broader"]["text"]) if rules.broader_check else 0)
     use = ("embeddings", "relation", "overlap") if mode == "shortlist" else ("embeddings", "full_scan")
     if holding == PP.HOLDING and mode == "shortlist" and not redecide:
         stages["physical_gloss"] = PP.estimate(len(to_gloss))
         use = ("physical_gloss",) + use
+    n_stage_gloss = sum(1 for k in to_gloss if RP.gloss_of(rows[k]) is None) if role_run else 0
+    if role_run:
+        stages["role_pass"] = RP.estimate(n_stage_gloss, n_kind_only=len(to_gloss) - n_stage_gloss,
+                                          batch=transport == "batches")
+        use = ("role_pass",) + use
     est = Estimate(lines=[x for s in use for x in stages[s].lines])
     plan = {"mode": mode, "n_candidates": len(cands), "n_exact_label": n_exact, "n_to_relation": n_live if mode == "shortlist" else 0,
             "skipped": skipped, "transport": transport, "query_form": args.query_form, "listed_mean": listed_mean,
@@ -1833,6 +2050,14 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         plan["holding"] = holding
         if holding == PP.HOLDING and mode == "shortlist" and not redecide:
             plan["physical_gloss"] = {"n_to_gloss": len(to_gloss), "model": PP.MODEL}
+    if role_run:
+        plan["role_pass"] = {"n_to_stage": len(to_gloss), "n_gloss": n_stage_gloss,
+                             "n_kind_only": len(to_gloss) - n_stage_gloss, "kind_readings": RP.KIND_READINGS,
+                             "model": RP.MODEL, "transport": transport, "step_versions": stage_pins["step_versions"]}
+        plan["role_settings"] = rsettings
+    if cross_kind:
+        plan["cross_type"] = {"kind": cross_kind, "k": NV.CROSS_TYPE_K,
+                              "n_missing_from_cache": (cross_info or {}).get("n_missing_from_cache")}
     redecide_meta, offline_ctx, src_ctx = None, None, None
     embed_queue_first = False
     if redecide and (index is None or miss):
@@ -1964,13 +2189,20 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
             need = {w["key"] for w in wanted} if not embed_queue_first else set()   # a candidate whose calls are
             first = next((i for i, c in enumerate(cands) if c.key in need), None)   # not on record, if any
         else:
-            if to_gloss:
+            if to_gloss and role_run:
+                print(RP.render(rows[to_gloss[0]], label_form=label_form))
+            elif to_gloss:
                 print(PP.render(rows[to_gloss[0]], label_form=label_form))
-            first = next((i for i, c in enumerate(cands) if i in found and c.key not in set(to_gloss)
+            # ``found`` is by position in ``texts`` (a roles run's rows covered at stage 0 have no query text)
+            pos = {k: i for i, k in enumerate(texts)}
+            first = next((i for i, c in enumerate(cands) if pos.get(c.key) in found and c.key not in set(to_gloss)
                           and not (sets and NV.exact_label_match(c.stem, sets, rules=rules))), None)
+            if first is not None and pos.get(cands[first].key) != first:
+                found = dict(found) | {first: found[pos[cands[first].key]]}
         if index is not None and first is not None:
             print(render_for(cands[first], found[first], index, rubrics, relation_seed, cfg.k,
-                             relation_model=relation_model, label_form=label_form))
+                             relation_model=relation_model, label_form=label_form,
+                             list_key="roles" if role_run else "traits"))
         elif not redecide:
             print("(no rendered prompt: no candidate's query embedding is cached yet; the run embeds them first)")
         return 0
@@ -1980,7 +2212,8 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     if status:
         return status
     bad = _resume_model_mismatch(earlier, relation_model) if mode == "shortlist" else None
-    run_pass = {PP.HOLDING: PP.PASS_NAME, SP.PASS_NAME: SP.PASS_NAME}.get(holding) if holding else None
+    run_pass = {PP.HOLDING: PP.PASS_NAME, SP.PASS_NAME: SP.PASS_NAME, RP.HOLDING: RP.PASS_NAME}.get(holding) \
+        if holding else None
     if bad is None and earlier is not None and earlier.get("pass") != run_pass:
         bad = (f"the run's earlier session was {'the ' + earlier['pass'] + ' pass' if earlier.get('pass') else 'a trait run'}, "
                f"this one {'the ' + run_pass + ' pass' if run_pass else 'a trait run'}: a separate batch id per pass")
@@ -2034,6 +2267,13 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         run_meta["pass"] = run_pass
         if holding == PP.HOLDING and mode == "shortlist" and not redecide:
             run_meta["physical_gloss"] = {"model": PP.MODEL, "n_to_gloss": len(to_gloss), **PP.stage_summary({})}
+    if role_run:
+        run_meta["role_pass"] = {"model": RP.MODEL, "n_to_stage": len(to_gloss), "transport": transport,
+                                 "kind_readings": RP.KIND_READINGS, **stage_pins, **RP.stage_summary({})}
+        run_meta["role_settings"] = rsettings
+        run_meta["models"]["role_stage"] = RP.MODEL
+    if cross_kind:
+        run_meta["cross_type"] = plan["cross_type"]
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -2043,10 +2283,11 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
     if args.resume:
         _merge_earlier_usage(usage, out_dir, resume_records)
+    rubric_files = ([paths.RUBRICS_DIR / sr.ROLE_FILES[n] for n in sr.ROLE_NAMES] if role_run else
+                    [paths.RUBRICS_DIR / "overlap_concept.md", paths.RUBRICS_DIR / "relation.md"]
+                    + ([paths.RUBRICS_DIR / NV.BROADER_FILE] if rules.broader_check else []))
     inputs = [current_file_input(dep_key="metric_config", path=args.metric_config),
-              current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "overlap_concept.md",
-                                                            paths.RUBRICS_DIR / "relation.md"]
-                                  + ([paths.RUBRICS_DIR / NV.BROADER_FILE] if rules.broader_check else []))]
+              current_files_input(dep_key="rubrics", paths=rubric_files)]
     if hide_meta:
         inputs.append(current_file_input(dep_key="hidden", path=Path(hide_meta["path"])))
     if queue_meta.get("n_entries") and corpus_info.get("corpus_at") == "current":
@@ -2058,22 +2299,31 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
     status, error, runner = 0, None, None
     try:
         if to_gloss:
-            cands = physical_gloss_stage(reg=reg, to_gloss=to_gloss, cands=cands, skipped=skipped, out_dir=out_dir,
-                                         usage=usage, batch_id=args.batch_id, concurrency=args.concurrency,
-                                         run_meta=run_meta, label_form=label_form)
+            if role_run:
+                cands = role_pass_stage(reg=reg, to_stage=to_gloss, cands=cands, skipped=skipped, out_dir=out_dir,
+                                        usage=usage, batch_id=args.batch_id, concurrency=args.concurrency,
+                                        run_meta=run_meta, label_form=label_form, transport=transport, cap=cap)
+            else:
+                cands = physical_gloss_stage(reg=reg, to_gloss=to_gloss, cands=cands, skipped=skipped, out_dir=out_dir,
+                                             usage=usage, batch_id=args.batch_id, concurrency=args.concurrency,
+                                             run_meta=run_meta, label_form=label_form)
             texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
-                     for c in cands}
+                     for c in cands if c.gloss}
             if not cands:
                 print(f"nothing to score after the gloss stage ({json.dumps(skipped)})", file=sys.stderr)
                 return 0
         if index is None:
             index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True, hide=hide,
-                                           queue_search=queue_on)
+                                           queue_search=queue_on, entity_type="role" if role_run else "trait",
+                                           variant=rsettings["variant"] if role_run else None)
+        if cross_kind and cross_index is None:
+            cross_index, cross_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True,
+                                                 queue_search=queue_on, entity_type="trait" if role_run else "role")
         canary = EM.check_canary(embedder, cfg.canary["texts"], cache, usage=usage,
                                  min_cosine=cfg.canary.get("min_cosine", EM.CANARY_MIN_COSINE))
         run_meta["canary"] = canary
-        keys = [c.key for c in cands]
-        E = EM.embed_texts(embedder, [texts[k] for k in keys], cache=cache, usage=usage)
+        keys = [c.key for c in cands if c.key in texts]
+        E = EM.embed_texts(embedder, [texts[k] for k in keys], cache=cache, usage=usage) if keys else []
         vectors = dict(zip(keys, E))
         if getattr(args, "embed_only", False):
             # the candidates are embedded (cached, charged to this run's usage.json); no LLM call is made, so
@@ -2100,7 +2350,9 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                   relation_seed=relation_seed,
                                   replay_records=source["records"] if redecide else (),
                                   extra_block=extra_block or None, relation_model=relation_model,
-                                  label_form=label_form, broader_model=args.broader_model)
+                                  label_form=label_form, broader_model=args.broader_model,
+                                  cross_index=cross_index if cross_kind else None, cross_kind=cross_kind,
+                                  list_key="roles" if role_run else "traits")
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -2120,8 +2372,11 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                extra=({"redecide": redecide_meta} if redecide else {})
                                | ({"hide": hide_meta} if hide_meta else {})
                                | ({"pass": run_pass} if holding else {})
+                               | ({"role_pass": run_meta.get("role_pass")} if role_run else {})
                                | ({"affected_only": affected_meta} if affected_meta else {})
-                               | {"queue_search_record": queue_meta, PL.LABEL_FORM_KEY: label_form})
+                               | {"queue_search_record": queue_meta, PL.LABEL_FORM_KEY: label_form},
+                               kinds_of=(lambda keys: {k: RP.kind_of(reg.fold().get(k) or {}) for k in keys})
+                               if role_run else None)
         else:
             usage.write_json(out_dir / "usage.json")
             run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
@@ -2725,16 +2980,16 @@ def select_scan_sample(rows: dict, args, holding: Optional[str] = None) -> tuple
 
 def render_for(cand: NR.M3Candidate, e_raw, index: NV.CorpusIndex, rubrics: dict, batch_id: str, k: int,
                *, exclude: tuple = (), relation_model: str = NR.RELATION_MODEL, overlap: bool = True,
-               label_form: str = PL.DEFAULT_LABEL_FORM) -> str:
+               label_form: str = PL.DEFAULT_LABEL_FORM, list_key: str = "traits") -> str:
     """The relation request (on ``relation_model``) and, unless ``overlap`` is false, the first overlap
     request for one candidate, as the models receive them (labels in ``label_form``: the judge display form for a
-    new run)."""
+    new run; the relation call's list under ``list_key``: ``roles`` for the roles pass)."""
     from assistant_axis.gapgen.llm import request_params
     q = index.project(e_raw)
     listed = NV.expand(index.retrieve(q, k, exclude=exclude), index.traits, lambda s: index.cosine_to(q, s))
     order = NV.relation_order([x.stem for x in listed], batch_id, cand.key)
     user = NV.render_relation_user(cand.label, cand.gloss, [(index.traits[s].label, index.traits[s].description)
-                                                            for s in order], label_form=label_form)
+                                                            for s in order], label_form=label_form, list_key=list_key)
     p = request_params(model=relation_model, system=rubrics["relation"]["text"], user=user,
                        max_tokens=NR.RELATION_MAX_TOKENS, temperature=NR.TEMPERATURE, cache_system=False)
     head = {k2: v for k2, v in p.items() if k2 not in ("system", "messages")}
@@ -2743,7 +2998,8 @@ def render_for(cand: NR.M3Candidate, e_raw, index: NV.CorpusIndex, rubrics: dict
     listing = "\n".join(f"  {x.stem}: cosine {x.cosine:.3f}, {x.via}" + (f" rank {x.rank}" if x.rank else
                                                                            f" from {', '.join(x.expanded_from)}")
                         + (f", partners {', '.join(x.partners)}" if x.partners else "") for x in listed)
-    top = f"=== candidate {cand.key} ({cand.label}), {len(listed)} listed traits (not shown to the model) ===\n{listing}\n"
+    what = "roles" if list_key == "roles" else "traits"
+    top = f"=== candidate {cand.key} ({cand.label}), {len(listed)} listed {what} (not shown to the model) ===\n{listing}\n"
     if not overlap:
         return top + relation_text
     first = listed[0].stem
@@ -2755,7 +3011,7 @@ def render_for(cand: NR.M3Candidate, e_raw, index: NV.CorpusIndex, rubrics: dict
                         max_tokens=NR.OVERLAP_MAX_TOKENS, temperature=NR.TEMPERATURE, cache_system=True)
     ohead = {k2: v for k2, v in po.items() if k2 not in ("system", "messages")}
     return (top + relation_text +
-            f"=== overlap call on the nearest trait, request settings {json.dumps(ohead)}, system block cache_control "
+            f"=== overlap call on the nearest {what[:-1]}, request settings {json.dumps(ohead)}, system block cache_control "
             f"{json.dumps(po['system'][0].get('cache_control'))} ===\n--- user ---\n{ou}\n")
 
 
@@ -2934,6 +3190,9 @@ def cmd_render(args) -> int:
     from assistant_axis.gapgen.retrieval import query_text as gloss_query
     cfg = MetricConfig.load(args.metric_config)
     cache = EM.EmbeddingCache(args.cache_dir)
+    if getattr(args, "pass_", "traits") == RP.PASS_NAME:
+        return render_roles(args, cfg, cache)
+    args.query_form = resolve_query_form(args, None, cfg)
     index, info = load_index(cfg, data_dir=args.data_dir, cache=cache, queue_search=resolve_queue_search(args))
     if index is None:
         raise SystemExit(f"corpus (or seed-queue) texts not in the embedding cache: {info}")
@@ -2961,6 +3220,68 @@ def cmd_render(args) -> int:
     if v is None:
         raise SystemExit(f"the query text of {cand.key} is not in the embedding cache (no paid call here): {text!r}")
     print(render_for(cand, v, index, rubrics, args.batch_id or "render", cfg.k, exclude=exclude))
+    return 0
+
+
+def render_roles(args, cfg, cache) -> int:
+    """``render --pass roles`` (coding plan 16, task 6): the relation and overlap requests of the roles pass for one
+    candidate, as the models receive them, from cached embeddings only (no call).  ``--key K``: a role row of the
+    registry with its role gloss (the stage must have glossed it) and its cached query embedding.  ``--stand-in
+    STEM``: a corpus role standing in for a candidate, itself hidden: its description stands in for a role gloss and
+    its cached corpus embedding (``label: description``) for the query embedding, so the listed roles are the
+    corpus's real nearest."""
+    from assistant_axis.gapgen import embed as EM
+    from assistant_axis.gapgen.representation import represent
+    rs = role_settings(cfg)
+    args.query_form = resolve_query_form(args, RP.HOLDING, cfg)
+    index, info = load_index(cfg, data_dir=args.data_dir, cache=cache, queue_search=resolve_queue_search(args),
+                             entity_type="role", variant=rs["variant"])
+    if index is None:
+        # render from what is cached: the corpus roles whose text is not (yet) embedded are left out, and said so
+        corpus = NV.load_role_corpus(args.data_dir)
+        embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
+        stems = sorted(corpus)
+        found, missing = cache.lookup(embedder.tag, [represent(corpus[x].label, corpus[x].description,
+                                                               cfg.representation) for x in stems])
+        if len(found) < 2:
+            raise SystemExit(f"role corpus texts not in the embedding cache: {info}")
+        keep = {stems[i]: corpus[stems[i]] for i in sorted(found)}
+        import numpy as np
+        E = np.stack([found[i] for i in sorted(found)])
+        index = NV.build_index(keep, E, variant=rs["variant"], settings={"k": cfg.k, "entity_type": "role"})
+        print(f"(rendered without the {len(missing)} corpus roles whose text is not in the embedding cache: "
+              f"{', '.join(stems[i] for i in missing)})")
+    try:
+        rubrics = load_role_rubrics(args.rubrics_dir)
+    except RubricError as exc:
+        # render sends nothing, and is what a rubric is read in before its first pin (working-style: "read the
+        # rendered prompt"): the text on disk, said to be unpinned
+        print(f"(rendering texts that are not pinned yet: {str(exc).splitlines()[0]})")
+        rubrics = {k: {"name": n, "text": sr.load_prompt(n, args.rubrics_dir), "version": None, "sha256": None}
+                   for k, n in (("overlap", "overlap_concept_roles"), ("relation", "relation_roles"))}
+    embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
+    if args.key:
+        row = Registry(args.registry).fold()[args.key]
+        cand, why = RP.candidate_from_row(row)
+        if cand is None:
+            raise SystemExit(f"{args.key}: {why} (a role row needs its role gloss first: score --holding roles runs "
+                             "the stage; --dry-run shows its request)")
+        v = cache.get(embedder.tag, NV.query_text(cand.label, cand.gloss, query_form=args.query_form,
+                                                  representation=cfg.representation))
+        exclude: tuple = ()
+    else:
+        stem = args.stand_in
+        corpus = NV.load_role_corpus(args.data_dir)
+        if stem not in corpus:
+            raise SystemExit(f"{stem}: not a corpus role")
+        t = corpus[stem]
+        cand = RP.RoleCandidate(key=f"{stem}|R#1", stem=stem, label=t.label, gloss=t.description, alignment_score=None,
+                                region=None)
+        v = cache.get(embedder.tag, represent(t.label, t.description, cfg.representation))
+        exclude = (stem,)
+    if v is None:
+        raise SystemExit(f"the query text of {cand.key} is not in the embedding cache (no paid call here)")
+    print(render_for(cand, v, index, rubrics, args.batch_id or "render", cfg.k, exclude=exclude, list_key="roles"))
     return 0
 
 
@@ -3016,7 +3337,11 @@ def build_parser() -> argparse.ArgumentParser:
                          "--run, --keys or --unscored) instead of verdict-trait rows; rows with no gloss first get M1's "
                          "gloss and alignment calls on their accepted reading (the gloss stage), then M3 as for trait "
                          "rows.  states: the states pass v4 (states_pass.py): the rows it moved out of the states queue "
-                         "(holding states_released), with its gloss and alignment score.  The pass is recorded in every "
+                         "(holding states_released), with its gloss and alignment score.  roles: the roles pass (coding "
+                         "plan 16, roles_pass.py): the rows on the roles list and the role-aimed rows M1 routed to the "
+                         "role flow; rows with no role gloss first get the stage (the role gloss call, then three role "
+                         "kind readings; --transport governs it too), then M3 against the role corpus with the role "
+                         "rubrics, cut-off 3, the nearest traits shown (cross_type).  The pass is recorded in every "
                          "block, run.json and summary.json.  One batch id per pass")
     sp.add_argument("--limit", type=int)
     sp.add_argument("--embed-only", action="store_true",
@@ -3118,9 +3443,12 @@ def build_parser() -> argparse.ArgumentParser:
         else:
             g = sp.add_mutually_exclusive_group(required=True)
             g.add_argument("--key")
-            g.add_argument("--stand-in", help="a corpus stem standing in for a candidate (its M1 gloss, itself hidden)")
+            g.add_argument("--stand-in", help="a corpus stem standing in for a candidate (its M1 gloss, itself hidden; "
+                                              "with --pass roles: a corpus role, its description and cached embedding)")
             sp.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
-            sp.add_argument("--query-form", choices=NV.QUERY_FORMS, default=NV.DEFAULT_QUERY_FORM)
+            sp.add_argument("--query-form", choices=NV.QUERY_FORMS + NV.ROLE_QUERY_FORMS[:2], default=None)
+            sp.add_argument("--pass", dest="pass_", choices=("traits", RP.PASS_NAME), default="traits",
+                            help="roles: the roles pass's requests (the role index and rubrics, coding plan 16)")
             sp.add_argument("--batch-id", default=None)
         sp.set_defaults(func=lambda a, argv, f=func: f(a))
     return ap
