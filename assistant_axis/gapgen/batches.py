@@ -78,6 +78,11 @@ MAX_BATCH_REQUESTS = 50_000
 MAX_BATCH_BYTES = 128 * 1024 * 1024
 #: A poll that finds a batch ended more than this long ago says so (a suspended process shows up).
 LATE_ENDED_SECONDS = 600.0
+#: A batch just created can answer 404 for a moment (2026-10-21: retrieved one second after creation,
+#: ``not_found_error``, which ended M3's alignment rejudge until a --resume an hour later collected it).  A 404
+#: this soon after submission is waited out; one later than this is raised (a batch that really is not there).
+NEW_BATCH_GRACE_SECONDS = 300.0
+NEW_BATCH_404_WAIT_SECONDS = 10.0
 #: ``--transport auto``: fewer words than this go live, this many or more through batches.
 AUTO_BATCH_FROM = 300
 
@@ -121,6 +126,11 @@ def split_requests(calls: list, build: Callable[[Any], dict], *, max_requests: O
     if cur:
         chunks.append(cur)
     return chunks
+
+
+def is_not_found(exc: BaseException) -> bool:
+    """An HTTP 404 from the API (``anthropic.NotFoundError``, or any error carrying ``status_code`` 404)."""
+    return getattr(exc, "status_code", None) == 404 or type(exc).__name__ == "NotFoundError"
 
 
 def is_transient_stream_error(exc: BaseException) -> bool:
@@ -292,7 +302,16 @@ class BatchTransport:
             return self.client.messages.batches.retrieve(bid)
 
         while True:
-            b = await self._retrying("retrieve", bid, retrieve)
+            try:
+                b = await self._retrying("retrieve", bid, retrieve)
+            except Exception as exc:  # noqa: BLE001 - only a 404 just after submission is waited out
+                waited = _since(rec.get("submitted_at"))
+                if not is_not_found(exc) or waited is None or waited > NEW_BATCH_GRACE_SECONDS:
+                    raise
+                logger.warning("batch %s: not found %s after submission (a new batch can take a moment to "
+                               "appear); trying again in %ss", bid, _span(waited), NEW_BATCH_404_WAIT_SECONDS)
+                await self.sleep(NEW_BATCH_404_WAIT_SECONDS)
+                continue
             status = _get(b, "processing_status")
             waited = _since(rec.get("submitted_at"))
             if status == "ended":

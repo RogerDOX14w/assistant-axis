@@ -402,6 +402,44 @@ class TestDroppedConnections:
         assert calls["n"] == 1
         bc.batches.retrieve = real
 
+    @staticmethod
+    def _not_found():
+        import anthropic
+        import httpx
+        req = httpx.Request("GET", "https://api.anthropic.com/v1/messages/batches/msgbatch_x")
+        return anthropic.NotFoundError("Message Batch not found", response=httpx.Response(404, request=req), body=None)
+
+    def test_a_new_batch_that_answers_404_at_first_is_waited_out(self, tmp_path):
+        """2026-10-21: a batch retrieved one second after creation answered 404 (not_found_error)."""
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)))
+        real, left = bc.batches.retrieve, {"n": 2}
+
+        def late(bid):
+            if left["n"] > 0:
+                left["n"] -= 1
+                raise self._not_found()
+            return real(bid)
+        bc.batches.retrieve = late
+        r, _, _ = make(tmp_path, bclient=bc)
+        res = r.run(test_items(5))
+        assert left["n"] == 0 and all(x.stage == "classified" for x in res)
+
+    def test_a_404_long_after_submission_is_raised(self, tmp_path, monkeypatch):
+        import anthropic
+        from assistant_axis.gapgen import batches as B
+        monkeypatch.setattr(B, "NEW_BATCH_GRACE_SECONDS", -1.0)      # every batch counts as old
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)))
+        calls = {"n": 0}
+
+        def gone(bid):
+            calls["n"] += 1
+            raise self._not_found()
+        bc.batches.retrieve = gone
+        r, _, _ = make(tmp_path, bclient=bc)
+        with pytest.raises(anthropic.NotFoundError):
+            r.run(test_items(3))
+        assert calls["n"] == 1
+
     def test_the_transient_classes(self):
         import anthropic
         import httpx
