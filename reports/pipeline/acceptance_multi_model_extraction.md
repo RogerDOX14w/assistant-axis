@@ -57,15 +57,17 @@ fakes compared bit for bit with a fixture made from the code before this work (8
 | [tools/tests](../../tools/tests/) | 427 passed |
 | [data_analysis/tests](../../data_analysis/tests/) | 821 passed |
 
-## Smoke runs (pending: the pod)
+## Smoke runs
 
 | family | derived header, as the log printed it | the row's expectation | checks (1)-(6) of § 11 | GPU-hours |
 |---|---|---|---|---|
-| `qwen3` (the first entities of the October run, § 15 Q9) | (not run yet) | the seven, ids `151644 77091 198 151667 271 151668 271` | (not run yet) | |
+| `qwen3` (2026-10-22, a separate launch on 1× A100 PCIe 80 GB, pod `roger-aa-smoke`, entities `default` and [absolutist](../../data/traits/instructions/absolutist.json), 30 questions, git f8a3a417) | `['<\|im_start\|>', 'assistant', '\n', '<think>', '\n\n', '</think>', '\n\n']`, ids `[151644, 77091, 198, 151667, 271, 151668, 271]` | the seven, ids `151644 77091 198 151667 271 151668 271`: **equal** | all pass: (1) header printed and written to `generation_config.json`; (2) side-car check matched before the model loaded (Qwen3's template writes no BOS); (3) no header mismatch, no `HEADER NOT FOUND`, no dropped conversation; (4) `--verify_spans 20`: 20 of 20; (5) vectors `(8, 64, 5120)` float32, `slot_labels` = `body-mean` + the seven; (6) `axis.pt` written, float32 | about 0.1 (step 1 227 s, step 2 119 s, both with model load) |
 | `llama`, `gemma2`, `olmo2` / `olmo3` | (not run; each needs Roger's go) | drafts (`DRAFT_HEADERS`) | | |
 | `gpt_oss` | not runnable (TODO, § 15 Q3) | | | |
 
-GPU-hours used so far: **0**.  Paid calls: **none**.
+The Qwen3 run's other observations: the new response fields are all present (`finish_reason`, `thinking_stripped`, `thinking_suspected`, `question_id`); no thinking leaked (0 stripped, 0 suspected of 300); `default` hit the 512-token cap on 105 of 150 answers, `absolutist` on 58 of 150.  Step 3 ran on the Mac in real time: 150 of 150 parsed, $0.055, 73 output tokens per reply on average; `absolutist` scored 131 of 150 at level 3.  Steps 4 and 5 ran on the pod.
+
+GPU-hours used so far: **about 0.1**.  Paid calls: **150 judge calls, $0.055**.
 
 ## Open rows
 

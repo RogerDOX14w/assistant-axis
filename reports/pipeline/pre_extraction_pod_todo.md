@@ -12,6 +12,34 @@ operations").  The code these items exercise is built off-pod first, by the peer
 "Decisions so far" has every decision, and
 [regeneration_list.md](../code_review_2026-10-12/regeneration_list.md) the data each fix makes stale.
 
+## The first pod (2026-10-22): what it showed
+
+A new RunPod account (a team account; see the auto-memory note on it), volume `Roger_AA_1` (200 GB,
+US-KS-2), pod `roger-aa-smoke` on 1× A100 PCIe 80 GB (16 vCPUs, 125 GB RAM), image
+`runpod/pytorch:1.4.1-cu1281-torch280-ubuntu2404`, start command running
+[pipeline/pod/start.sh](../../pipeline/pod/start.sh) when the checkout exists.  Roger's order that day: the
+smoke run, then the role-rubric experiment (item 11), ahead of the cap pilot.
+
+- **The pod sat at "Initializing" for about an hour** with no container or system logs, then came up by
+  itself.  Nothing was wrong with its configuration; allow for it.
+- **The template's environment overrides did not reach the container**; only the start command did.  The
+  image itself sets `HF_HOME=/workspace/.cache/huggingface/` and `UV_CACHE_DIR=/workspace/.cache/uv/`.  SSH
+  sessions see neither, so `/workspace/pod_env.sh` holds the non-secret settings (the venv path
+  `/root/venvs/assistant-axis`, `UV_LINK_MODE=copy`) and every command sources it.  The OpenAI key is not
+  needed on the pod: step 3 ran on the Mac.
+- **`/dev/shm` is 58 GB and `noexec`** on a 125-GB host, smaller than Qwen3-32B's 62 GB, so the RAM mirror
+  cannot hold the model (the mirror code checks space and skips).  The weights loaded from `/workspace` in
+  under two minutes because the download had left them in the page cache (a full re-read ran at 5.5 GB/s).
+  **A cold load from the volume is untested**; on a pod where it is slow, the fix is a container disk large
+  enough for the mirror (`--tmpfs-dir` on the container disk) or a host with more RAM.
+- **Item 3, the local half:** `uv sync --frozen` into the container-disk venv took 179 s (9.6 GB); importing
+  torch and vLLM took 8 s.  The `/workspace` venv was not built, so the comparison is still open.
+- **The model download** (`snapshot_download`, 62 GB) took 212 s.
+- **`rsync -a` fails on the volume** (it cannot change ownership): use `rsync -rt`.
+- **SSH from the agent's sandbox** goes through the sandbox's own proxy with an HTTP CONNECT relay
+  (`.secrets/runpod/ssh_proxy.py`, git-ignored), under Roger's permission rule for
+  `ssh -F .secrets/runpod/ssh_config` (his choice of 2026-10-22 over taking ssh out of the sandbox).
+
 ## Must run before the extraction
 
 **Order (Roger, 2026-10-13): the cap pilot (item 2) is the first job once the pods are up.**  Its step-1 to
@@ -32,6 +60,12 @@ parameters at launch.
    shell `cp -r` has no marker: rsync copies it again (once), cp refuses it until it is deleted.  And
    P8.3: steps 2 and 4 now return before importing torch when there is nothing to do, and step 3 imports
    no torch at all, which changes what item 3 below measures.
+   **Done 2026-10-22, as a separate launch** (Roger: "maybe just default"; one trait added so steps 3 and 4
+   run too): pod `roger-aa-smoke`, entities `default` and `absolutist`, 30 questions, git f8a3a417.  Every
+   check of item 13's list passed; the side-car, the new response fields and the float32 vectors and axis
+   all behaved.  Results in the smoke-run table of
+   [acceptance_multi_model_extraction.md](./acceptance_multi_model_extraction.md).  Not yet exercised:
+   the model mirror (it could not fit, above), the four-GPU path, and P8.1's exit status on a failing run.
 2. **The response-length cap pilot** ([plan_max_tokens_pilot.md](./plan_max_tokens_pilot.md); about 16
    GPU-hours and $25 batch, over the GPU line: **Roger's go with quoted parameters**).  64 entities at caps
    256 / 512 / 768 / 1024; decides the cap the extraction uses.  Needs P6's `finish_reason` and P8.1 first.
