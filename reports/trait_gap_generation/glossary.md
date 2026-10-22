@@ -909,3 +909,19 @@ dropped.
 A submission sized to about two hours of Roger's review: enough [net-new rows](#net-new) that, at the pilot's
 measured net-new kept share, about 300 are kept (at about 150 terms an hour).  Rows the registry has already
 filtered may fall inside the cut and are submitted, but they do not count toward the 300.
+
+<a id="costly-row"></a>
+### Costly row, and real new traits per costly row
+Roger's measure of a generator's worth (2026-10-20, [QUESTIONS 208](./QUESTIONS.md#L338)), replacing the never-derived 70% trait-and-new target.  A **costly row** is a kept row that costs real review time and gives nothing back: a duplicate M3 read at 2 or below (or never read), or a not-trait.  A duplicate M3 read at 3 or 4 is not costly: the review app groups it with its match, it takes a moment, and it supplies an alternative name.  **Real new traits per costly row** is Roger's T marks on a sample divided by its costly rows: plan 06's families ran from (a) 2.0 to (c) 0.40; corpus frames 0.45 ([213](./QUESTIONS.md#L348)); the structural operators 0.68 ([214](./QUESTIONS.md#L350)).
+
+<a id="probably-covered"></a>
+### Probably covered (by X)
+A proposed merge the review app shows on a row M3 called new on a best reading of 2 (2026-10-20, [QUESTIONS 209](./QUESTIONS.md#L340), option (b)): two or more corpus traits read 2 **and** a second signal (cosine at or above 0.45, a dictionary link, or the persona-space duplicate flag).  On the reviewed rows that rule was 81% merges.  It is never a cut: the row still reaches Roger, with X outlined on the card and `c` ("Covered by X") on the toolbar.  `serve --blind` hides it.
+
+<a id="narrow-pass"></a>
+### Narrow trait, the narrow pass
+A **narrow trait** is a narrower case of a broader corpus or queued trait: humblebragging under self-aggrandizing, debt-averse under frugal (Roger, 2026-10-20, [QUESTIONS 208](./QUESTIONS.md#L338) (3)).  Filling every such gap would make the corpus explode, so **at most one narrow trait per parent goes to review**; the rest are held on the `narrow` holding list.  The **narrow pass** ([narrow_pass.py](../../assistant_axis/gapgen/narrow_pass.py)) asks Haiku 5.5, three readings, whether a kept candidate is narrower than, the same as, broader than or different from each parent M3 read at 2 or more ([rubrics/narrow_direction.md](./rubrics/narrow_direction.md)); `--release` frees a parent's slot when its kept child is rejected or merged in review.  It cannot see a parent M3 never read (debt-averse, [QUESTIONS 211](./QUESTIONS.md#L344)).
+
+<a id="archetype"></a>
+### Archetype (as a role)
+For the role generators (plan 16, decision 6; Roger, 2026-10-21/22): a role name a person could be called outside any story, so it stays (hero, villain, sidekick, fool, trickster, guardian, mentor), as against a **position in a plot**, which only says where a character sits in a narrative and is dropped (protagonist, love interest, foil, deuteragonist).  Pearson's twelve Jungian archetypes (innocent, everyman, hero, caregiver, explorer, rebel, lover, creator, jester, sage, magician, ruler) are generator A's reference list.  Jung's anima and animus are archetypes of a different kind, figures within one psyche, and are not roles here.
