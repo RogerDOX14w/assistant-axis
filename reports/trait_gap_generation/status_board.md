@@ -56,6 +56,7 @@ rows: 5,795 kept awaiting review, 211 reviewed.
 | — | Label-fit check (does a label mean its gloss?) | **8, parked** (survey 2026-10-17: it caught 3 of Roger's 16 problems and flagged 25 of 189 good rows; [readout](../../data/candidates/label_fit_survey/2026-10-17/readout.md)) | kept off the review card; rubric iteration waits for more positives |
 | — | Marking sheets show the review tool's neighbours ([QUESTIONS 208](./QUESTIONS.md#L338)) | **8, finished** (2026-10-20: the llm_entropy, structural and corpus_frames sheets) | nothing |
 | — | [Noun normalization](./coding_plan_noun_normalization.md), gzip-aware records, role kinds | **8, finished** | nothing |
+| — | Embedding cache layout: appends or shards instead of a 2 GB rewrite on every save (the [README](./README.md) TODO) | **1** (Roger, 2026-10-22: build it) | queued after the plan 16 build |
 | — | Promotion and arrangements (the [README](./README.md) TODO) | **1** | this week (Roger, 2026-10-14) |
 
 ## Evaluation
