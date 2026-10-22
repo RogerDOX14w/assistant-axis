@@ -22,7 +22,7 @@ platform work: a generator submits `Candidate`s with `entity_type="role"`, a `ki
 `human` guess and a `source_ref` that the review card shows as provenance (§ 6.1, § Frozen interface); the pass,
 R1, R2 and promotion then run as for the pilot.  Nothing in those four generators is planned here.
 
-## Decisions for Roger (open; each with a recommendation)
+## Decisions for Roger (decided 2026-10-22)
 
 1. **ESCO and ISCO-08 (decision 7's condition).**  Findings in § 7d.  ESCO: no page names a licence for the
    classification files themselves, but two official pages say EU-owned content on europa.eu is CC BY 4.0 unless
@@ -33,24 +33,30 @@ R1, R2 and promotion then run as for the pilot.  Nothing in those four generator
    O*NET descriptions, O*NET job titles); leave ISCO-08 out until a licence statement is found, and use only
    ESCO's occupations file, not its ISCO-groups file.  If Roger wants certainty before ESCO runs, the two
    addresses are the Publications Office (op-copyright@publications.europa.eu) and rights@ilo.org.
+   **Decided (Roger, 2026-10-22): (a)**, ESCO as CC BY 4.0 behind a source flag for wave 2 (by the API, so no e-mail address is given), ISCO-08 out.
 2. **A role candidate whose stem is a corpus trait** (specialist, young, optimist's twins): the eleven collisions
    are allowed by policy, but [test_collision_regression.py](../../assistant_axis/tests/test_collision_regression.py)
    fails until `COLLISION_NAMES` is updated, and the twins TODO in [ROLES_TO_ADD.md](../../data/roles/instructions/ROLES_TO_ADD.md)
    may drop some.  **Recommend**: promotion allows it with a loud NOTE naming the trait and the test to update, the
    card shows the trait twin among the nearest traits (decision 5), and Roger decides per case.  The alternative,
    refusing, loses roles the corpus already admits.
+   **Decided (Roger, 2026-10-22): (a)**, allowed with a loud NOTE and the trait twin on the card; Roger decides per case.
 3. **Query form of the retrieval check.**  The role gloss carries its label ("A bouncer is someone who ..."), so a
    query that keeps it finds the role's own description by the label alone.  **Recommend** the production query
    strips the opening "A/An <label> is" (§ 7b), the check is run on that form against 95%, and the label-kept
    form is reported beside it as information.
+   **Decided (Roger, 2026-10-22): (a)**, the label-stripped production form against 95%, the label-kept form reported.
 4. **Pilot transport.**  `--transport auto` sends 300 or more non-exact-label candidates through the Batches API;
    the pilot has about 325 (§ 10) for about $4.  **Recommend** `--transport live` (the under-$20 rule: turnaround
    over the saving).
+   **Decided (Roger, 2026-10-22): (b), batched** (`--transport batches`) for this pilot; his under-$20 real-time rule otherwise stands.
 5. **The 15 state-tagged rows on the roles list** (captive, fugitive, housebound, imprisoned, ostracized, shut-in
    and nine more, routed there by the states pass): **recommend** they stay in the pilot as circumstance
    candidates; their gloss comes from the role gloss call like any other.
+   **Decided (Roger, 2026-10-22): (a)**, they stay, by the "lasts months or years" test, which captive, fugitive, housebound, imprisoned, ostracized, shut-in and the rest pass.  The exact set is the 14 rows of the `roles` list that M1 tagged `state` (2026-10-22); learning, minding and unauthoritative look like M1 errors, left to the role gloss call and review.
 6. **One small dependency**: reading the BLS OEWS workbook needs `openpyxl` (pure Python, not a dependency
    today); the alternative is a hand-made CSV.  **Recommend** `uv add openpyxl`, asked for with the downloads.
+   **Decided (Roger, 2026-10-22): (a)**, `uv add openpyxl`, asked for with the downloads.
 
 ## 1. Decisions already made
 
