@@ -445,7 +445,7 @@ All through `uv run python`; every paid command prints its estimate, takes `--bu
   as sent (used for the rendered samples before pinning, task 4).
 - `novelty_score.py retrieval-check --batch-id roles_retrieval_1 --budget-usd 1 [--forms role_gloss_w14,label_gloss,role_gloss_w20] [--space centred,raw]`:
   § 7b; writes [glosses.jsonl](../../data/candidates/novelty/roles_retrieval_1/glosses.jsonl), [recall.json](../../data/candidates/novelty/roles_retrieval_1/recall.json), [recall.md](../../data/candidates/novelty/roles_retrieval_1/recall.md) and [usage.json](../../data/candidates/novelty/roles_retrieval_1/usage.json) under `data/candidates/novelty/roles_retrieval_1/` (not there yet).
-- `novelty_score.py rubric-check --pairs reports/trait_gap_generation/role_rubric_pairs.md --batch-id roles_rubric_1 --budget-usd 2` (the marked sheet, [role_rubric_pairs.md](./role_rubric_pairs.md), blank until Roger marks it; the command parses its mark column):
+- `novelty_score.py rubric-check --pairs reports/trait_gap_generation/role_rubric_pairs.md --batch-id roles_rubric_1 --budget-usd 2` (the marked sheet, [role_rubric_pairs.md](./role_rubric_pairs.md), written first by `rubric-check --make-sheet --glosses data/candidates/novelty/roles_retrieval_1/glosses.jsonl --overwrite` from the retrieval check's role glosses, refused without them; the command parses its mark column and refuses marks made on a sheet without the glosses):
   § 8 test 7; writes [readings.jsonl](../../data/candidates/novelty/roles_rubric_1/readings.jsonl), [kappa.json](../../data/candidates/novelty/roles_rubric_1/kappa.json) and [readout.md](../../data/candidates/novelty/roles_rubric_1/readout.md) under `data/candidates/novelty/roles_rubric_1/` (not there yet).
 - `review_graph.py build --batch-id review_roles_<name> --from-batches roles_<name> --budget-usd C`: unchanged
   flags; a roles build is detected from the batches' `pass` and uses the role rubrics and corpus targets.
@@ -889,8 +889,10 @@ index over a ten-role fixture corpus, a scratch registry under `tmp_path`); no n
 **The paid checks before the pilot** (not tests; recorded runs): the retrieval check (§ 7b, about $0.10) and
 the rubric check (§ 10 of the idea plan): Roger marks 40 role pairs (the six recorded pairs, ten parent /
 sub-role pairs such as doctor / cardiologist, ten same-role pairs such as cop / police officer, the rest
-unrelated; the sheet [role_rubric_pairs.md](./role_rubric_pairs.md), written 2026-10-22 and waiting for the marks: mark column second, the
-glosses labelled as the role gloss call's) in about twenty minutes; `rubric-check` runs both role rubrics on
+unrelated; the sheet [role_rubric_pairs.md](./role_rubric_pairs.md): mark column second, each target's role gloss
+from the retrieval check, labelled as the role gloss call's, against the other's corpus description; written after
+the retrieval check, so that check comes first; the description-only sheet of 2026-10-22 is headed "Not for
+marking") in about twenty minutes; `rubric-check` runs both role rubrics on
 Sonnet 5.5 in both orders and prints weighted kappa against his marks and the straight-minus-swapped gap
 (about $0.50); below kappa 0.6 the rubric is redrafted before the pilot's first overlap call.
 
@@ -921,8 +923,8 @@ Opus works in a worktree; platform tasks get a Fable diff review before the pilo
     [server.py](../../assistant_axis/gapgen/review_app/server.py) route and `Literal`, [app.js](../../assistant_axis/gapgen/review_app/static/app.js) chip, readout and balance line, `apply` with `allow_roles` (test 9).
 11. Promotion: `promote(..., allow_roles)`, the roles branch, per-type collision checks, `queue_entry_extras`,
     `gap_registry.py promote --allow-roles`, `holding --list roles` with gloss and kind (test 10).
-12. The rubric check: the 40-pair sheet for Roger, `rubric-check` (kappa, swap-averaging), run after his marks
-    (about $0.50).
+12. The rubric check: the 40-pair sheet for Roger, written from the retrieval check's glosses (task 8 first),
+    `rubric-check` (kappa, swap-averaging), run after his marks (about $0.50).
 13. The kinds side-car: [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py) `--from-pass`, [seed_entities.py](../../data_analysis/seed_entities.py) `write` appending (test 5);
     [README.md](./rubrics/README.md) of the rubrics directory and [coding_plan_review.md](./coding_plan_review.md) get a "Role pass"
     section pointer; the pilot (§ 10).
@@ -954,7 +956,9 @@ blasting): M3 does not remove it, and the review does; the readout counts how mu
 
 1. `novelty_score.py retrieval-check --batch-id roles_retrieval_1 --budget-usd 1` (task 8): recall at 10 against
    0.95; the arms if below.
-2. Roger's 40-pair marks, `rubric-check` (task 12): kappa at or above 0.6 for both role rubrics.
+2. `novelty_score.py rubric-check --make-sheet --glosses data/candidates/novelty/roles_retrieval_1/glosses.jsonl
+   --overwrite` (no call): the 40-pair sheet from step 1's role glosses (review of 2026-10-23, finding 1); then
+   Roger's marks; then `rubric-check` (task 12): kappa at or above 0.6 for both role rubrics.
 3. `novelty_score.py score --holding roles --batch-id roles_pilot_1 --unscored --transport batches --budget-usd 8`
    (batched: Roger's decision 4, 2026-10-22):
    the stage (382 gloss calls, 1,146 kind readings, about $0.20), then M3 on the 325 rows not covered at stage 0

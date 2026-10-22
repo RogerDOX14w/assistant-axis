@@ -33,10 +33,22 @@ def test_kappa():
         ["similar", "similar", "similar", "unrelated", "unrelated", "opposed", None]
 
 
+def write_glosses(path: Path, *, skip=()) -> Path:
+    """A retrieval check's ``glosses.jsonl`` for every role of the pairs (a gloss per stem; ``skip``: none)."""
+    stems = sorted({x for a, b, _ in RP.RUBRIC_PAIRS for x in (a, b)} - set(skip))
+    path.write_text("".join(json.dumps({"stem": st, "label": st.replace("_", " "),
+                                        "gloss": f"A {st.replace('_', ' ')} is someone who does what a "
+                                                 f"{st.replace('_', ' ')} does, all day.", "form_ok": True}) + "\n"
+                            for st in stems) + json.dumps({"stem": "x", "gloss": None, "error": "parse"}) + "\n")
+    return path
+
+
 @pytest.fixture
 def sheet(tmp_path):
     p = tmp_path / "role_rubric_pairs.md"
-    assert cli.main(["rubric-check", "--make-sheet", "--pairs", str(p), "--data-dir", str(REPO / "data")]) == 0
+    g = write_glosses(tmp_path / "glosses.jsonl")
+    assert cli.main(["rubric-check", "--make-sheet", "--pairs", str(p), "--data-dir", str(REPO / "data"),
+                     "--glosses", str(g)]) == 0
     return p
 
 
@@ -61,7 +73,8 @@ def test_the_sheet_is_blind_and_reads_back(sheet):
     assert cli.parse_rubric_marks(sheet) == {}
     mark(sheet, {"r01": "3", "r02": "opposite", "r03": "`2`"})
     assert cli.parse_rubric_marks(sheet) == {"r01": "3", "r02": "opposite", "r03": "2"}
-    assert cli.main(["rubric-check", "--make-sheet", "--pairs", str(sheet), "--data-dir", str(REPO / "data")]) == 2
+    assert cli.main(["rubric-check", "--make-sheet", "--pairs", str(sheet), "--data-dir", str(REPO / "data"),
+                     "--glosses", str(sheet.with_name("glosses.jsonl"))]) == 2         # marks there: refused
     mark(sheet, {"r04": "5"})
     with pytest.raises(ValueError, match="r04"):
         cli.parse_rubric_marks(sheet)
@@ -119,12 +132,58 @@ def test_the_check_refuses_an_unmarked_sheet(sheet, capsys):
     assert "mark every pair" in capsys.readouterr().err
 
 
+def test_the_sheet_needs_the_role_glosses(tmp_path, capsys):
+    """Review finding 1 (2026-10-23): the sheet to mark pairs each target's role gloss with the other's corpus
+    description, as M3 reads them.  Without ``--glosses``, or with targets the glosses miss, ``--make-sheet`` is
+    refused; ``--allow-descriptions`` writes the sheet marked as not for marking, and the check refuses marks made
+    on it unless told."""
+    base = ["rubric-check", "--data-dir", str(REPO / "data")]
+    p = tmp_path / "role_rubric_pairs.md"
+    assert cli.main([*base, "--make-sheet", "--pairs", str(p)]) == 2
+    err = capsys.readouterr().err
+    assert "no --glosses" in err and "retrieval-check first" in err and not p.exists()
+    a_target = RP.RUBRIC_PAIRS[0][0]
+    g = write_glosses(tmp_path / "glosses.jsonl", skip=(a_target,))
+    assert cli.main([*base, "--make-sheet", "--pairs", str(p), "--glosses", str(g)]) == 2
+    err = capsys.readouterr().err
+    assert f"have no role gloss in {g}" in err and a_target in err
+    assert not p.exists()
+    # the description-only sheet: written only when told, and marked
+    assert cli.main([*base, "--make-sheet", "--pairs", str(p), "--allow-descriptions"]) == 0
+    assert "WARNING: 40 of the 40 targets" in capsys.readouterr().err
+    text = p.read_text()
+    assert "**Not for marking.**" in text and "(corpus description, no role gloss)" in text
+    key = json.loads(p.with_name("role_rubric_pairs_key.json").read_text())
+    assert key["for_marking"] is False and key["n_targets_without_gloss"] == 40 and key["glosses"] is None
+    mark(p, {f"r{i:02d}": "1" for i in range(1, 41)})
+    assert cli.main([*base, "--pairs", str(p), "--dry-run"]) == 2
+    assert "finding 1" in capsys.readouterr().err
+    assert cli.main([*base, "--pairs", str(p), "--dry-run", "--allow-descriptions"]) == 0
+    # the sheet to mark: every target its role gloss, no banner
+    q = tmp_path / "ok" / "role_rubric_pairs.md"
+    q.parent.mkdir()
+    assert cli.main([*base, "--make-sheet", "--pairs", str(q), "--glosses", str(write_glosses(tmp_path / "g2.jsonl"))]) == 0
+    t = q.read_text()
+    assert "Not for marking" not in t and "(corpus description" not in t and "its role gloss, the role gloss call's" in t
+    assert json.loads(q.with_name("role_rubric_pairs_key.json").read_text())["for_marking"] is True
+
+
 def test_the_committed_sheet_is_the_codes(tmp_path):
     """reports/trait_gap_generation/role_rubric_pairs.md is what --make-sheet writes (no marks yet), so a changed pair
-    list or corpus description shows up here."""
-    p = tmp_path / "role_rubric_pairs.md"
-    assert cli.main(["rubric-check", "--make-sheet", "--pairs", str(p), "--data-dir", str(REPO / "data")]) == 0
+    list or corpus description shows up here.  Until the retrieval check has run it is the description-only sheet,
+    marked not for marking (review finding 1); after, the sheet of its glosses (compared when they are on disk)."""
     committed = REPO / "reports/trait_gap_generation/role_rubric_pairs.md"
     if cli.parse_rubric_marks(committed):
         pytest.skip("the committed sheet carries Roger's marks")
+    key = json.loads(committed.with_name("role_rubric_pairs_key.json").read_text())
+    p = tmp_path / "role_rubric_pairs.md"
+    extra = ["--allow-descriptions"]
+    if key.get("glosses"):
+        g = REPO / key["glosses"] if not Path(key["glosses"]).is_absolute() else Path(key["glosses"])
+        if not g.exists():
+            pytest.skip(f"the sheet's glosses ({key['glosses']}) are not on disk here")
+        extra = ["--glosses", str(g)]
+    assert cli.main(["rubric-check", "--make-sheet", "--pairs", str(p), "--data-dir", str(REPO / "data"), *extra]) == 0
     assert committed.read_text() == p.read_text()
+    if not key.get("glosses"):
+        assert "**Not for marking.**" in committed.read_text()

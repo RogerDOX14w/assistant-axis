@@ -100,7 +100,8 @@ Generator B's own call (pinned in the same file, among the generators' prompts):
 | [profession_lay.md](./profession_lay.md) | Which roles would a lay person call the people of this SOC broad group or O*NET job title?  Each with the occupations it covers and a gloss; three readings, union with support | draft 1, pinned as version 1 |
 
 The 40-pair check of the two M3 role rubrics against Roger's marks is the sheet
-[role_rubric_pairs.md](../role_rubric_pairs.md) (`novelty_score.py rubric-check`).
+[role_rubric_pairs.md](../role_rubric_pairs.md) (`novelty_score.py rubric-check`), written from the retrieval check's
+role glosses (`--make-sheet --glosses`) before it is marked; until then it is headed "Not for marking".
 
 ## How to edit
 

@@ -205,11 +205,14 @@ library [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py).  Generator B
 1: [role_gloss.md](./rubrics/role_gloss.md), [role_kind.md](./rubrics/role_kind.md) (the classifier's prompt, moved),
 [relation_roles.md](./rubrics/relation_roles.md), [overlap_concept_roles.md](./rubrics/overlap_concept_roles.md),
 [profession_lay.md](./rubrics/profession_lay.md).  Commands: [data_analysis/README.md](../../data_analysis/README.md),
-"The role path" and "Generator B".  **Waiting on Roger before anything is paid for**: the marks on the 40-pair sheet
-[role_rubric_pairs.md](./role_rubric_pairs.md) (about twenty minutes), B's downloads and `uv add openpyxl`.  Then,
-in order: the retrieval check (about $0.10), the rubric check (about $0.50), the pilot on the held role rows,
-batched (`score --holding roles --batch-id roles_pilot_1 --unscored --transport batches`, about $4), its review,
-and B's lay call and first wave.  The readout will be
+"The role path" and "Generator B".  **In order** (review of 2026-10-23, finding 1): the retrieval check (about
+$0.05-0.10; it needs nothing from Roger, and its role glosses are the texts the sheet must show); then the 40-pair
+sheet [role_rubric_pairs.md](./role_rubric_pairs.md) written again from those glosses (`rubric-check --make-sheet
+--glosses data/candidates/novelty/roles_retrieval_1/glosses.jsonl --overwrite`; until then the committed sheet shows
+corpus descriptions and is headed "Not for marking"); **then Roger's marks** (about twenty minutes); then the rubric
+check (about $0.50), the pilot on the held role rows, batched (`score --holding roles --batch-id roles_pilot_1
+--unscored --transport batches`, about $4), its review, and B's lay call and first wave, which wait on B's downloads
+and `uv add openpyxl` (Roger's go).  The readout will be
 [acceptance_16_role_path_and_professions.md](./acceptance_16_role_path_and_professions.md) (not there yet).
 
 **Unparked for planning** (Roger, 2026-10-16): the plan is

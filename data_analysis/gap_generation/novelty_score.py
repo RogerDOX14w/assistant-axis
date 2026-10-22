@@ -3520,10 +3520,29 @@ def rubric_sheet_pairs(data_dir: Path, *, glosses: Optional[dict] = None) -> lis
     return out
 
 
+#: Where the sheet to mark comes from (review finding 1, 2026-10-23): the retrieval check's glosses, so that each row
+#: pairs a role gloss with a corpus description, as M3's overlap call reads them.
+RUBRIC_SHEET_COMMAND = ("novelty_score.py rubric-check --make-sheet --glosses "
+                        "data/candidates/novelty/roles_retrieval_1/glosses.jsonl --overwrite")
+NOT_FOR_MARKING = ("> **Not for marking.**  Both texts of every row are corpus descriptions, a pair no production call "
+                   "reads (M3's overlap call reads a candidate's role gloss against a corpus description).  Run "
+                   "`novelty_score.py retrieval-check` first, then `" + RUBRIC_SHEET_COMMAND + "`, which writes the "
+                   "sheet to mark over this one.")
+
+
 def rubric_sheet_markdown(pairs: list[dict], *, source: str) -> str:
     """The sheet Roger marks (working-style: the mark column early, found by its header; every column says where it
-    comes from; nothing that tells the design's sets apart)."""
-    lines = ["# Role rubric check: 40 pairs to mark", "",
+    comes from; nothing that tells the design's sets apart).  A sheet whose targets show their corpus descriptions
+    instead of role glosses (``--allow-descriptions``) opens with :data:`NOT_FOR_MARKING` when no target has a gloss,
+    and says so in the row of each target that has none."""
+    n_gloss = sum(1 for p in pairs if p.get("target_text_from") == "role gloss call")
+    lines = ["# Role rubric check: 40 pairs to mark", ""]
+    if n_gloss == 0:
+        lines += [NOT_FOR_MARKING, ""]
+    elif n_gloss < len(pairs):
+        lines += [f"> **{len(pairs) - n_gloss} of the {len(pairs)} targets have no role gloss** (the gloss call failed "
+                  "for them in the retrieval check): their rows show the corpus description, said so in the cell.", ""]
+    lines += [
              "For the role versions of M3's rubrics ([overlap_concept_roles.md](./rubrics/overlap_concept_roles.md), "
              "[relation_roles.md](./rubrics/relation_roles.md)), before the pilot's first overlap call "
              "([coding_plan_16_role_generators.md](./coding_plan_16_role_generators.md) § 8, the paid checks).  "
@@ -3539,13 +3558,16 @@ def rubric_sheet_markdown(pairs: list[dict], *, source: str) -> str:
              "`novelty_score.py rubric-check --pairs` reads this file's `mark` column by its header and the pair ids; "
              "the design of the pairs is in [role_rubric_pairs_key.json](./role_rubric_pairs_key.json) (not needed "
              "for marking).", "",
-             "| pair | mark | target | other | target's description | other's description |",
+             "| pair | mark | target | other | target's text (its role gloss, the role gloss call's) | "
+             "other's text (its corpus description) |",
              "|---|---|---|---|---|---|"]
     md = lambda t: str(t).replace("|", "\\|").replace("\n", " ")  # noqa: E731
     for p in pairs:
+        tt = md(p["target_text"]) if p.get("target_text_from") == "role gloss call" else \
+            f"(corpus description, no role gloss) {md(p['target_text'])}"
         lines.append(f"| {p['pair']} |  | [{md(p['target_label'])}](../../data/roles/instructions/{p['target']}.json) | "
                      f"[{md(p['other_label'])}](../../data/roles/instructions/{p['other']}.json) | "
-                     f"{md(p['target_text'])} | {md(p['other_text'])} |")
+                     f"{tt} | {md(p['other_text'])} |")
     return "\n".join(lines) + "\n"
 
 
@@ -3653,15 +3675,34 @@ def cmd_rubric_check(args, argv) -> int:
                     glosses[d["stem"]] = d["gloss"]
     pairs = rubric_sheet_pairs(data_dir, glosses=glosses)
     key_path = Path(args.pairs).with_name(Path(args.pairs).stem + "_key.json")
+    no_gloss = [p["target"] for p in pairs if p["target_text_from"] != "role gloss call"]
     if args.make_sheet:
         if Path(args.pairs).exists() and not args.overwrite and parse_rubric_marks(args.pairs):
             print(f"REFUSED: {args.pairs} holds marks; --overwrite to write a blank sheet over it", file=sys.stderr)
             return 2
+        if no_gloss and not args.allow_descriptions:
+            why = ("no --glosses: every target would show its corpus description, a text pair no production call "
+                   "reads" if glosses is None else
+                   f"{len(no_gloss)} of the {len(pairs)} targets have no role gloss in {args.glosses} "
+                   f"({', '.join(sorted(set(no_gloss))[:8])}{' ...' if len(set(no_gloss)) > 8 else ''}); rerun the "
+                   "retrieval check with --resume to gloss them")
+            print(f"REFUSED: the sheet to mark pairs each target's role gloss (the role gloss call's) with the other's "
+                  f"corpus description, as M3 reads them; {why}.  Run retrieval-check first, then {RUBRIC_SHEET_COMMAND}"
+                  f" (--allow-descriptions writes a sheet marked as not for marking)", file=sys.stderr)
+            return 2
+        if no_gloss:
+            print(f"*** WARNING: {len(no_gloss)} of the {len(pairs)} targets show their corpus description, not a role "
+                  f"gloss{'; the sheet is marked NOT FOR MARKING' if len(no_gloss) == len(pairs) else ''} ***",
+                  file=sys.stderr)
         src = ("the target's is its role gloss, written by the role gloss call, the other's the corpus file's"
-               if glosses else "both are the corpus files' descriptions")
+               if not no_gloss else "the target's is its role gloss where it has one, else its corpus description "
+               "(said so in the cell); the other's the corpus file's" if glosses else
+               "both are the corpus files' descriptions: not the texts M3 reads")
         atomic_write_text(rubric_sheet_markdown(pairs, source=src), Path(args.pairs))
         atomic_write_text(json.dumps({"seed": RUBRIC_SHEET_SEED, "glosses": str(args.glosses) if args.glosses else None,
-                                      "pairs": pairs}, indent=1, ensure_ascii=False) + "\n", key_path)
+                                      "n_targets_without_gloss": len(no_gloss),
+                                      "for_marking": not no_gloss, "pairs": pairs},
+                                     indent=1, ensure_ascii=False) + "\n", key_path)
         print(f"wrote {args.pairs} and {key_path} ({len(pairs)} pairs)")
         return 0
     paths.check_id(args.batch_id, "batch_id")
@@ -3673,6 +3714,13 @@ def cmd_rubric_check(args, argv) -> int:
         return 2
     if key_path.exists():
         pairs = json.loads(key_path.read_text(encoding="utf-8"))["pairs"]
+    bare = [p["pair"] for p in pairs if p.get("target_text_from") != "role gloss call"]
+    if bare and not args.allow_descriptions:
+        print(f"REFUSED: {len(bare)} of the {len(pairs)} pairs of {args.pairs} show a corpus description where the "
+              f"target's role gloss belongs, so marks made on it do not test the texts M3 reads (review finding 1); "
+              f"write the sheet with {RUBRIC_SHEET_COMMAND} after the retrieval check, or --allow-descriptions",
+              file=sys.stderr)
+        return 2
     marked = [p for p in pairs if p["pair"] in marks]
     if len(marked) < len(pairs):
         print(f"{len(pairs) - len(marked)} of {len(pairs)} pairs have no mark yet", file=sys.stderr)
@@ -3909,7 +3957,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--make-sheet", action="store_true", help="write the blank sheet and its key (no call)")
     sp.add_argument("--glosses", type=Path, default=None,
                     help="with --make-sheet: a retrieval check's glosses.jsonl, whose role glosses stand in for the "
-                         "targets' corpus descriptions")
+                         "targets' corpus descriptions (required unless --allow-descriptions)")
+    sp.add_argument("--allow-descriptions", action="store_true",
+                    help="allow corpus descriptions where a target has no role gloss: --make-sheet writes the sheet "
+                         "marked as such (not for marking when no target has one), and the check runs on it")
     sp.add_argument("--batch-id", default="roles_rubric_1")
     sp.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
     sp.add_argument("--out-root", type=Path, default=None)

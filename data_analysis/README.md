@@ -1268,14 +1268,20 @@ holding list (plain key `stem#1`, `entity_type: "role"`), and **role-aimed** row
   only; `--cross-type` adds the nearest roles to a trait run).  Every block, `run.json` and `summary.json` say
   `pass: "roles"`; `decisions.md` has a kind column.  `--redecide`, relation-only runs and `full-scan` are refused
   for a roles batch.
-- *Two checks before the pilot*: `retrieval-check` glosses every corpus role afresh (no reading) and measures recall
-  at 10 of its own stem on the production form against 95% (the label-kept form reported beside it); below it, the
-  arms (`role_gloss_w20`, the raw space) run and the best is written to the `roles` section of [metric_config.json](../data/candidates/metric_config.json),
-  which the pass reads.  `rubric-check --make-sheet` writes the 40-pair sheet
+- *Two checks before the pilot, in this order*: (1) `retrieval-check` glosses every corpus role afresh (no reading;
+  `glosses.jsonl` in its run directory) and measures recall at 10 of its own stem on the production form against
+  95% (the label-kept form reported beside it); below it, the arms (`role_gloss_w20`, the raw space) run and the
+  best is written to the `roles` section of [metric_config.json](../data/candidates/metric_config.json), which M3,
+  R1 and B's ranker read (`roles_pass.role_settings`).  It needs nothing from Roger.  (2) `rubric-check
+  --make-sheet --glosses <the retrieval run>/glosses.jsonl --overwrite` writes the 40-pair sheet
   [role_rubric_pairs.md](../reports/trait_gap_generation/role_rubric_pairs.md) (blind to the pair sets; the key in
-  [role_rubric_pairs_key.json](../reports/trait_gap_generation/role_rubric_pairs_key.json)); once Roger has marked
-  it (0-4, `opposite`, `unsure`), `rubric-check` reads both role rubrics on Sonnet 5.5 in both orders and writes the
-  weighted kappa against his marks (target 0.6) and the straight-minus-swapped gap by pair set.
+  [role_rubric_pairs_key.json](../reports/trait_gap_generation/role_rubric_pairs_key.json)): each row a target's
+  role gloss, written by the role gloss call, against the other role's corpus description, the pair M3's overlap
+  call reads.  Without `--glosses` it is refused (`--allow-descriptions` writes a description-only sheet headed
+  "Not for marking", which the committed sheet is until the retrieval check has run).  (3) Roger marks it (0-4,
+  `opposite`, `unsure`).  (4) `rubric-check` reads both role rubrics on Sonnet 5.5 in both orders and writes the
+  weighted kappa against his marks (target 0.6) and the straight-minus-swapped gap by pair set; it refuses marks
+  made on a sheet without the role glosses.
 - *Review* (R1, R2): a roles batch builds a roles graph (`role:` corpus nodes, candidate nodes with `outcome:
   "role"`, the card's kind, `human`, the generator's `kind_guess` and provenance, the nearest traits);
   `review_app.py serve` defaults to `--order kinds` for it: the kinds whose share of the corpus is too low first
@@ -1296,7 +1302,9 @@ holding list (plain key `stem#1`, `entity_type: "role"`), and **role-aimed** row
 ```bash
 # the checks before the pilot (each --dry-run first)
 uv run python data_analysis/gap_generation/novelty_score.py retrieval-check --batch-id roles_retrieval_1 --budget-usd 1
-uv run python data_analysis/gap_generation/novelty_score.py rubric-check --make-sheet      # the blank sheet (no call)
+uv run python data_analysis/gap_generation/novelty_score.py rubric-check --make-sheet \
+    --glosses data/candidates/novelty/roles_retrieval_1/glosses.jsonl --overwrite      # the sheet to mark (no call)
+# then Roger marks reports/trait_gap_generation/role_rubric_pairs.md
 uv run python data_analysis/gap_generation/novelty_score.py rubric-check --budget-usd 2   # after Roger's marks
 uv run python data_analysis/gap_generation/novelty_score.py render --pass roles --stand-in detective   # free
 # the pilot on the held role rows, batched (Roger's decision 4, 2026-10-22)
