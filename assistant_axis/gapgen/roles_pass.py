@@ -844,3 +844,58 @@ def queue_entry_extras(entry: dict, rec: Mapping, queue: Mapping, *, section: Op
                        "prompt_sha256": ((b.get("prompt_sha256") or {}).get("role_kind") or "")[:16] or None,
                        "model": b.get("model")}
     return entry
+
+
+# --------------------------------------------------------------------------- the retrieval check (§ 7b, decision 11)
+
+#: The production query form and space of the role index, and the acceptance line (decision 11; Roger's decision 3
+#: of 2026-10-22: the label-stripped form against 95%, the label-kept form reported beside it).
+PRODUCTION_ARM = ("role_gloss_w14", "centred")
+RECALL_TARGET = 0.95
+RECALL_K = 10
+#: The arms tried, on the same glosses at no new call, only when the production arm falls below the target; the
+#: label-kept form is information, never chosen.
+ARMS = (("role_gloss_w20", "centred"), ("role_gloss_w14", "raw"), ("role_gloss_w20", "raw"))
+INFO_FORMS = (("label_gloss", "centred"),)
+
+
+def rank_of(index, q_raw, stem: str) -> int:
+    """The 1-based rank of ``stem`` among ``index``'s rows for the raw query ``q_raw`` (projected into the index's
+    space): one more than the number of rows strictly closer (a tie does not push it down)."""
+    q = index.project(q_raw)
+    sims = index.cosines(q)
+    own = index.cosine_to(q, stem)
+    if own is None:
+        raise KeyError(f"{stem} is not in the index")
+    return 1 + int((sims > own + 1e-12).sum())
+
+
+def recall_summary(ranks: Mapping[str, int], *, kinds: Mapping[str, Optional[str]], k: int = RECALL_K) -> dict:
+    """``{"n", "recall_at_k", "mrr", "by_kind": {kind: {"n", "recall_at_k"}}, "n_missed"}`` over ``ranks`` (stem ->
+    rank)."""
+    n = len(ranks)
+    hits = {s: r <= k for s, r in ranks.items()}
+    by: dict[str, list] = {}
+    for s in ranks:
+        by.setdefault(kinds.get(s) or "unknown", []).append(hits[s])
+    return {"n": n, "k": k, "recall_at_k": round(sum(hits.values()) / n, 4) if n else None,
+            "mrr": round(sum(1.0 / r for r in ranks.values()) / n, 4) if n else None,
+            "n_missed": sum(1 for h in hits.values() if not h),
+            "by_kind": {kd: {"n": len(v), "recall_at_k": round(sum(v) / len(v), 4)} for kd, v in sorted(by.items())}}
+
+
+def choose_arm(results: Mapping[tuple, Mapping], *, target: float = RECALL_TARGET) -> dict:
+    """The role setting the check gives (decision 11): the production arm when it reaches ``target``; else the best
+    of the production arm and :data:`ARMS` evaluated (by recall at k, then MRR; the production arm wins a tie, so
+    the settings change only for a better arm).  ``{"query_form", "variant", "recall_at_k", "mrr", "changed",
+    "reached_target"}``."""
+    prod = results[PRODUCTION_ARM]
+    if prod["recall_at_k"] is not None and prod["recall_at_k"] >= target:
+        best = PRODUCTION_ARM
+    else:
+        cands = [PRODUCTION_ARM] + [a for a in ARMS if a in results]
+        best = max(cands, key=lambda a: (results[a]["recall_at_k"] or 0.0, results[a]["mrr"] or 0.0,
+                                         a == PRODUCTION_ARM))
+    r = results[best]
+    return {"query_form": best[0], "variant": best[1], "recall_at_k": r["recall_at_k"], "mrr": r["mrr"],
+            "changed": best != PRODUCTION_ARM, "reached_target": (r["recall_at_k"] or 0.0) >= target}

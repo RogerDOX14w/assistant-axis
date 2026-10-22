@@ -3285,6 +3285,227 @@ def render_roles(args, cfg, cache) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- the role retrieval check
+
+def _role_kinds_on_record(data_dir: Path) -> dict:
+    p = Path(data_dir) / "roles" / "role_kinds.json"
+    recs = (json.loads(p.read_text(encoding="utf-8")).get("roles") or {}) if p.exists() else {}
+    return {s: (r or {}).get("kind") for s, r in recs.items()}
+
+
+def write_role_setting(config_path: Path, setting: dict) -> None:
+    """The metric config's ``roles`` section (``MetricConfig.roles``): the role index's settings when the retrieval
+    check chose an arm over M2's (decision 11 of plan 16).  The config file's envelope and its other blocks are kept
+    as they are; the section records the check that wrote it."""
+    p = Path(config_path)
+    doc = json.loads(p.read_text(encoding="utf-8"))
+    payload = doc["result"] if isinstance(doc.get("result"), dict) else doc
+    payload["roles"] = dict(setting)
+    atomic_write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", p)
+
+
+def retrieval_markdown(rep: dict) -> str:
+    """``recall.md``: the recall table (every form and space evaluated), the acceptance line, the arm chosen, recall
+    by kind, and the misses with their rank, gloss and nearest roles."""
+    lines = [f"# Role retrieval check: `{rep['batch_id']}`", "",
+             f"Coding plan 16, § 7b (decision 11): each of the {rep['n_roles']} corpus roles glossed afresh by the role "
+             "gloss call with no reading ([role_gloss.md](../../../../reports/trait_gap_generation/rubrics/role_gloss.md)), "
+             f"its gloss queried against the full role index (the role stays in), recall at {rep['k']} of the role's own "
+             f"stem.  Acceptance: the production form (`{RP.PRODUCTION_ARM[0]}`, {RP.PRODUCTION_ARM[1]} space) at "
+             f"{RP.RECALL_TARGET:.0%} or above; the label-kept form (`label_gloss`) is reported beside it (Roger, "
+             "2026-10-22).  The arms are run only below the line, on the same glosses at no new call.", "",
+             f"**{rep['acceptance']}**", "",
+             "| form | space | recall at k | MRR | missed | role |", "|---|---|---|---|---|---|"]
+    for a in rep["arms"]:
+        lines.append(f"| `{a['query_form']}` | {a['variant']} | {a['recall_at_k']} | {a['mrr']} | {a['n_missed']} | "
+                     f"{a['role']} |")
+    ch = rep["chosen"]
+    lines += ["", f"Chosen setting: `{ch['query_form']}`, {ch['variant']} space (recall {ch['recall_at_k']})"
+              + (": written to the metric config's `roles` section." if ch["changed"] else ": M2's settings stay."), "",
+              "## Recall by kind (production form)", "", "| kind | roles | recall at k |", "|---|---|---|"]
+    for kd, v in rep["production"]["by_kind"].items():
+        lines.append(f"| {kd} | {v['n']} | {v['recall_at_k']} |")
+    lines += ["", f"## Misses of the production form ({len(rep['misses'])})", "",
+              "A gloss written for another sense of the label counts as a miss and shows here; read the glosses.", ""]
+    for m in rep["misses"]:
+        lines.append(f"- [{_md(m['label'])}](../../../roles/instructions/{m['stem']}.json) ({m.get('kind')}): rank "
+                     f"{m['rank']}; nearest {', '.join(m['nearest'])}.  Gloss: {_md(m['gloss'])}")
+    if rep.get("failed"):
+        lines += ["", f"Gloss call failed (left out of the recall): {', '.join(rep['failed'])}"]
+    return "\n".join(lines) + "\n"
+
+
+def cmd_retrieval_check(args, argv) -> int:
+    """``retrieval-check`` (coding plan 16, § 7b; module docstring)."""
+    from assistant_axis.gapgen import embed as EM
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    from assistant_axis.gapgen.representation import represent
+    from assistant_axis.plot_metadata import json_metadata
+    paths.check_id(args.batch_id, "batch_id")
+    cfg = MetricConfig.load(args.metric_config)
+    data_dir = Path(args.data_dir)
+    corpus = NV.load_role_corpus(data_dir)
+    stems = sorted(corpus)[: args.limit] if args.limit else sorted(corpus)
+    kinds = _role_kinds_on_record(data_dir)
+    try:
+        stage_pins = RP.pins(args.rubrics_dir)
+    except ValueError as exc:
+        print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
+        return 2
+    forms = [f.strip() for f in args.forms.split(",") if f.strip()]
+    spaces = [x.strip() for x in args.space.split(",") if x.strip()]
+    bad = [f for f in forms if f not in NV.ROLE_QUERY_FORMS] + [x for x in spaces if x not in ("centred", "raw")]
+    if bad or RP.PRODUCTION_ARM[0] not in forms or RP.PRODUCTION_ARM[1] not in spaces:
+        print(f"REFUSED: --forms must be among {NV.ROLE_QUERY_FORMS} and --space among centred, raw, the production "
+              f"arm {RP.PRODUCTION_ARM} included (got {forms}, {spaces})", file=sys.stderr)
+        return 2
+    rows = [{"key": f"corpus:{s}", "stem": s, "label": corpus[s].label, "filter": None, "sources": []} for s in stems]
+    est = RP.estimate(len(stems))
+    est.lines = est.lines[:1]                                       # the gloss call only: no kind call here
+    est.add("query embeddings (OpenAI text-embedding-3-large), every form, + the corpus texts not cached",
+            cfg.live_model["model_id"], 1, (len(stems) * (len(forms) + 1) + 8) * 30, 0)
+    out_dir = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
+    print(f"retrieval check: {len(stems)} corpus roles, forms {forms}, spaces {spaces}; the arms only below "
+          f"{RP.RECALL_TARGET:.0%}\nestimate:\n{est.format()}")
+    try:
+        cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                               confirmed_by=args.confirmed_by)
+    except CostRefused:
+        return 2
+    sha = git_sha()
+    dirty = platform_dirty_files()
+    if dirty and not args.allow_dirty and not args.dry_run:
+        print(f"REFUSED: uncommitted changes to the platform's own code or prompt paths ({len(dirty)}); commit first, "
+              "or pass --allow-dirty", file=sys.stderr)
+        return 2
+    if args.dry_run:
+        print(RP.render(rows[0], label_form=PL.DEFAULT_LABEL_FORM).split("=== then role_kind")[0])
+        print(f"DRY-RUN: would write {out_dir}/ (glosses.jsonl, recall.json, recall.md, usage.json, run.json)")
+        return 0
+    status, _, _ = _prepare_out_dir(out_dir, args)
+    if status:
+        return status
+    run_meta = {"batch_id": args.batch_id, "command": "retrieval-check", "git_sha": sha, "argv": sys.argv[1:] if argv is None else argv,
+                "n_roles": len(stems), "forms": forms, "spaces": spaces, "estimate_usd": round(est.usd, 4),
+                "budget_usd": args.budget_usd, "cap_usd": cap, "allow_dirty": bool(args.allow_dirty),
+                "model": RP.MODEL, **stage_pins, "started_at": utc_now()}
+    atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
+    from dotenv import load_dotenv
+    import anthropic
+    load_dotenv(_REPO_ROOT / ".env")
+    holder: list = []
+    status = 0
+    try:
+        runner = RP.StageRunner(client=anthropic.AsyncAnthropic(max_retries=0), usage=usage, batch_id=args.batch_id,
+                                records_path=out_dir / "role_gloss_responses.jsonl", concurrency=args.concurrency,
+                                rubrics_dir=args.rubrics_dir)
+        holder.append(runner)
+        calls = [runner.gloss_call(r) for r in rows]
+
+        async def glosses():
+            import asyncio as _a
+            runner.sem = _a.Semaphore(runner.concurrency)
+            try:
+                return await runner.wave("g1_role_gloss", calls)
+            finally:
+                close = getattr(runner.client, "close", None)
+                if close is not None:
+                    res = close()
+                    if _a.iscoroutine(res):
+                        await res
+        import asyncio
+        res = asyncio.run(glosses())
+        got, failed = {}, []
+        lines = []
+        for r, c in zip(rows, calls):
+            parsed, err = res[id(c)]
+            if parsed is None:
+                failed.append(r["stem"])
+            else:
+                got[r["stem"]] = parsed
+            lines.append({"stem": r["stem"], "label": r["label"], "kind": kinds.get(r["stem"]),
+                          "gloss": (parsed or {}).get("gloss"), "form_ok": (parsed or {}).get("form_ok"), "error": err})
+        atomic_write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in lines), out_dir / "glosses.jsonl")
+        runner.warn_parse_rates(logger)
+        if runner.stop:
+            raise runner.stop[0]
+        # the indexes (the role stays in: not leave-one-out) and the queries in every form
+        cache = EM.EmbeddingCache(args.cache_dir)
+        embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
+        ctexts = [represent(corpus[x].label, corpus[x].description, cfg.representation) for x in sorted(corpus)]
+        E = EM.embed_texts(embedder, ctexts, cache=cache, usage=usage)
+        indexes = {sp: NV.build_index(corpus, E, variant=sp, settings={"k": RP.RECALL_K, "entity_type": "role"})
+                   for sp in spaces}
+        done = [s for s in stems if s in got]
+        qvec: dict = {}
+
+        def vectors(form):
+            if form not in qvec:
+                texts = [NV.query_text(corpus[s].label, got[s]["gloss"], query_form=form,
+                                       representation=cfg.representation) for s in done]
+                qvec[form] = dict(zip(done, EM.embed_texts(embedder, texts, cache=cache, usage=usage)))
+            return qvec[form]
+
+        def evaluate(form, space):
+            ranks = {s: RP.rank_of(indexes[space], vectors(form)[s], s) for s in done}
+            return ranks, RP.recall_summary(ranks, kinds=kinds)
+        results, ranks_of = {}, {}
+        to_run = [RP.PRODUCTION_ARM] + [a for a in RP.INFO_FORMS if a[0] in forms and a[1] in spaces]
+        for arm in to_run:
+            ranks_of[arm], results[arm] = evaluate(*arm)
+        below = results[RP.PRODUCTION_ARM]["recall_at_k"] is not None and \
+            results[RP.PRODUCTION_ARM]["recall_at_k"] < RP.RECALL_TARGET
+        if below:
+            for arm in RP.ARMS:
+                if arm[0] in forms and arm[1] in spaces:
+                    ranks_of[arm], results[arm] = evaluate(*arm)
+        chosen = RP.choose_arm(results)
+        prod_ranks = ranks_of[RP.PRODUCTION_ARM]
+        idx = indexes[RP.PRODUCTION_ARM[1]]
+        misses = []
+        for s in sorted(prod_ranks, key=lambda x: (-prod_ranks[x], x)):
+            if prod_ranks[s] <= RP.RECALL_K:
+                continue
+            q = idx.project(vectors(RP.PRODUCTION_ARM[0])[s])
+            misses.append({"stem": s, "label": corpus[s].label, "kind": kinds.get(s), "rank": prod_ranks[s],
+                           "gloss": got[s]["gloss"], "nearest": [x for x, _ in idx.retrieve(q, 3)]})
+        pr = results[RP.PRODUCTION_ARM]
+        acceptance = (f"Production form recall at {RP.RECALL_K}: {pr['recall_at_k']} "
+                      + ("(at or above 95%: M2's settings stay for roles)" if not below else
+                         f"(below 95%: arms tried; chosen {chosen['query_form']}, {chosen['variant']}, recall "
+                         f"{chosen['recall_at_k']})"))
+        role_of = {RP.PRODUCTION_ARM: "production", **{a: "information" for a in RP.INFO_FORMS},
+                   **{a: "arm" for a in RP.ARMS}}
+        rep = {"batch_id": args.batch_id, "n_roles": len(stems), "n_glossed": len(done), "failed": failed,
+               "k": RP.RECALL_K, "target": RP.RECALL_TARGET, "acceptance": acceptance, "below_target": below,
+               "arms": [{"query_form": a[0], "variant": a[1], "role": role_of.get(a, "arm"), **results[a]}
+                        for a in results], "production": pr, "chosen": chosen, "misses": misses,
+               "n_gloss_form_ok": sum(1 for s in done if got[s].get("form_ok")),
+               "ranks": {f"{a[0]}|{a[1]}": ranks_of[a] for a in ranks_of}}
+        env = json_metadata(rep, title=f"novelty_score retrieval-check {args.batch_id}")
+        atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "recall.json")
+        atomic_write_text(retrieval_markdown(rep), out_dir / "recall.md")
+        if chosen["changed"]:
+            setting = {"query_form": chosen["query_form"], "variant": chosen["variant"],
+                       "recall_at_k": chosen["recall_at_k"], "production_recall_at_k": pr["recall_at_k"],
+                       "k": RP.RECALL_K, "batch_id": args.batch_id, "written_at": utc_now(),
+                       "written_by": "novelty_score.py retrieval-check (decision 11 of plan 16: below 95%)"}
+            write_role_setting(args.metric_config, setting)
+            run_meta["role_setting_written"] = setting
+        run_meta.update(chosen=chosen, production=pr, below_target=below)
+        print(acceptance)
+    except BudgetExceededError as exc:
+        print(f"STOPPED: {exc}", file=sys.stderr)
+        status = 2
+    finally:
+        usage.write_json(out_dir / "usage.json")
+        print(usage.log_line())
+        run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
+        atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    return status
+
+
 # --------------------------------------------------------------------------- main
 
 def build_parser() -> argparse.ArgumentParser:
@@ -3381,6 +3602,31 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--resume", action="store_true")
     sp.add_argument("--overwrite", action="store_true")
     sp.set_defaults(func=lambda a, argv: cmd_broader_pilot(a, argv))
+    sp = sub.add_parser("retrieval-check",
+                        help="the role index's retrieval check (coding plan 16, decision 11): every corpus role glossed "
+                             "afresh with no reading, recall at 10 of its own stem; the arms below 95%")
+    sp.add_argument("--batch-id", required=True)
+    sp.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
+    sp.add_argument("--out-root", type=Path, default=None)
+    sp.add_argument("--metric-config", type=Path, default=paths.METRIC_CONFIG_PATH,
+                    help="read for M2's settings; its roles section is written when an arm beats the production form "
+                         "below 95%")
+    sp.add_argument("--cache-dir", type=Path, default=paths.EMBEDDING_CACHE_DIR)
+    sp.add_argument("--rubrics-dir", type=Path, default=None)
+    sp.add_argument("--forms", default="role_gloss_w14,label_gloss,role_gloss_w20",
+                    help="query forms to evaluate (comma-separated; the production role_gloss_w14 always; label_gloss "
+                         "reported as information; role_gloss_w20 an arm)")
+    sp.add_argument("--space", default="centred,raw", help="spaces (centred, the production one; raw, an arm)")
+    sp.add_argument("--limit", type=int, default=None, help="the first N roles only (a smoke run)")
+    sp.add_argument("--concurrency", type=int, default=RP.DEFAULT_CONCURRENCY)
+    sp.add_argument("--budget-usd", type=float, default=1.0)
+    sp.add_argument("--confirm-expensive", action="store_true")
+    sp.add_argument("--confirmed-by", default=None)
+    sp.add_argument("--allow-dirty", action="store_true")
+    sp.add_argument("--resume", action="store_true", help="continue the run directory (its recorded glosses replayed)")
+    sp.add_argument("--overwrite", action="store_true")
+    sp.add_argument("--dry-run", action="store_true", help="the plan, the estimate and the rendered gloss request")
+    sp.set_defaults(func=lambda a, argv: cmd_retrieval_check(a, argv))
     sp = sub.add_parser("promote-redecide",
                         help="write a finished re-decided run's novelty blocks to the registry (no API call)")
     sp.add_argument("--batch-id", required=True, help="the re-decided run (score --redecide --batch-id)")
