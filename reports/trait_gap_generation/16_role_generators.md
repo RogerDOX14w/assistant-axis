@@ -191,8 +191,9 @@ Independent of our list: no corpus role is shown to the model.
    is dropped at generation, an archetype kept (decision 6, Roger 2026-10-21): protagonist is a place in a plot,
    not a role; the corpus's [guardian](../../data/roles/instructions/guardian.json),
    [trickster](../../data/roles/instructions/trickster.json) and [fool](../../data/roles/instructions/fool.json) are
-   archetypes, and so is hero (kept).  Which of the other examples (villain, sidekick, mentor, love interest) are
-   archetypes is for Roger when this generator's rubric is written.
+   archetypes, and so are hero, villain and sidekick (kept; Roger, 2026-10-22); mentor is in the corpus; love
+   interest is a position in a plot (dropped).  The rubric's rule: keep a name a person could be called in real
+   life, drop one that only names a position in a story.
 4. Normalise (lower case, singular, US spelling via the relabel helper's tables), merge across works keeping the
    provenance list; `n_sources` (detective will arrive from forty works) is a commonness prior, as in plan 09.
 5. Submit in role mode (§ 3) with `source_ref` `wikidata:<work>/<character>` and the kind guess.
@@ -437,7 +438,7 @@ missing occupations supplies the occupation half of every wave (§ 6).
    **Decided (Roger, 2026-10-21): (a).**
 6. **Narrative-function roles** (hero, villain, sidekick, mentor, love interest) from A.  (a) kept and tagged;
    (b) dropped at generation.  **Recommend (a)**.  *Long version:* [§ 5](#5-generator-a-characters-of-a-media-franchise) (generator A).
-   **Decided (Roger, 2026-10-21): (b), with adjustments.**  A role-in-a-story is not a role in this corpus's sense: protagonist is dropped at generation.  An archetype is a role and is kept: fool, trickster, guardian, and hero.  § 5 step 3 updated.
+   **Decided (Roger, 2026-10-21): (b), with adjustments.**  A role-in-a-story is not a role in this corpus's sense: protagonist is dropped at generation.  An archetype is a role and is kept: fool, trickster, guardian, and hero.  § 5 step 3 updated.  **2026-10-22: villain and sidekick are kept** (one can be either outside any story), mentor is in the corpus already, love interest is dropped; the rule for A's rubric: keep a name a person could be called in real life, drop one that only names a position in a plot (protagonist, love interest, foil, deuteragonist).
 7. **B's sources.**  (a) the SOC broad tier with O*NET's descriptions, plus O*NET's alternate titles, all ranked
    by familiarity and distance from the corpus (Roger's rule of 2026-10-16, § 6; the DOT sample dropped); (b) add
    ESCO and ISCO-08 once their licences are read.  **Recommend (a)**; the alternate-titles file and the BLS OEWS
