@@ -47,6 +47,26 @@ LABEL_FIT_INPUT_NAME = "label_fit_input.jsonl"
 DOWNLOAD_MANIFEST_NAME = "DOWNLOAD_MANIFEST.json"
 EXTERNAL_DIR = DATA_EXTERNAL
 
-__all__ = ["GENERATOR", "SCHEMA_VERSION", "TABLE_NAME", "BUILD_NAME", "LAY_RESPONSES_NAME", "LAY_NAME",
+
+
+def source_line(source_ref: str):
+    """The attribution line a promoted role's queue entry carries as its ``source`` (coding plan 16, § 6.5; read by
+    ``roles_pass.source_line``): ``soc:29-1210``, ``onet_title:33-9032.00:bouncer`` or ``esco:2221`` (a label-fit
+    tag after ``;`` is left out), with the source's licence and owner; None for a ref of another form (the
+    caller then shows the ref itself)."""
+    import re
+    ref = str(source_ref or "").split(";", 1)[0]
+    kind, _, rest = ref.partition(":")
+    code = rest.split(":", 1)[0]
+    if kind == "soc" and re.fullmatch(r"\d\d-\d{4}", code):
+        return f"SOC 2018 broad group {code} (BLS, public domain), its O*NET 31.0 occupations (CC BY 4.0, USDOL/ETA)"
+    if kind == "onet_title" and re.fullmatch(r"\d\d-\d{4}\.\d\d", code):
+        return f"O*NET 31.0 job title under {code} (CC BY 4.0, USDOL/ETA)"
+    if kind == "esco" and re.fullmatch(r"\d{1,4}", code):
+        return f"ESCO occupations under ISCO group {code} (CC BY 4.0, European Commission)"
+    return None
+
+
+__all__ = ["source_line", "GENERATOR", "SCHEMA_VERSION", "TABLE_NAME", "BUILD_NAME", "LAY_RESPONSES_NAME", "LAY_NAME",
            "BATCHES_NAME", "RANKING_NAME", "CANDIDATES_NAME", "ATTRIBUTION_NAME", "REPORT_NAME",
            "SUBMIT_REPORT_NAME", "LABEL_FIT_DIR", "LABEL_FIT_INPUT_NAME", "DOWNLOAD_MANIFEST_NAME", "EXTERNAL_DIR"]

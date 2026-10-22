@@ -800,12 +800,34 @@ def provisional_candidate(row: Mapping):
 
 # --------------------------------------------------------------------------- promotion
 
+def source_line(source: Mapping) -> Optional[str]:
+    """A registry source's provenance as a role entry's ``source`` shows it (§ 6.5): the generator's own attribution
+    line when its package (``assistant_axis.gapgen.generators.<generator>``) defines ``source_line(source_ref)``
+    (generator B: "O*NET 31.0 job title under 33-9032.00 (CC BY 4.0, USDOL/ETA)"), else the ``source_ref`` itself;
+    None for a source with no ``source_ref``."""
+    ref = source.get("source_ref")
+    if not ref:
+        return None
+    gen = source.get("generator")
+    if gen and _re.fullmatch(r"[a-z_][a-z0-9_]*", str(gen)):
+        import importlib
+        try:
+            fn = getattr(importlib.import_module(f"assistant_axis.gapgen.generators.{gen}"), "source_line", None)
+        except ImportError:
+            fn = None
+        if callable(fn):
+            line = fn(ref)
+            if line:
+                return line
+    return ref
+
+
 def queue_entry_extras(entry: dict, rec: Mapping, queue: Mapping, *, section: Optional[str] = None) -> dict:
     """A promoted role row's queue entry (``promote.queue_entry_from_record``'s), made a role entry in place (§ 6.5):
     ``entity_type: "role"``; tags ``gap_gen``, ``source:<generator>``, ``kind:<kind>``, ``human:<bool>`` merged with
     the row's; the section of the role generators unless ``section`` is given; the role gloss as
     ``description_draft``; a ``description_notes`` line with the pass, the kind and its agreement, the nearest roles
-    and traits; the generators' provenance as ``source`` (the source refs); and ``gap_gen.role_kind`` and
+    and traits; the generators' provenance as ``source`` (:func:`source_line`); and ``gap_gen.role_kind`` and
     ``gap_gen.holding``.  ``pairing``: ``pair`` with ``pair_by_construction: false`` when a source carries a
     ``partner_hint`` (the role-pair check decides at seeding)."""
     b = block_of(rec)
@@ -829,9 +851,9 @@ def queue_entry_extras(entry: dict, rec: Mapping, queue: Mapping, *, section: Op
             + (f" | nearest roles: {near_roles}" if near_roles else "")
             + (f" | nearest traits: {near_traits}" if near_traits else ""))
     entry["description_notes"] = " | ".join(x for x in (note, entry.get("description_notes")) if x)
-    refs = [s.get("source_ref") for s in rec.get("sources") or [] if s.get("source_ref")]
-    if refs and not entry.get("source"):
-        entry["source"] = "; ".join(dict.fromkeys(refs))
+    lines = [source_line(s) for s in rec.get("sources") or []]
+    if any(lines) and not entry.get("source"):
+        entry["source"] = "; ".join(dict.fromkeys(x for x in lines if x))
     partner = next((s.get("partner_hint") for s in rec.get("sources") or [] if s.get("partner_hint")), None)
     if partner and not entry.get("partner"):
         from assistant_axis.entity_id import normalize_to_file_name

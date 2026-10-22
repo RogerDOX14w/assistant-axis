@@ -145,3 +145,20 @@ def test_gap_registry_holding_list_shows_the_role_gloss_and_kind(tmp_path, capsy
     o = capsys.readouterr().out
     assert "**baker** (role_person; from censuses): A baker is someone who bakes bread before dawn. [kind occupation]" in o
     assert "**captive**" in o
+
+
+def test_the_source_is_the_generators_attribution_line(data):
+    """§ 6.5: a generator whose package defines ``source_line`` (B) gives the entry's ``source`` its attribution; a
+    ref it does not know, or a generator with no hook, shows the ref itself."""
+    from assistant_axis.gapgen.generators import professions as PROF
+    r = staged(aimed_row("bouncer", "works the door"), gloss=GLOSS)
+    r["sources"][0]["source_ref"] = "onet_title:33-9032.00:bouncer;label_fit:fits:bouncer"
+    r["sources"].append(dict(r["sources"][0], source_ref="soc:33-9030"))
+    r["sources"].append(dict(r["sources"][0], generator="censuses", source_ref="tda:bouncer"))
+    rep = P.promote({"bouncer|R#1": r}, queue(data), ["bouncer|R#1"], data_dir=data, allow_roles=True)
+    assert rep.entries[0]["source"] == (
+        "O*NET 31.0 job title under 33-9032.00 (CC BY 4.0, USDOL/ETA); SOC 2018 broad group 33-9030 (BLS, public "
+        "domain), its O*NET 31.0 occupations (CC BY 4.0, USDOL/ETA); tda:bouncer")
+    assert PROF.source_line("esco:5414") == "ESCO occupations under ISCO group 5414 (CC BY 4.0, European Commission)"
+    assert PROF.source_line("soc:") is None and PROF.source_line("other:1") is None
+    assert RP.source_line({"generator": "../x", "source_ref": "r"}) == "r" and RP.source_line({"source_ref": None}) is None
