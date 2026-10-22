@@ -468,6 +468,22 @@
         "pinned_at": "2026-10-20T16:37:18+00:00",
         "why": "draft 1 (2026-10-20, Opus): the narrow pass's direction call, QUESTIONS 208 (3)"
       }
+    ],
+    "role_gloss": [
+      {
+        "version": 1,
+        "sha256": "dfa7646f08c156cac49724ffc0065932d76df70da7b616f9aacfd33e645be0f2",
+        "pinned_at": "2026-10-22T22:04:00+00:00",
+        "why": "First pin: draft 1 (coding plan 16 § 7a.1, 2026-10-22), the roles pass's role gloss call: one sentence in the role corpus's form for M1's accepted reading (or the label's usual sense when the reading is null), rendered from code before the pin"
+      }
+    ],
+    "role_kind": [
+      {
+        "version": 1,
+        "sha256": "11b559f0cff501891620ca6aeeabcfd48567589f47a852b4cf4818cba7eefe29",
+        "pinned_at": "2026-10-22T22:04:00+00:00",
+        "why": "First pin: classify_role_kinds.py's SYSTEM (Roger's nine kinds of 2026-10-16), moved here byte for byte by coding plan 16 task 3; both readers load it; sha unchanged (11b559f0cff50189...)"
+      }
     ]
   }
 }

@@ -70,15 +70,14 @@ KINDS: list[tuple[str, str, str]] = [
 ]
 KIND_KEYS = [k for k, _, _ in KINDS]
 
-SYSTEM = (
-    "You sort personas into kinds.  Each persona is a role that a language model can be asked to take on.  Choose "
-    "the one kind below that best says what the role is.  If a role could fit two kinds, choose the one that is "
-    "most central to it.  A non-human role is always \"non_human\", whatever it does.  \"other\" is for a role that "
-    "fits none of the kinds.\n\nThe kinds:\n"
-    + "\n".join(f"- \"{k}\" ({name}): {d}" for k, name, d in KINDS)
-    + "\n\nAnswer with one JSON object and nothing else.  Give the reason in one short sentence first, then the "
-      "kind: {\"reason\": \"<one short sentence>\", \"kind\": \"<one of the kind keys above>\"}"
-)
+#: The system prompt, from the pinned rubric file ``reports/trait_gap_generation/rubrics/role_kind.md`` (since
+#: 2026-10-22, coding plan 16 task 3: moved there byte for byte from the string this module built from :data:`KINDS`,
+#: so that the roles pass reads candidates' kinds with the same text; its sha is unchanged, ``11b559f0cff50189``).
+#: The list of kinds in it must stay :data:`KINDS`'s (``test_gapgen_role_kind_rubric.py`` checks); edit both together
+#: and pin the new text with ``rubric_pins.py bump role_kind``.
+from assistant_axis.gapgen import split_rubrics as _sr  # noqa: E402
+
+SYSTEM = _sr.load_prompt("role_kind")
 PROMPT_SHA = hashlib.sha256(SYSTEM.encode()).hexdigest()[:16]
 
 

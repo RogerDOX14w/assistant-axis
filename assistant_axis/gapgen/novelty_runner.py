@@ -198,20 +198,28 @@ def candidate_from_row(row: Mapping, *, holding: Optional[str] = None) -> tuple[
     --holding physical``): a row on that holding list instead, its gloss and alignment score from the pass's gloss
     stage (:func:`assistant_axis.gapgen.physical_pass.candidate_from_row`); ``holding="states"`` (the states pass
     v4, ``--holding states``): a row the states pass released, its gloss and alignment score from its
-    ``states_pass`` block (:func:`assistant_axis.gapgen.states_pass.candidate_from_row`); without it, nothing
-    changes."""
+    ``states_pass`` block (:func:`assistant_axis.gapgen.states_pass.candidate_from_row`); ``holding="roles"`` (the
+    roles pass, coding plan 16): a role row (on the roles list, or role-aimed and routed to the role flow), its gloss
+    from its ``role_pass`` block, cut-off 3 (:func:`assistant_axis.gapgen.roles_pass.candidate_from_row`).  Without
+    it, a trait row as always; a role-aimed row (``entity_type: "role"``) is refused (``not_a_trait_row``): it is
+    judged against the role corpus in a roles run, never against the traits."""
     if holding is not None:
         from . import physical_pass as PP
+        from . import roles_pass as RP
         from . import states_pass as SP
         if holding == PP.HOLDING:
             return PP.candidate_from_row(row)
         if holding == SP.PASS_NAME:
             return SP.candidate_from_row(row)
-        raise ValueError(f"M3 reads the {PP.HOLDING!r} holding list and the {SP.PASS_NAME!r} pass's released rows "
-                         f"as passes of their own, not {holding!r}")
+        if holding == RP.HOLDING:
+            return RP.candidate_from_row(row)
+        raise ValueError(f"M3 reads the {PP.HOLDING!r} holding list, the {SP.PASS_NAME!r} pass's released rows and the "
+                         f"{RP.HOLDING!r} pass's role rows as passes of their own, not {holding!r}")
     f = row.get("filter") or {}
     if not f:
         return None, "not_filtered"
+    if row.get("entity_type") == "role" and f.get("role_route") is not None:
+        return None, "not_a_trait_row"
     if f.get("verdict") != "trait":
         return None, "not_a_trait"
     g = row.get("gloss")

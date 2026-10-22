@@ -39,6 +39,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Optional, Sequence
 
+from .novelty_runner import M3Candidate
+
 #: The holding list this pass reads, and the name the pass goes by in blocks and ``run.json``.
 HOLDING = "roles"
 PASS_NAME = "roles"
@@ -149,8 +151,9 @@ def kind_guess_of(row: Mapping) -> Optional[str]:
 
 
 def needs_stage(row: Mapping) -> bool:
-    """A role row whose stage has not given it a gloss yet."""
-    return is_role_row(row) and gloss_of(row) is None
+    """A role row whose stage has not given it a gloss and a kind yet (a row glossed by an earlier run whose kind calls
+    all failed gets the kind calls only)."""
+    return is_role_row(row) and (gloss_of(row) is None or kind_of(row) is None)
 
 
 # --------------------------------------------------------------------------- the kind readout (decision 2)
@@ -261,3 +264,583 @@ def corpus_kind_counts(data_dir: Path, queue: Mapping, *, nominees: Iterable[Map
         k = kind_of(r)
         counts[k if k else "unknown"] += 1
     return dict(counts), len(seen)
+
+
+# --------------------------------------------------------------------------- the role gloss's form
+
+import re as _re
+
+
+def _label_pattern(label: str) -> str:
+    """A regular expression for ``label`` as a gloss writes it: case-insensitive (the caller's flag), spaces, hyphens
+    and underscores interchangeable, an apostrophe optional (``devil's advocate``)."""
+    words = [w for w in _re.split(r"[\s_\-]+", str(label).strip()) if w]
+    return r"[\s\-]+".join(_re.escape(w).replace("'", "'?").replace("\\'", "'?") for w in words)
+
+
+def opening_re(label: str):
+    """``A|An|The <label> is`` at the start of a gloss (case-insensitive), the form "A <role> is someone who ..."."""
+    return _re.compile(r"^\s*(?:an?|the)\s+" + _label_pattern(label) + r"\s+is\s+", _re.I)
+
+
+def role_gloss_form_ok(gloss: Optional[str], label: str) -> bool:
+    """True when the gloss opens with its label in the corpus form ("A bouncer is ...", "An operator is ...")."""
+    return bool(gloss) and bool(opening_re(label).match(gloss))
+
+
+def strip_opening(gloss: str, label: str) -> tuple[str, bool]:
+    """``(text, stripped)``: the gloss without its opening ``A|An <label> is`` (the retrieval check's production query
+    form, Roger's decision 3 of 2026-10-22: a query that keeps the label finds the role's own description by the
+    label alone), and whether it opened so.  A gloss that does not open so comes back whole."""
+    m = opening_re(label).match(gloss or "")
+    if not m:
+        return (gloss or "").strip(), False
+    rest = gloss[m.end():].strip()
+    return (rest[:1].upper() + rest[1:]) if rest else rest, True
+
+
+# --------------------------------------------------------------------------- the stage: requests
+
+def max_tokens_for(step: str, model: str = MODEL) -> int:
+    """The role gloss call: M1's ``max_tokens`` for its gloss call (``physical_pass.max_tokens_for``: the thinking
+    allowance on a model that refuses a temperature); the role kind call: :data:`KIND_MAX_TOKENS`."""
+    from .physical_pass import max_tokens_for as pp_max
+    if step == "role_gloss":
+        return pp_max("gloss", model)
+    if step == "role_kind":
+        return KIND_MAX_TOKENS
+    raise ValueError(f"the roles pass's stage sends {STEPS}, not {step!r}")
+
+
+def request(step: str, *, label: str, reading: Optional[str] = None, gloss: Optional[str] = None, model: str = MODEL,
+            rubrics_dir: Optional[Path] = None, label_form: Optional[str] = None) -> dict:
+    """One call of the stage: ``role_gloss`` on the reading (``split.payload("gloss", ...)``'s shape, one JSON object
+    with ``"id": 1``; ``reading`` None for the retrieval check's corpus roles), ``role_kind`` on the gloss
+    (``classify_role_kinds.user_message``: ``Role: <label>`` / ``Description: <gloss>``).  ``label`` (as stored) is
+    shown in ``label_form`` (the judge display form by default).  ``{"step", "model", "system", "user",
+    "max_tokens", "temperature", "cache_system"}``."""
+    from . import split
+    from . import split_rubrics as sr
+    from . import split_runner as SR
+    from .prompt_labels import DEFAULT_LABEL_FORM, prompt_label
+    if step not in STEPS:
+        raise ValueError(f"the roles pass's stage sends {STEPS}, not {step!r}")
+    form = label_form or DEFAULT_LABEL_FORM
+    system = sr.load_prompt(step, rubrics_dir)
+    if step == "role_gloss":
+        user = split.payload("gloss", label=label, reading=reading, label_form=form)
+        temperature = SR.TEMPERATURE
+    else:
+        if not gloss:
+            raise ValueError("the role kind call reads a gloss")
+        user = _kinds().user_message(prompt_label(label, form), gloss)
+        temperature = None
+    return {"step": step, "model": model, "system": system, "user": user, "max_tokens": max_tokens_for(step, model),
+            "temperature": temperature, "cache_system": SR.caches_system(system, model)}
+
+
+def pins(rubrics_dir: Optional[Path] = None) -> dict:
+    """``{"step_versions": {step: version}, "prompt_sha256": {step: sha}}`` of the two prompts as pinned; a
+    ``ValueError`` when either text on disk is not its latest pin."""
+    from . import split_rubrics as sr
+    probs = [p for p in sr.mismatches(rubrics_dir) if p.split(":", 1)[0] in STEPS]
+    if probs:
+        raise ValueError("; ".join(probs))
+    cur = sr.current_versions(rubrics_dir, STEPS)
+    return {"step_versions": {s: cur[s][0] for s in STEPS},
+            "prompt_sha256": {s: sr.sha256(sr.load_prompt(s, rubrics_dir)) for s in STEPS}}
+
+
+#: Estimated tokens a call on Haiku 5.5: the role gloss as M1's gloss call measured (``split_runner.tokens_for``);
+#: the kind call as ``classify_role_kinds.py`` estimates it (generous: 900 in, 600 out).
+def tokens_for(step: str, model: str = MODEL) -> tuple[int, int]:
+    from . import split_runner as SR
+    if step == "role_gloss":
+        return SR.tokens_for("gloss", model)
+    CRK = _kinds()
+    return CRK.EST_IN, CRK.EST_OUT
+
+
+def estimate(n_rows: int, *, model: str = MODEL, n_kind_only: int = 0, batch: bool = False):
+    """The stage's estimate: one role gloss call and :data:`KIND_READINGS` kind calls a row (``n_kind_only`` more rows
+    that have their gloss and need only the kind calls); ``batch`` prices them at the Batches rate."""
+    from assistant_axis.judge_pricing import BATCH_SUFFIX
+    from .cost import Estimate
+    m = model + (BATCH_SUFFIX if batch else "")
+    est = Estimate()
+    i, o = tokens_for("role_gloss", model)
+    est.add("roles pass stage: the role gloss call", m, n_rows, i, o)
+    i, o = tokens_for("role_kind", model)
+    est.add(f"roles pass stage: the role kind call ({KIND_READINGS} readings)", m, (n_rows + n_kind_only) * KIND_READINGS,
+            i, o)
+    return est
+
+
+def render(row: Mapping, *, model: str = MODEL, rubrics_dir: Optional[Path] = None,
+           label_form: Optional[str] = None) -> str:
+    """The role gloss request for ``row`` and the kind request's form, as the model receives them (the dry run; the
+    kind call's description is the gloss, not known before the call)."""
+    p = pins(rubrics_dir)
+    q = request("role_gloss", label=row["label"], reading=accepted_reading(row), model=model, rubrics_dir=rubrics_dir,
+                label_form=label_form)
+    head = {k: q[k] for k in ("model", "max_tokens", "temperature", "cache_system")}
+    k = request("role_kind", label=row["label"], gloss="<the role gloss>", model=model, rubrics_dir=rubrics_dir,
+                label_form=label_form)
+    return (f"=== roles pass stage, {row['key']}: role_gloss v{p['step_versions']['role_gloss']}, request settings "
+            f"{json.dumps(head)} ===\n--- system ---\n{q['system']}\n--- user ---\n{q['user']}\n"
+            f"=== then role_kind v{p['step_versions']['role_kind']} on the gloss, {KIND_READINGS} readings, settings "
+            f"{json.dumps({x: k[x] for x in ('model', 'max_tokens', 'temperature', 'cache_system')})} ===\n"
+            f"--- user ---\n{k['user']}\n")
+
+
+# --------------------------------------------------------------------------- the stage: calls
+
+@dataclass
+class StageCall:
+    """One call of the stage: one row, one prompt (``rep``: the kind reading, 0-based)."""
+    step: str
+    key: str
+    label: str
+    model: str
+    system: str
+    user: str
+    max_tokens: int
+    temperature: Optional[float]
+    cache_system: bool = False
+    cache_ttl: Optional[str] = None
+    rep: int = 0
+    retry: bool = False
+
+    @property
+    def prompt_sha256(self) -> str:
+        from . import split_rubrics as sr
+        return sr.sha256(self.system)
+
+    @property
+    def custom_id(self) -> str:
+        """``<step>-<key>-<hash>-<reading>[-r]``, within the Message Batches limit of 64 characters of
+        ``[A-Za-z0-9_-]``; the retry of a call has its own id."""
+        import hashlib
+        h = hashlib.sha256(f"{self.step}|{self.key}|{self.user}".encode("utf-8")).hexdigest()[:10]
+        k = _re.sub(r"[^A-Za-z0-9_-]", "_", self.key)[:28]
+        return f"{self.step[5:9]}-{k}-{h}-{self.rep}" + ("-r" if self.retry else "")
+
+    def cache_key(self) -> tuple:
+        """``(step, prompt hash, model, user, reading)``: the three kind readings send the same request, so a resume
+        finds each its own answer."""
+        return (self.step, self.prompt_sha256, self.model, self.user, self.rep)
+
+
+def record_cache_key(rec: Mapping) -> tuple:
+    return (rec.get("step"), rec.get("prompt_sha256"), rec.get("model"), rec.get("user"), int(rec.get("reading") or 0))
+
+
+def parse_role_gloss(text: Optional[str], label: str) -> tuple[Optional[dict], Optional[str]]:
+    """``({"gloss", "form_ok"}, None)`` or ``(None, why)`` (``split.parse_gloss``'s one-row answer; ``form_ok``: the
+    corpus form, :func:`role_gloss_form_ok`)."""
+    from . import split
+    row, err = split.parse_gloss(text)
+    if err:
+        return None, err
+    return {"gloss": row["gloss"], "form_ok": role_gloss_form_ok(row["gloss"], label)}, None
+
+
+def parse_role_kind(text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
+    """``({"kind", "reason"}, None)`` (``classify_role_kinds.parse_kind``: the last JSON object with a known kind,
+    prose before it allowed), or ``(None, why)``."""
+    if not text or not text.strip():
+        return None, "empty response"
+    r = _kinds().parse_kind(text)
+    return (r, None) if r else (None, "no kind among the nine keys")
+
+
+class _LiveTransport:
+    name = "live"
+
+    def __init__(self, runner: "StageRunner"):
+        self.runner = runner
+
+    async def execute(self, wave: str, calls: Sequence[StageCall], on_result: Callable) -> None:
+        from assistant_axis.judge_pricing import BudgetExceededError
+        from .llm import call_anthropic_json
+        r = self.runner
+
+        async def one(c: StageCall) -> None:
+            if r.stop:
+                return
+            async with r.sem:
+                if r.stop:
+                    return
+                meta: dict = {}
+                try:
+                    t = await call_anthropic_json(r.client, system=c.system, user=c.user, model=c.model,
+                                                  max_tokens=c.max_tokens, temperature=c.temperature, usage=r.usage,
+                                                  cache_system=c.cache_system, retry_delays=r.retry_delays, meta=meta)
+                except BudgetExceededError as exc:
+                    t = meta.get("text")
+                    r.stop.append(exc)
+            meta["charged_as"] = c.model if meta.get("usage_raw") else None
+            on_result(c, t, meta)
+
+        await asyncio.gather(*(one(c) for c in calls))
+
+
+class StageRunner:
+    """The stage's two waves (``s1_role_gloss``, ``s2_role_kind``, each followed by a retry wave for the answers that
+    did not parse), sent live (``concurrency`` at a time) or through a Batches transport
+    (``batches.BatchTransport(runner, client, state_path)``).  Every response is appended to ``records_path`` as it
+    arrives, before it is parsed; an answer on record there (the same step, prompt, model, user turn and reading)
+    is replayed instead of sent, so a resumed run pays for nothing twice.  A budget stop keeps what was paid for and
+    is raised once the answers in hand are recorded."""
+
+    def __init__(self, *, client, usage, batch_id: str, records_path: Path, model: str = MODEL,
+                 concurrency: int = DEFAULT_CONCURRENCY, retry_delays: Optional[Sequence[float]] = None,
+                 transport: Any = None, rubrics_dir: Optional[Path] = None, label_form: Optional[str] = None,
+                 cache_ttl: Optional[str] = None):
+        from .llm import RETRY_DELAYS_S
+        from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form
+        self.client = client
+        self.usage = usage
+        self.batch_id = batch_id
+        self.records_path = Path(records_path)
+        self.model = model
+        self.retry_delays = tuple(RETRY_DELAYS_S if retry_delays is None else retry_delays)
+        self.concurrency = max(1, int(concurrency))
+        self.rubrics_dir = rubrics_dir
+        self.label_form = check_label_form(label_form or DEFAULT_LABEL_FORM)
+        self.pinned = pins(rubrics_dir)
+        self.transport = transport if transport is not None else _LiveTransport(self)
+        self.cache_ttl = cache_ttl
+        self.stop: list[BaseException] = []
+        self.sem: Optional[asyncio.Semaphore] = None
+        self.stats: Counter = Counter()
+        self.on_record: dict[tuple, dict] = {}
+        self.failed_once: Counter = Counter()
+        if self.records_path.exists():
+            for line in self.records_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                rec = json.loads(line)
+                if rec.get("text") is None:
+                    continue
+                k = record_cache_key(rec)
+                if rec.get("parse_error"):
+                    self.failed_once[k] += 1
+                else:
+                    self.on_record[k] = rec
+
+    # -- money (the Batches transport asks) -------------------------------------
+    def estimate_usd(self, calls: Sequence[StageCall], *, batch: bool = False) -> float:
+        from assistant_axis.judge_pricing import BATCH_SUFFIX, cost_for_usage
+        return sum(cost_for_usage(c.model + (BATCH_SUFFIX if batch else ""), *tokens_for(c.step, c.model))
+                   for c in calls)
+
+    # -- calls ------------------------------------------------------------------
+    def gloss_call(self, row: Mapping) -> StageCall:
+        q = request("role_gloss", label=row["label"], reading=accepted_reading(row), model=self.model,
+                    rubrics_dir=self.rubrics_dir, label_form=self.label_form)
+        return StageCall(step="role_gloss", key=row["key"], label=row["label"], model=q["model"], system=q["system"],
+                         user=q["user"], max_tokens=q["max_tokens"], temperature=q["temperature"],
+                         cache_system=q["cache_system"], cache_ttl=self.cache_ttl if q["cache_system"] else None)
+
+    def kind_calls(self, row: Mapping, gloss: str) -> list[StageCall]:
+        q = request("role_kind", label=row["label"], gloss=gloss, model=self.model, rubrics_dir=self.rubrics_dir,
+                    label_form=self.label_form)
+        return [StageCall(step="role_kind", key=row["key"], label=row["label"], model=q["model"], system=q["system"],
+                          user=q["user"], max_tokens=q["max_tokens"], temperature=q["temperature"],
+                          cache_system=q["cache_system"], cache_ttl=self.cache_ttl if q["cache_system"] else None,
+                          rep=i) for i in range(KIND_READINGS)]
+
+    @staticmethod
+    def parse(c: StageCall, text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
+        return parse_role_gloss(text, c.label) if c.step == "role_gloss" else parse_role_kind(text)
+
+    def _record(self, c: StageCall, text: Optional[str], meta: Mapping, err: Optional[str]) -> dict:
+        from .registry import utc_now
+        rec = {"batch_id": self.batch_id, "stage": STAGE, "step": c.step, "model": c.model, "key": c.key,
+               "label": c.label, "reading": c.rep, "user": c.user, "prompt_sha256": c.prompt_sha256, "text": text,
+               "stop_reason": meta.get("stop_reason"), "stop_details": meta.get("stop_details"),
+               "usage_raw": meta.get("usage_raw"), "attempts": meta.get("attempts"), "error": meta.get("error"),
+               "parse_error": err, "charged_as": meta.get("charged_as"), "retry": c.retry,
+               "transport": getattr(self.transport, "name", "live"), "custom_id": c.custom_id,
+               "batch_request_id": meta.get("batch_request_id"), "at": utc_now()}
+        self.records_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.records_path, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        return rec
+
+    async def wave(self, wave: str, calls: Sequence[StageCall]) -> dict[int, tuple[Optional[dict], Optional[str]]]:
+        """``{id(call): (parsed, error)}`` for ``calls``: answers on record replayed, the rest sent, and those whose
+        answer did not parse asked once more (``<wave>_retry``).  ``error`` ``"not sent (stopped)"`` after a stop."""
+        out: dict[int, tuple[Optional[dict], Optional[str]]] = {}
+        todo, again = [], []
+        for c in calls:
+            k = c.cache_key()
+            if k in self.on_record:
+                self.stats["replayed"] += 1
+                out[id(c)] = self.parse(c, self.on_record[k]["text"])
+                if out[id(c)][0] is not None:
+                    continue
+            if self.failed_once[k] >= 2:
+                out[id(c)] = (None, "unparsed twice (on record)")
+                continue
+            (again if self.failed_once[k] == 1 else todo).append(c)
+
+        def handle(c: StageCall, text: Optional[str], meta: Mapping) -> None:
+            parsed, err = self.parse(c, text)
+            if text is None and err in (None, "empty response"):
+                err = f"no response: {meta.get('error')}"
+            if meta.get("stop_reason") == "refusal":
+                err = f"refusal ({(meta.get('stop_details') or {}).get('category')})"
+                parsed = None
+            rec = self._record(c, text, meta, err)
+            self.stats[f"sent:{c.step}"] += 1
+            if err is None:
+                self.stats[f"ok:{c.step}"] += 1
+                self.on_record[c.cache_key()] = rec
+            elif text is not None:
+                self.failed_once[c.cache_key()] += 1
+            out[id(c)] = (parsed, err)
+
+        if todo and not self.stop:
+            try:
+                await self.transport.execute(wave, todo, handle)
+            except Exception as exc:  # noqa: BLE001 - a budget stop or a transport failure: kept, raised by the caller
+                self.stop.append(exc)
+        retry = [c for c in todo if out.get(id(c), (None, "x"))[0] is None and id(c) in out
+                 and not str(out[id(c)][1]).startswith("no response")] + again
+        if retry and not self.stop:
+            back = {}
+            rcalls = []
+            for c in retry:
+                rc = StageCall(**{**c.__dict__, "retry": True})
+                rcalls.append(rc)
+                back[id(rc)] = c
+            sub: dict[int, tuple] = {}
+
+            def handle_retry(rc, text, meta):
+                handle(rc, text, meta)
+                sub[id(rc)] = out.pop(id(rc))
+
+            try:
+                await self.transport.execute(wave + "_retry", rcalls, handle_retry)
+            except Exception as exc:  # noqa: BLE001
+                self.stop.append(exc)
+            for rc in rcalls:
+                c = back[id(rc)]
+                if id(rc) in sub:
+                    p, e = sub[id(rc)]
+                    first = out.get(id(c), (None, None))[1]
+                    out[id(c)] = (p, None) if e is None else (None, f"{first}; retry: {e}" if first else e)
+        for c in calls:
+            out.setdefault(id(c), (None, "not sent (stopped)"))
+        return out
+
+    # -- rows -------------------------------------------------------------------
+    def block(self, row: Mapping, *, gloss: Optional[dict], readings: Sequence[Optional[dict]],
+              errors: Mapping[str, str], kind_errors: Sequence[Optional[str]] = ()) -> dict:
+        from .registry import utc_now
+        CRK = _kinds()
+        g = (gloss or {}).get("gloss")
+        comb = CRK.combine(list(readings)) if g else {"kind": None, "split": False, "n_parsed": 0}
+        kind = comb.get("kind")
+        b = {"gloss": g, "gloss_form_ok": (gloss or {}).get("form_ok") if g else None, "kind": kind,
+             "kind_readings": ([dict(r) if r else {"kind": None, "error": e or "no answer"}
+                                for r, e in zip(readings, list(kind_errors) + [None] * len(readings))] if g else []),
+             "kind_unanimous": bool(comb.get("unanimous")) if kind else None,
+             "kind_split": bool(comb.get("split")) if kind else None,
+             "human": None if kind is None else kind != "non_human", "reading": accepted_reading(row),
+             "model": self.model, "batch_id": self.batch_id, "step_versions": dict(self.pinned["step_versions"]),
+             "prompt_sha256": dict(self.pinned["prompt_sha256"]), "label_form": self.label_form, "at": utc_now()}
+        if errors:
+            b["errors"] = dict(errors)
+        return b
+
+    async def run_async(self, rows: Sequence[Mapping], *, on_block: Optional[Callable[[str, dict], None]] = None
+                        ) -> dict[str, dict]:
+        self.sem = asyncio.Semaphore(self.concurrency)
+        out: dict[str, dict] = {}
+        glossed: dict[str, dict] = {}
+
+        def emit(row, b):
+            out[row["key"]] = b
+            if on_block is not None:
+                on_block(row["key"], b)
+
+        need_gloss = []
+        for r in rows:
+            g = gloss_of(r)
+            if g:                         # glossed by an earlier run, its kind failed: the kind calls only
+                glossed[r["key"]] = {"gloss": g, "form_ok": role_gloss_form_ok(g, r["label"])}
+            else:                         # no accepted reading: the call asks for the label's most usual sense
+                need_gloss.append(r)
+        calls = [self.gloss_call(r) for r in need_gloss]
+        res = await self.wave("s1_role_gloss", calls)
+        for r, c in zip(need_gloss, calls):
+            parsed, err = res[id(c)]
+            if parsed is not None:
+                glossed[r["key"]] = parsed
+            elif err != "not sent (stopped)" and not self.stop:
+                emit(r, self.block(r, gloss=None, readings=[], errors={"role_gloss": err}))
+        todo = [r for r in rows if r["key"] in glossed]
+        kcalls = {r["key"]: self.kind_calls(r, glossed[r["key"]]["gloss"]) for r in todo}
+        res = await self.wave("s2_role_kind", [c for cs in kcalls.values() for c in cs]) if kcalls else {}
+        for r in todo:
+            got = [res[id(c)] for c in kcalls[r["key"]]]
+            if any(e == "not sent (stopped)" for _, e in got):
+                continue                  # stopped half way: no block (the answers paid for are on record)
+            readings = [p for p, _ in got]
+            errs = [e for _, e in got]
+            errors = {} if any(readings) else {"role_kind": "; ".join(sorted({str(e) for e in errs if e}))}
+            emit(r, self.block(r, gloss=glossed[r["key"]], readings=readings, errors=errors, kind_errors=errs))
+        if self.stop:
+            raise self.stop[0]
+        return out
+
+    def parse_rates(self) -> dict:
+        return {s: {"n": self.stats.get(f"sent:{s}", 0), "ok": self.stats.get(f"ok:{s}", 0)} for s in STEPS}
+
+    def warn_parse_rates(self, log=None) -> None:
+        from assistant_axis.judge import warn_if_low_parse_rate
+        for s, d in self.parse_rates().items():
+            warn_if_low_parse_rate(label=f"roles_pass:{s}:{self.model}", n_ok=d["ok"], n_total=d["n"], logger_obj=log)
+
+
+async def stage_rows(rows: Sequence[Mapping], *, client, usage, batch_id: str, records_path: Path,
+                     on_block: Optional[Callable[[str, dict], None]] = None, model: str = MODEL,
+                     concurrency: int = DEFAULT_CONCURRENCY, retry_delays: Optional[Sequence[float]] = None,
+                     rubrics_dir: Optional[Path] = None, label_form: Optional[str] = None,
+                     transport_factory: Optional[Callable[["StageRunner"], Any]] = None,
+                     cache_ttl: Optional[str] = None, runner_out: Optional[list] = None) -> dict[str, dict]:
+    """The stage for ``rows``: the role gloss call on each row's accepted reading (a row whose block already has a
+    gloss skips it), then :data:`KIND_READINGS` role kind calls on the gloss, combined by majority.  ``on_block(key,
+    block)`` is called as each row finishes (the CLI writes the registry there); a row whose gloss failed (asked
+    twice) gets a block with ``gloss: None`` and ``errors``; a row stopped half way by a budget stop gets none, and
+    the stop is raised once the answers in hand are recorded.  ``transport_factory(runner)``: a Batches transport
+    (default: live).  Returns ``{key: block}``."""
+    r = StageRunner(client=client, usage=usage, batch_id=batch_id, records_path=records_path, model=model,
+                    concurrency=concurrency, retry_delays=retry_delays, rubrics_dir=rubrics_dir, label_form=label_form,
+                    cache_ttl=cache_ttl)
+    if transport_factory is not None:
+        r.transport = transport_factory(r)
+    if runner_out is not None:
+        runner_out.append(r)
+    return await r.run_async(rows, on_block=on_block)
+
+
+def run_stage_rows(rows: Sequence[Mapping], **kw) -> dict[str, dict]:
+    """:func:`stage_rows` from synchronous code, the client closed inside the loop (as ``physical_pass.run_gloss_rows``)."""
+    async def main() -> dict[str, dict]:
+        try:
+            return await stage_rows(rows, **kw)
+        finally:
+            close = getattr(kw.get("client"), "close", None)
+            if close is not None:
+                res = close()
+                if asyncio.iscoroutine(res):
+                    await res
+    return asyncio.run(main())
+
+
+def stage_summary(blocks: Mapping[str, Mapping]) -> dict:
+    """Counts for ``run.json`` and the readout: rows, glossed, gloss failed, in the corpus form, kind failed, by kind,
+    unanimous, split."""
+    ok = [b for b in blocks.values() if b.get("gloss")]
+    kinds = [b for b in ok if b.get("kind")]
+    return {"n_rows": len(blocks), "n_glossed": len(ok), "n_gloss_failed": len(blocks) - len(ok),
+            "n_gloss_form_ok": sum(1 for b in ok if b.get("gloss_form_ok")),
+            "n_kind_failed": len(ok) - len(kinds),
+            "kinds": dict(sorted(Counter(b["kind"] for b in kinds).items())),
+            "n_kind_unanimous": sum(1 for b in kinds if b.get("kind_unanimous")),
+            "n_kind_split": sum(1 for b in kinds if b.get("kind_split"))}
+
+
+def result_line(row: Mapping, block: Mapping) -> dict:
+    """One line of the run's :data:`RESULTS_NAME`: the row, its reading and the block."""
+    return {"key": row["key"], "label": row["label"], "reading": accepted_reading(row), BLOCK: dict(block)}
+
+
+# --------------------------------------------------------------------------- M3's candidate
+
+class RoleCandidate(M3Candidate):
+    """A role candidate as M3 reads it: cut-off 3 under every rule set (decision 4 and § 3 step 5: a sub-role is covered
+    by its parent; roles have no alignment call), no alignment score, no region."""
+
+    @property
+    def cut_off(self) -> int:
+        return CUT_OFF
+
+
+def _gens(row: Mapping) -> list:
+    return list(dict.fromkeys(s.get("generator") for s in row.get("sources") or [] if s.get("generator")))
+
+
+def candidate_from_row(row: Mapping):
+    """``(RoleCandidate, None)`` for a role row with a role gloss, else ``(None, why)``: ``not_filtered``,
+    ``not_a_role_row``, ``no_gloss``."""
+    if not row.get("filter"):
+        return None, "not_filtered"
+    if not is_role_row(row):
+        return None, "not_a_role_row"
+    g = gloss_of(row)
+    if g is None:
+        return None, "no_gloss"
+    return RoleCandidate(key=row["key"], stem=row["stem"], label=row["label"], gloss=g, alignment_score=None,
+                         region=None, generators=_gens(row)), None
+
+
+def provisional_candidate(row: Mapping):
+    """A stand-in for a row the stage has still to gloss, for the run's plan and estimate only (never sent): its
+    gloss built from the accepted reading.  Replaced by :func:`candidate_from_row` after the stage."""
+    reading = accepted_reading(row) or row["label"]
+    return RoleCandidate(key=row["key"], stem=row["stem"], label=row["label"],
+                         gloss=f"A {row['label']} is someone who {reading}.", alignment_score=None, region=None,
+                         generators=_gens(row))
+
+
+# --------------------------------------------------------------------------- promotion
+
+def queue_entry_extras(entry: dict, rec: Mapping, queue: Mapping, *, section: Optional[str] = None) -> dict:
+    """A promoted role row's queue entry (``promote.queue_entry_from_record``'s), made a role entry in place (§ 6.5):
+    ``entity_type: "role"``; tags ``gap_gen``, ``source:<generator>``, ``kind:<kind>``, ``human:<bool>`` merged with
+    the row's; the section of the role generators unless ``section`` is given; the role gloss as
+    ``description_draft``; a ``description_notes`` line with the pass, the kind and its agreement, the nearest roles
+    and traits; the generators' provenance as ``source`` (the source refs); and ``gap_gen.role_kind`` and
+    ``gap_gen.holding``.  ``pairing``: ``pair`` with ``pair_by_construction: false`` when a source carries a
+    ``partner_hint`` (the role-pair check decides at seeding)."""
+    b = block_of(rec)
+    kind = kind_of(rec)
+    human = human_of(rec)
+    tags = list(entry.get("tags") or [])
+    tags += [t for t in (f"kind:{kind}" if kind else None, f"human:{str(human).lower()}" if human is not None else None)
+             if t]
+    entry["entity_type"] = "role"
+    entry["tags"] = list(dict.fromkeys(tags))
+    entry["section"] = section or SECTION
+    entry["description_draft"] = gloss_of(rec) or entry.get("description_draft")
+    nv = rec.get("novelty") or {}
+    readings = b.get("kind_readings") or []
+    n_agree = sum(1 for r in readings if (r or {}).get("kind") == kind)
+    near_roles = ", ".join(f"{x['stem']} {x.get('cosine')}" + (f" ({x.get('relation')})" if x.get("relation") else "")
+                           for x in (nv.get("listed") or [])[:3] if x.get("stem"))
+    near_traits = ", ".join(f"{x['stem']} {x.get('cosine')}"
+                            for x in ((nv.get("cross_type") or {}).get("traits") or [])[:3] if x.get("stem"))
+    note = (f"role pass {nv.get('run_id') or b.get('batch_id')} | kind {kind} ({n_agree} of {len(readings)})"
+            + (f" | nearest roles: {near_roles}" if near_roles else "")
+            + (f" | nearest traits: {near_traits}" if near_traits else ""))
+    entry["description_notes"] = " | ".join(x for x in (note, entry.get("description_notes")) if x)
+    refs = [s.get("source_ref") for s in rec.get("sources") or [] if s.get("source_ref")]
+    if refs and not entry.get("source"):
+        entry["source"] = "; ".join(dict.fromkeys(refs))
+    partner = next((s.get("partner_hint") for s in rec.get("sources") or [] if s.get("partner_hint")), None)
+    if partner and not entry.get("partner"):
+        from assistant_axis.entity_id import normalize_to_file_name
+        entry.update(pairing="pair", partner=normalize_to_file_name(partner), partner_exists=None,
+                     pair_by_construction=False)
+    gg = entry.setdefault("gap_gen", {})
+    gg["holding"] = rec.get("holding")
+    gg["role_kind"] = {"kind": kind, "unanimous": b.get("kind_unanimous"), "split": b.get("kind_split"),
+                       "readings": [(r or {}).get("kind") for r in readings], "batch_id": b.get("batch_id"),
+                       "prompt_sha256": ((b.get("prompt_sha256") or {}).get("role_kind") or "")[:16] or None,
+                       "model": b.get("model")}
+    return entry

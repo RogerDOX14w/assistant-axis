@@ -32,7 +32,10 @@ records use them), while :data:`PINNED_NAMES` (every set) is what the pins, :fun
 (``relation.md``), first pinned as version 1.  Since 2026-10-08 a fourth, :data:`GENERATOR_FILES`: the
 generators' own calls: the Roget head-scope call (``roget_head_scope.md``) and the Roget label placement
 check (``roget_placement.md``), each first pinned as version 1; the alignment sweep's and the IPIP generator's
-since; and since 2026-10-13 workstream 13's paraphrase synonym call (``paraphrase_synonym.md``).
+since; and since 2026-10-13 workstream 13's paraphrase synonym call (``paraphrase_synonym.md``).  Since 2026-10-22 a
+fifth, :data:`ROLE_FILES`: the shared role path's rubrics (coding plan 16): the roles pass's role gloss and role kind
+calls (the latter ``classify_role_kinds.py``'s system prompt, moved here byte for byte) and M3's relation and
+overlap calls for roles.
 """
 from __future__ import annotations
 
@@ -101,6 +104,8 @@ M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: closest human phrasing, Roger's decision of that day), first pinned as version 1.
 #: Since 2026-10-20 the platform's narrow pass (``assistant_axis/gapgen/narrow_pass.py``; QUESTIONS 208 (3): is a kept
 #: candidate a narrower case of its closest corpus or queue trait?), first pinned as version 1.
+#: Since 2026-10-22 generator B's lay-role call (coding plan 16, ``assistant_axis/gapgen/generators/professions/lay.py``:
+#: what the people of an occupation group call themselves), first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
     "roget_placement": "roget_placement.md",
@@ -119,10 +124,20 @@ GENERATOR_FILES: dict[str, str] = {
     "llm_entropy_multilingual": "llm_entropy_multilingual.md",
     "llm_entropy_backtranslate": "llm_entropy_backtranslate.md",
     "narrow_direction": "narrow_direction.md",
+    "profession_lay": "profession_lay.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
+#: The shared role path's rubrics (coding plan 16, 2026-10-22; ``assistant_axis/gapgen/roles_pass.py``): the role
+#: gloss call and the role kind call of the pass's stage (``role_kind.md`` is ``classify_role_kinds.py``'s system
+#: prompt moved byte for byte; both readers load it from here), and M3's relation and overlap calls for roles, each
+#: first pinned as version 1.  A generator's own call (B's ``profession_lay``) goes into :data:`GENERATOR_FILES`.
+ROLE_FILES: dict[str, str] = {
+    "role_gloss": "role_gloss.md",
+    "role_kind": "role_kind.md",
+}
+ROLE_NAMES: tuple[str, ...] = tuple(ROLE_FILES)
 #: Every prompt file pinned in ``versions.json``.
-PINNED_FILES: dict[str, str] = {**FILES, **OVERLAP_FILES, **M3_FILES, **GENERATOR_FILES}
+PINNED_FILES: dict[str, str] = {**FILES, **OVERLAP_FILES, **M3_FILES, **GENERATOR_FILES, **ROLE_FILES}
 PINNED_NAMES: tuple[str, ...] = tuple(PINNED_FILES)
 VERSIONS_NAME = "versions.json"
 
