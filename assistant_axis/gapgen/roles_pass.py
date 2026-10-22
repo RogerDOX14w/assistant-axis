@@ -899,3 +899,72 @@ def choose_arm(results: Mapping[tuple, Mapping], *, target: float = RECALL_TARGE
     r = results[best]
     return {"query_form": best[0], "variant": best[1], "recall_at_k": r["recall_at_k"], "mrr": r["mrr"],
             "changed": best != PRODUCTION_ARM, "reached_target": (r["recall_at_k"] or 0.0) >= target}
+
+
+# --------------------------------------------------------------------------- the rubric check (§ 8, task 12)
+
+#: The 40 role pairs Roger marks before the pilot's first overlap call (idea plan § 10; coding plan § 8): the six
+#: recorded pairs of the role corpus, ten sub-role / parent pairs (the sub-role is the target, line 3's direction),
+#: ten near-synonym pairs that may be one role under two names, and fourteen others (neighbours, counterparts and
+#: unrelated roles).  All are corpus roles, so the sheet shows the corpus files' descriptions (no gloss is needed
+#: before the check; the role gloss call's glosses can stand in for the targets' with ``--glosses``).  ``set`` is the
+#: design's category, kept out of the sheet so that the marks are blind to it.
+RUBRIC_PAIRS: tuple[tuple[str, str, str], ...] = (
+    ("angel", "demon", "recorded_pair"), ("cosmopolitan", "provincial", "recorded_pair"),
+    ("destroyer", "guardian", "recorded_pair"), ("paperclip_maximizer", "instrumentally_aligned_ai", "recorded_pair"),
+    ("parasite", "symbiont", "recorded_pair"), ("prey", "predator", "recorded_pair"),
+    ("physicist", "scientist", "sub_role"), ("chemist", "scientist", "sub_role"), ("biologist", "scientist", "sub_role"),
+    ("novelist", "writer", "sub_role"), ("poet", "writer", "sub_role"), ("playwright", "writer", "sub_role"),
+    ("reporter", "journalist", "sub_role"), ("toddler", "child", "sub_role"), ("infant", "child", "sub_role"),
+    ("grandparent_caregiver", "caregiver", "sub_role"),
+    ("instructor", "teacher", "same_role"), ("trainer", "coach", "same_role"), ("counselor", "therapist", "same_role"),
+    ("reviewer", "critic", "same_role"), ("examiner", "evaluator", "same_role"), ("wanderer", "nomad", "same_role"),
+    ("secretary", "assistant", "same_role"), ("loner", "hermit", "same_role"), ("pauper", "beggar", "same_role"),
+    ("translator", "interpreter", "same_role"),
+    ("judge", "lawyer", "other"), ("detective", "criminal", "other"), ("student", "teacher", "other"),
+    ("patient", "doctor", "other"), ("veteran", "soldier", "other"), ("sommelier", "chef", "other"),
+    ("herder", "farmer", "other"), ("navigator", "pilot", "other"), ("archivist", "librarian", "other"),
+    ("smuggler", "pirate", "other"), ("farmer", "doctor", "other"), ("mechanic", "poet", "other"),
+    ("accountant", "witch", "other"), ("tree", "robot", "other"))
+#: The marks the sheet takes: the overlap rubric's answers.
+MARKS = ("0", "1", "2", "3", "4", "opposite", "unsure")
+KAPPA_TARGET = 0.6
+
+
+def relation_of_mark(mark) -> Optional[str]:
+    """A mark on the overlap scale as the relation call's answer: 2-4 ``similar``, 0-1 ``unrelated``, ``opposite``
+    ``opposed``; ``unsure`` and anything else None."""
+    m = str(mark).strip().lower()
+    if m in ("2", "3", "4"):
+        return "similar"
+    if m in ("0", "1"):
+        return "unrelated"
+    if m == "opposite":
+        return "opposed"
+    return None
+
+
+def weighted_kappa(a: Sequence[int], b: Sequence[int], *, categories: Sequence[int] = (0, 1, 2, 3, 4),
+                   weights: str = "quadratic") -> Optional[float]:
+    """Cohen's weighted kappa of two raters' ordinal answers (``quadratic`` or ``linear`` weights; ``none``: the
+    unweighted kappa).  None for no pair, or when the expected disagreement is zero."""
+    cats = list(categories)
+    k = len(cats)
+    if not a or len(a) != len(b):
+        return None
+    ix = {c: i for i, c in enumerate(cats)}
+    obs = [[0.0] * k for _ in range(k)]
+    for x, y in zip(a, b):
+        obs[ix[x]][ix[y]] += 1
+    n = float(len(a))
+    ra = [sum(obs[i]) / n for i in range(k)]
+    rb = [sum(obs[i][j] for i in range(k)) / n for j in range(k)]
+
+    def w(i, j):
+        if weights == "none":
+            return 0.0 if i == j else 1.0
+        d = abs(i - j) / max(1, k - 1)
+        return d * d if weights == "quadratic" else d
+    num = sum(w(i, j) * obs[i][j] / n for i in range(k) for j in range(k))
+    den = sum(w(i, j) * ra[i] * rb[j] for i in range(k) for j in range(k))
+    return None if den == 0 else round(1.0 - num / den, 4)

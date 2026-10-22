@@ -3506,6 +3506,292 @@ def cmd_retrieval_check(args, argv) -> int:
     return status
 
 
+# --------------------------------------------------------------------------- the role rubric check
+
+#: The sheet Roger marks (coding plan 16, § 8) and the seed of its order.
+RUBRIC_SHEET = paths.REPO_ROOT / "reports" / "trait_gap_generation" / "role_rubric_pairs.md"
+RUBRIC_SHEET_SEED = "role_rubric_pairs_2026-10-22"
+
+
+def rubric_sheet_pairs(data_dir: Path, *, glosses: Optional[dict] = None) -> list[dict]:
+    """The 40 pairs of :data:`roles_pass.RUBRIC_PAIRS` in the sheet's order (a seeded shuffle, so that the design's
+    sets are not grouped), numbered ``r01`` to ``r40``, with their labels and the descriptions the check sends: the
+    corpus files', or for a target with a gloss in ``glosses`` (stem -> gloss, the retrieval check's
+    ``glosses.jsonl``) the role gloss call's."""
+    corpus = NV.load_role_corpus(data_dir)
+    order = list(RP.RUBRIC_PAIRS)
+    random.Random(RUBRIC_SHEET_SEED).shuffle(order)
+    out = []
+    for i, (a, b, kind) in enumerate(order, 1):
+        g = (glosses or {}).get(a)
+        out.append({"pair": f"r{i:02d}", "target": a, "other": b, "set": kind, "target_label": corpus[a].label,
+                    "other_label": corpus[b].label, "target_text": g or corpus[a].description,
+                    "target_text_from": "role gloss call" if g else "corpus description",
+                    "other_text": corpus[b].description, "other_text_from": "corpus description"})
+    return out
+
+
+def rubric_sheet_markdown(pairs: list[dict], *, source: str) -> str:
+    """The sheet Roger marks (working-style: the mark column early, found by its header; every column says where it
+    comes from; nothing that tells the design's sets apart)."""
+    lines = ["# Role rubric check: 40 pairs to mark", "",
+             "For the role versions of M3's rubrics ([overlap_concept_roles.md](./rubrics/overlap_concept_roles.md), "
+             "[relation_roles.md](./rubrics/relation_roles.md)), before the pilot's first overlap call "
+             "([coding_plan_16_role_generators.md](./coding_plan_16_role_generators.md) § 8, the paid checks).  "
+             "About twenty minutes.", "",
+             "**How to mark.**  Put one answer in the `mark` column of each row, on the overlap rubric's scale, reading "
+             "the target against the other role: `4` the same role under another name; `3` the target is a kind of "
+             "the other, or the other narrowed to a setting, specialty or rank (a cardiologist with a doctor); `2` "
+             "overlapping roles, neither a kind of the other, which includes the other being a kind of the target; "
+             "`1` neighbouring roles (same world, different work); `0` different roles; `opposite` the counterpart "
+             "(the other side of the same relation); `unsure`.  The direction matters for `3` and `2`.", "",
+             f"**What the columns are.**  `target` and `other` are corpus roles (their files linked); the two "
+             f"descriptions are what the check sends the model ({source}).  "
+             "`novelty_score.py rubric-check --pairs` reads this file's `mark` column by its header and the pair ids; "
+             "the design of the pairs is in [role_rubric_pairs_key.json](./role_rubric_pairs_key.json) (not needed "
+             "for marking).", "",
+             "| pair | mark | target | other | target's description | other's description |",
+             "|---|---|---|---|---|---|"]
+    md = lambda t: str(t).replace("|", "\\|").replace("\n", " ")  # noqa: E731
+    for p in pairs:
+        lines.append(f"| {p['pair']} |  | [{md(p['target_label'])}](../../data/roles/instructions/{p['target']}.json) | "
+                     f"[{md(p['other_label'])}](../../data/roles/instructions/{p['other']}.json) | "
+                     f"{md(p['target_text'])} | {md(p['other_text'])} |")
+    return "\n".join(lines) + "\n"
+
+
+def parse_rubric_marks(path: Path) -> dict[str, str]:
+    """``{pair id: mark}`` from the sheet's table, the columns found by their headers (``pair``, ``mark``); a blank
+    mark is left out; a mark not in :data:`roles_pass.MARKS` raises ``ValueError``."""
+    text = Path(path).read_text(encoding="utf-8")
+    header, out = None, {}
+    for line in text.splitlines():
+        if not line.strip().startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if header is None:
+            if "pair" in cells and "mark" in cells:
+                header = {c: i for i, c in enumerate(cells)}
+            continue
+        if set(line.replace("|", "").strip()) <= set("-: "):
+            continue
+        pid, mark = cells[header["pair"]], cells[header["mark"]].strip().strip("`").lower()
+        if not mark:
+            continue
+        if mark not in RP.MARKS:
+            raise ValueError(f"{path}: pair {pid}: mark {mark!r} is not one of {', '.join(RP.MARKS)}")
+        out[pid] = mark
+    if header is None:
+        raise ValueError(f"{path}: no table with a 'pair' and a 'mark' column")
+    return out
+
+
+def _num(v) -> Optional[int]:
+    return v if isinstance(v, int) and not isinstance(v, bool) else (int(v) if isinstance(v, str) and v.isdigit() else None)
+
+
+def rubric_check_summary(rows: list[dict]) -> dict:
+    """The check's figures: per rubric and order, the kappa against the marks (the overlap rubric's quadratic
+    weighted kappa over the pairs both answered 0-4; the relation rubric's unweighted kappa over similar, opposed
+    and unrelated, the marks mapped by :func:`roles_pass.relation_of_mark`), the agreement on ``opposite``, and the
+    straight-minus-swapped gap by set (on a directional rubric a sub-role pair's gap is expected, the others' is the
+    position bias)."""
+    out: dict = {"n_pairs": len(rows), "kappa_target": RP.KAPPA_TARGET, "overlap": {}, "relation": {}}
+    rel_cats = ["similar", "opposed", "unrelated"]
+    for order in ("straight", "swapped"):
+        a = [(_num(r["mark"]), _num(r["overlap"][order])) for r in rows]
+        a = [(x, y) for x, y in a if x is not None and y is not None]
+        opp = [r for r in rows if r["mark"] == "opposite"]
+        out["overlap"][order] = {"n": len(a), "kappa": RP.weighted_kappa([x for x, _ in a], [y for _, y in a]),
+                                 "opposite_marked": len(opp),
+                                 "opposite_agreed": sum(1 for r in opp if r["overlap"][order] == "opposite")}
+        b = [(RP.relation_of_mark(r["mark"]), r["relation"][order]) for r in rows]
+        b = [(x, y) for x, y in b if x in rel_cats and y in rel_cats]
+        ix = {c: i for i, c in enumerate(rel_cats)}
+        out["relation"][order] = {"n": len(b), "kappa": RP.weighted_kappa([ix[x] for x, _ in b], [ix[y] for _, y in b],
+                                                                          categories=(0, 1, 2), weights="none")}
+    gaps: dict = {}
+    for r in rows:
+        s, w = _num(r["overlap"]["straight"]), _num(r["overlap"]["swapped"])
+        if s is not None and w is not None:
+            gaps.setdefault(r["set"], []).append(s - w)
+    out["gap_by_set"] = {k: {"n": len(v), "mean": round(sum(v) / len(v), 3)} for k, v in sorted(gaps.items())}
+    st = out["overlap"]["straight"]["kappa"], out["relation"]["straight"]["kappa"]
+    out["passed"] = all(k is not None and k >= RP.KAPPA_TARGET for k in st)
+    return out
+
+
+def rubric_check_markdown(summary: dict, rows: list[dict], *, batch_id: str) -> str:
+    o, r = summary["overlap"], summary["relation"]
+    lines = [f"# Role rubric check: `{batch_id}`", "",
+             "Both role rubrics on the 40 marked pairs ([role_rubric_pairs.md](../../../../reports/trait_gap_generation/"
+             "role_rubric_pairs.md)), each pair read in both orders (straight: the target first, as Roger marked it).  "
+             f"Acceptance: kappa at or above {RP.KAPPA_TARGET} for both rubrics, straight order; below it the rubric is "
+             "redrafted before the pilot's first overlap call.", "",
+             f"**{'Passed' if summary['passed'] else 'Below the line'}.**", "",
+             "| rubric | order | pairs | kappa | opposite agreed |", "|---|---|---|---|---|"]
+    for order in ("straight", "swapped"):
+        lines.append(f"| overlap (weighted, 0-4) | {order} | {o[order]['n']} | {o[order]['kappa']} | "
+                     f"{o[order]['opposite_agreed']} of {o[order]['opposite_marked']} |")
+    for order in ("straight", "swapped"):
+        lines.append(f"| relation (similar / opposed / unrelated) | {order} | {r[order]['n']} | {r[order]['kappa']} | |")
+    lines += ["", "Straight-minus-swapped gap of the overlap reading, by the design's set (a sub-role read 3 as the "
+                  "target and 2 as the other is a gap of 1 by design; for the other sets the gap is position bias):", ""]
+    for k, v in summary["gap_by_set"].items():
+        lines.append(f"- {k}: mean {v['mean']} over {v['n']} pairs")
+    lines += ["", "| pair | set | target | other | mark | overlap straight / swapped | relation straight / swapped |",
+              "|---|---|---|---|---|---|---|"]
+    for x in rows:
+        lines.append(f"| {x['pair']} | {x['set']} | {x['target']} | {x['other']} | {x['mark']} | "
+                     f"{x['overlap']['straight']} / {x['overlap']['swapped']} | {x['relation']['straight']} / "
+                     f"{x['relation']['swapped']} |")
+    return "\n".join(lines) + "\n"
+
+
+def cmd_rubric_check(args, argv) -> int:
+    """``rubric-check`` (coding plan 16, task 12): ``--make-sheet`` writes the 40-pair sheet (no call); without it, both
+    role rubrics on the marked pairs, both orders, kappa against the marks."""
+    import numpy as np
+    from assistant_axis.plot_metadata import json_metadata
+    data_dir = Path(args.data_dir)
+    glosses = None
+    if args.glosses:
+        glosses = {}
+        for line in Path(args.glosses).read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                d = json.loads(line)
+                if d.get("gloss"):
+                    glosses[d["stem"]] = d["gloss"]
+    pairs = rubric_sheet_pairs(data_dir, glosses=glosses)
+    key_path = Path(args.pairs).with_name(Path(args.pairs).stem + "_key.json")
+    if args.make_sheet:
+        if Path(args.pairs).exists() and not args.overwrite and parse_rubric_marks(args.pairs):
+            print(f"REFUSED: {args.pairs} holds marks; --overwrite to write a blank sheet over it", file=sys.stderr)
+            return 2
+        src = ("the target's is its role gloss, written by the role gloss call, the other's the corpus file's"
+               if glosses else "both are the corpus files' descriptions")
+        atomic_write_text(rubric_sheet_markdown(pairs, source=src), Path(args.pairs))
+        atomic_write_text(json.dumps({"seed": RUBRIC_SHEET_SEED, "glosses": str(args.glosses) if args.glosses else None,
+                                      "pairs": pairs}, indent=1, ensure_ascii=False) + "\n", key_path)
+        print(f"wrote {args.pairs} and {key_path} ({len(pairs)} pairs)")
+        return 0
+    paths.check_id(args.batch_id, "batch_id")
+    try:
+        marks = parse_rubric_marks(args.pairs)
+        rubrics = load_role_rubrics(args.rubrics_dir)
+    except (OSError, ValueError, RubricError) as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    if key_path.exists():
+        pairs = json.loads(key_path.read_text(encoding="utf-8"))["pairs"]
+    marked = [p for p in pairs if p["pair"] in marks]
+    if len(marked) < len(pairs):
+        print(f"{len(pairs) - len(marked)} of {len(pairs)} pairs have no mark yet", file=sys.stderr)
+        if not args.allow_partial:
+            print("REFUSED: mark every pair first (or --allow-partial)", file=sys.stderr)
+            return 2
+    idx = NV.CorpusIndex(stems=[], Z=np.zeros((0, 1)), transform=None, traits={}, settings={})
+    model = args.model
+
+    def make_runner(**kw):
+        return NR.NoveltyRunner(batch_id=args.batch_id, rubrics=rubrics, index=idx, k=0, config_version="",
+                                label_sets=NV.LabelSets(corpus=set(), queue={}, renamed={}), retry_delays=None,
+                                list_key="roles", **kw)
+    calls: dict = {}
+    for i, p in enumerate(marked, 1):
+        for order in ("straight", "swapped"):
+            t, o = ((p["target_label"], p["target_text"]), (p["other_label"], p["other_text"])) if order == "straight" \
+                else ((p["other_label"], p["other_text"]), (p["target_label"], p["target_text"]))
+            key = f"{p['pair']}_{order[:2]}"
+            pc = OT.PairCall(call_id=f"{key}>o", set="rubric_check", target=key, listed=["other"])
+            user = OT.render_single(pc, {key: {"label": t[0], "description": t[1]},
+                                         "other": {"label": o[0], "description": o[1]}})
+            calls[(p["pair"], order, "overlap")] = NR.Call(
+                step="overlap", role=NR.model_role(model), key=key, model=model, system=rubrics["overlap"]["text"],
+                user=user, max_tokens=NR.OVERLAP_MAX_TOKENS, temperature=NR.TEMPERATURE, cache_system=True,
+                stem="other", position=i)
+            calls[(p["pair"], order, "relation")] = NR.Call(
+                step="relation", role=NR.model_role(model), key=key, model=model, system=rubrics["relation"]["text"],
+                user=NV.render_relation_user(t[0], t[1], [o], list_key="roles"), max_tokens=NR.RELATION_MAX_TOKENS,
+                temperature=NR.TEMPERATURE, cache_system=False, stems=("other",), position=i)
+    est = Estimate()
+    for step in ("overlap", "relation"):
+        toks = [NR.call_tokens(c) for (pid, o, st), c in calls.items() if st == step]
+        if toks:
+            est.add(f"{step} call, both orders, {len(marked)} pairs", model, len(toks),
+                    int(round(sum(t[0] for t in toks) / len(toks))), int(round(sum(t[1] for t in toks) / len(toks))))
+    out_dir = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
+    print(f"rubric check: {len(marked)} marked pairs, both role rubrics, both orders, on {model}\nestimate:\n{est.format()}")
+    try:
+        cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                               confirmed_by=args.confirmed_by)
+    except CostRefused:
+        return 2
+    dirty = platform_dirty_files()
+    if dirty and not args.allow_dirty and not args.dry_run:
+        print(f"REFUSED: uncommitted changes to the platform's own code or prompt paths ({len(dirty)}); commit first, "
+              "or pass --allow-dirty", file=sys.stderr)
+        return 2
+    if args.dry_run:
+        for st in ("overlap", "relation"):
+            c = calls[(marked[0]["pair"], "straight", st)] if marked else None
+            if c is not None:
+                print(f"=== {st} call, {marked[0]['pair']} straight ===\n--- user ---\n{c.user}")
+        print(f"DRY-RUN: would write {out_dir}/ (readings.jsonl, kappa.json, readout.md, usage.json, run.json)")
+        return 0
+    status, resume_records, _ = _prepare_out_dir(out_dir, args)
+    if status:
+        return status
+    run_meta = {"batch_id": args.batch_id, "command": "rubric-check", "git_sha": git_sha(), "model": model,
+                "pairs_file": str(args.pairs), "n_marked": len(marked), "estimate_usd": round(est.usd, 4),
+                "cap_usd": cap, "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")}
+                                            for k, v in rubrics.items()},
+                "argv": sys.argv[1:] if argv is None else argv, "started_at": utc_now()}
+    atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
+    status, outcomes, runner = 0, {}, None
+    try:
+        from dotenv import load_dotenv
+        import anthropic
+        load_dotenv(_REPO_ROOT / ".env")
+        runner = make_runner(client=anthropic.AsyncAnthropic(max_retries=0), usage=usage,
+                             responses_path=out_dir / "responses.jsonl", concurrency=args.concurrency,
+                             resume_records=resume_records)
+        outcomes = runner.run_calls(list(calls.values()), wave="rc")
+    except BudgetExceededError as exc:
+        print(f"STOPPED: {exc}", file=sys.stderr)
+        status = 2
+    finally:
+        usage.write_json(out_dir / "usage.json")
+        rows = []
+        for p in marked:
+            row = {"pair": p["pair"], "set": p["set"], "target": p["target"], "other": p["other"],
+                   "mark": marks[p["pair"]], "overlap": {}, "relation": {}, "reasons": {}}
+            for order in ("straight", "swapped"):
+                oc = outcomes.get(id(calls[(p["pair"], order, "overlap")]))
+                rc = outcomes.get(id(calls[(p["pair"], order, "relation")]))
+                row["overlap"][order] = oc.parsed["value"] if oc is not None and oc.status == "ok" else None
+                row["relation"][order] = rc.parsed[1]["value"] if rc is not None and rc.status == "ok" else None
+                row["reasons"][order] = {"overlap": oc.parsed["reason"] if oc is not None and oc.status == "ok" else None,
+                                         "relation": rc.parsed[1]["reason"] if rc is not None and rc.status == "ok" else None}
+            rows.append(row)
+        atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), out_dir / "readings.jsonl")
+        summary = rubric_check_summary(rows)
+        if runner is not None:
+            summary["parse_rates"] = runner.warn_parse_rates(logger)
+        summary["spend_usd"] = round(usage.total_cost_usd, 6)
+        env = json_metadata(summary, title=f"novelty_score rubric-check {args.batch_id}")
+        atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "kappa.json")
+        atomic_write_text(rubric_check_markdown(summary, rows, batch_id=args.batch_id), out_dir / "readout.md")
+        print(usage.log_line())
+        print(json.dumps({"overlap": summary["overlap"]["straight"], "relation": summary["relation"]["straight"],
+                          "passed": summary["passed"]}))
+        run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status,
+                        passed=summary["passed"])
+        atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    return status
+
+
 # --------------------------------------------------------------------------- main
 
 def build_parser() -> argparse.ArgumentParser:
@@ -3627,6 +3913,29 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--overwrite", action="store_true")
     sp.add_argument("--dry-run", action="store_true", help="the plan, the estimate and the rendered gloss request")
     sp.set_defaults(func=lambda a, argv: cmd_retrieval_check(a, argv))
+    sp = sub.add_parser("rubric-check",
+                        help="the role rubric check (coding plan 16, task 12): --make-sheet writes the 40-pair sheet; "
+                             "then both role rubrics on Roger's marks, both orders, weighted kappa")
+    sp.add_argument("--pairs", type=Path, default=RUBRIC_SHEET, help="the marked sheet (role_rubric_pairs.md)")
+    sp.add_argument("--make-sheet", action="store_true", help="write the blank sheet and its key (no call)")
+    sp.add_argument("--glosses", type=Path, default=None,
+                    help="with --make-sheet: a retrieval check's glosses.jsonl, whose role glosses stand in for the "
+                         "targets' corpus descriptions")
+    sp.add_argument("--batch-id", default="roles_rubric_1")
+    sp.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
+    sp.add_argument("--out-root", type=Path, default=None)
+    sp.add_argument("--rubrics-dir", type=Path, default=None)
+    sp.add_argument("--model", default=NR.FIRST_MODEL, help=f"the model reading both rubrics (default {NR.FIRST_MODEL})")
+    sp.add_argument("--allow-partial", action="store_true", help="run on the marked pairs although some are not")
+    sp.add_argument("--concurrency", type=int, default=NR.DEFAULT_CONCURRENCY)
+    sp.add_argument("--budget-usd", type=float, default=2.0)
+    sp.add_argument("--confirm-expensive", action="store_true")
+    sp.add_argument("--confirmed-by", default=None)
+    sp.add_argument("--allow-dirty", action="store_true")
+    sp.add_argument("--resume", action="store_true")
+    sp.add_argument("--overwrite", action="store_true")
+    sp.add_argument("--dry-run", action="store_true")
+    sp.set_defaults(func=lambda a, argv: cmd_rubric_check(a, argv))
     sp = sub.add_parser("promote-redecide",
                         help="write a finished re-decided run's novelty blocks to the registry (no API call)")
     sp.add_argument("--batch-id", required=True, help="the re-decided run (score --redecide --batch-id)")
