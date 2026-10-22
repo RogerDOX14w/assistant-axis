@@ -511,17 +511,20 @@ def cmd_rank(args) -> int:
     cfg = MetricConfig.load(args.metric_config) if args.embedder != "none" else None
     emb = cache = None
     est_usd = 0.0
+    query_form = RK.QUERY_FORM
     if args.embedder != "none":
         st = RK.role_index_settings(cfg)
+        query_form = st["query_form"]
         _, texts = RK.role_index_texts(args.data_dir, st["representation"])
-        queries = [q for q in (RK.role_query(r) for r in rows) if q]
+        queries = [q for q in (RK.role_query(r, query_form=query_form) for r in rows) if q]
         emb, cache = _embedder(args.embedder, model_id=cfg.live_model.get("model_id"), cache_dir=args.embed_cache_dir)
         uniq = list(dict.fromkeys(texts + queries))
         miss = list(range(len(uniq))) if cache is None else cache.lookup(emb.tag, uniq)[1]
         tokens = int(sum(len(uniq[i]) for i in miss) / EMBED_CHARS_PER_TOKEN)
         est_usd = 0.0 if args.embedder == "hash" else cost_for_usage(emb.usage_model, tokens, 0)
         print(f"  embeddings: {len(texts)} corpus roles and {len(queries)} lay glosses ({st['representation']}, "
-              f"{st['variant']}, settings from {st['source']}); {len(miss)} of {len(uniq)} texts not in the cache, "
+              f"{st['variant']}, query {query_form}, settings from {st['source']}); {len(miss)} of {len(uniq)} texts "
+              f"not in the cache, "
               f"~{tokens:,} tokens = ${est_usd:.4f}" + ("  (hash: local, free)" if args.embedder == "hash" else ""))
     else:
         print("  --embedder none: no distance feature (every role counted at the mean distance)")
@@ -535,7 +538,7 @@ def cmd_rank(args) -> int:
         return code
     ctx = start_run(P.GENERATOR, args.run_id, candidates_dir=args.candidates_dir, args={
         "step": "rank", "weights": weights, "embedder": args.embedder, "budget_usd": args.budget_usd,
-        "query_form": RK.QUERY_FORM, "near_corpus_cosine": RK.NEAR_CORPUS_COSINE,
+        "query_form": query_form, "near_corpus_cosine": RK.NEAR_CORPUS_COSINE,
         "metric_config": None if cfg is None else cfg.config_version})
     ctx.usage = RunGuardedUsage(budget_usd=args.budget_usd, usage_path=rdir / "usage.json", earlier=ctx.total_usage())
     index = embed = None
@@ -545,7 +548,8 @@ def cmd_rank(args) -> int:
                 return EM.embed_texts(emb, texts, cache=cache, usage=ctx.usage)
             index, info = RK.build_role_index(args.data_dir, cfg=cfg, embed=embed)
             ctx.args["role_index"] = info
-        ranked = RK.rank_roles(lay_rows, zipf=RK.default_zipf(), role_index=index, embed=embed, weights=weights)
+        ranked = RK.rank_roles(lay_rows, zipf=RK.default_zipf(), role_index=index, embed=embed, weights=weights,
+                               query_form=query_form)
     except BudgetExceededError as exc:
         print(f"STOPPED at the cap (--budget-usd {args.budget_usd:g}): {exc}", file=sys.stderr)
         return 1

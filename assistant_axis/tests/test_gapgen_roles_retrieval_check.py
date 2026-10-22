@@ -86,7 +86,7 @@ def test_at_or_above_the_line_the_settings_stay(env, capsys):
     md = (d / "recall.md").read_text()
     assert "at or above 95%" in md and "| `label_gloss` | centred |" in md
     assert json.loads((d / "usage.json").read_text())["per_model"]["claude-haiku-5-5"]["n_calls"] == len(ROLE_CORPUS)
-    assert RP.role_settings if False else cli.role_settings(MetricConfig.load(env["cfg"]))["query_form"] == "role_gloss_w14"
+    assert RP.role_settings(MetricConfig.load(env["cfg"]))["query_form"] == "role_gloss_w14"
 
 
 def test_below_the_line_the_arms_run_and_the_best_is_written_and_read_back(env):
@@ -119,8 +119,12 @@ def test_below_the_line_the_arms_run_and_the_best_is_written_and_read_back(env):
     assert by[("role_gloss_w20", "centred")]["recall_at_k"] > rep["production"]["recall_at_k"]
     cfg = MetricConfig.load(env["cfg"])
     assert cfg.roles["query_form"] == "role_gloss_w20" and cfg.roles["batch_id"] == "rc1"
-    s = cli.role_settings(cfg)
+    s = RP.role_settings(cfg)
     assert s["query_form"] == "role_gloss_w20" and s["source"] == "metric_config.roles"
+    # generator B's ranker reads the same setting (finding 2 of the review of 2026-10-23)
+    from assistant_axis.gapgen.generators.professions import rank as RK
+    st = RK.role_index_settings(cfg)
+    assert {k: st[k] for k in s} == s
 
 
 def test_dry_run_and_refusals(env, capsys):
@@ -130,3 +134,51 @@ def test_dry_run_and_refusals(env, capsys):
     assert not (env["cand_dir"] / "novelty" / "rc1").exists()
     assert check(env, "rc1", "--forms", "label_gloss") == 2
     assert check(env, "rc1", "--space", "raw") == 2
+
+
+def test_every_reader_follows_a_written_setting(env, tmp_path, monkeypatch):
+    """One reader of the role setting (``roles_pass.role_settings``; finding 2 of the review of 2026-10-23): once the
+    check writes a ``roles`` section, M3 and R1 (the query form and the space) and generator B's ranker (its role
+    index and its query) all follow it, so a recalibration cannot split B's distance feature from M3's retrieval."""
+    import data_analysis.gap_generation.professions_generator as G
+    from assistant_axis.gapgen.generators.professions import rank as RK
+    from assistant_axis.tests import professions_fakes as F
+    from assistant_axis.tests.test_gapgen_professions_rank import LAY_ROWS
+    cli.write_role_setting(env["cfg"], {"query_form": "role_gloss_w20", "variant": "raw", "batch_id": "rcx"})
+    cfg = MetricConfig.load(env["cfg"])
+    s = RP.role_settings(cfg)
+    assert (s["query_form"], s["variant"], s["source"]) == ("role_gloss_w20", "raw", "metric_config.roles")
+    assert s["representation"] == cfg.covered["representation"]
+    # M3 and R1: the default query form of a roles run is the setting's
+    import argparse
+    assert cli.resolve_query_form(argparse.Namespace(query_form=None), RP.HOLDING, cfg) == "role_gloss_w20"
+    # B: the role index in the setting's space, the query in its form
+    st = RK.role_index_settings(cfg)
+    assert {k: st[k] for k in s} == s
+    embed, _ = F.hash_embed()
+    idx, info = RK.build_role_index(env["data"], cfg=cfg, embed=embed)
+    assert idx.settings["variant"] == "raw" and info["query_form"] == "role_gloss_w20"
+    long = {"role": "keeper", "gloss": "A keeper is someone who walks the long wet paths of the park at dawn and "
+                                       "again at dusk with a lamp and a dog."}
+    assert RK.role_query(long, query_form=info["query_form"]) == NV.query_text("keeper", long["gloss"],
+                                                                                 query_form="role_gloss_w20")
+    assert RK.role_query(long, query_form=info["query_form"]) != RK.role_query(long)          # w14 cuts it shorter
+    # and the rank command end to end: what it records and what it queried with
+    from assistant_axis.gapgen.generators.professions import rank as RKmod
+    monkeypatch.setattr(RKmod, "default_zipf", lambda: F.fake_zipf)
+    monkeypatch.setattr(G, "_dirty", lambda args: None)
+    cand = tmp_path / "cand_b"
+    rd = cand / "runs" / "professions" / "r1"
+    rd.mkdir(parents=True)
+    (rd / "lay.jsonl").write_text("".join(json.dumps(r) + "\n" for r in LAY_ROWS))
+    assert G.main(["--candidates-dir", str(cand), "--data-dir", str(env["data"]), "--registry",
+                   str(tmp_path / "reg_b.jsonl"), "rank", "--run-id", "r1", "--embedder", "hash",
+                   "--metric-config", str(env["cfg"])]) == 0
+    run = json.loads((rd / "run.json").read_text())
+    args = run["sessions"][-1]["args"]
+    assert args["query_form"] == "role_gloss_w20" and args["role_index"]["variant"] == "raw"
+    ranked = [json.loads(x) for x in (rd / "ranking.jsonl").read_text().splitlines()]
+    q = {r["stem"]: r["query"] for r in ranked if r.get("query")}
+    assert q and all(v == NV.query_text(k.replace("_", " "), next(
+        x["gloss"] for row in LAY_ROWS for x in row["roles"] if x["stem"] == k and x.get("gloss")),
+        query_form="role_gloss_w20") for k, v in q.items())

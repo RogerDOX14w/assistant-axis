@@ -870,6 +870,22 @@ def queue_entry_extras(entry: dict, rec: Mapping, queue: Mapping, *, section: Op
 
 # --------------------------------------------------------------------------- the retrieval check (§ 7b, decision 11)
 
+def role_settings(cfg) -> dict:
+    """The role index's settings, the one reader of them (decision 11 of plan 16): M2's trait settings (the covered
+    representation and the covered space's variant) with the role query form
+    :data:`novelty.DEFAULT_ROLE_QUERY_FORM`, unless the metric config's ``roles`` section (written by
+    ``novelty_score.py retrieval-check`` when the check fell below 95% and an arm did better: ``query_form`` and
+    ``variant``) says otherwise.  M3 (``score --holding roles``), R1 (a roles build) and generator B's ranker
+    (``professions.rank``) all read it here, so a recalibration moves all three together.  ``{"query_form",
+    "variant", "representation", "source"}``."""
+    from .novelty import DEFAULT_ROLE_QUERY_FORM
+    r = dict(getattr(cfg, "roles", None) or {})
+    return {"query_form": r.get("query_form") or DEFAULT_ROLE_QUERY_FORM,
+            "variant": r.get("variant") or cfg.covered["space"]["variant"],
+            "representation": cfg.covered["representation"],
+            "source": "metric_config.roles" if r else "M2's trait settings (metric_config.covered)"}
+
+
 #: The production query form and space of the role index, and the acceptance line (decision 11; Roger's decision 3
 #: of 2026-10-22: the label-stripped form against 95%, the label-kept form reported beside it).
 PRODUCTION_ARM = ("role_gloss_w14", "centred")

@@ -103,6 +103,7 @@ from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import prompt_labels as PL  # noqa: E402
 from assistant_axis.gapgen import records as RF  # noqa: E402
 from assistant_axis.gapgen import review_graph as RG  # noqa: E402
+from assistant_axis.gapgen import roles_pass as RP  # noqa: E402
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import Registry, utc_now  # noqa: E402
@@ -367,7 +368,7 @@ def cmd_build(args, argv) -> int:
         print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
         return 2
     args.query_form = NS.resolve_query_form(args, "roles" if roles_build else None, cfg)
-    variant = NS.role_settings(cfg)["variant"] if roles_build else cfg.covered["space"]["variant"]
+    variant = RP.role_settings(cfg)["variant"] if roles_build else cfg.covered["space"]["variant"]
     index_kw = {"entity_type": "role", "variant": variant} if roles_build else {}
     list_key = "roles" if roles_build else "traits"
     queue = load_queue(args.data_dir)

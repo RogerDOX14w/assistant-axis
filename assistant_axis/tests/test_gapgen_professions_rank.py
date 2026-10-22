@@ -112,7 +112,9 @@ class TestDistance:
 
     def test_the_role_index_leaves_default_out(self, tmp_path):
         idx, info, _ = self._index(tmp_path)
-        assert info["n_roles"] == 10 and "default" not in idx.stems and info["source"] == "covered"
+        # the settings come through roles_pass.role_settings, the reader M3 and R1 use (review finding 2, 2026-10-23)
+        assert info["n_roles"] == 10 and "default" not in idx.stems and info["source"].startswith("M2's trait settings")
+        assert info["query_form"] == "role_gloss_w14"
         assert info["representation"] == "w20" and info["variant"] == "raw"
 
     def test_nearest_corpus_role_through_the_role_gloss_query(self, tmp_path):

@@ -8,8 +8,9 @@ corpus's.  So each lay role gets three features:
   detailed employment, :func:`.soc.detailed_employment`); a role that several groups name takes the largest;
 * ``distance``: ``1 - cosine`` to the nearest corpus role by the role index (``novelty.load_role_corpus`` embedded as
   ``label: description`` in the covered representation through the embedding cache, ``novelty.build_index`` with
-  M2's settings, or the metric config's ``roles`` section when there is one), the query the lay gloss in the role
-  query form ``role_gloss_w14`` (its opening "A/An <role> is" taken out, cut to 14 words).
+  M2's settings, or the metric config's ``roles`` section when there is one: ``roles_pass.role_settings``, the
+  reader M3 and R1 use), the query the lay gloss in that setting's role query form (``role_gloss_w14`` unless a
+  recalibration chose another: its opening "A/An <role> is" taken out, cut to 14 words).
 
 Each feature is z-scored over the run (a missing value counts as the mean, z 0, and is flagged), the three summed
 with weights 1, 1, 1 (``--weights``), highest first; ties by employment, then by stem.  A role whose nearest corpus
@@ -31,6 +32,8 @@ import numpy as np
 RANK_WEIGHTS: dict[str, float] = {"zipf": 1.0, "employment": 1.0, "distance": 1.0}
 FEATURES: dict[str, str] = {"zipf": "zipf", "employment": "log_employment", "distance": "distance"}
 NEAR_CORPUS_COSINE = 0.75
+#: The role query form when there is no metric config to read (``--embedder none``); otherwise the setting's
+#: (:func:`role_index_settings`).
 QUERY_FORM = "role_gloss_w14"
 TOP_N = 40
 
@@ -189,14 +192,12 @@ def rank_roles(lay_rows: Sequence[Mapping], *, zipf: Callable[[str], float], rol
 # --------------------------------------------------------------------------- the role index
 
 def role_index_settings(cfg) -> dict:
-    """The role index's settings: the metric config's ``roles`` section (``representation``, ``space.variant``)
-    when it has one (a recalibration, coding plan 16 decision 11), else M2's covered settings."""
-    roles = (getattr(cfg, "extra", None) or {}).get("roles") or {}
-    cov = dict(cfg.covered)
-    rep = roles.get("representation") or cov["representation"]
-    variant = ((roles.get("space") or {}).get("variant")) or cov["space"]["variant"]
-    return {"representation": rep, "variant": variant, "metric": "cos", "source": "roles" if roles else "covered",
-            "config_version": getattr(cfg, "config_version", None)}
+    """The role index's settings as M3 and R1 retrieve with them (``roles_pass.role_settings``, the one reader: the
+    metric config's ``roles`` section after a recalibration, coding plan 16 decision 11, else M2's covered settings
+    with the role query form): ``representation``, ``variant``, ``query_form``, ``source``, plus ``metric`` and the
+    config's version."""
+    from assistant_axis.gapgen import roles_pass as RP
+    return {**RP.role_settings(cfg), "metric": "cos", "config_version": getattr(cfg, "config_version", None)}
 
 
 def role_index_texts(data_dir: Path, representation: str) -> tuple[dict, list[str]]:
@@ -208,7 +209,8 @@ def role_index_texts(data_dir: Path, representation: str) -> tuple[dict, list[st
 
 
 def build_role_index(data_dir: Path, *, cfg, embed: Callable[[Sequence[str]], np.ndarray]) -> tuple[Any, dict]:
-    """The role index (module docstring); ``embed`` embeds through the cache and charges the usage."""
+    """The role index (module docstring) in :func:`role_index_settings`'s representation and space; ``embed``
+    embeds through the cache and charges the usage.  The info returned carries the query form to rank with."""
     from assistant_axis.gapgen import novelty as NV
     st = role_index_settings(cfg)
     roles, texts = role_index_texts(data_dir, st["representation"])

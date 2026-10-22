@@ -1317,7 +1317,8 @@ cut keeps (1-2 words, no parentheses, singular, Zipf at least 3.0, not a corpus 
 the top 300); the lay call (Haiku 5.5, pinned
 [profession_lay.md](../reports/trait_gap_generation/rubrics/profession_lay.md), three readings combined as a union
 with support) names the roles a lay person would call the people of each row; `rank` scores familiarity (Zipf,
-employment) and distance from the corpus (the role index), z-scored and summed; `submit` sends the net-new rows from
+employment) and distance from the corpus (the role index, in the setting M3 retrieves with:
+`roles_pass.role_settings`, which a recalibration by `retrieval-check` moves for both), z-scored and summed; `submit` sends the net-new rows from
 the top, metered to `share x wave_rows / kept_share` (B's share 0.5, the pilot's kept share), as role candidates
 (`kind_guess: occupation`, `human: true`) and prints the M1, M3, R1 and R2 commands.  **Downloads** (`fetch`, refused
 without `--approved-by`; manifest rows in `data/external/<source>/DOWNLOAD_MANIFEST.json`; bls.gov refuses

@@ -250,24 +250,13 @@ def load_role_rubrics(rubrics_dir: Optional[Path] = None) -> dict:
     return out
 
 
-def role_settings(cfg) -> dict:
-    """The role index's settings (decision 11 of plan 16): M2's trait settings (the covered space's variant) with the
-    role query form :data:`novelty.DEFAULT_ROLE_QUERY_FORM`, unless the metric config's ``roles`` section (written by
-    ``retrieval-check`` when the check fell below 95% and an arm did better) says otherwise.  ``{"query_form",
-    "variant", "source"}``."""
-    r = dict(getattr(cfg, "roles", None) or {})
-    return {"query_form": r.get("query_form") or NV.DEFAULT_ROLE_QUERY_FORM,
-            "variant": r.get("variant") or cfg.covered["space"]["variant"],
-            "source": "metric_config.roles" if r else "M2's trait settings (metric_config.covered)"}
-
-
 def resolve_query_form(args, holding: Optional[str], cfg=None) -> Optional[str]:
     """``--query-form`` for this run, or why it is refused: a trait run takes :data:`novelty.QUERY_FORMS` (default
-    ``gloss_w14``); a roles run :data:`novelty.ROLE_QUERY_FORMS` (default the role setting, :func:`role_settings`)."""
+    ``gloss_w14``); a roles run :data:`novelty.ROLE_QUERY_FORMS` (default the role setting, ``roles_pass.role_settings``)."""
     v = getattr(args, "query_form", None)
     if holding == RP.HOLDING:
         if v is None:
-            return role_settings(cfg)["query_form"] if cfg is not None else NV.DEFAULT_ROLE_QUERY_FORM
+            return RP.role_settings(cfg)["query_form"] if cfg is not None else NV.DEFAULT_ROLE_QUERY_FORM
         if v not in NV.ROLE_QUERY_FORMS:
             raise SystemExit(f"--query-form {v}: a roles run embeds a role gloss ({', '.join(NV.ROLE_QUERY_FORMS)})")
         return v
@@ -393,7 +382,7 @@ def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = Fa
 
     ``entity_type="role"`` (coding plan 16, § 7b): the role index: the role files (``default.json`` left out,
     :func:`novelty.load_role_corpus`) and the queue's live role entries, embedded the same way, centred on the role
-    corpus's own mean; ``variant`` overrides the covered space's (the role setting, :func:`role_settings`)."""
+    corpus's own mean; ``variant`` overrides the covered space's (the role setting, ``roles_pass.role_settings``)."""
     import numpy as np
     from assistant_axis.gapgen import embed as EM
     from assistant_axis.gapgen.recovery import reduced_traits
@@ -1882,7 +1871,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
         return 2
     cfg = MetricConfig.load(args.metric_config)
     args.query_form = resolve_query_form(args, RP.HOLDING if role_run else None, cfg)
-    rsettings = role_settings(cfg) if role_run else None
+    rsettings = RP.role_settings(cfg) if role_run else None
     cross_on = getattr(args, "cross_type", None)
     cross_on = role_run if cross_on is None else bool(cross_on)
     if role_run:
@@ -3232,7 +3221,7 @@ def render_roles(args, cfg, cache) -> int:
     corpus's real nearest."""
     from assistant_axis.gapgen import embed as EM
     from assistant_axis.gapgen.representation import represent
-    rs = role_settings(cfg)
+    rs = RP.role_settings(cfg)
     args.query_form = resolve_query_form(args, RP.HOLDING, cfg)
     index, info = load_index(cfg, data_dir=args.data_dir, cache=cache, queue_search=resolve_queue_search(args),
                              entity_type="role", variant=rs["variant"])

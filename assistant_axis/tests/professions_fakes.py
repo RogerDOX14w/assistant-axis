@@ -263,6 +263,7 @@ class FakeMetricConfig:
     config_version = "test"
     covered = {"representation": "w20", "space": {"variant": "raw"}, "metric": "cos", "k": 10}
     extra: dict = {}
+    roles = None                    # no ``roles`` section: M2's settings with the role query form
     live_model = {"model_id": "hash-64"}
 
 
