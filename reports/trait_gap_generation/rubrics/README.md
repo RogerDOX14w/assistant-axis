@@ -79,6 +79,29 @@ one narrow trait per parent goes to review).
 |---|---|---|
 | [narrow_direction.md](./narrow_direction.md) | Is the candidate a narrower case of the existing trait (one domain, context or behaviour), the same, broader, or different? | draft 1, pinned as version 1 |
 
+## The role pass (added 2026-10-22)
+
+The calls of the roles pass ([coding_plan_16_role_generators.md](../coding_plan_16_role_generators.md); library
+[roles_pass.py](../../../assistant_axis/gapgen/roles_pass.py)): the stage before M3 for a role row, and M3's two
+calls with the role corpus in place of the trait corpus.  Pinned in the same `versions.json`, each file with its
+rendered samples.
+
+| file | what it asks | status |
+|---|---|---|
+| [role_gloss.md](./role_gloss.md) | Write one sentence, "A/An <label> is someone who ...", describing the role in the reading M1 accepted | draft 1, pinned as version 1 |
+| [role_kind.md](./role_kind.md) | Which of the nine kinds is the role (occupation, life stage, circumstance, status, stance, pastime, non-human, temperament, other)?  Three readings, majority | [classify_role_kinds.py](../../../data_analysis/classify_role_kinds.py)'s prompt moved byte for byte, pinned as version 1 (sha `11b559f0cff50189`, the one [role_kinds.json](../../../data/roles/role_kinds.json) records) |
+| [relation_roles.md](./relation_roles.md) | How does each listed role stand to the candidate role: similar, opposed, unrelated, or unsure | draft 1, pinned as version 1 |
+| [overlap_concept_roles.md](./overlap_concept_roles.md) | Rubric A for roles: how similar are two roles, 0 to 4, "opposite" or "unsure" (a sub-role of a wider one is a 3) | draft 1, pinned as version 1 |
+
+Generator B's own call (pinned in the same file, among the generators' prompts):
+
+| file | what it asks | status |
+|---|---|---|
+| [profession_lay.md](./profession_lay.md) | Which roles would a lay person call the people of this SOC broad group or O*NET job title?  Each with the occupations it covers and a gloss; three readings, union with support | draft 1, pinned as version 1 |
+
+The 40-pair check of the two M3 role rubrics against Roger's marks is the sheet
+[role_rubric_pairs.md](../role_rubric_pairs.md) (`novelty_score.py rubric-check`).
+
 ## How to edit
 
 Each file holds one prompt inside a fenced block.  Change the text inside the block.  When you are

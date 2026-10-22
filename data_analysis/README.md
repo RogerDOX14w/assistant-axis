@@ -1239,6 +1239,106 @@ uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-20-
 uv run python data_analysis/gap_generation/narrow_pass.py --batch-id 2026-10-27-release --release all --dry-run
 ```
 
+**The role path (coding plan 16, 2026-10-22): `novelty_score.py score --holding roles` and what feeds it.**  Plan
+[coding_plan_16_role_generators.md](../reports/trait_gap_generation/coding_plan_16_role_generators.md); library
+[roles_pass.py](../assistant_axis/gapgen/roles_pass.py).  A *role* is who or what a persona is (pirate, refugee,
+goldfish), a *trait* a disposition it enacts.  Role rows reach the registry two ways: rows M1 parked on the `roles`
+holding list (plain key `stem#1`, `entity_type: "role"`), and **role-aimed** rows a role generator submits
+(`Candidate(entity_type="role", kind_guess=..., human=...)`, `gap_registry.py submit --entity-type role`; keyed
+`stem|R#1` unless a role row already holds `stem#1`, so a role and a trait of one surface are two rows).
+- *M1 for role-aimed rows*: the split filter's kind call routes the row by the kind of its first surviving primary
+  reading (`roles_pass.ROLE_ROUTES`, version 1): a role kind goes on as a role (`role`), a disposition reading as
+  role and trait (`both`), a membership as the trait rule says (`membership`), the rest are turned away; the
+  filter block records `role_route` and `routes_version`, M1's own gloss wave is skipped for every route but
+  `membership`, and the write-back keeps `entity_type: "role"`.  Trait-aimed rows are routed exactly as before.
+- *The stage* (before M3, for the role rows that need it): the role gloss call (Haiku 5.5,
+  [role_gloss.md](../reports/trait_gap_generation/rubrics/role_gloss.md): "A/An <label> is someone who ...") and
+  three readings of the role kind call ([role_kind.md](../reports/trait_gap_generation/rubrics/role_kind.md), the
+  prompt `classify_role_kinds.py` uses, moved byte for byte, sha `11b559f0cff50189`) combined by majority (a three-way
+  split keeps the first and sets `kind_split`); the `role_pass` block on the row (`gloss`, `kind`, `human`,
+  `kind_readings`, `kind_unanimous`, the pins).  Rows covered at stage 0 (a corpus or queue role stem) skip it.
+  Live, or `--transport batches` (two waves, gloss then kind); every response in `role_pass_responses.jsonl`,
+  replayed on resume.
+- *M3 for roles*: the role corpus (the files of `data/roles/instructions/` but `default.json`, the six recorded pairs
+  expanded, and the queue's live role entries) indexed on the role gloss with its opening stripped
+  (`role_gloss_w14`, Roger's decision 3); the relation call over `roles`
+  ([relation_roles.md](../reports/trait_gap_generation/rubrics/relation_roles.md)) and the overlap call
+  ([overlap_concept_roles.md](../reports/trait_gap_generation/rubrics/overlap_concept_roles.md)); a flat cut-off of 3
+  (a sub-role is covered by its parent at 3); the five nearest traits on every block (`cross_type`, information
+  only; `--cross-type` adds the nearest roles to a trait run).  Every block, `run.json` and `summary.json` say
+  `pass: "roles"`; `decisions.md` has a kind column.  `--redecide`, relation-only runs and `full-scan` are refused
+  for a roles batch.
+- *Two checks before the pilot*: `retrieval-check` glosses every corpus role afresh (no reading) and measures recall
+  at 10 of its own stem on the production form against 95% (the label-kept form reported beside it); below it, the
+  arms (`role_gloss_w20`, the raw space) run and the best is written to the `roles` section of [metric_config.json](../data/candidates/metric_config.json),
+  which the pass reads.  `rubric-check --make-sheet` writes the 40-pair sheet
+  [role_rubric_pairs.md](../reports/trait_gap_generation/role_rubric_pairs.md) (blind to the pair sets; the key in
+  [role_rubric_pairs_key.json](../reports/trait_gap_generation/role_rubric_pairs_key.json)); once Roger has marked
+  it (0-4, `opposite`, `unsure`), `rubric-check` reads both role rubrics on Sonnet 5.5 in both orders and writes the
+  weighted kappa against his marks (target 0.6) and the straight-minus-swapped gap by pair set.
+- *Review* (R1, R2): a roles batch builds a roles graph (`role:` corpus nodes, candidate nodes with `outcome:
+  "role"`, the card's kind, `human`, the generator's `kind_guess` and provenance, the nearest traits);
+  `review_app.py serve` defaults to `--order kinds` for it: the kinds whose share of the corpus is too low first
+  (`roles_pass.balance`: held = the reference share x the corpus size, ±10%; the order fixed when the log opens),
+  with the kind readout on every card and a balance line in the counts.  `/files/roles/{stem}.json` serves the role
+  files.
+- *Promotion* by name only: `gap_registry.py promote --keys K --allow-roles`, or the review app's `apply`; a bulk
+  `--status` promotion leaves role rows out and says how many.  The queue entry is a role entry (tags `kind:` and
+  `human:`, section "role generators (2026-10)", `description_draft` the role gloss, `source` the generator's
+  attribution line where its package defines `source_line` (B does), `gap_gen.role_kind`); a stem
+  that is a role file or a live or turned-down role entry is refused; one that is a corpus or queue trait is
+  allowed with a loud `*** NOTE` naming the trait and the collision test to update (Roger's decision 2).
+  `gap_registry.py holding --list roles` shows each row's role gloss and kind.  When the promoted entries have role
+  files, `classify_role_kinds.py --from-pass <batch>/role_pass.jsonl` appends their kinds to
+  [role_kinds.json](../data/roles/role_kinds.json) (no call; `seed_entities.py write` does the same for a role entry
+  carrying `gap_gen.role_kind`).
+
+```bash
+# the checks before the pilot (each --dry-run first)
+uv run python data_analysis/gap_generation/novelty_score.py retrieval-check --batch-id roles_retrieval_1 --budget-usd 1
+uv run python data_analysis/gap_generation/novelty_score.py rubric-check --make-sheet      # the blank sheet (no call)
+uv run python data_analysis/gap_generation/novelty_score.py rubric-check --budget-usd 2   # after Roger's marks
+uv run python data_analysis/gap_generation/novelty_score.py render --pass roles --stand-in detective   # free
+# the pilot on the held role rows, batched (Roger's decision 4, 2026-10-22)
+uv run python data_analysis/gap_generation/novelty_score.py score --holding roles --batch-id roles_pilot_1 \
+    --unscored --transport batches --budget-usd 8 [--dry-run | --resume]
+uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_roles_pilot_1 \
+    --from-batches roles_pilot_1 --budget-usd 4
+uv run python data_analysis/gap_generation/review_app.py serve --batch-id review_roles_pilot_1 --order kinds
+uv run python data_analysis/gap_generation/gap_registry.py promote --keys 'bouncer|R#1' --allow-roles [--dry-run]
+uv run python data_analysis/classify_role_kinds.py --from-pass data/candidates/novelty/roles_pilot_1/role_pass.jsonl \
+    [--dry-run]
+```
+
+**Generator B, professions (coding plan 16, step 2): `gap_generation/professions_generator.py`.**  Package
+[generators/professions/](../assistant_axis/gapgen/generators/professions/__init__.py).  A ranked pick, not a sweep:
+one row per SOC 2018 broad group (459) with its O*NET occupations and OEWS employment, plus the O*NET job titles the
+cut keeps (1-2 words, no parentheses, singular, Zipf at least 3.0, not a corpus role or an occupation's own title,
+the top 300); the lay call (Haiku 5.5, pinned
+[profession_lay.md](../reports/trait_gap_generation/rubrics/profession_lay.md), three readings combined as a union
+with support) names the roles a lay person would call the people of each row; `rank` scores familiarity (Zipf,
+employment) and distance from the corpus (the role index), z-scored and summed; `submit` sends the net-new rows from
+the top, metered to `share x wave_rows / kept_share` (B's share 0.5, the pilot's kept share), as role candidates
+(`kind_guess: occupation`, `human: true`) and prints the M1, M3, R1 and R2 commands.  **Downloads** (`fetch`, refused
+without `--approved-by`; manifest rows in `data/external/<source>/DOWNLOAD_MANIFEST.json`; bls.gov refuses
+automated clients, so `fetch --only KEY --hand` records a file placed by hand): O*NET 31.0 job titles (CC BY 4.0),
+BLS OEWS May 2025 national (public domain), optionally the BLS SOC 2018 structure, and ESCO's occupations by its API
+for wave 2 (`--source esco`, CC BY 4.0).  Reading a BLS workbook needs `openpyxl` (not a dependency yet: `uv add
+openpyxl`, approved with the downloads).  Every run directory (`data/candidates/runs/professions/<run_id>/`) carries
+`ATTRIBUTION.md` (O*NET's statement verbatim), `run.json` and `usage.json`; every paid step prints its estimate and
+takes a `--budget-usd` cap.
+
+```bash
+uv run python data_analysis/gap_generation/professions_generator.py fetch --dry-run
+uv run python data_analysis/gap_generation/professions_generator.py fetch --approved-by '<Roger, date>'
+uv run python data_analysis/gap_generation/professions_generator.py build --run-id w1
+uv run python data_analysis/gap_generation/professions_generator.py lay --run-id w1 --budget-usd 2 [--dry-run]
+uv run python data_analysis/gap_generation/professions_generator.py rank --run-id w1 --budget-usd 0.5
+uv run python data_analysis/gap_generation/professions_generator.py label-fit --run-id w1 --kept-share 0.5 --budget-usd 2
+uv run python data_analysis/gap_generation/professions_generator.py submit --run-id w1 --kept-share 0.5 [--dry-run]
+uv run python data_analysis/gap_generation/professions_generator.py report --run-id w1
+```
+
 **The census spelling-repair check (2026-10-14): `gap_generation/census_generator.py repair-check`.**
 [QUESTIONS](../reports/trait_gap_generation/QUESTIONS.md) 35: of the 706 one-edit repair suggestions the census ingest
 lists (`repair_suggestions_list` in [ingest_counts.json](../data/candidates/censuses/ingest_counts.json)), the 314 whose
