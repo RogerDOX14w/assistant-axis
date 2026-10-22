@@ -41,8 +41,9 @@ parameters at launch.
    readings of the decision rule (centred cosines, layer 25, the 2-point test) wait for Roger's word
    in the plan before the pilot runs.
 3. **The venv on local disk** (walk-through P8.3 (b)).  The recorded slow step was importing torch over
-   NFS.  On the first pod, put the environment on local disk or `/dev/shm`
-   (`UV_PROJECT_ENVIRONMENT`), time the import against the `/workspace` venv, and write the pod setup
+   NFS.  On the first pod, put the environment on local disk (`UV_PROJECT_ENVIRONMENT`;
+   not `/dev/shm`, which RunPod mounts `noexec`, so no shared library there can be loaded: the
+   2026-05-02 breakage, 8d20fb41), time the import against the `/workspace` venv, and write the pod setup
    step into [pipeline/README.md](../../pipeline/README.md).
 4. **fsync timing on the pod's NFS** (walk-through E4).  The opt-in fsync for small JSON writes in
    [atomic_io.py](../../assistant_axis/atomic_io.py) is built off-pod; time it on `/workspace` and decide

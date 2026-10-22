@@ -24,7 +24,11 @@
 #   UV_CACHE_DIR            /workspace/.uv-cache             wheel cache, persistent
 #   UV_PROJECT_ENVIRONMENT  /root/venvs/assistant-axis       the venv, off the network
 #                           volume (pod TODO item 3: time the torch import here
-#                           against a venv on /workspace before settling it)
+#                           against a venv on /workspace before settling it).
+#                           Not /dev/shm: RunPod mounts it noexec, so no .so file
+#                           there can be loaded (the May 2026 breakage, 8d20fb41;
+#                           assistant_axis.tmpfs moves the Triton and inductor
+#                           compile caches off it for the same reason).
 #   UV_LINK_MODE            copy                             cache and venv sit on
 #                           different filesystems, so uv cannot hard-link
 # Secrets (OPENAI_API_KEY, HF_TOKEN) come from RunPod's secret store through
