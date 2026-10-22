@@ -662,7 +662,10 @@ class TestPromote:
         role = released_row("rolish", route="role", holding="roles")
         rep = promote({role["key"]: role}, {"_meta": {}, "entries": []}, [role["key"]], data_dir=data_dir,
                       allow_released_states=True, allow_physical=True)
-        assert rep.refused[role["key"]] == "on the roles holding list (never promoted)"
+        # the roles list was "never promoted" until coding plan 16 (2026-10-22): its rows are promoted by name with
+        # allow_roles (the roles pass), so without it the refusal says how
+        assert rep.refused[role["key"]].startswith("on the roles holding list (a role row, the roles pass): promoted "
+                                                   "only by name")
         # a held v4 row with a renamed route still goes the old way, under Roger's confirmed name
         held = released_row("startly", route="renamed", holding="states")
         held["states_pass"].update(lasting=False, plausible=True, name_fits=False, suggested_name="jumpyish")

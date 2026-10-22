@@ -254,7 +254,8 @@ def test_a_held_role_reaches_neither_m3_nor_the_queue(env):
     assert row["holding"] == "roles"
     assert candidate_from_row(row) == (None, "not_a_trait")                  # M3 never scores it
     rep = promote(Registry(env.reg).fold(), {"entries": []}, ["zzwardenly#1"], data_dir=env.data)
-    assert rep.promoted == [] and "never promoted" in rep.refused["zzwardenly#1"]
+    # "never promoted" until coding plan 16 (2026-10-22): a role row is now promoted by name only, with allow_roles
+    assert rep.promoted == [] and "promoted only by name" in rep.refused["zzwardenly#1"]
     assert run(env, "roles-report", "--run-id", R) == 0
     assert "zzwardenly" in (env.edir / "roles_report.md").read_text()
 
