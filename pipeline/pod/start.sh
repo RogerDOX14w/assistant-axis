@@ -6,8 +6,9 @@
 # The pod template's start command, once the checkout is on the network volume:
 #   bash -c 'S=/workspace/assistant-axis/pipeline/pod/start.sh; if [ -x "$S" ]; then exec "$S"; else exec /start.sh; fi'
 # The first pod on a new volume therefore boots the image's own /start.sh;
-# clone the repository then (it is public, no token needed):
-#   git clone https://github.com/RogerDOX14w/assistant-axis.git /workspace/assistant-axis
+# clone the repository then (it is public, no token needed).  Name the branch:
+# GitHub's default is master, over a thousand commits behind the working branch.
+#   git clone -b anthropic-vllm-uv https://github.com/RogerDOX14w/assistant-axis.git /workspace/assistant-axis
 # and every later boot runs this script.
 #
 # Setup runs in the background, logged to /workspace/pod_setup.log, while the
