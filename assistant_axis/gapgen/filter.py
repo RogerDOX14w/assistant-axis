@@ -109,8 +109,13 @@ class FilterResult:
     error: Optional[str] = None
 
     def registry_fields(self) -> dict:
+        """The fields M1 writes on the registry row.  A role-aimed row's ``entity_type`` (coding plan 16) is never
+        overwritten with a trait's: it stays ``role`` unless its route is ``membership`` (a membership is a trait)."""
+        et = self.entity_type
+        if (self.meta or {}).get("entity_type") == "role" and (self.filter or {}).get("role_route") != "membership":
+            et = "role"
         return {"freq": self.freq, "wordnet": self.wordnet, "filter": self.filter, "gloss": self.gloss,
-                "holding": self.holding, "entity_type": self.entity_type}
+                "holding": self.holding, "entity_type": et}
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -124,19 +129,31 @@ def items_from_records(records: Sequence[dict]) -> list[FilterItem]:
     for r in records:
         hint = first_gloss_hint(r)
         gens = sorted({str(s["generator"]) for s in r.get("sources") or [] if s.get("generator")})
+        meta = {"generators": gens} if gens else {}
+        if is_role_aimed(r):
+            meta["entity_type"] = "role"
         out.append(FilterItem(key=r["key"], label=r["label"],
                               intended_sense=display_form_name(hint) if hint else None,
-                              familiarity=familiarity_of(r), curated=is_curated(r),
-                              meta={"generators": gens} if gens else {}))
+                              familiarity=familiarity_of(r), curated=is_curated(r), meta=meta))
     return out
+
+
+def is_role_aimed(row: Mapping) -> bool:
+    """A row a generator submitted in role mode (coding plan 16): ``entity_type`` role, and a ``stem|R#sense`` key or
+    a source carrying the role-mode fields (a role candidate merged into a held row).  A row M1 itself put on the
+    roles list (entity type role, plain key, trait-mode sources only) is not: refiltered, it is routed as before."""
+    from .normalize import is_role_key
+    if row.get("entity_type") != "role":
+        return False
+    return is_role_key(row["key"]) or any("kind_guess" in s for s in row.get("sources") or [])
 
 
 #: The membership kind held on its own list (decision 3, open point B).
 NATIONALITY_KIND = "nationality_ethnicity_language"
 
 
-def holding_for(verdict: str, tags: Sequence[str], membership_kind: Optional[str] = None
-                ) -> tuple[Optional[str], str]:
+def holding_for(verdict: str, tags: Sequence[str], membership_kind: Optional[str] = None, *,
+                entity_type: str = "trait") -> tuple[Optional[str], str]:
     """``(holding, entity_type)`` for a verdict and its tags (routing follows
     the verdict; tags of another verdict never reroute a row, decision 4):
     tagged role -> roles (entity type role); tagged physical -> physical;
@@ -146,7 +163,15 @@ def holding_for(verdict: str, tags: Sequence[str], membership_kind: Optional[str
     nationalities (still a trait, but held off the main review list: Roger,
     open point B, "Add a tag for this, we can build a queue for them, and draw
     more samples from it if needed"); anything else, including every other
-    membership trait, -> no holding list."""
+    membership trait, -> no holding list.
+
+    ``entity_type="role"`` (a role-aimed row, coding plan 16; the single-call pipeline, which records no route): a
+    membership trait follows the trait rule above (the membership track); anything else stays a role row with no
+    holding list (a role or trait verdict is in the role flow; any other verdict leaves it out of every flow)."""
+    if entity_type == "role":
+        if verdict == "trait" and "membership" in tags:
+            return holding_for(verdict, tags, membership_kind)
+        return None, "role"
     if verdict == "tagged" and ("role_person" in tags or "role_thing" in tags):
         return "roles", "role"
     if verdict == "tagged" and "physical" in tags:
@@ -424,7 +449,8 @@ class FilterRunner:
         res = self.results[key]
         res.stage = "classified"
         res.error = None
-        hold, et = holding_for(row["verdict"], row["tags"], row.get("membership_kind"))
+        hold, et = holding_for(row["verdict"], row["tags"], row.get("membership_kind"),
+                               entity_type=(res.meta or {}).get("entity_type") or "trait")
         notes = fr.derive_notes(row)
         res.filter = {
             "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": self.model, "batch_id": self.batch_id,

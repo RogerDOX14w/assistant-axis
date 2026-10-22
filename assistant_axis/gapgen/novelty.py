@@ -116,6 +116,14 @@ EXPANDING_FIXED = ("pair", "triangle", "tetrahedron")
 #: covered representation, the corpus side's form; kept for comparison).
 QUERY_FORMS: tuple[str, ...] = ("gloss_w14", "label_gloss")
 DEFAULT_QUERY_FORM = "gloss_w14"
+#: How a role candidate is embedded (coding plan 16, § 7b; Roger's decision 3 of 2026-10-22): ``role_gloss_w14``, the
+#: production form, is the role gloss with its opening ``A|An <label> is`` removed (a query that keeps the label finds
+#: the role's own description by the label alone), cut to 14 words as the trait form is; ``role_gloss_w20`` the same
+#: cut to 20 (the retrieval check's arm); ``label_gloss`` as for traits (reported beside the production form).
+ROLE_QUERY_FORMS: tuple[str, ...] = ("role_gloss_w14", "role_gloss_w20", "label_gloss")
+DEFAULT_ROLE_QUERY_FORM = "role_gloss_w14"
+#: The nearest entities of the other kind a block shows (``cross_type``, decision 5 of plan 16: information only).
+CROSS_TYPE_K = 5
 #: The seed-queue statuses whose trait entries join the similarity search (2026-10-09; Roger: "That definitely
 #: needs fixing first"): the statuses at which an entry is a word in hand that is not yet a trait file.
 #: ``candidate`` (what ``promote`` writes) and ``ready`` are the lifecycle before ``seeded``; ``tbd`` and
@@ -423,6 +431,62 @@ def load_trait_corpus(data_dir: Path) -> dict[str, CorpusTrait]:
     return out
 
 
+def load_role_corpus(data_dir: Path) -> dict[str, CorpusTrait]:
+    """Every role file under ``<data_dir>/roles/instructions`` but ``default.json`` (the assistant default, not a
+    role a generator could duplicate), as :class:`CorpusTrait` rows for the role index (coding plan 16, § 7b):
+    label ``corpus_display_name(stem, "roles")`` (``devils_advocate`` -> ``devil's advocate``), the file's
+    description, no negative label (roles have none); partners and expansion from the role files' arrangements, as
+    for traits: a recorded pair (and a triangle, tetrahedron or simplex) expands, a sequence, map, square or set
+    does not; ``renamed_from``."""
+    from assistant_axis.arrangements import load_corpus_arrangements
+    from assistant_axis.entity_id import corpus_display_name
+    data_dir = Path(data_dir)
+    recs = load_corpus_arrangements(data_dir, "roles")
+    out: dict[str, CorpusTrait] = {}
+    for stem, rec in sorted(recs.items()):
+        if stem == "default":
+            continue
+        doc = json.loads(rec.path.read_text(encoding="utf-8"))
+        partner: Optional[str] = None
+        corners: set[str] = set()
+        expands: set[str] = set()
+        simplexes: list[dict] = []
+        for a in rec.arrangements:
+            if not is_expanding(a.kind):
+                continue
+            others = [m for m in a.members if m != stem]
+            expands.update(others)
+            if a.kind == "pair":
+                partner = partner or (others[0] if others else None)
+            else:
+                corners.update(others)
+                simplexes.append({"kind": a.kind, "members": sorted(a.members)})
+        partners = ([partner] if partner else []) + sorted(c for c in corners if c != partner)
+        try:
+            label = corpus_display_name(stem, "roles")
+        except Exception:  # noqa: BLE001 - a fixture data dir the display table does not know: the mechanical form
+            label = stem.replace("_", " ")
+        out[stem] = CorpusTrait(stem=stem, label=label, description=doc.get("description") or "",
+                                negative_label=None, pair_partner=partner, partners=partners,
+                                expands_to=sorted(expands), renamed_from=_renamed_from(doc.get("renamed_from")),
+                                simplexes=simplexes)
+    return out
+
+
+def queue_roles(queue: Mapping, corpus: Mapping[str, CorpusTrait], *, statuses: Sequence[str] = QUEUE_SEARCH_STATUSES,
+                hide: Iterable[str] = ()) -> tuple[dict[str, CorpusTrait], dict]:
+    """:func:`queue_traits` for the role index: the queue's live role entries with a text that are not yet a role
+    file (coding plan 16, § 7b: they join the search as the trait entries do)."""
+    return queue_traits(queue, corpus, statuses=statuses, hide=hide, entity_type="role")
+
+
+def cross_type(index: "CorpusIndex", q_raw, *, k: int = CROSS_TYPE_K) -> list[dict]:
+    """The ``k`` nearest entries of ``index`` (the other entity type's index) to a candidate's raw query embedding,
+    projected into that index's own space: ``[{"stem", "cosine"}]`` (decision 5 of plan 16: shown, never decides)."""
+    q = index.project(q_raw)
+    return [{"stem": s, "cosine": round(float(c), 6)} for s, c in index.retrieve(q, k)]
+
+
 def queue_text(entry: Mapping) -> str:
     """A seed-queue entry's text: its ``description``, else its ``description_draft`` (promote writes the
     candidate's gloss there), stripped; ``""`` when it has neither."""
@@ -434,8 +498,8 @@ def queue_text(entry: Mapping) -> str:
 
 
 def queue_traits(queue: Mapping, corpus: Mapping[str, CorpusTrait], *,
-                 statuses: Sequence[str] = QUEUE_SEARCH_STATUSES, hide: Iterable[str] = ()
-                 ) -> tuple[dict[str, CorpusTrait], dict]:
+                 statuses: Sequence[str] = QUEUE_SEARCH_STATUSES, hide: Iterable[str] = (),
+                 entity_type: str = "trait") -> tuple[dict[str, CorpusTrait], dict]:
     """The seed-queue entries that join the similarity search, as :class:`CorpusTrait` rows with
     ``queue_status`` set, and the record of the selection.
 
@@ -466,8 +530,8 @@ def queue_traits(queue: Mapping, corpus: Mapping[str, CorpusTrait], *,
 
     for e in queue.get("entries") or []:
         stem = e.get("stem")
-        if (e.get("entity_type") or "trait") != "trait" or not stem:
-            skip("not_a_trait_entry")
+        if (e.get("entity_type") or "trait") != entity_type or not stem:
+            skip(f"not_a_{entity_type}_entry")
             continue
         if handed_to_registry(e):
             skip("handed_to_registry")
@@ -601,14 +665,35 @@ def build_index(traits: Mapping[str, CorpusTrait], E_raw: np.ndarray, *, variant
 
 
 def query_text(label: str, gloss: str, *, query_form: str = DEFAULT_QUERY_FORM, representation: str = "w20") -> str:
-    """The text embedded for a candidate (:data:`QUERY_FORMS`)."""
+    """The text embedded for a candidate (:data:`QUERY_FORMS`; a role candidate's :data:`ROLE_QUERY_FORMS`)."""
     from .representation import represent_short
     from .retrieval import query_text as gloss_query
     if query_form == "label_gloss":
         return represent_short(label, gloss, representation)
     if query_form == "gloss_w14":
         return gloss_query(gloss)
-    raise ValueError(f"query_form must be one of {QUERY_FORMS}, not {query_form!r}")
+    if query_form in ("role_gloss_w14", "role_gloss_w20"):
+        return role_query_text(label, gloss, words=14 if query_form == "role_gloss_w14" else 20)
+    raise ValueError(f"query_form must be one of {QUERY_FORMS + ROLE_QUERY_FORMS[:2]}, not {query_form!r}")
+
+
+def role_query_text(label: str, gloss: str, *, words: int = 14) -> str:
+    """A role gloss as the role index is queried (coding plan 16, § 7b): its opening ``A|An <label> is`` taken out
+    (``roles_pass.strip_opening``, on the label as stored and as the prompts show it), then cut to ``words`` words
+    as the trait query is (``representation.truncate_words``).  A gloss that does not open so is used whole, with a
+    WARNING."""
+    import logging
+    from . import roles_pass as RP
+    from .representation import truncate_words
+    if not isinstance(gloss, str) or not gloss.strip():
+        raise ValueError("empty query text")
+    text, ok = RP.strip_opening(gloss, label)
+    if not ok:
+        text, ok = RP.strip_opening(gloss, prompt_label(label))
+    if not ok:
+        logging.getLogger(__name__).warning("role gloss of %r does not open 'A/An %s is': queried whole: %.80s",
+                                            label, label, gloss)
+    return truncate_words(text.strip(), int(words))
 
 
 # --------------------------------------------------------------------------- stage 0: the exact label
@@ -641,13 +726,17 @@ class LabelSets:
         return memo[which]
 
 
-def label_sets(traits: Mapping[str, CorpusTrait], queue: Mapping) -> LabelSets:
+def label_sets(traits: Mapping[str, CorpusTrait], queue: Mapping, *, entity_type: Optional[str] = None) -> LabelSets:
     """The names stage 0 checks: corpus trait stems, every seed-queue entry's stem and normalised label
     (any status, either entity type: a queued name is decided or in hand, except an entry handed to the trait-gap
-    pipeline, :func:`handed_to_registry`), and every ``renamed_from``."""
+    pipeline, :func:`handed_to_registry`), and every ``renamed_from``.  ``entity_type`` (``"role"`` for the role
+    index, coding plan 16: covered is decided against roles only, decision 5): the queue entries of that type
+    only; ``traits`` is then the role corpus."""
     q: dict[str, dict] = {}
     for e in queue.get("entries") or []:
         if handed_to_registry(e):
+            continue
+        if entity_type is not None and (e.get("entity_type") or "trait") != entity_type:
             continue
         info = {"stem": e.get("stem"), "status": e.get("status"), "entity_type": e.get("entity_type")}
         for name in (e.get("stem"), normalize_to_file_name(e["label"]) if e.get("label") else None):
@@ -762,24 +851,32 @@ def relation_order(stems: Iterable[str], run_id: str, key: str) -> list[str]:
     return out
 
 
+#: The key the relation call's list goes under: ``traits`` (``relation.md``), or ``roles`` for the role rubric
+#: (``relation_roles.md``, coding plan 16).
+RELATION_LIST_KEYS: tuple[str, ...] = ("traits", "roles")
+
+
 def relation_payload(label: str, description: str, traits: Sequence[tuple[str, str]], *,
-                     label_form: str = DEFAULT_LABEL_FORM) -> dict:
+                     label_form: str = DEFAULT_LABEL_FORM, list_key: str = "traits") -> dict:
     """The relation call's user turn as an object.  The labels (the candidate's and each listed trait's, as stored)
     are shown in ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`: the judge display form by default,
-    ``careless (HEXACO)`` -> ``careless (from HEXACO)``); nothing else is rewritten."""
+    ``careless (HEXACO)`` -> ``careless (from HEXACO)``); nothing else is rewritten.  ``list_key``: ``traits``, or
+    ``roles`` in a roles run (the role rubric names its list so)."""
+    if list_key not in RELATION_LIST_KEYS:
+        raise ValueError(f"list_key must be one of {RELATION_LIST_KEYS}, not {list_key!r}")
     return {"candidate": {"label": prompt_label(label, label_form), "description": description},
-            "traits": [{"id": i, "label": prompt_label(lb, label_form), "description": d}
+            list_key: [{"id": i, "label": prompt_label(lb, label_form), "description": d}
                        for i, (lb, d) in enumerate(traits, 1)]}
 
 
 def render_relation_user(label: str, description: str, traits: Sequence[tuple[str, str]], *,
-                         label_form: str = DEFAULT_LABEL_FORM) -> str:
+                         label_form: str = DEFAULT_LABEL_FORM, list_key: str = "traits") -> str:
     """The relation call's user turn, laid out as the overlap test's list form (``render_payload``): the
     candidate on the first line, each listed trait on its own line, ids 1..n in the order given; labels in
-    ``label_form`` (:func:`relation_payload`)."""
-    obj = relation_payload(label, description, traits, label_form=label_form)
-    lines = ['{"candidate": ' + json.dumps(obj["candidate"], ensure_ascii=False) + ",", ' "traits": [']
-    body = ",\n".join("  " + json.dumps(t, ensure_ascii=False) for t in obj["traits"])
+    ``label_form`` (:func:`relation_payload`); the list under ``list_key``."""
+    obj = relation_payload(label, description, traits, label_form=label_form, list_key=list_key)
+    lines = ['{"candidate": ' + json.dumps(obj["candidate"], ensure_ascii=False) + ",", f' "{list_key}": [']
+    body = ",\n".join("  " + json.dumps(t, ensure_ascii=False) for t in obj[list_key])
     return "\n".join(lines) + "\n" + body + "\n ]}"
 
 

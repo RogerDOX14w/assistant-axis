@@ -870,6 +870,17 @@ class SplitRunner(FilterRunner):
         """True when the second model decided ``key`` (a phrase, with its path complete)."""
         return (self.state[key].get("decided") or {}).get("join") is not None
 
+    def _role_route(self, key: str) -> Optional[str]:
+        """A role-aimed row's route (coding plan 16, decision 3: ``roles_pass.route_for`` on the kind of the row's most
+        likely reading, ``split.primary_kind``, in the answers that are the row's: the second model's for a phrase it
+        decided, else the winning verdict reading's); None for a trait-aimed row, which is routed as always."""
+        if (getattr(self, "_entity_type", None) or {}).get(key) != "role":
+            return None
+        from .roles_pass import route_for
+        st = self.state[key]
+        sense = st.get("so_sense") if self._decided(key) else self._sense(key, "first", self._winner(key))
+        return route_for(split.primary_kind(sense), entity_type="role")
+
     def _row_join(self, key: str) -> Optional[dict]:
         """The join the row follows: the second model's when it decided the phrase, else the first model's
         (``state["join"]``, which the opinions and the tripwire compare); then an alignment-sweep row's roles
@@ -936,6 +947,9 @@ class SplitRunner(FilterRunner):
         self._sem = asyncio.Semaphore(self.concurrency)
         self._stop = None
         self._intended = {it.key: it.intended_sense for it in items}
+        # a role-aimed row (coding plan 16): routed by roles_pass.route_for; its gloss, alignment and descriptors
+        # calls are skipped unless its route is membership (the roles pass's role gloss replaces them)
+        self._entity_type = {it.key: (it.meta or {}).get("entity_type") or "trait" for it in items}
         for it in items:
             self.state[it.key] = {"label": it.label, "intended": it.intended_sense, "sense": None, "so_sense": None,
                                   "to_sense": None, "same_sense": None, "so_same_sense": None, "to_same_sense": None,
@@ -1007,6 +1021,11 @@ class SplitRunner(FilterRunner):
         for k in ready:
             j = self._row_join(k)
             if j["outcome"] != "trait":
+                continue
+            if self._role_route(k) in ("role", "both", "turned_away"):
+                # the roles pass's role gloss replaces M1's for role and both; a row turned away from the role flow
+                # is rejected, so its gloss would be paid for and never read (coding plan 16)
+                self.stats["role_aimed_gloss_skipped"] += 1
                 continue
             m = self.second_model if (k in so or self._decided(k)) else self.model
             gloss_calls.append(self._make("gloss", k, model=m, index=j["accepted_index"],
@@ -1213,7 +1232,8 @@ class SplitRunner(FilterRunner):
                 descriptors=st.get("descriptors") if "error" not in (st.get("descriptors") or {}) else None,
                 second_opinion=self._second_block(it.key), gloss=g.get("gloss"),
                 third_opinion=self._opinion_block(it.key, "third"),
-                decided_by=self._decided_block(it.key), rerouted=self._rerouted(it.key))
+                decided_by=self._decided_block(it.key), rerouted=self._rerouted(it.key),
+                route=self._role_route(it.key))
             errs = {k: (st.get(k) or {}).get("error") for k in ("gloss", "alignment", "descriptors")
                     if (st.get(k) or {}).get("error")}
             if errs:

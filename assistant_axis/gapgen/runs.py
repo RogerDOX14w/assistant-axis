@@ -67,6 +67,8 @@ PLATFORM_PATHS: tuple[str, ...] = (
     "assistant_axis/entity_id.py",
     "assistant_axis/atomic_io.py",
     "assistant_axis/arrangements.py",
+    # the role kind call's user turn, parser and majority rule (the roles pass, coding plan 16)
+    "data_analysis/classify_role_kinds.py",
     "data/candidates/validation",
     # the split filter's prompts are read from these files at run time
     "reports/trait_gap_generation/rubrics",
