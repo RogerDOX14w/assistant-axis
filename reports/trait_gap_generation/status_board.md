@@ -1,7 +1,7 @@
 # Gap-filling platform: status board
 
 Every generator, platform component and evaluation item, with its stage and what (if anything) blocks it.
-Kept current by the coordinator; last updated 2026-10-20.  Roger's decision list, with the detail of each
+Kept current by the coordinator; last updated 2026-10-22.  Roger's decision list, with the detail of each
 question, is [open_items.md](../../roger/open_items.md), which carries a copy of this board.
 
 **Stages** (the order a workstream moves through):
@@ -19,8 +19,8 @@ question, is [open_items.md](../../roger/open_items.md), which carries a copy of
 
 "Kept" below means a candidate the trait-hood filter (M1) passed and the novelty check (M3) judged new or grey:
 what goes in front of Roger in the review app.  "Reviewed" means settled in review (accepted, merged or
-rejected).  Counts from the registry on 2026-10-20; a row proposed by two generators counts under both.  Distinct
-rows: 5,527 kept awaiting review, 211 reviewed.
+rejected).  Counts from the registry on 2026-10-22; a row proposed by two generators counts under both.  Distinct
+rows: 5,795 kept awaiting review, 211 reviewed.
 
 ## Generators
 
@@ -32,9 +32,9 @@ rows: 5,527 kept awaiting review, 211 reviewed.
 | 03 | [Base model](./coding_plan_03_base_model.md) | **7** (wave 1: 325 kept of 879 decided, 37%) | 1,587 / 143 | held on purpose: review is the binding constraint, and plan 13's stop rule decides from reviewed yield whether wave 2 pays |
 | 04 | [Masked LM](./coding_plan_04_masked_lm.md) | **7** (wave 1: 228 kept) | 680 / 29 | as 03; the weakest per candidate at equal N, so low priority |
 | 05 | [Corpus frames](./coding_plan_05_corpus_frames.md) | **6** (built and reviewed 2026-10-17; the Books stream complete 2026-10-18 after the one-shard span fix, about 45 GB streamed, 27 MB kept; pilot: 868 candidates, 385 new rows, 147 kept, 38%, $4.39) | 307 / 19 | Roger: the 50-row sample ([roger_sample.md](../../data/candidates/runs/corpus_frames/2026-10-18-pilot/roger_sample.md), about 15 minutes; regenerated 2026-10-20 with the mark column second and M3's neighbours, same rows); then wave 1 |
-| 06 | [LLM generation with injected entropy](./coding_plan_06_llm_entropy.md) | **7** (pilot 2026-10-17/18: 506 new rows, 308 kept, 61%, about $17.60; wave 1 decided, [QUESTIONS 208](./QUESTIONS.md#L338), family (c) on Haiku, [QUESTIONS 212](./QUESTIONS.md#L346); the full grid `2026-10-21-grid` running since 2026-10-21 02:10: (a), (e), (c) done, $2.19) | 531 / 40 | nothing: the grid's remaining steps ((b), (d), back-translation, collapse), then wave 1 (`submit --kept-target 300 --kept-share 0.616`, M1 and M3 batched, about $7) |
+| 06 | [LLM generation with injected entropy](./coding_plan_06_llm_entropy.md) | **7** (wave 1 done 2026-10-22: the full grid `2026-10-21-grid`, 35,151 distinct stems, about $5.40, family (c) on Haiku, [QUESTIONS 212](./QUESTIONS.md#L346); wave 1 by [QUESTIONS 208](./QUESTIONS.md#L338)'s family weights: 488 net-new rows, M1 476 trait, M3 274 new, 56% kept, $4.06; the stop rule ends family (e) at two runs; [report](../../data/candidates/runs/llm_entropy/2026-10-21-grid/report.md)) | 1,047 / 79 | nothing; a wave 2 (about 535 net-new rows for the next 300 kept) on Roger's word, by plan 13's stop rule after review |
 | 07 | [IPIP behaviour items](./coding_plan_07_behaviour_items.md) | **8** | 405 / 6 | nothing.  The loose pile (114 clusters, about $1) is held; recommended to run, as the source most distinct from the lexicon (Roger to say) |
-| 08 | [Alignment sweep](./coding_plan_08_alignment_sweep.md) | **8, rework pending** (Roger's label-fit marks, 2026-10-17: AI framing in labels and glosses, 19% problem names) | 623 / 3 | Roger: how its traits are written ((b) recommended) and how much to rerun ((A), a rewrite pass, about $10-19, recommended) |
+| 08 | [Alignment sweep](./coding_plan_08_alignment_sweep.md) | **8** (rewritten in human phrasing 2026-10-20/21, [QUESTIONS 210](./QUESTIONS.md#L342): run `2026-10-20-humanize` replaces the four old runs; AI wording in glosses 239 -> 0; M3 289 new of 335 new rows, 280 new of 358 rejudged; about $9.80; the AI/human analogue test set is hand-seeded per TRAITS_TO_ADD) | 617 / 2 | nothing |
 | 09 | [Structural generators](./coding_plan_09_structural_generators.md) | **6** (v2 rerun 2026-10-20, the pilot retracted: 1,978 rows, 546 net-new; M1 592 trait of 645, M3 271 new of 587; net-new kept share 50.5%; $13.94; [report](../../data/candidates/runs/structural/2026-10-20-v2/report.md)) | 648 / 59 | Roger: the fresh 50-row sample ([roger_sample.md](../../data/candidates/runs/structural/2026-10-20-v2/roger_sample.md)) |
 | — | antonym-check seeds | **8** | 139 / 1 | nothing |
 | — | states and physical passes | **8** | 159 / 8 | nothing |
@@ -65,4 +65,4 @@ rows: 5,527 kept awaiting review, 211 reviewed.
 | 13 | [Generator testing and saturation](./coding_plan_13_generator_testing.md) | **8** (pooled harness; recall at equal N computed 2026-10-17: the base model strongest unseeded, the censuses' total mostly volume) | nothing; the dashboard rebuild after the sample review hour |
 | — | trait corpus target | **about 1,800, provisional** (2026-10-16); plan 13's estimates at Roger's grain suggest 3,000+ reachable | revisit once review has grouped the kept candidates |
 | — | role-judge rubric experiment ([plan](../pipeline/plan_role_rubric_experiment.md)) | **approved**, all eight arms (about $50 batched) | runs on the pod after the extraction's step 3 |
-| — | **review itself** | ongoing | Roger: the blind sample review hour (`serve --batch-id review_traits_all_2 --order sample --blind`; the split action is in); 5,527 kept candidates awaiting review, 211 settled |
+| — | **review itself** | ongoing | Roger: the blind sample review hour (`serve --batch-id review_traits_all_2 --order sample --blind`; the split action is in); 5,795 kept candidates awaiting review, 211 settled |
