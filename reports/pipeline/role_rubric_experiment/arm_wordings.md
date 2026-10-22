@@ -998,10 +998,20 @@ uv run python data_analysis/role_rubric_experiment.py analyze-scores \
     --scores-dir runpod_workspace/rubric_exp/judged \
     --responses-dir runpod_workspace/rubric_exp/responses
 
-# (e) on the pod: the vectors (judged directory copied to the pod)
-uv run python data_analysis/role_rubric_experiment.py analyze-vectors \
+# (e) on the pod: the vectors (judged directory copied to the pod), compared by centred
+#     cosine on the median A0 vector and on the default vector, and saved for (f);
+#     DEFAULT_VECTOR is the default entity's step-4 vector (vectors/default.pt)
+uv run python data_analysis/role_rubric_experiment.py analyze-vectors --tmpdir /dev/shm \
     --activations-dir /workspace/rubric_exp/activations \
-    --scores-dir /workspace/rubric_exp/judged
+    --scores-dir /workspace/rubric_exp/judged \
+    --default-vector "$DEFAULT_VECTOR" \
+    --save-vectors /workspace/rubric_exp/arm_vectors
+
+# (f) anywhere, from a copy of the saved vectors (no activations; the default vector is
+#     the copy saved beside them); the score files are checked against the judged directory
+uv run python data_analysis/role_rubric_experiment.py analyze-vectors \
+    --from-vectors runpod_workspace/rubric_exp/arm_vectors \
+    --scores-dir runpod_workspace/rubric_exp/judged
 ```
 
-The paths assume the October responses are copied from the pod into [runpod_workspace/rubric_exp/responses/](../../../runpod_workspace/rubric_exp/responses) (not there yet; git-ignored, as all of `runpod_workspace/`).  What the run writes, none of it there yet: the run directory [runpod_workspace/rubric_exp/judged/](../../../runpod_workspace/rubric_exp/judged) (per arm `<arm>/<role>.json` in step 3's format, [usage.json](../../../runpod_workspace/rubric_exp/judged/usage.json), [run_record.json](../../../runpod_workspace/rubric_exp/judged/run_record.json), every reply under `replies/`); the analysis [score_analysis.md](./score_analysis.md) with [score_analysis.json](./score_analysis.json); the blind reading sheet [reading_sheet/](./reading_sheet) with its key [reading_sheet_key.json](./reading_sheet_key.json) (kept apart; not to be opened before marking) and, once marked, [reading_results.json](./reading_results.json) from `read-marks`; and from the pod [vector_analysis.md](./vector_analysis.md) with [vector_analysis.json](./vector_analysis.json).  The vector analysis takes step 4's `--min_count` as [run_pipeline.sh](../../../pipeline/run_pipeline.sh) passes it for roles (30, its `MIN_COUNT`), not the script's own default of 50.
+The paths assume the October responses are copied from the pod into [runpod_workspace/rubric_exp/responses/](../../../runpod_workspace/rubric_exp/responses) (not there yet; git-ignored, as all of `runpod_workspace/`).  What the run writes, none of it there yet: the run directory [runpod_workspace/rubric_exp/judged/](../../../runpod_workspace/rubric_exp/judged) (per arm `<arm>/<role>.json` in step 3's format, [usage.json](../../../runpod_workspace/rubric_exp/judged/usage.json), [run_record.json](../../../runpod_workspace/rubric_exp/judged/run_record.json), every reply under `replies/`); the analysis [score_analysis.md](./score_analysis.md) with [score_analysis.json](./score_analysis.json); the blind reading sheet [reading_sheet/](./reading_sheet) with its key [reading_sheet_key.json](./reading_sheet_key.json) (kept apart; not to be opened before marking) and, once marked, [reading_results.json](./reading_results.json) from `read-marks`; and from the pod [vector_analysis.md](./vector_analysis.md) with [vector_analysis.json](./vector_analysis.json), and the saved vectors, copied to [runpod_workspace/rubric_exp/arm_vectors/](../../../runpod_workspace/rubric_exp/arm_vectors) for (f) (each `<arm>/<role>.pt`, `default.pt` and [index.json](../../../runpod_workspace/rubric_exp/arm_vectors/index.json); about 2.8 GB).  The vector analysis takes step 4's `--min_count` as [run_pipeline.sh](../../../pipeline/run_pipeline.sh) passes it for roles (30, its `MIN_COUNT`), not the script's own default of 50, and compares the vectors by centred cosine only: raw cosines between role vectors are all above 0.9999 and are kept in the JSON as not informative.

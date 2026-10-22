@@ -597,7 +597,7 @@ def test_parse_marks(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# analyze-vectors: step 4's computation on tiny tensors
+# analyze-vectors: step 4's computation on tiny tensors, centred comparison
 # ---------------------------------------------------------------------------
 
 def test_vectors_are_step_4s_and_cosines_are_per_slot_and_layer(tmp_path):
@@ -632,21 +632,27 @@ def test_vectors_are_step_4s_and_cosines_are_per_slot_and_layer(tmp_path):
     assert torch.equal(v_step4, v_a0) and v_a0.dtype == torch.float32
     manual = torch.stack([acts[k].double() for k in keys[1:5]]).mean(0).float()
     assert torch.allclose(v_a1, manual, atol=1e-7, rtol=0)
-    grid = e["arms"]["A1"]["cos_with_A0"]
+    # the raw cosine (kept, marked as not informative), per slot and layer
+    grid = e["arms"]["A1"]["raw_cos_with_A0"]
     assert len(grid) == 2 and len(grid[0]) == 3
     for s in range(2):
         for l in range(3):
             want = torch.nn.functional.cosine_similarity(v_a1[s, l].double(), v_a0[s, l].double(), dim=0)
             assert grid[s][l] == pytest.approx(float(want), abs=1e-12)
-    assert e["arms"]["A1"]["cos_with_A0_layer_mean"][1] == pytest.approx(sum(grid[1]) / 3)
-    summ = res["summary"]["ai_persona"]["A1"]["0"]
-    noise = e["arms"]["A0b"]["cos_with_A0_layer_mean"][0]
-    assert summ["median_cos"] == pytest.approx(e["arms"]["A1"]["cos_with_A0_layer_mean"][0])
+    assert e["arms"]["A1"]["raw_cos_with_A0_layer_mean"][1] == pytest.approx(sum(grid[1]) / 3)
+    summ = res["summary"]["raw"]["ai_persona"]["A1"]["0"]
+    noise = e["arms"]["A0b"]["raw_cos_with_A0_layer_mean"][0]
+    assert summ["median_cos"] == pytest.approx(e["arms"]["A1"]["raw_cos_with_A0_layer_mean"][0])
     assert summ["median_ratio_to_noise"] == pytest.approx(
-        (1 - e["arms"]["A1"]["cos_with_A0_layer_mean"][0]) / (1 - noise))
-    assert res["summary"]["other_roles"]["A1"] == {}
+        (1 - e["arms"]["A1"]["raw_cos_with_A0_layer_mean"][0]) / (1 - noise))
+    assert res["summary"]["raw"]["other_roles"]["A1"] == {}
+    assert "not informative" in res["raw_cosine_note"].lower()
+    # one role: the median reference is its own A0 vector, so there is no offset to compare
+    assert res["references"]["median"]["n_roles"] == 1
+    assert e["arms"]["A1"]["centred"]["median"]["cos_with_A0_layer_mean"] == [None, None]
     md = exp.vector_markdown(res, doc_dir=tmp_path)
-    assert "slot 0" in md and "below_min_count" in md
+    assert "## Median reference" in md and "below_min_count" in md
+    assert "Omitted: no --default-vector was given." in md
 
 
 def test_analyze_vectors_cli_writes_its_report(tmp_path):
@@ -662,8 +668,278 @@ def test_analyze_vectors_cli_writes_its_report(tmp_path):
                      "--roles", "altruist", "--arms", "A0b", "--min-count", "1",
                      "--report-dir", str(report)]) == 0
     res = json.loads((report / "vector_analysis.json").read_text())
-    assert res["per_role"]["altruist"]["arms"]["A0b"]["cos_with_A0"][0] == pytest.approx([1.0] * 3)
+    assert res["per_role"]["altruist"]["arms"]["A0b"]["raw_cos_with_A0"][0] == pytest.approx([1.0] * 3)
     assert (report / "vector_analysis.md").exists()
+    # the grids are written one row to a line
+    text = (report / "vector_analysis.json").read_text()
+    assert re.search(r'"raw_cos_with_A0": \[\s*\[[^\n\]]+\]\s*\]', text)
+
+
+def test_elementwise_median():
+    import statistics
+    import torch
+    nan = float("nan")
+    ts = [torch.tensor([[1.0, 5.0, nan, nan]]), torch.tensor([[2.0, 7.0, 3.0, nan]]),
+          torch.tensor([[4.0, 6.0, nan, nan]]), torch.tensor([[3.0, 8.0, nan, nan]])]
+    med = exp.elementwise_median(ts)                     # 2-D in, 2-D out, float64
+    assert med.dtype == torch.float64 and med.shape == (1, 4)
+    assert med[0, :3].tolist() == [2.5, 6.5, 3.0]          # an even count: the two middle values' mean
+    assert math.isnan(med[0, 3])                          # NaN everywhere stays NaN
+    assert torch.median(torch.tensor([1.0, 2.0, 3.0, 4.0])) == 2.0   # (torch's own is the lower one)
+    g = torch.Generator().manual_seed(3)
+    ts = [torch.randn(2, 3, 5, generator=g) for _ in range(7)]
+    med = exp.elementwise_median(ts)
+    for idx in [(0, 0, 0), (1, 2, 4), (0, 1, 3)]:
+        assert med[idx].item() == statistics.median(float(t[idx]) for t in ts)
+
+
+ROLES4 = ("robot", "assistant", "altruist", "pirate")       # two AI-persona roles, two others
+KEYS6 = [f"pos_p0_q{q}" for q in range(6)]
+
+
+def _first(n_or_range):
+    rng = range(n_or_range) if isinstance(n_or_range, int) else n_or_range
+    return {k: (3 if i in rng else 2) for i, k in enumerate(KEYS6)}
+
+
+def _scores4(a1_altruist=range(1, 5)):
+    """A0: the first four responses of every role at 3.  A0': one fewer for robot and altruist.
+    A1: equal to A0 except altruist (another four).  A7: below min_count (2) for robot."""
+    a0 = {r: _first(4) for r in ROLES4}
+    return {"A0": a0,
+            "A0b": {**a0, "robot": _first(3), "altruist": _first(range(1, 4))},
+            "A1": {**a0, "altruist": _first(a1_altruist)},
+            "A7": {**a0, "robot": _first(1)}}
+
+
+def _vector_inputs(tmp_path, scores, *, seed=0):
+    import torch
+    g = torch.Generator().manual_seed(seed)
+    act_dir, judged = tmp_path / "activations", tmp_path / "judged"
+    act_dir.mkdir(parents=True, exist_ok=True)
+    acts = {}
+    for role in ROLES4:
+        acts[role] = {k: torch.randn(2, 3, 4, generator=g) for k in KEYS6}
+        torch.save({**acts[role], "metadata": {"model": "fake"}}, act_dir / f"{role}.pt")
+    _write_scores(judged, scores)
+    return act_dir, judged, acts
+
+
+def test_the_median_reference_is_the_a0_median_and_the_same_for_every_arm(tmp_path):
+    import statistics
+    import torch
+    scores = _scores4()
+    act_dir, judged, acts = _vector_inputs(tmp_path, scores)
+    arms = ["A0", "A0b", "A1", "A7"]
+    res = exp.analyze_vectors(act_dir, judged, list(ROLES4), arms, min_count=2)
+    assert res["references"]["median"]["n_roles"] == 4
+    assert res["references"]["default"] == {"omitted": exp.NO_DEFAULT_REASON}
+
+    j4 = exp.step4()
+    a0 = {r: j4.compute_pos_3_vector(acts[r], scores["A0"][r], 2) for r in ROLES4}
+    flat = torch.stack([a0[r].double() for r in ROLES4]).reshape(4, -1)
+    med = torch.tensor([statistics.median(flat[:, i].tolist()) for i in range(flat.shape[1])],
+                       dtype=torch.float64).reshape(a0["robot"].shape)
+    assert torch.equal(exp.elementwise_median(list(a0.values())), med)
+
+    def centred(arm, role):
+        v = j4.compute_pos_3_vector(acts[role], scores[arm][role], 2).double()
+        return [[float(torch.nn.functional.cosine_similarity(v[s, l] - med[s, l],
+                                                             a0[role][s, l].double() - med[s, l], dim=0))
+                 for l in range(3)] for s in range(2)]
+
+    for arm, role in (("A1", "altruist"), ("A0b", "robot"), ("A0b", "altruist")):
+        got = res["per_role"][role]["arms"][arm]["centred"]["median"]["cos_with_A0"]
+        want = centred(arm, role)
+        for s in range(2):
+            assert got[s] == pytest.approx(want[s], abs=1e-12)
+        assert max(res["per_role"][role]["arms"][arm]["centred"]["median"]["cos_with_A0_layer_mean"]) < 1 - 1e-6
+
+    # the same selection gives exactly 1 (and the same offset length); one role's change shows
+    # in that role only
+    for role in ("robot", "assistant", "pirate"):
+        c = res["per_role"][role]["arms"]["A1"]["centred"]["median"]
+        assert c["cos_with_A0_layer_mean"] == [1.0, 1.0] and c["norm_ratio_layer_mean"] == [1.0, 1.0]
+    assert "centred" not in res["per_role"]["robot"]["arms"]["A7"]       # below min_count: left out
+    moved = res["moved_roles"]["median"]["A1"]
+    assert moved[0]["role"] == "altruist" and moved[0]["ratio_to_noise"] > 0
+    assert {m["role"] for m in moved if m["ratio_to_noise"] is None} == {"assistant", "pirate"}
+
+    # the summary: the median over roles of the layer means, (1 - cos) against A0' 's
+    d = res["summary"]["median"]["all"]["A1"]["0"]
+    assert d["n_roles"] == 4 and d["median_cos"] == 1.0
+    alt = res["per_role"]["altruist"]["arms"]
+    want = ((1 - alt["A1"]["centred"]["median"]["cos_with_A0_layer_mean"][0])
+            / (1 - alt["A0b"]["centred"]["median"]["cos_with_A0_layer_mean"][0]))
+    assert d["median_ratio_to_noise"] == pytest.approx(statistics.median([0.0, want]))
+    assert res["summary"]["median"]["ai_persona"]["A1"]["0"]["n_roles"] == 2
+    assert res["summary"]["median"]["a0_offset_fraction"]["0"] > 0
+
+    # another A1 selection moves A1's numbers and nothing else: the reference is A0's alone
+    act2, judged2, _ = _vector_inputs(tmp_path / "b", _scores4(a1_altruist=range(2, 6)))
+    res2 = exp.analyze_vectors(act2, judged2, list(ROLES4), arms, min_count=2)
+    for role in ROLES4:
+        assert (res2["per_role"][role]["arms"]["A0b"]["centred"]
+                == res["per_role"][role]["arms"]["A0b"]["centred"])
+    assert (res2["per_role"]["altruist"]["arms"]["A1"]["centred"]
+            != res["per_role"]["altruist"]["arms"]["A1"]["centred"])
+
+    md = exp.vector_markdown(res, doc_dir=tmp_path)
+    assert md.index("## Median reference") < md.index("## Default reference") < md.index("## Per role")
+    assert "### All roles (4)" in md and "### The AI-persona roles (2)" in md
+    assert "### The other roles (2)" in md and "×)" in md and "[altruist](" in md
+
+
+def test_a_shared_offset_leaves_centred_cosines_unchanged_and_raw_ones_go_to_1():
+    """Every role vector shares a large component, which is why raw cosines say nothing: add the
+    same vector to every role vector (and to the default) and the centred cosines do not move,
+    while the raw ones go to 1.  Integer-valued vectors keep every step exact."""
+    import torch
+    g = torch.Generator().manual_seed(1)
+    arms = ("A0", "A0b", "A1")
+    vecs = {(a, r): torch.randint(-4, 5, (2, 3, 6), generator=g).to(torch.float32)
+            for a in arms for r in ROLES4}
+    default = torch.randint(-4, 5, (2, 3, 6), generator=g).to(torch.float32)
+    offset = torch.randint(-4, 5, (2, 3, 6), generator=g).to(torch.float32) * 250
+
+    def run(shift):
+        per_role = {r: {"arms": {a: {"status": "ok", "shape": [2, 3, 6]} for a in arms}} for r in ROLES4}
+        comp = exp.compare_arm_vectors(per_role, lambda a, r: vecs[(a, r)] + shift, arms,
+                                       default=(default + shift, {"source": "test", "shape": [2, 3, 6]}))
+        return comp, per_role
+
+    comp0, pr0 = run(torch.zeros(2, 3, 6))
+    comp1, pr1 = run(offset)
+    for r in ROLES4:
+        for a in ("A0b", "A1"):
+            i0, i1 = pr0[r]["arms"][a], pr1[r]["arms"][a]
+            assert i1["centred"] == i0["centred"]                     # exactly
+            for x0, x1 in zip(i0["raw_cos_with_A0_layer_mean"], i1["raw_cos_with_A0_layer_mean"]):
+                assert x0 < x1 and x1 > 0.999
+    for ref in ("median", "default"):
+        s0, s1 = dict(comp0["summary"][ref]), dict(comp1["summary"][ref])
+        f0, f1 = s0.pop("a0_offset_fraction"), s1.pop("a0_offset_fraction")
+        assert s1 == s0
+        assert all(f1[s] < f0[s] for s in f0)                       # the offset is a smaller part
+        assert comp1["moved_roles"][ref] == comp0["moved_roles"][ref]
+    assert comp1["summary"]["raw"] != comp0["summary"]["raw"]
+    assert max(pr0[r]["arms"]["A1"]["centred"]["median"]["cos_with_A0_layer_mean"][0]
+               for r in ROLES4) < 0.99                               # and they are informative
+
+
+def _step4_default(tmp_path, shape=(2, 3, 4)):
+    """A default vector written by pipeline/4_vectors.py (the mean of every activation)."""
+    import torch
+    d_act = tmp_path / "default_activations"
+    d_act.mkdir()
+    g = torch.Generator().manual_seed(7)
+    torch.save({k: torch.randn(*shape, generator=g) for k in KEYS6}, d_act / "default.pt")
+    assert exp.step4().main(["--activations_dir", str(d_act), "--scores_dir", str(tmp_path / "none"),
+                             "--output_dir", str(tmp_path / "default_vec"), "--min_count", "1"]) == 0
+    return tmp_path / "default_vec" / "default.pt"
+
+
+def _cli(*argv):
+    return exp.main(["analyze-vectors", *argv])
+
+
+def test_the_default_reference_only_with_a_default_vector(tmp_path):
+    import torch
+    act_dir, judged, acts = _vector_inputs(tmp_path, _scores4())
+    common = ["--scores-dir", str(judged), "--roles", *ROLES4, "--min-count", "2"]
+    report = tmp_path / "r1"
+    assert _cli("--activations-dir", str(act_dir), *common, "--report-dir", str(report)) == 0
+    res = json.loads((report / "vector_analysis.json").read_text())
+    assert res["references"]["default"] == {"omitted": exp.NO_DEFAULT_REASON}
+    assert set(res["per_role"]["altruist"]["arms"]["A1"]["centred"]) == {"median"}
+    assert "default" not in res["summary"] and "default" not in res["moved_roles"]
+    md = (report / "vector_analysis.md").read_text()
+    after = md.split("## Default reference", 1)[1].split("## Per role", 1)[0]
+    assert after.strip() == "Omitted: no --default-vector was given."
+
+    default = _step4_default(tmp_path)
+    report = tmp_path / "r2"
+    assert _cli("--activations-dir", str(act_dir), *common, "--report-dir", str(report),
+                "--default-vector", str(default)) == 0
+    res = json.loads((report / "vector_analysis.json").read_text())
+    ref = res["references"]["default"]
+    assert ref["role"] == "default" and ref["type"] == "mean" and ref["shape"] == [2, 3, 4]
+    assert ref["file_sha256"] == exp._sha256_file(default)
+    assert set(res["per_role"]["altruist"]["arms"]["A1"]["centred"]) == {"median", "default"}
+    d = torch.load(default, weights_only=False)["vector"].double()
+    v = exp.step4().compute_pos_3_vector(acts["altruist"], _scores4()["A1"]["altruist"], 2).double()
+    b = exp.step4().compute_pos_3_vector(acts["altruist"], _scores4()["A0"]["altruist"], 2).double()
+    want = float(torch.nn.functional.cosine_similarity(v[1, 2] - d[1, 2], b[1, 2] - d[1, 2], dim=0))
+    got = res["per_role"]["altruist"]["arms"]["A1"]["centred"]["default"]["cos_with_A0"][1][2]
+    assert got == pytest.approx(want, abs=1e-12)
+    md = (report / "vector_analysis.md").read_text()
+    after = md.split("## Default reference", 1)[1].split("## Per role", 1)[0]
+    assert "### All roles (4)" in after and "Omitted" not in after
+
+    bad = tmp_path / "bad_default.pt"
+    torch.save({"vector": torch.zeros(3, 3, 4), "role": "default", "type": "mean"}, bad)
+    assert _cli("--activations-dir", str(act_dir), *common, "--report-dir", str(tmp_path / "r3"),
+                "--default-vector", str(bad)) == 2
+
+
+def test_save_then_from_vectors_reproduces_the_numbers_exactly(tmp_path):
+    import shutil
+    import torch
+    act_dir, judged, _ = _vector_inputs(tmp_path, _scores4())
+    default = _step4_default(tmp_path)
+    saved, r1, r2 = tmp_path / "arm_vectors", tmp_path / "r1", tmp_path / "r2"
+    assert _cli("--activations-dir", str(act_dir), "--scores-dir", str(judged), "--roles", *ROLES4,
+                "--min-count", "2", "--default-vector", str(default), "--save-vectors", str(saved),
+                "--report-dir", str(r1)) == 0
+    index = json.loads((saved / exp.VECTORS_INDEX_NAME).read_text())
+    assert index["min_count"] == 2 and index["arms"] == list(exp.ARM_IDS)
+    assert index["per_role"]["robot"]["arms"]["A0"]["n_score3"] == 4
+    assert index["default_vector"]["source"] == str(default)
+    assert len(index["scores_fingerprint"]) == 64
+    assert not (saved / "A7" / "robot.pt").exists()                  # below min_count: no vector
+    assert index["per_role"]["robot"]["arms"]["A7"]["status"] == "below_min_count"
+    saved_v = torch.load(saved / "A1" / "altruist.pt", weights_only=False)
+    assert saved_v["vector"].dtype == torch.float32 and saved_v["arm"] == "A1"
+
+    # a copy elsewhere, without the activations, gives the same numbers
+    copy_dir = tmp_path / "elsewhere" / "arm_vectors"
+    shutil.copytree(saved, copy_dir)
+    shutil.rmtree(act_dir)
+    assert _cli("--from-vectors", str(copy_dir), "--scores-dir", str(judged),
+                "--report-dir", str(r2)) == 0
+    a = json.loads((r1 / "vector_analysis.json").read_text())
+    b = json.loads((r2 / "vector_analysis.json").read_text())
+    for key in ("per_role", "summary", "moved_roles", "references", "scores_fingerprint",
+                "min_count", "reduce_questions", "arms", "roles"):
+        assert a[key] == b[key], key
+    assert b["vectors"]["source"] == "saved" and b["vectors"]["default_vector_from"].startswith("the saved copy")
+    assert b["vectors"]["scores_check"].startswith("every score file unchanged")
+    md_a = (r1 / "vector_analysis.md").read_text().split("## Median reference", 1)[1]
+    md_b = (r2 / "vector_analysis.md").read_text().split("## Median reference", 1)[1]
+    assert md_a == md_b
+
+    # a subset of arms or roles is read from the same files
+    assert _cli("--from-vectors", str(copy_dir), "--arms", "A0b", "A1", "--report-dir",
+                str(tmp_path / "r3")) == 0
+    c = json.loads((tmp_path / "r3" / "vector_analysis.json").read_text())
+    assert c["arms"] == ["A0", "A0b", "A1"]
+    assert c["per_role"]["altruist"]["arms"]["A1"] == a["per_role"]["altruist"]["arms"]["A1"]
+
+    # refused: another min_count, a score file that changed, a damaged vector, no index
+    assert _cli("--from-vectors", str(copy_dir), "--min-count", "3", "--report-dir", str(tmp_path / "x")) == 2
+    (judged / "A1" / "altruist.json").write_text(json.dumps(_first(5)))
+    assert _cli("--from-vectors", str(copy_dir), "--scores-dir", str(judged),
+                "--report-dir", str(tmp_path / "x")) == 2
+    assert _cli("--from-vectors", str(copy_dir), "--report-dir", str(tmp_path / "r4")) == 0   # unchecked
+    torch.save({**saved_v, "vector": saved_v["vector"] + 1}, copy_dir / "A1" / "altruist.pt")
+    assert _cli("--from-vectors", str(copy_dir), "--report-dir", str(tmp_path / "x")) == 2
+    (copy_dir / exp.VECTORS_INDEX_NAME).unlink()
+    assert _cli("--from-vectors", str(copy_dir), "--report-dir", str(tmp_path / "x")) == 2
+    assert not (tmp_path / "x").exists()
+    x = ["--report-dir", str(tmp_path / "x")]
+    assert _cli("--from-vectors", str(saved), "--activations-dir", str(act_dir), *x) == 2
+    assert _cli("--scores-dir", str(judged), *x) == 2                # neither source
+    assert not (tmp_path / "x").exists()
 
 
 # ---------------------------------------------------------------------------

@@ -349,7 +349,21 @@ direction (the AI-persona roles apart) and a blind reading sheet (arms
 hidden, the two scores as X and Y in a random order, the key in a separate
 file; it refuses to overwrite a marked sheet); `read-marks` tallies the marks.
 `analyze-vectors` (on the pod) computes each arm's role vectors with step 4's
-own functions and their cosine with A0's per slot and layer against A0'.
+own functions and compares each with the same role's A0 vector by the
+**centred** cosine cos(v_arm - r, v_A0 - r) per slot and layer, against A0',
+for two references r fixed across arms: the elementwise median of the
+sampled roles' A0 vectors, and the default entity's step-4 vector
+(`--default-vector`; without it those columns are omitted, with the reason).
+Raw cosines are kept in the JSON only, marked as not informative: every role
+vector shares a large common component, so they are all above 0.9999 (Roger,
+2026-10-22).  The JSON also has the offset-length ratio
+|v_arm - r| / |v_A0 - r| and, per arm and reference, every role ranked by how
+far it moves (`moved_roles`).  `--save-vectors DIR` writes each (arm, role)
+vector as float32 with an `index.json` (counts, min_count, the score files'
+hashes, each tensor's hash) and a copy of the default vector, and
+`--from-vectors DIR` recomputes the whole comparison from a copy of DIR
+without the activations (on the Mac; with `--scores-dir` the score files are
+checked against the index; a changed file or a damaged vector is refused).
 
 ```bash
 uv run python data_analysis/role_rubric_experiment.py estimate     # May responses: about $29

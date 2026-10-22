@@ -46,8 +46,13 @@ Subcommands:
     analyze-scores   the noise floor (A0 vs A0'), boundary flips per arm by role, question and
                      direction, the AI-persona roles apart, and the blind reading sheet
     read-marks       Roger's marks on the reading sheet joined to its key, per arm
-    analyze-vectors  (on the pod) each arm's role vectors exactly as step 4 computes them, and
-                     their cosine with A0's per slot and layer, against A0' vs A0
+    analyze-vectors  each arm's role vectors exactly as step 4 computes them (from the activations,
+                     on the pod), compared with A0's by the centred cosine cos(v - r, v_A0 - r) per
+                     slot and layer, r the elementwise median of the roles' A0 vectors or (with
+                     --default-vector) the default vector, against A0' vs A0.  Raw cosines are
+                     kept in the JSON only, as not informative (all above 0.9999: every role
+                     vector shares a large common component).  --save-vectors DIR keeps the
+                     vectors; --from-vectors DIR recomputes the comparison from them anywhere
 
 Run directory written by ``judge`` (``--out-dir``): ``<arm>/<role>.json`` score files in step 3's
 format (keys ``pos_p0_q0``, the keys of the response files) with ``<arm>/usage.json``;
@@ -68,13 +73,17 @@ Commands (see arm_wordings.md for the current ones)::
         --responses-dir <responses>
     uv run python data_analysis/role_rubric_experiment.py analyze-scores --scores-dir <run dir> \\
         --responses-dir <responses>
+    uv run python data_analysis/role_rubric_experiment.py analyze-vectors --tmpdir /dev/shm \\
+        --activations-dir <activations> --scores-dir <run dir> \\
+        --default-vector <default.pt> --save-vectors <vectors dir>
     uv run python data_analysis/role_rubric_experiment.py analyze-vectors \\
-        --activations-dir <activations> --scores-dir <run dir>
+        --from-vectors <copy of the vectors dir> [--scores-dir <run dir>]
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
+import copy
 import difflib
 import hashlib
 import importlib.util
@@ -100,7 +109,8 @@ if str(REPO) not in sys.path:
 # NFS-safe reads and writes (AGENT_NOTES "NFS-safe file I/O"): the run directory may be on the
 # pod's /workspace.  openai_batch imports the standard library and atomic_io only.
 from assistant_axis.atomic_io import (  # noqa: E402
-    atomic_write_text, read_jsonl_with_retry, read_text_with_retry, write_jsonl,
+    atomic_write_text, read_jsonl_with_retry, read_text_with_retry, torch_load_with_retry,
+    torch_save_with_retry, write_jsonl,
 )
 from assistant_axis.openai_batch import (  # noqa: E402
     TOKEN_LIMIT_CODE, BatchFailedError, OpenAIBatchRunner, _error_codes, _error_text, _get,
@@ -1529,10 +1539,20 @@ def render_document(*, roles_dir: Path, responses_dir: Path, may_scores_dir: Pat
         "    --scores-dir runpod_workspace/rubric_exp/judged \\",
         "    --responses-dir runpod_workspace/rubric_exp/responses",
         "",
-        "# (e) on the pod: the vectors (judged directory copied to the pod)",
-        f"uv run python {SCRIPT_REL} analyze-vectors \\",
+        "# (e) on the pod: the vectors (judged directory copied to the pod), compared by centred",
+        "#     cosine on the median A0 vector and on the default vector, and saved for (f);",
+        "#     DEFAULT_VECTOR is the default entity's step-4 vector (vectors/default.pt)",
+        f"uv run python {SCRIPT_REL} analyze-vectors --tmpdir /dev/shm \\",
         "    --activations-dir /workspace/rubric_exp/activations \\",
-        "    --scores-dir /workspace/rubric_exp/judged",
+        "    --scores-dir /workspace/rubric_exp/judged \\",
+        "    --default-vector \"$DEFAULT_VECTOR\" \\",
+        "    --save-vectors /workspace/rubric_exp/arm_vectors",
+        "",
+        "# (f) anywhere, from a copy of the saved vectors (no activations; the default vector is",
+        "#     the copy saved beside them); the score files are checked against the judged directory",
+        f"uv run python {SCRIPT_REL} analyze-vectors \\",
+        "    --from-vectors runpod_workspace/rubric_exp/arm_vectors \\",
+        "    --scores-dir runpod_workspace/rubric_exp/judged",
     ]), "bash"))
     a("")
     judged = REPO / "runpod_workspace" / "rubric_exp" / "judged"
@@ -1548,9 +1568,15 @@ def render_document(*, roles_dir: Path, responses_dir: Path, may_scores_dir: Pat
       f"{_link(doc_dir / SHEET_KEY_NAME, doc_dir)} (kept apart; not to be opened before marking) "
       f"and, once marked, {_link(doc_dir / 'reading_results.json', doc_dir)} from `read-marks`; "
       f"and from the pod {_link(doc_dir / 'vector_analysis.md', doc_dir)} with "
-      f"{_link(doc_dir / 'vector_analysis.json', doc_dir)}.  The vector analysis takes step 4's "
+      f"{_link(doc_dir / 'vector_analysis.json', doc_dir)}, and the saved vectors, copied to "
+      f"{_link(REPO / 'runpod_workspace' / 'rubric_exp' / 'arm_vectors', doc_dir, 'runpod_workspace/rubric_exp/arm_vectors/')} "
+      f"for (f) (each `<arm>/<role>.pt`, `default.pt` and "
+      f"{_link(REPO / 'runpod_workspace' / 'rubric_exp' / 'arm_vectors' / VECTORS_INDEX_NAME, doc_dir)}"
+      f"; about 2.8 GB).  The vector analysis takes step 4's "
       f"`--min_count` as {_link(REPO / 'pipeline' / 'run_pipeline.sh', doc_dir)} passes it for "
-      f"roles ({DEFAULT_MIN_COUNT}, its `MIN_COUNT`), not the script's own default of 50.")
+      f"roles ({DEFAULT_MIN_COUNT}, its `MIN_COUNT`), not the script's own default of 50, and "
+      "compares the vectors by centred cosine only: raw cosines between role vectors are all "
+      "above 0.9999 and are kept in the JSON as not informative.")
     a("")
     return "\n".join(L)
 
@@ -2023,26 +2049,152 @@ def cmd_read_marks(args) -> int:
 
 
 # ---------------------------------------------------------------------------
-# analyze-vectors (on the pod)
+# analyze-vectors: each arm's role vectors against A0's, centred
 # ---------------------------------------------------------------------------
 
 # Step 4's --min_count as the pipeline passes it for roles (run_pipeline.sh MIN_COUNT, roger
 # mode; 4_vectors.py's own default, 50, is christina mode's CHRISTINA_MIN_COUNT).
 DEFAULT_MIN_COUNT = 30
 
+# The comparison is the centred cosine cos(v_arm - r, v_A0 - r) for a reference r that is the
+# same for every arm (Roger, 2026-10-22: "Use cosine of embedding - median, or embedding -
+# default.  Raw embedding cosine is meaningless.").  Raw cosines between role vectors are all
+# above 0.9999, because every role vector shares a large common component.
+REFERENCES = ("median", "default")
+REFERENCE_TITLES = {"median": "Median reference", "default": "Default reference"}
+REFERENCE_DEFINITIONS = {
+    "median": "the elementwise median, per slot and layer, of the A0 vectors of the roles analysed "
+              "(for an even count the mean of the two middle values; NaN entries left out); one "
+              "fixed reference for every arm",
+    "default": "the default entity's step-4 vector (the mean of all its activations), from "
+               "--default-vector; one fixed reference for every arm",
+}
+RAW_COSINE_NOTE = (
+    "Not informative, kept for the record: raw_cos_with_A0, raw_cos_with_A0_layer_mean and "
+    "summary.raw are cos(v_arm, v_A0) without centring.  Every role vector shares a large common "
+    "component, so raw cosines between role vectors are all above 0.9999 (Roger, 2026-10-22: "
+    "'Raw embedding cosine is meaningless').  The comparison is centred.<reference>, "
+    "cos(v_arm - r, v_A0 - r).")
+NO_DEFAULT_REASON = "no --default-vector was given"
+NO_SAVED_DEFAULT_REASON = ("no --default-vector was given, and the saved vectors hold no default "
+                           "vector (the --save-vectors run had none)")
+# A0' 's (1 - cos) at or below this is no noise (A0' chose the same responses as A0): no ratio.
+NOISE_EPS = 1e-12
+SUBSETS = (("all", "All roles"), ("ai_persona", "The AI-persona roles"),
+           ("other_roles", "The other roles"))
+MOVED_ROLES_SHOWN = 5
+
+# --save-vectors: <dir>/<arm>/<role>.pt, <dir>/default.pt, and the index, written last.
+VECTORS_INDEX_NAME = "index.json"
+VECTORS_INDEX_SCHEMA = 1
+DEFAULT_VECTOR_NAME = "default.pt"
+VECTORS_LAYOUT = (
+    "<arm>/<role>.pt: a dict with 'vector' (float32, (slots, layers, hidden), step 4's "
+    "compute_pos_3_vector of the responses the arm scored 3), 'arm', 'role', 'type' ('pos_3') and "
+    "'inputs'; default.pt: the --default-vector's tensor as float32 (lossless from bf16), in the "
+    "same form; index.json (this file) is written last")
+
+
+class VectorInputError(ValueError):
+    """The inputs of analyze-vectors do not fit together (a saved vector or score file that
+    changed, a default vector of another shape, a directory that is not a saved-vectors
+    directory): refused, nothing analysed."""
+
+
+def _as_3d(t):
+    return t.unsqueeze(0) if t.dim() == 2 else t
+
+
+def _grid(t) -> List[List[Optional[float]]]:
+    return [[(v if math.isfinite(v) else None) for v in row] for row in t.tolist()]
+
 
 def cosine_grid(a, b) -> List[List[Optional[float]]]:
-    """Cosine over the hidden dimension, per slot and layer, of two vectors shaped
-    ``(slots, layers, hidden)`` (or ``(layers, hidden)``, one slot); None where either is NaN or
-    zero."""
+    """Raw cosine (not informative; see ``RAW_COSINE_NOTE``) over the hidden dimension, per slot
+    and layer, of two vectors shaped ``(slots, layers, hidden)`` (or ``(layers, hidden)``, one
+    slot); None where either is NaN or zero."""
     import torch
-    x, y = a.to(torch.float64), b.to(torch.float64)
-    if x.dim() == 2:
-        x, y = x.unsqueeze(0), y.unsqueeze(0)
-    num = (x * y).sum(-1)
-    den = x.norm(dim=-1) * y.norm(dim=-1)
-    cos = num / den
-    return [[(float(v) if math.isfinite(float(v)) else None) for v in row] for row in cos]
+    x, y = _as_3d(a.to(torch.float64)), _as_3d(b.to(torch.float64))
+    cos = (x * y).sum(-1) / (x.norm(dim=-1) * y.norm(dim=-1))
+    return _grid(cos)
+
+
+def centred_grids(v, base, ref) -> Tuple[List[List[Optional[float]]], List[List[Optional[float]]]]:
+    """``(cos(v - ref, base - ref), |v - ref| / |base - ref|)`` over the hidden dimension, per
+    slot and layer, in float64; None where an offset is zero or NaN.  Identical ``v`` and
+    ``base`` give exactly 1 for both wherever they are defined."""
+    import torch
+    r = _as_3d(ref.to(torch.float64))
+    x = _as_3d(v.to(torch.float64)) - r
+    y = _as_3d(base.to(torch.float64)) - r
+    nx, ny = x.norm(dim=-1), y.norm(dim=-1)
+    cos = (x * y).sum(-1) / (nx * ny)
+    ratio = nx / ny
+    if torch.equal(v, base):
+        cos = torch.where(torch.isfinite(cos), torch.ones_like(cos), cos)
+        ratio = torch.where(torch.isfinite(ratio), torch.ones_like(ratio), ratio)
+    return _grid(cos), _grid(ratio)
+
+
+def offset_fraction_grid(base, ref) -> List[List[Optional[float]]]:
+    """``|base - ref| / |base|`` per slot and layer: how much of a role vector its offset from
+    the reference is (small: the raw cosine is dominated by the shared component)."""
+    import torch
+    b = _as_3d(base.to(torch.float64))
+    return _grid((b - _as_3d(ref.to(torch.float64))).norm(dim=-1) / b.norm(dim=-1))
+
+
+def _nanmedian0(x):
+    """The median along dimension 0 of a float64 tensor, NaN entries left out; for an even count
+    the mean of the two middle values (``statistics.median``'s convention; ``torch.median`` takes
+    the lower one); NaN where every entry is NaN."""
+    import torch
+    n = x.shape[0]
+    finite = ~torch.isnan(x)
+    k = finite.sum(0)
+    s = torch.sort(torch.where(finite, x, torch.full_like(x, math.inf)), dim=0).values
+    lo = (torch.clamp(k - 1, min=0) // 2).unsqueeze(0)
+    hi = torch.clamp(k // 2, max=n - 1).unsqueeze(0)
+    med = (s.gather(0, lo).squeeze(0) + s.gather(0, hi).squeeze(0)) / 2
+    return torch.where(k > 0, med, torch.full_like(med, math.nan))
+
+
+def elementwise_median(tensors: Sequence[Any]):
+    """The elementwise median of equally shaped tensors, in float64, one slot at a time (30 role
+    vectors of (8, 64, 5120) stack to 630 MB in float64; a slot is an eighth of that)."""
+    import torch
+    if not tensors:
+        raise ValueError("no tensors to take the median of")
+    first = _as_3d(tensors[0])
+    out = torch.empty(first.shape, dtype=torch.float64)
+    for s in range(first.shape[0]):
+        out[s] = _nanmedian0(torch.stack([_as_3d(t)[s].to(torch.float64) for t in tensors]))
+    return out if tensors[0].dim() == 3 else out[0]
+
+
+def tensor_sha256(t) -> str:
+    """SHA-256 of a tensor's dtype, shape and bytes (a saved vector is checked against it when it
+    is read back, so that a damaged copy is refused rather than analysed)."""
+    import torch
+    x = t.detach().to("cpu").contiguous()
+    h = hashlib.sha256(f"{x.dtype}|{tuple(x.shape)}|".encode("utf-8"))
+    h.update(x.reshape(-1).view(torch.uint8).numpy().tobytes())
+    return h.hexdigest()
+
+
+def _read_scores(path: Path) -> Tuple[Dict[str, Any], str]:
+    """A step-3 score file and the SHA-256 of its text, as step 4 hashes it
+    (``inputs.scores_file.sha256``)."""
+    text = read_text_with_retry(path, logger_obj=logger)
+    return json.loads(text), hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def scores_fingerprint(per_role: Mapping[str, Any]) -> str:
+    """One SHA-256 over every ``<arm>/<role>.json`` hash the analysis used."""
+    lines = sorted(f"{arm}/{role}.json {info['scores_sha256']}"
+                   for role, e in per_role.items() for arm, info in (e.get("arms") or {}).items()
+                   if info.get("scores_sha256"))
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
 
 
 def _mean(xs: Iterable[Optional[float]]) -> Optional[float]:
@@ -2050,16 +2202,31 @@ def _mean(xs: Iterable[Optional[float]]) -> Optional[float]:
     return sum(vals) / len(vals) if vals else None
 
 
-def analyze_vectors(activations_dir: Path, scores_dir: Path, roles: Sequence[str],
-                    arms: Sequence[str] = ARM_IDS, *, min_count: int = DEFAULT_MIN_COUNT,
-                    reduce_questions: int = 1, roles_dir: Path = ROLES_DIR) -> Dict[str, Any]:
-    """For each role: its activations loaded once (step 4's ``load_activations``, which reads
-    with ``torch_load_with_retry``), each arm's vector by step 4's ``compute_pos_3_vector`` (the
-    score == 3 filter, the min-count rule, the float64 mean stored as float32), and each arm's
-    cosine with A0's vector per slot and layer."""
+def _a0_ok(e: Mapping[str, Any]) -> bool:
+    return (((e.get("arms") or {}).get(BASE_ARM) or {}).get("status") == "ok")
+
+
+def _in_subset(role: str, subset: str) -> bool:
+    if subset == "ai_persona":
+        return role in AI_PERSONA_ROLES
+    if subset == "other_roles":
+        return role not in AI_PERSONA_ROLES
+    return True
+
+
+def compute_arm_vectors(activations_dir: Path, scores_dir: Path, roles: Sequence[str],
+                        arms: Sequence[str], *, min_count: int, reduce_questions: int,
+                        roles_dir: Path) -> Tuple[Dict[str, Any], Dict[Tuple[str, str], Any]]:
+    """``(per_role, vectors)``: for each role, its activations loaded once (step 4's
+    ``load_activations``, which reads with ``torch_load_with_retry``) and each arm's vector by
+    step 4's ``compute_pos_3_vector`` (the score == 3 filter, the min-count rule, the float64 mean
+    stored as float32); ``vectors[(arm, role)]`` for every arm that reaches ``min_count``.  All
+    vectors are kept (about 10 MB each, 2.8 GB for nine arms of 30 roles), since the median
+    reference needs every role's A0 vector before any comparison."""
     import gc
     j4 = step4()
     per_role: Dict[str, Any] = {}
+    vectors: Dict[Tuple[str, str], Any] = {}
     for role in roles:
         doc = load_role(role, roles_dir) if (Path(roles_dir) / f"{role}.json").exists() else {}
         act = Path(activations_dir) / f"{role}.pt"
@@ -2072,110 +2239,510 @@ def analyze_vectors(activations_dir: Path, scores_dir: Path, roles: Sequence[str
             per_role[role] = {"status": "no_activations"}
             continue
         activations, _meta = j4.load_activations(act)
-        vecs, entry = {}, {"activation_file": act.name, "n_activations": len(activations), "arms": {}}
+        entry: Dict[str, Any] = {"activation_file": act.name, "n_activations": len(activations),
+                                 "arms": {}}
+        keys3: Dict[str, set] = {}
         for arm in arms:
             sp = score_path(scores_dir, arm, role)
             if not sp.exists():
                 entry["arms"][arm] = {"status": "no_scores"}
                 continue
-            scores = j4.load_scores(sp)
-            n3 = sum(1 for k in activations if k in scores and scores[k] == 3
-                     and j4._keep_by_reduce(k, reduce_questions))
-            info: Dict[str, Any] = {"n_score3": n3, "n_scored": sum(1 for k in activations if k in scores)}
+            scores, sha = _read_scores(sp)
+            keys3[arm] = {k for k in activations if k in scores and scores[k] == 3
+                          and j4._keep_by_reduce(k, reduce_questions)}
+            info: Dict[str, Any] = {"n_score3": len(keys3[arm]),
+                                    "n_scored": sum(1 for k in activations if k in scores),
+                                    "scores_sha256": sha}
             try:
-                vecs[arm] = j4.compute_pos_3_vector(activations, scores, min_count, reduce_questions)
-                info["status"] = "ok"
-                info["shape"] = list(vecs[arm].shape)
+                v = j4.compute_pos_3_vector(activations, scores, min_count, reduce_questions)
+                vectors[(arm, role)] = v
+                info.update(status="ok", shape=list(v.shape), vector_sha256=tensor_sha256(v))
             except j4.BelowMinCount as e:
-                info["status"] = "below_min_count"
-                info["detail"] = str(e)
-            info["score3_keys"] = sorted(k for k in activations if k in scores and scores[k] == 3
-                                         and j4._keep_by_reduce(k, reduce_questions))
+                info.update(status="below_min_count", detail=str(e))
             entry["arms"][arm] = info
-        base = vecs.get(BASE_ARM)
-        base3 = set((entry["arms"].get(BASE_ARM) or {}).get("score3_keys") or [])
-        for arm, info in entry["arms"].items():
-            keys = set(info.pop("score3_keys", []) or [])
+        base3 = keys3.get(BASE_ARM, set())
+        for arm, keys in keys3.items():
             if arm != BASE_ARM and base3 | keys:
-                info["jaccard_score3_with_A0"] = len(base3 & keys) / len(base3 | keys)
-            if base is not None and arm in vecs and arm != BASE_ARM:
-                grid = cosine_grid(vecs[arm], base)
-                info["cos_with_A0"] = grid
-                info["cos_with_A0_layer_mean"] = [_mean(row) for row in grid]
+                entry["arms"][arm]["jaccard_score3_with_A0"] = len(base3 & keys) / len(base3 | keys)
         per_role[role] = entry
-        del activations, vecs
+        del activations
         gc.collect()
-    return {"min_count": min_count, "reduce_questions": reduce_questions, "arms": list(arms),
-            "roles": list(roles), "per_role": per_role, "summary": vector_summary(per_role, arms)}
+    return per_role, vectors
 
 
-def vector_summary(per_role: Mapping[str, Any], arms: Sequence[str]) -> Dict[str, Any]:
-    """Per arm and slot, over roles: the median layer-mean cosine with A0, and the median of
-    (1 - cos) relative to A0' (above 1: the arm moved the vector more than the judge's noise)."""
+def load_default_vector(path: Path) -> Tuple[Any, Dict[str, Any]]:
+    """``(vector as float32, info)`` from a step-4 vector file (a dict with a ``vector`` tensor of
+    shape ``(slots, layers, hidden)``, as pipeline/4_vectors.py writes for the default entity).
+    A May vector is bf16; float32 holds it exactly."""
+    import torch
+    path = Path(path)
+    data = torch_load_with_retry(path, map_location="cpu", weights_only=False, logger_obj=logger)
+    vec = data.get("vector") if isinstance(data, dict) else data
+    if not torch.is_tensor(vec) or vec.dim() not in (2, 3):
+        raise VectorInputError(f"{path}: no 'vector' tensor of shape (slots, layers, hidden), as "
+                               f"step 4 writes")
+    meta = data if isinstance(data, dict) else {}
+    if meta.get("role") not in (None, "default") or meta.get("type") not in (None, "mean"):
+        logger.warning(f"{path}: role {meta.get('role')!r}, type {meta.get('type')!r}; the default "
+                       f"entity's vector has role 'default' and type 'mean'")
+    v32 = vec.detach().to(torch.float32).contiguous()
+    inputs = meta.get("inputs")
+    info = {"source": str(path), "file_sha256": _sha256_file(path), "role": meta.get("role"),
+            "type": meta.get("type"), "dtype": str(vec.dtype).replace("torch.", ""),
+            "shape": list(vec.shape), "vector_sha256": tensor_sha256(v32),
+            "inputs": json.loads(json.dumps(inputs, default=str)) if inputs is not None else None}
+    return v32, info
+
+
+def _check_default_shape(default: Optional[Tuple[Any, Dict[str, Any]]],
+                         per_role: Mapping[str, Any]) -> None:
+    if default is None:
+        return
+    shapes = {tuple(info["shape"]) for e in per_role.values()
+              for info in (e.get("arms") or {}).values() if info.get("status") == "ok"}
+    want = tuple(default[1]["shape"])
+    if shapes and shapes != {want}:
+        raise VectorInputError(f"the default vector {default[1]['source']} has shape {list(want)}, "
+                               f"the role vectors {sorted(list(s) for s in shapes)}")
+
+
+def save_arm_vectors(out_dir: Path, per_role: Mapping[str, Any], vectors: Mapping[Tuple[str, str], Any],
+                     *, header: Mapping[str, Any],
+                     default: Optional[Tuple[Any, Dict[str, Any]]] = None) -> Path:
+    """Write every ``(arm, role)`` vector to ``<out_dir>/<arm>/<role>.pt`` (float32, verified by
+    ``torch_save_with_retry``), the default vector to ``default.pt``, and the index last: a
+    directory with an index is complete.  An earlier index is moved aside first, so that a save
+    stopped half way never leaves an index beside vectors it does not describe."""
+    out_dir = Path(out_dir)
+    index_path = out_dir / VECTORS_INDEX_NAME
+    if index_path.exists():
+        aside = out_dir / f"{VECTORS_INDEX_NAME}.replaced.{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
+        os.replace(index_path, aside)
+        logger.warning(f"{index_path}: an earlier save's index moved to {aside.name}; its vectors "
+                       f"are overwritten")
+    for (arm, role), v in vectors.items():
+        info = per_role[role]["arms"][arm]
+        inputs = {"script": SCRIPT_REL, "experiment": EXPERIMENT, "created_at": _now(),
+                  "activation_file": per_role[role]["activation_file"],
+                  "scores_file": {"name": f"{arm}/{role}.json", "sha256": info["scores_sha256"]},
+                  "n_score3_used": info["n_score3"], "min_count": header["min_count"],
+                  "reduce_questions": header["reduce_questions"], "vector_dtype": "float32",
+                  "accumulation": "float64"}
+        torch_save_with_retry({"vector": v, "arm": arm, "role": role, "type": "pos_3",
+                               "inputs": inputs}, out_dir / arm / f"{role}.pt", logger_obj=logger)
+    if default is not None:
+        torch_save_with_retry({"vector": default[0], "role": "default", "type": "mean",
+                               "inputs": {"copied_from": default[1]["source"],
+                                          "file_sha256": default[1]["file_sha256"]}},
+                              out_dir / DEFAULT_VECTOR_NAME, logger_obj=logger)
+    sha, dirty = git_info([SCRIPT_REL, "pipeline/4_vectors.py"])
+    index = {**header, "schema": VECTORS_INDEX_SCHEMA, "layout": VECTORS_LAYOUT,
+             "written_at": _now(), "git": {"head": sha, "dirty": dirty},
+             "per_role": per_role, "default_vector": default[1] if default is not None else None}
+    _write_json(index_path, index)
+    logger.info(f"saved {len(vectors)} vectors{' and the default vector' if default else ''} to "
+                f"{out_dir}")
+    return index_path
+
+
+def load_vectors_index(vectors_dir: Path) -> Dict[str, Any]:
+    path = Path(vectors_dir) / VECTORS_INDEX_NAME
+    if not path.exists():
+        raise VectorInputError(f"no {VECTORS_INDEX_NAME} in {vectors_dir}: not a --save-vectors "
+                               f"directory, or its save did not finish")
+    index = json.loads(read_text_with_retry(path, logger_obj=logger))
+    if index.get("experiment") != EXPERIMENT or index.get("schema") != VECTORS_INDEX_SCHEMA:
+        raise VectorInputError(f"{path}: not a {EXPERIMENT} vectors index of schema "
+                               f"{VECTORS_INDEX_SCHEMA}")
+    return index
+
+
+def _load_saved_tensor(path: Path, expected_sha: Optional[str]):
+    data = torch_load_with_retry(path, map_location="cpu", weights_only=False, logger_obj=logger)
+    v = data["vector"] if isinstance(data, dict) else data
+    if expected_sha is not None and tensor_sha256(v) != expected_sha:
+        raise VectorInputError(f"{path}: the tensor is not the one the index records (sha256 "
+                               f"{expected_sha[:12]}...); copy the directory again")
+    return v
+
+
+def check_saved_scores(per_role: Mapping[str, Any], scores_dir: Path) -> List[str]:
+    """Every score file the saved vectors were computed from (and every one that was missing)
+    against ``scores_dir`` now; one line per difference."""
+    problems = []
+    for role, e in per_role.items():
+        for arm, info in (e.get("arms") or {}).items():
+            path = score_path(scores_dir, arm, role)
+            now = _read_scores(path)[1] if path.exists() else None
+            then = info.get("scores_sha256")
+            if now != then:
+                problems.append(f"{arm}/{role}.json: {then[:12] if then else 'absent'} when the "
+                                f"vectors were saved, {now[:12] if now else 'absent'} now")
+    return problems
+
+
+def compare_arm_vectors(per_role: Dict[str, Any], get_vector: Callable[[str, str], Any],
+                        arms: Sequence[str], *,
+                        default: Optional[Tuple[Any, Dict[str, Any]]] = None,
+                        default_reason: str = NO_DEFAULT_REASON) -> Dict[str, Any]:
+    """The centred comparison, written into ``per_role`` (each arm entry gains ``centred`` and the
+    raw cosines; A0's gains ``offset_fraction_layer_mean``), with the references, the summary and
+    the per-arm role lists.  ``get_vector(arm, role)`` is called once for every vector of status
+    ``ok``: the A0 vectors first (the median reference needs them all), then role by role."""
+    a0 = {role: get_vector(BASE_ARM, role) for role, e in per_role.items() if _a0_ok(e)}
+    refs: Dict[str, Any] = {}
+    references: Dict[str, Any] = {}
+    if a0:
+        refs["median"] = elementwise_median(list(a0.values()))
+        references["median"] = {"definition": REFERENCE_DEFINITIONS["median"],
+                                "roles": list(a0), "n_roles": len(a0),
+                                "shape": list(refs["median"].shape)}
+    else:
+        references["median"] = {"omitted": "no role has an A0 vector"}
+    if default is not None:
+        _check_default_shape(default, per_role)
+        refs["default"] = default[0]
+        references["default"] = {"definition": REFERENCE_DEFINITIONS["default"], **default[1]}
+    else:
+        references["default"] = {"omitted": default_reason}
+    for role, base in a0.items():
+        arms_e = per_role[role]["arms"]
+        arms_e[BASE_ARM]["offset_fraction_layer_mean"] = {
+            name: [_mean(row) for row in offset_fraction_grid(base, r)] for name, r in refs.items()}
+        for arm in arms:
+            info = arms_e.get(arm) or {}
+            if arm == BASE_ARM or info.get("status") != "ok":
+                continue
+            v = get_vector(arm, role)
+            raw = cosine_grid(v, base)
+            info["raw_cos_with_A0"] = raw
+            info["raw_cos_with_A0_layer_mean"] = [_mean(row) for row in raw]
+            info["centred"] = {}
+            for name, r in refs.items():
+                cos, norm = centred_grids(v, base, r)
+                info["centred"][name] = {"cos_with_A0": cos,
+                                         "cos_with_A0_layer_mean": [_mean(row) for row in cos],
+                                         "norm_ratio_layer_mean": [_mean(row) for row in norm]}
+            del v
+    summary: Dict[str, Any] = {name: vector_summary(per_role, arms, name) for name in refs}
+    summary["raw"] = vector_summary(per_role, arms, "raw")
+    return {"references": references, "summary": summary,
+            "moved_roles": {name: moved_roles(per_role, arms, name) for name in refs}}
+
+
+def _comparison(info: Mapping[str, Any], reference: str
+                ) -> Tuple[Optional[List[Optional[float]]], Optional[List[Optional[float]]]]:
+    """``(cos layer means, norm-ratio layer means)`` per slot of one arm entry."""
+    if reference == "raw":
+        return info.get("raw_cos_with_A0_layer_mean"), None
+    c = (info.get("centred") or {}).get(reference) or {}
+    return c.get("cos_with_A0_layer_mean"), c.get("norm_ratio_layer_mean")
+
+
+def vector_summary(per_role: Mapping[str, Any], arms: Sequence[str], reference: str) -> Dict[str, Any]:
+    """Per subset, arm and slot, over roles: the median of the role's layer-mean cosine with A0
+    (centred on ``reference``, or ``"raw"``); the median over roles of (1 - cos) / (1 - cos of
+    A0') (above 1: the arm moved the vector more than the judge's noise), and the ratio of the
+    two medians; the median offset-length ratio |v - r| / |v_A0 - r|.  A centred reference also
+    gets ``a0_offset_fraction``: per slot, the median over roles of |v_A0 - r| / |v_A0|."""
     out: Dict[str, Any] = {}
-    for subset, members in (("all", None), ("ai_persona", AI_PERSONA_ROLES),
-                            ("other_roles", "rest")):
+    for subset, _title in SUBSETS:
         sub: Dict[str, Any] = {}
         for arm in arms:
             if arm == BASE_ARM:
                 continue
-            per_slot: Dict[int, List[float]] = defaultdict(list)
-            ratios: Dict[int, List[float]] = defaultdict(list)
+            cos_s: Dict[int, List[float]] = defaultdict(list)
+            ratio_s: Dict[int, List[float]] = defaultdict(list)
+            pair_s: Dict[int, List[Tuple[float, float]]] = defaultdict(list)
+            norm_s: Dict[int, List[float]] = defaultdict(list)
             for role, e in per_role.items():
-                if members == "rest" and role in AI_PERSONA_ROLES:
+                if not _in_subset(role, subset):
                     continue
-                if isinstance(members, tuple) and role not in members:
-                    continue
-                cos = ((e.get("arms") or {}).get(arm) or {}).get("cos_with_A0_layer_mean")
-                noise = ((e.get("arms") or {}).get(NOISE_ARM) or {}).get("cos_with_A0_layer_mean")
+                arms_e = e.get("arms") or {}
+                cos, norm = _comparison(arms_e.get(arm) or {}, reference)
+                noise, _ = _comparison(arms_e.get(NOISE_ARM) or {}, reference)
                 if not cos:
                     continue
                 for s, v in enumerate(cos):
                     if v is None:
                         continue
-                    per_slot[s].append(v)
-                    if noise and noise[s] is not None and (1 - noise[s]) > 0:
-                        ratios[s].append((1 - v) / (1 - noise[s]))
-            sub[arm] = {str(s): {"median_cos": statistics.median(v), "min_cos": min(v),
-                                 "n_roles": len(v),
-                                 "median_ratio_to_noise": (statistics.median(ratios[s])
-                                                           if ratios.get(s) else None)}
-                        for s, v in sorted(per_slot.items())}
+                    cos_s[s].append(v)
+                    if norm and norm[s] is not None:
+                        norm_s[s].append(norm[s])
+                    if noise and noise[s] is not None:
+                        pair_s[s].append((1 - v, 1 - noise[s]))
+                        if (1 - noise[s]) > NOISE_EPS:
+                            ratio_s[s].append((1 - v) / (1 - noise[s]))
+            cells = {}
+            for s, vals in sorted(cos_s.items()):
+                noise_med = statistics.median(n for _, n in pair_s[s]) if pair_s.get(s) else None
+                cells[str(s)] = {
+                    "median_cos": statistics.median(vals), "min_cos": min(vals), "n_roles": len(vals),
+                    "median_ratio_to_noise": statistics.median(ratio_s[s]) if ratio_s.get(s) else None,
+                    "ratio_of_medians_to_noise": (
+                        statistics.median(a for a, _ in pair_s[s]) / noise_med
+                        if noise_med is not None and noise_med > NOISE_EPS else None),
+                    "median_norm_ratio": statistics.median(norm_s[s]) if norm_s.get(s) else None}
+            sub[arm] = cells
         out[subset] = sub
+    if reference != "raw":
+        frac: Dict[int, List[float]] = defaultdict(list)
+        for e in per_role.values():
+            fl = (((e.get("arms") or {}).get(BASE_ARM) or {}).get("offset_fraction_layer_mean")
+                  or {}).get(reference)
+            for s, v in enumerate(fl or []):
+                if v is not None:
+                    frac[s].append(v)
+        out["a0_offset_fraction"] = {str(s): statistics.median(v) for s, v in sorted(frac.items())}
     return out
 
 
-def vector_markdown(res: Mapping[str, Any], *, doc_dir: Path, roles_dir: Path = ROLES_DIR) -> str:
-    L = ["# Role-judge rubric experiment: the vectors", "",
-         f"Written by {_link(REPO / SCRIPT_REL, doc_dir)} `analyze-vectors` on {_now()} "
-         f"(min_count {res['min_count']}, reduce_questions {res['reduce_questions']}); every "
-         f"number is in {_link(doc_dir / 'vector_analysis.json', doc_dir)}.  Each arm's role "
-         "vector is computed as step 4 computes it (the mean of the activations of the responses "
-         "scored 3, float64, stored float32) and compared with A0's by cosine per slot, averaged "
-         "over layers; the median over roles is shown, with the median of (1 - cos) divided by "
-         "A0' 's (1 - cos) in brackets: above 1, the arm moves the vector more than the judge's "
-         "own noise.", ""]
-    for subset, title in (("all", "All roles"), ("ai_persona", "The AI-persona roles"),
-                          ("other_roles", "The other roles")):
-        sub = res["summary"].get(subset) or {}
+def moved_roles(per_role: Mapping[str, Any], arms: Sequence[str], reference: str
+                ) -> Dict[str, List[Dict[str, Any]]]:
+    """Per arm, every role it was compared on, the most moved first: ``cos`` and ``noise_cos``
+    (A0' 's) averaged over layers and slots, ``ratio_to_noise`` = (1 - cos) / (1 - noise_cos)
+    (None when A0' chose A0's responses), ``norm_ratio`` averaged likewise, and the counts."""
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for arm in arms:
+        if arm == BASE_ARM:
+            continue
+        rows = []
+        for role, e in per_role.items():
+            arms_e = e.get("arms") or {}
+            info = arms_e.get(arm) or {}
+            cos, norm = _comparison(info, reference)
+            if not cos:
+                continue
+            noise, _ = _comparison(arms_e.get(NOISE_ARM) or {}, reference)
+            c, n = _mean(cos), (_mean(noise) if noise else None)
+            rows.append({
+                "role": role, "stratum": stratum_of(role), "cos": c, "noise_cos": n,
+                "ratio_to_noise": ((1 - c) / (1 - n) if c is not None and n is not None
+                                   and (1 - n) > NOISE_EPS else None),
+                "norm_ratio": _mean(norm or []), "n_score3": info.get("n_score3"),
+                "n_score3_A0": (arms_e.get(BASE_ARM) or {}).get("n_score3"),
+                "jaccard_score3_with_A0": info.get("jaccard_score3_with_A0")})
+        rows.sort(key=lambda r: (r["ratio_to_noise"] is None, -(r["ratio_to_noise"] or 0.0),
+                                 r["role"]))
+        out[arm] = rows
+    return out
+
+
+def _vector_result(per_role: Dict[str, Any], get_vector: Callable[[str, str], Any],
+                   arms: Sequence[str], *, min_count: int, reduce_questions: int,
+                   default: Optional[Tuple[Any, Dict[str, Any]]], default_reason: str) -> Dict[str, Any]:
+    comp = compare_arm_vectors(per_role, get_vector, arms, default=default,
+                               default_reason=default_reason)
+    return {"min_count": min_count, "reduce_questions": reduce_questions, "arms": list(arms),
+            "roles": list(per_role), "per_role": per_role,
+            "scores_fingerprint": scores_fingerprint(per_role), "raw_cosine_note": RAW_COSINE_NOTE,
+            **comp}
+
+
+def analyze_vectors(activations_dir: Path, scores_dir: Path, roles: Sequence[str],
+                    arms: Sequence[str] = ARM_IDS, *, min_count: int = DEFAULT_MIN_COUNT,
+                    reduce_questions: int = 1, roles_dir: Path = ROLES_DIR,
+                    default_vector: Optional[Path] = None,
+                    save_vectors: Optional[Path] = None) -> Dict[str, Any]:
+    """Each arm's role vectors from the activations (``compute_arm_vectors``), saved to
+    ``save_vectors`` when given, and compared with A0's (``compare_arm_vectors``) centred on the
+    median A0 vector and, with ``default_vector``, on the default vector."""
+    default = load_default_vector(default_vector) if default_vector else None   # fail early
+    per_role, vectors = compute_arm_vectors(activations_dir, scores_dir, roles, arms,
+                                            min_count=min_count, reduce_questions=reduce_questions,
+                                            roles_dir=roles_dir)
+    _check_default_shape(default, per_role)
+    if save_vectors is not None:
+        header = {"experiment": EXPERIMENT, "script": SCRIPT_REL, "min_count": min_count,
+                  "reduce_questions": reduce_questions, "arms": list(arms), "roles": list(roles),
+                  "activations_dir": str(activations_dir), "scores_dir": str(scores_dir),
+                  "scores_fingerprint": scores_fingerprint(per_role)}
+        save_arm_vectors(Path(save_vectors), per_role, vectors, header=header, default=default)
+    res = _vector_result(per_role, lambda arm, role: vectors[(arm, role)], arms,
+                         min_count=min_count, reduce_questions=reduce_questions, default=default,
+                         default_reason=NO_DEFAULT_REASON)
+    res["vectors"] = {"source": "activations",
+                      "saved_to": str(save_vectors) if save_vectors is not None else None}
+    res["activations_dir"], res["scores_dir"] = str(activations_dir), str(scores_dir)
+    return res
+
+
+def analyze_saved_vectors(vectors_dir: Path, *, roles: Optional[Sequence[str]] = None,
+                          arms: Optional[Sequence[str]] = None,
+                          default_vector: Optional[Path] = None,
+                          scores_dir: Optional[Path] = None, min_count: Optional[int] = None,
+                          reduce_questions: Optional[int] = None) -> Dict[str, Any]:
+    """The comparison of :func:`analyze_vectors` from a ``--save-vectors`` directory (a copy will
+    do: the index names no absolute path), without the activations.  With ``scores_dir``, every
+    score file the vectors were computed from must be unchanged there; every vector read must be
+    the one the index records."""
+    vectors_dir = Path(vectors_dir)
+    index = load_vectors_index(vectors_dir)
+    for name, given in (("min_count", min_count), ("reduce_questions", reduce_questions)):
+        if given is not None and given != index[name]:
+            raise VectorInputError(f"the saved vectors were computed with {name} {index[name]}, "
+                                   f"not {given}: recompute them from the activations")
+    roles = list(roles or index["roles"])
+    arms = list(arms or index["arms"])
+    if BASE_ARM not in arms:
+        arms = [BASE_ARM] + arms
+    unknown = ([f"role {r}" for r in roles if r not in index["per_role"]]
+               + [f"arm {a}" for a in arms if a not in index["arms"]])
+    if unknown:
+        raise VectorInputError(f"not in the saved vectors: {', '.join(unknown)}")
+    per_role: Dict[str, Any] = {}
+    for role in roles:
+        e = copy.deepcopy(index["per_role"][role])
+        if "arms" in e:
+            e["arms"] = {a: e["arms"][a] for a in arms if a in e["arms"]}
+        per_role[role] = e
+    scores_check = "not checked (no --scores-dir)"
+    if scores_dir is not None:
+        problems = check_saved_scores(per_role, Path(scores_dir))
+        if problems:
+            more = f"\n  ... and {len(problems) - 20} more" if len(problems) > 20 else ""
+            raise VectorInputError(
+                f"{len(problems)} score file(s) in {scores_dir} differ from those the saved vectors "
+                f"were computed from (recompute the vectors from the activations):\n  "
+                + "\n  ".join(problems[:20]) + more)
+        scores_check = f"every score file unchanged in {scores_dir}"
+    if default_vector:
+        default, default_from = load_default_vector(Path(default_vector)), str(default_vector)
+    elif index.get("default_vector"):
+        dinfo = index["default_vector"]
+        default = (_load_saved_tensor(vectors_dir / DEFAULT_VECTOR_NAME, dinfo["vector_sha256"]), dinfo)
+        default_from = f"the saved copy, {DEFAULT_VECTOR_NAME}"
+    else:
+        default, default_from = None, None
+
+    def get_vector(arm: str, role: str):
+        return _load_saved_tensor(vectors_dir / arm / f"{role}.pt",
+                                  per_role[role]["arms"][arm].get("vector_sha256"))
+
+    res = _vector_result(per_role, get_vector, arms, min_count=index["min_count"],
+                         reduce_questions=index["reduce_questions"], default=default,
+                         default_reason=NO_SAVED_DEFAULT_REASON)
+    res["vectors"] = {"source": "saved", "dir": str(vectors_dir),
+                      "index_written_at": index.get("written_at"), "git": index.get("git"),
+                      "scores_check": scores_check, "default_vector_from": default_from,
+                      "saved_scores_fingerprint": index.get("scores_fingerprint")}
+    res["activations_dir"], res["scores_dir"] = index.get("activations_dir"), index.get("scores_dir")
+    return res
+
+
+def _compact_json(obj: Any) -> str:
+    """``_json_dump`` with every list of numbers on one line (the per-layer grids would otherwise
+    take a line per number); checked to parse back to the same value."""
+    text = _json_dump(obj)
+    num = r"(?:-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?|null)"
+    out = re.sub(r"\[\s*(" + num + r"(?:\s*,\s*" + num + r")*)\s*\]",
+                 lambda m: "[" + ", ".join(p.strip() for p in m.group(1).split(",")) + "]", text)
+    if json.loads(out) != json.loads(text):
+        raise AssertionError("compacting the JSON changed it")
+    return out
+
+
+def _n_with_a0(res: Mapping[str, Any], subset: str) -> int:
+    return sum(1 for role, e in res["per_role"].items() if _in_subset(role, subset) and _a0_ok(e))
+
+
+def _slot_header(slots: Sequence[int]) -> List[str]:
+    return ["| arm | " + " | ".join(f"slot {s}" for s in slots) + " |",
+            "|---|" + "---|" * len(slots)]
+
+
+def _pct(x: Optional[float]) -> str:
+    return "" if x is None else f"{100 * x:.1f}%"
+
+
+def _reference_section(res: Mapping[str, Any], ref: str, *, doc_dir: Path, roles_dir: Path) -> List[str]:
+    info = res["references"].get(ref) or {}
+    L = [f"## {REFERENCE_TITLES[ref]}", ""]
+    if "omitted" in info:
+        return L + [f"Omitted: {info['omitted']}.", ""]
+    summ = res["summary"].get(ref) or {}
+    frac = [v for v in (summ.get("a0_offset_fraction") or {}).values() if v is not None]
+    stored = f"stored {info['dtype']}, " if info.get("dtype") else ""
+    what = (f"the elementwise median of the A0 vectors of {info.get('n_roles')} roles, per slot and "
+            "layer" if ref == "median" else
+            f"the default entity's step-4 vector (the mean of all its activations; {stored}its "
+            "file and sha256 in the JSON)")
+    line = f"r is {what}, the same for every arm."
+    if frac:
+        line += (f"  A role's A0 offset from it, |v_A0 − r|, is a median "
+                 f"{_pct(statistics.median(frac))} of the vector's length |v_A0| (by slot, "
+                 f"{_pct(min(frac))} to {_pct(max(frac))}).")
+    L += [line, ""]
+    for subset, title in SUBSETS:
+        sub = summ.get(subset) or {}
         slots = sorted({int(s) for d in sub.values() for s in d})
         if not slots:
             continue
-        L += [f"## {title}", "", "| arm | " + " | ".join(f"slot {s}" for s in slots) + " |",
-              "|---|" + "---|" * len(slots)]
+        L += [f"### {title} ({_n_with_a0(res, subset)})", ""] + _slot_header(slots)
         for arm in COMPARED_ARMS:
             if arm not in sub:
                 continue
             cells = []
             for s in slots:
                 d = sub[arm].get(str(s))
-                if not d:
-                    cells.append("")
-                    continue
-                r = d["median_ratio_to_noise"]
-                cells.append(f"{d['median_cos']:.5f}" + ("" if r is None else f" ({r:.1f})"))
+                r = (d or {}).get("median_ratio_to_noise")
+                cells.append("" if not d else f"{d['median_cos']:.5f}"
+                             + ("" if r is None else f" ({r:.1f}×)"))
             L.append(f"| {ARM_BY_ID[arm].label} | " + " | ".join(cells) + " |")
         L.append("")
+    sub = summ.get("all") or {}
+    slots = sorted({int(s) for d in sub.values() for s in d})
+    if slots:
+        L += ["### Offset length, all roles", "",
+              "The median over roles of |v_arm − r| / |v_A0 − r| per slot, averaged over layers: "
+              "below 1 the arm's selection shortens the role's offset from r, above 1 lengthens "
+              "it (the two subsets are in the JSON).", ""] + _slot_header(slots)
+        for arm in COMPARED_ARMS:
+            if arm in sub:
+                cells = [("" if (sub[arm].get(str(s)) or {}).get("median_norm_ratio") is None
+                          else f"{sub[arm][str(s)]['median_norm_ratio']:.4f}") for s in slots]
+                L.append(f"| {ARM_BY_ID[arm].label} | " + " | ".join(cells) + " |")
+        L.append("")
+    moved = (res.get("moved_roles") or {}).get(ref) or {}
+    rows = []
+    for arm in COMPARED_ARMS:
+        top = [x for x in moved.get(arm, []) if x.get("ratio_to_noise") is not None]
+        if arm != NOISE_ARM and top:
+            rows.append(f"| {ARM_BY_ID[arm].label} | " + ", ".join(
+                f"{_role_link(x['role'], doc_dir, roles_dir)} {x['ratio_to_noise']:.1f}×"
+                for x in top[:MOVED_ROLES_SHOWN]) + " |")
+    if rows:
+        L += ["### The roles that move most", "",
+              f"Per arm, the {MOVED_ROLES_SHOWN} roles with the largest (1 − cos) relative to A0' "
+              "'s, both averaged over layers and slots; every role, with its cosine, A0' 's and "
+              "the offset length, is in the JSON (`moved_roles`).", "",
+              "| arm | roles |", "|---|---|"] + rows + [""]
+    return L
+
+
+def vector_markdown(res: Mapping[str, Any], *, doc_dir: Path, roles_dir: Path = ROLES_DIR) -> str:
+    vec = res.get("vectors") or {}
+    source = ("vectors computed from the activations" if vec.get("source") != "saved" else
+              f"vectors read from a --save-vectors directory written {vec.get('index_written_at')}")
+    L = ["# Role-judge rubric experiment: the vectors", "",
+         f"Written by {_link(REPO / SCRIPT_REL, doc_dir)} `analyze-vectors` on {_now()} "
+         f"(min_count {res['min_count']}, reduce_questions {res['reduce_questions']}; {source}); "
+         f"every number is in {_link(doc_dir / 'vector_analysis.json', doc_dir)}.", "",
+         "Each arm's role vector v_arm is computed as step 4 computes it (the mean of the "
+         "activations of the responses scored 3, float64, stored float32) and compared with the "
+         "same role's A0 vector by the centred cosine cos(v_arm − r, v_A0 − r) over the hidden "
+         "dimension, per slot and layer, for a reference r that is the same for every arm: the "
+         "median of the A0 role vectors first, then the default vector.  In each table a cell is "
+         "the median over roles of the role's cosine averaged over layers, and in brackets the "
+         "median over roles of (1 − cos) divided by A0' 's (1 − cos) for the same role and slot: "
+         "above 1, the arm turns the role's offset from r more than the judge's own noise does (a "
+         "role whose A0' vector equals its A0 vector has no noise and no ratio).  An arm below "
+         "min_count for a role has no vector there and is left out (the last table).", "",
+         "Raw cosines, cos(v_arm, v_A0), are not shown: every role vector shares a large common "
+         "component, so they are all above 0.9999 and say nothing.  They stay in the JSON "
+         "(`raw_cos_with_A0`, `summary.raw`), marked as not informative.", ""]
+    for ref in REFERENCES:
+        L += _reference_section(res, ref, doc_dir=doc_dir, roles_dir=roles_dir)
     L += ["## Per role: responses scored 3 and status", "", "| role | " +
           " | ".join(ARM_BY_ID[a].label for a in res["arms"]) + " |", "|---|" + "---|" * len(res["arms"])]
     for role, e in res["per_role"].items():
@@ -2184,23 +2751,49 @@ def vector_markdown(res: Mapping[str, Any], *, doc_dir: Path, roles_dir: Path = 
             d = (e.get("arms") or {}).get(arm) or {}
             cells.append(f"{d.get('n_score3', '')}" + ("" if d.get("status") in (None, "ok")
                                                        else f" ({d['status']})"))
-        L.append(f"| {_role_link(role, doc_dir, roles_dir)} | " + " | ".join(cells) + " |")
+        status = "" if e.get("status") is None else f" ({e['status']})"
+        L.append(f"| {_role_link(role, doc_dir, roles_dir)}{status} | " + " | ".join(cells) + " |")
     L.append("")
     return "\n".join(L)
 
 
 def cmd_analyze_vectors(args) -> int:
-    roles, arms = _selection(args)
-    if BASE_ARM not in arms:
-        arms = [BASE_ARM] + arms
-    res = analyze_vectors(Path(args.activations_dir), Path(args.scores_dir), roles, arms,
-                          min_count=args.min_count, reduce_questions=args.reduce_questions,
-                          roles_dir=Path(args.roles_dir))
-    res["activations_dir"] = str(args.activations_dir)
-    res["scores_dir"] = str(args.scores_dir)
+    if args.tmpdir:
+        from assistant_axis.tmpfs import setup_tmpdir
+        setup_tmpdir(args.tmpdir)
+    try:
+        if args.from_vectors:
+            if args.activations_dir or args.save_vectors:
+                raise VectorInputError("--from-vectors recomputes the comparison from saved "
+                                       "vectors: give no --activations-dir or --save-vectors with it")
+            unknown = [a for a in (args.arms or []) if a not in ARM_BY_ID]
+            if unknown:
+                raise VectorInputError(f"unknown arm(s) {unknown}; arms: {', '.join(ARM_IDS)}")
+            res = analyze_saved_vectors(
+                Path(args.from_vectors), roles=args.roles, arms=args.arms,
+                default_vector=Path(args.default_vector) if args.default_vector else None,
+                scores_dir=Path(args.scores_dir) if args.scores_dir else None,
+                min_count=args.min_count, reduce_questions=args.reduce_questions)
+        else:
+            if not args.activations_dir or not args.scores_dir:
+                raise VectorInputError("give --activations-dir and --scores-dir (on the pod), or "
+                                       "--from-vectors DIR")
+            roles, arms = _selection(args)
+            if BASE_ARM not in arms:
+                arms = [BASE_ARM] + arms
+            res = analyze_vectors(
+                Path(args.activations_dir), Path(args.scores_dir), roles, arms,
+                min_count=DEFAULT_MIN_COUNT if args.min_count is None else args.min_count,
+                reduce_questions=1 if args.reduce_questions is None else args.reduce_questions,
+                roles_dir=Path(args.roles_dir),
+                default_vector=Path(args.default_vector) if args.default_vector else None,
+                save_vectors=Path(args.save_vectors) if args.save_vectors else None)
+    except VectorInputError as e:
+        logger.error(str(e))
+        return 2
     res["written_at"] = _now()
     report_dir = Path(args.report_dir)
-    _write_json(report_dir / "vector_analysis.json", res)
+    atomic_write_text(_compact_json(res), report_dir / "vector_analysis.json", logger_obj=logger)
     atomic_write_text(vector_markdown(res, doc_dir=report_dir, roles_dir=Path(args.roles_dir)),
                       report_dir / "vector_analysis.md", logger_obj=logger)
     print(f"wrote {report_dir / 'vector_analysis.md'} and vector_analysis.json")
@@ -2276,16 +2869,35 @@ def build_parser() -> argparse.ArgumentParser:
     m = sub.add_parser("read-marks", help="tally the reading sheet's marks against its key")
     m.add_argument("--report-dir", default=str(REPORT_DIR))
 
-    v = sub.add_parser("analyze-vectors", help="(on the pod) each arm's role vectors against A0's")
-    v.add_argument("--activations-dir", required=True)
-    v.add_argument("--scores-dir", required=True)
+    v = sub.add_parser("analyze-vectors",
+                       help="each arm's role vectors against A0's by centred cosine (from the "
+                            "activations on the pod, or --from-vectors anywhere)")
+    v.add_argument("--activations-dir", help="step-2 activation files (<role>.pt); on the pod")
+    v.add_argument("--scores-dir",
+                   help="the judge run directory (<arm>/<role>.json); required with "
+                        "--activations-dir; with --from-vectors, optional: every score file the "
+                        "saved vectors were computed from must then be unchanged there")
+    v.add_argument("--from-vectors", metavar="DIR",
+                   help="recompute the comparison from a --save-vectors directory (or a copy of "
+                        "it), without the activations")
+    v.add_argument("--save-vectors", metavar="DIR",
+                   help="write each (arm, role) vector (float32, <arm>/<role>.pt), the default "
+                        "vector (default.pt) and index.json to DIR, for --from-vectors")
+    v.add_argument("--default-vector", metavar="PATH",
+                   help="the default entity's step-4 vector file (a dict whose 'vector' is "
+                        "(slots, layers, hidden)): the second reference.  Without it (and, with "
+                        "--from-vectors, without one saved in DIR) the default columns are omitted")
     v.add_argument("--roles-dir", default=str(ROLES_DIR))
     v.add_argument("--roles", nargs="+")
     v.add_argument("--arms", nargs="+")
-    v.add_argument("--min-count", type=int, default=DEFAULT_MIN_COUNT,
-                   help="step 4's --min_count as run_pipeline.sh passes it for roles (MIN_COUNT)")
-    v.add_argument("--reduce-questions", type=int, default=1)
+    v.add_argument("--min-count", type=int, default=None,
+                   help=f"step 4's --min_count as run_pipeline.sh passes it for roles (MIN_COUNT, "
+                        f"default {DEFAULT_MIN_COUNT}); with --from-vectors, the saved one (a "
+                        f"different value is refused)")
+    v.add_argument("--reduce-questions", type=int, default=None,
+                   help="step 4's --reduce_questions (default 1); with --from-vectors, the saved one")
     v.add_argument("--report-dir", default=str(REPORT_DIR))
+    v.add_argument("--tmpdir", help="set TMPDIR for the atomic writes (/dev/shm on the pod)")
     return p
 
 
