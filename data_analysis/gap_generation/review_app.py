@@ -29,7 +29,8 @@ order; ``?`` the key list.
 
 Commands:
 
-* ``serve --batch-id B [--port 8765] [--order cliques|generator|region|sample] [--by roger]``: the app on 127.0.0.1.
+* ``serve --batch-id B [--port 8765] [--order cliques|generator|region|sample|kinds] [--by roger]``: the app on 127.0.0.1
+  (a roles build, coding plan 16: ``kinds`` by default, the too-low kinds first, and the kind readout in the header).
   ``sample`` is a seeded random order for a review hour meant as a probability sample (decisions.py
   ``SAMPLE_WEIGHTS``); ``status`` then reports how far it went, per stratum.  ``--blind`` hides the persona-space
   and dictionary badges, so that the session's decisions test those signals.
@@ -78,9 +79,17 @@ def _open_log(args) -> D.DecisionLog:
 
 def cmd_serve(args) -> int:
     import uvicorn
+    from assistant_axis.gapgen import review_graph as RG
+    from assistant_axis.gapgen import records as RF
     from assistant_axis.gapgen.review_app.server import create_app
+    order = args.order
+    if order is None:
+        # a roles build (coding plan 16, § 7c): the kinds order by default (the too-low kinds first)
+        gp = _review_dir(args) / D.GRAPH_NAME
+        roles = RF.exists(gp) and D.is_roles_graph(RG.Graph.from_json(RF.read_json(gp)))
+        order = "kinds" if roles else "cliques"
     app = create_app(review_dir=_review_dir(args), data_dir=args.data_dir, registry_path=args.registry,
-                     queue_path=_queue_path(args), order=args.order, by=args.by, blind=args.blind)
+                     queue_path=_queue_path(args), order=order, by=args.by, blind=args.blind)
     log = app.state.log
     c = log.state.counts()
     print(f"review {args.batch_id}: {c['terms']['total']} terms ({c['terms']['handled']} handled), "
@@ -88,6 +97,9 @@ def cmd_serve(args) -> int:
           f"singletons; {len(log.events)} decisions on record in {log.path}")
     if log.state.skipped:
         print(f"WARNING: {len(log.state.skipped)} logged decisions no longer apply to this graph (skipped)")
+    if log.roles is not None:
+        print(f"roles pass: order {order} (the kind statuses fixed at {log.roles.get('fixed_at')}); kinds now: "
+              + "; ".join(c["balance_lines"]))
     print(f"open http://{args.host}:{args.port}  (Ctrl-C stops the server; every decision is already on disk)")
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
     return 0
@@ -129,6 +141,14 @@ def cmd_status(args) -> int:
           f"skipped on replay: {s['skipped']}")
     for x in s["skipped_events"]:
         print(f"  skipped {x['seq']} {x['action']} {x['group']}: {x['why']}")
+    if log.roles is not None:
+        # the kind readout (decision 2 of plan 16): the corpus before this review and as it will be once applied
+        from assistant_axis.gapgen import roles_pass as RP
+        before = RP.balance(log.roles.get("counts") or {}, int(log.roles.get("n") or 0))
+        after = log.state.role_balance()
+        print(f"kinds before this review ({before['n_now']} roles): " + "; ".join(RP.balance_lines(before)))
+        print(f"kinds after it ({after['n_now']} roles, {len(log.state.role_nominees())} promoted here): "
+              + "; ".join(RP.balance_lines(after)))
     return 0
 
 
@@ -172,8 +192,9 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "serve":
             sp.add_argument("--port", type=int, default=DEFAULT_PORT)
             sp.add_argument("--host", default=DEFAULT_HOST, help="keep the default: the app has no login")
-            sp.add_argument("--order", choices=D.ORDERS, default="cliques",
-                            help="the queue's first order (o on the page switches)")
+            sp.add_argument("--order", choices=D.ORDERS, default=None,
+                            help="the queue's first order (o on the page switches); default cliques, or kinds for a "
+                                 "roles build (the too-low kinds first, coding plan 16)")
             sp.add_argument("--blind", action="store_true",
                             help="hide the duplicate signals other than M3's decision (persona-space and dictionary "
                                  "badges), for a session meant to test them")

@@ -225,13 +225,29 @@ def calibration(names, out_root: Optional[Path], *, proposed_cut_off: int) -> tu
 
 def make_runner(*, client, batch_id: str, rubrics: dict, index, usage, responses_path: Path, concurrency: int,
                 config_version: str, embedding: dict, resume_records=(),
-                label_form: str = PL.DEFAULT_LABEL_FORM) -> RG.ReviewRunner:
+                label_form: str = PL.DEFAULT_LABEL_FORM, list_key: str = "traits") -> RG.ReviewRunner:
     """The build's runner; ``label_form`` (prompt_labels) is how its prompts show the labels: the judge display form
-    for a new build, the earlier session's recorded form for a ``--resume``."""
+    for a new build, the earlier session's recorded form for a ``--resume``; ``list_key``: ``roles`` in a roles build
+    (the role relation rubric's list)."""
     return RG.ReviewRunner(client=client, batch_id=batch_id, rubrics=rubrics, index=index,
                            label_sets=NV.LabelSets(set(), {}, {}), usage=usage, responses_path=responses_path,
                            config_version=config_version, concurrency=concurrency, embedding=embedding,
-                           resume_records=resume_records, label_form=label_form)
+                           resume_records=resume_records, label_form=label_form, list_key=list_key)
+
+
+def build_pass(rows: dict, batch_ids) -> tuple[Optional[str], Optional[str]]:
+    """``(pass, None)``: the pass the source batches were (``novelty.pass`` of their rows: ``roles`` for a roles
+    build, coding plan 16; None for trait batches), or ``(None, why)`` when they mix a roles batch with others."""
+    seen = {}
+    for r in rows.values():
+        nv = r.get("novelty") or {}
+        if nv.get("run_id") in set(batch_ids):
+            seen.setdefault(nv["run_id"], set()).add(nv.get("pass"))
+    roles = {b for b, ps in seen.items() if "roles" in ps}
+    if roles and (roles != set(seen) or any(len(ps) > 1 for ps in seen.values())):
+        return None, (f"a roles build reads roles batches only: {', '.join(sorted(roles))} are roles passes, "
+                      f"{', '.join(sorted(set(seen) - roles)) or 'others'} are not (one build per pass)")
+    return ("roles" if roles else None), None
 
 
 def graph_config(args, cfg, rubrics: dict) -> dict:
@@ -254,12 +270,13 @@ def graph_config(args, cfg, rubrics: dict) -> dict:
             **({"include": {"keys": sorted(args.include), "reason": args.include_reason}} if args.include else {})}
 
 
-def provenance_inputs(args, rubrics: dict) -> list:
+def provenance_inputs(args, rubrics: dict, *, roles_build: bool = False) -> list:
     from assistant_axis.provenance import current_file_input, current_files_input
     batches = ",".join(args.from_batches)
+    files = ([paths.RUBRICS_DIR / "overlap_concept_roles.md", paths.RUBRICS_DIR / "relation_roles.md"] if roles_build
+             else [paths.RUBRICS_DIR / "overlap_concept.md", paths.RUBRICS_DIR / "relation.md"])
     inputs = [current_file_input(dep_key="registry", path=args.registry, extras={"from_batches": batches}),
-              current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "overlap_concept.md",
-                                                            paths.RUBRICS_DIR / "relation.md"],
+              current_files_input(dep_key="rubrics", paths=files,
                                   extras={"overlap_rubric": str(rubrics["overlap"]["version"]),
                                           "relation_rubric": str(rubrics["relation"]["version"])}),
               current_file_input(dep_key="metric_config", path=args.metric_config)]
@@ -309,11 +326,12 @@ def render_samples(runner: RG.ReviewRunner, plan: RG.GraphPlan, rubrics: dict) -
         a, b = b, a
     rc = runner.relation_calls([(a, [o for o, _ in plan.neighbours[a]])])[0]
     out.append(f"=== relation call: {a}, {len(rc.stems)} listed candidates, {rc.model}; system prompt: "
-               f"rubrics/relation.md version {rubrics['relation']['version']}")
+               f"rubrics/{rubrics['relation']['name']}.md version {rubrics['relation']['version']}")
     out.append(rc.user)
     oc = runner.overlap_call(a, b, "sonnet", 1)
     out.append(f"=== overlap call: {a} > {b} (cosine {c:.3f}), {oc.model} then Opus by the rule at cut-off "
-               f"{RG.CUT_OFF}; system prompt: rubrics/overlap_concept.md version {rubrics['overlap']['version']} (cached)")
+               f"{RG.CUT_OFF}; system prompt: rubrics/{rubrics['overlap']['name']}.md version "
+               f"{rubrics['overlap']['version']} (cached)")
     out.append(oc.user)
     return "\n".join(out)
 
@@ -329,11 +347,6 @@ def cmd_build(args, argv) -> int:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
     out_dir = RG.review_dir(args.batch_id, candidates_dir=args.out_root)
-    try:
-        rubrics = NS.load_m3_rubrics(args.rubrics_dir)
-    except NS.RubricError as exc:
-        print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
-        return 2
     cfg = MetricConfig.load(args.metric_config)
     rows = Registry(args.registry).fold()
     present = {(r.get("novelty") or {}).get("run_id") for r in rows.values()}
@@ -342,9 +355,24 @@ def cmd_build(args, argv) -> int:
         print(f"REFUSED: no registry row carries novelty.run_id {', '.join(unknown)} in {args.registry} (an M3 batch "
               "id, as novelty_score.py score --batch-id wrote it)", file=sys.stderr)
         return 2
+    # a roles build (coding plan 16): detected from the batches' pass; the role corpus, rubrics and query form
+    the_pass, why = build_pass(rows, args.from_batches)
+    if why:
+        print(f"REFUSED: {why}", file=sys.stderr)
+        return 2
+    roles_build = the_pass == "roles"
+    try:
+        rubrics = NS.load_role_rubrics(args.rubrics_dir) if roles_build else NS.load_m3_rubrics(args.rubrics_dir)
+    except NS.RubricError as exc:
+        print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
+        return 2
+    args.query_form = NS.resolve_query_form(args, "roles" if roles_build else None, cfg)
+    variant = NS.role_settings(cfg)["variant"] if roles_build else cfg.covered["space"]["variant"]
+    index_kw = {"entity_type": "role", "variant": variant} if roles_build else {}
+    list_key = "roles" if roles_build else "traits"
     queue = load_queue(args.data_dir)
     cache = EM.EmbeddingCache(args.cache_dir)
-    index, index_info = NS.load_index(cfg, data_dir=args.data_dir, cache=cache)
+    index, index_info = NS.load_index(cfg, data_dir=args.data_dir, cache=cache, **index_kw)
     include = {k: args.include_reason for k in (args.include or [])}
     if include:
         covered_keys = {k for k, r in rows.items() if (r.get("novelty") or {}).get("run_id") in set(args.from_batches)
@@ -361,7 +389,8 @@ def cmd_build(args, argv) -> int:
     else:
         vectors, vinfo = {}, {"n_query_texts": len(cands), "n_cached": None, "n_to_embed": len(cands),
                               "corpus_not_cached": index_info}
-    corpus = index.traits if index is not None else NV.load_trait_corpus(args.data_dir)
+    corpus = index.traits if index is not None else (NV.load_role_corpus(args.data_dir) if roles_build
+                                                     else NV.load_trait_corpus(args.data_dir))
     # plan 11: the stem-family candidate edges; a new build has them, a resume keeps its earlier session's setting (a
     # build before 2026-10-15 had none), unless --stem-family / --no-stem-family says otherwise
     if args.stem_family is None:
@@ -382,7 +411,7 @@ def cmd_build(args, argv) -> int:
         tokens = RG.measured_overlap_tokens(source_records(args.from_batches, args.out_root))
     transport, why = choose_transport(args.transport, len(plan.cands))
     embedding = {"model": cfg.live_model["model_id"], "query_form": args.query_form,
-                 "representation": cfg.representation, "variant": cfg.covered["space"]["variant"]}
+                 "representation": cfg.representation, "variant": variant}
 
     # a resume: the spend of the earlier sessions counts against the cap, and the estimate is the replay of the build
     # on its records with nothing sent (the calls not on record, and those they lead to by the shares)
@@ -406,7 +435,7 @@ def cmd_build(args, argv) -> int:
         replay = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics, index=runner.index,
                              usage=MultiModelUsage(), responses_path=out_dir / "responses.jsonl",
                              concurrency=args.concurrency, config_version=cfg.config_version, embedding=embedding,
-                             resume_records=records_before, label_form=label_form)
+                             resume_records=records_before, label_form=label_form, list_key=list_key)
         r_est, r_graph, wanted = RG.resume_estimate(
             p, runner=replay, corpus=corpus, queue=queue, shares=shares, overlap_floor=args.overlap_floor,
             proposed_cut_off=args.proposed_cut_off, overlap_tokens=tokens, transport=transport, unsure=unsure)
@@ -423,7 +452,8 @@ def cmd_build(args, argv) -> int:
     probe = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics,
                         index=index if index is not None else SimpleNamespace(traits=corpus), usage=MultiModelUsage(),
                         responses_path=out_dir / "responses.jsonl", concurrency=args.concurrency,
-                        config_version=cfg.config_version, embedding=embedding, label_form=label_form)
+                        config_version=cfg.config_version, embedding=embedding, label_form=label_form,
+                        list_key=list_key)
     est = estimate(plan, probe, vinfo["n_to_embed"])
     pl = plan_line(plan, vinfo, overlap_floor=args.overlap_floor)
     print(f"plan: {json.dumps(pl)}")
@@ -481,7 +511,7 @@ def cmd_build(args, argv) -> int:
     fh = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
     fh.setFormatter(log_formatter())
     logging.getLogger().addHandler(fh)
-    inputs = provenance_inputs(args, rubrics)
+    inputs = provenance_inputs(args, rubrics, roles_build=roles_build)
     run_meta = {"batch_id": args.batch_id, "from_batches": list(args.from_batches), "git_sha": sha,
                 "allow_dirty": bool(args.allow_dirty), "dirty_check": dirty_check,
                 "argv": sys.argv[1:] if argv is None else list(argv), "plan": pl, "transport": transport,
@@ -503,6 +533,9 @@ def cmd_build(args, argv) -> int:
                                     "unsure": None if unsure is None else list(unsure), "calibration": calib},
                 "corpus": index_info, PL.LABEL_FORM_KEY: label_form, "resumed": bool(args.resume),
                 "started_at": utc_now()}
+    if roles_build:
+        run_meta["pass"] = "roles"
+        run_meta["settings"]["variant"] = variant
     if resuming:
         run_meta["resume_estimate"] = dict(resume_info)
     if earlier:
@@ -515,7 +548,8 @@ def cmd_build(args, argv) -> int:
     try:
         if index is None or vinfo["n_to_embed"]:
             if index is None:
-                index, index_info = NS.load_index(cfg, data_dir=args.data_dir, cache=cache, usage=usage, allow_embed=True)
+                index, index_info = NS.load_index(cfg, data_dir=args.data_dir, cache=cache, usage=usage, allow_embed=True,
+                                                  **index_kw)
                 corpus = index.traits
             vectors, vinfo = query_vectors(cands, cfg=cfg, index=index, cache=cache, query_form=args.query_form,
                                            usage=usage, allow_embed=True)
@@ -534,7 +568,7 @@ def cmd_build(args, argv) -> int:
         runner = make_runner(client=anthropic.AsyncAnthropic(max_retries=0), batch_id=args.batch_id, rubrics=rubrics,
                              index=index, usage=usage, responses_path=out_dir / "responses.jsonl",
                              concurrency=args.concurrency, config_version=cfg.config_version, embedding=embedding,
-                             resume_records=resume_records, label_form=label_form)
+                             resume_records=resume_records, label_form=label_form, list_key=list_key)
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -557,6 +591,7 @@ def cmd_build(args, argv) -> int:
 
         graph = RG.build_graph(plan, runner=runner, corpus=corpus, queue=queue, overlap_floor=args.overlap_floor,
                                config=graph_config(args, cfg, rubrics) | {PL.LABEL_FORM_KEY: label_form}
+                                      | ({"pass": "roles", "variant": variant} if roles_build else {})
                                | ({"stem_family_pairs": "linked: a candidate edge whatever its cosine, typed by its "
                                    "readings (one stem family, from the lexical blocks)"} if args.stem_family else {}),
                                batch_id=args.batch_id, gate=gate,
@@ -837,7 +872,7 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--metric-config", type=Path, default=paths.METRIC_CONFIG_PATH)
     b.add_argument("--cache-dir", type=Path, default=paths.EMBEDDING_CACHE_DIR)
     b.add_argument("--rubrics-dir", type=Path, default=None)
-    b.add_argument("--query-form", choices=NV.QUERY_FORMS, default=NV.DEFAULT_QUERY_FORM,
+    b.add_argument("--query-form", choices=NV.QUERY_FORMS + NV.ROLE_QUERY_FORMS[:2], default=None,
                    help="how a candidate is embedded (default gloss_w14, as M3 embedded it)")
     b.add_argument("--transport", choices=("auto", "live", "batches"), default="auto")
     b.add_argument("--concurrency", type=int, default=NR.DEFAULT_CONCURRENCY)

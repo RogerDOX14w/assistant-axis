@@ -5,7 +5,7 @@
 Routes:
 
 * ``GET /``: the page (``static/index.html``; ``app.js`` and ``style.css`` under ``/static``).
-* ``GET /api/queue?order=cliques|generator|region|sample``: every merged group, proposed group and singleton, with handled
+* ``GET /api/queue?order=cliques|generator|region|sample|kinds``: every merged group, proposed group and singleton, with handled
   counts, and the counts the page shows at all times.
 * ``GET /api/group/{id}``: a working group's card: members (gloss, generator, M1 tags, M3 decision and covering
   trait, flags, handled), neighbours ranked by strongest edge, corpus and queue traits by reading (each a link to its
@@ -17,8 +17,11 @@ Routes:
   ``rename`` (the page's Add note and Flag for rename buttons): the flag says the label this decision settles on
   wants a second look, and ``apply`` prints the flagged labels as a worklist.
 * ``GET /api/status``: groups resolved and open, decisions by type, time per decision.
-* ``GET /files/traits/{stem}.json``: a corpus trait's file, read-only; ``GET /files/queue/{stem}``: a seed-queue
-  entry.  Nothing else of the repository is served, and nothing is written but ``decisions.jsonl``.
+* ``GET /files/traits/{stem}.json``: a corpus trait's file, read-only; ``GET /files/roles/{stem}.json``: a corpus
+  role's (a roles build, coding plan 16); ``GET /files/queue/{stem}``: a seed-queue entry.  Nothing else of the
+  repository is served, and nothing is written but ``decisions.jsonl``.
+* A roles build's queue takes ``order=kinds`` (the too-low kinds first, decision 2 of plan 16) and its counts carry
+  the kind readout (``balance``, ``balance_lines``); ``/api/meta`` says ``pass: roles``.
 """
 from __future__ import annotations
 
@@ -65,13 +68,18 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
         g = log.graph
         return {"batch_id": g.batch_id, "from_batches": g.from_batches, "graph_sha256": log.graph_sha256,
                 "complete": g.complete, "schema": g.schema, "default_order": order, "by": log.by,
-                "proposed_cut_off": g.config.get("proposed_cut_off"), "blind": blind}
+                "proposed_cut_off": g.config.get("proposed_cut_off"), "blind": blind,
+                "pass": "roles" if log.roles is not None else None,
+                "kinds_fixed_at": (log.roles or {}).get("fixed_at")}
 
     @app.get("/api/queue")
-    def queue(order: Optional[Literal["cliques", "generator", "region", "sample"]] = None):
+    def queue(order: Optional[Literal["cliques", "generator", "region", "sample", "kinds"]] = None):
         with log.lock:
             o = order or app.state.default_order
-            return {"order": o, "items": log.state.queue(o), "counts": log.state.counts()}
+            try:
+                return {"order": o, "items": log.state.queue(o), "counts": log.state.counts()}
+            except ActionError as exc:
+                raise HTTPException(409, str(exc)) from None
 
     @app.get("/api/group/{gid}")
     def group(gid: str):
@@ -119,6 +127,14 @@ def create_app(*, review_dir: Path, data_dir: Optional[Path] = None, registry_pa
         p = data_dir / "traits" / "instructions" / f"{stem}.json"
         if not stem or not _STEM.match(stem) or not p.is_file():
             raise HTTPException(404, f"no corpus trait file {name}")
+        return FileResponse(p, media_type="application/json")
+
+    @app.get("/files/roles/{name}")
+    def role_file(name: str):
+        stem = name[:-5] if name.endswith(".json") else None
+        p = data_dir / "roles" / "instructions" / f"{stem}.json"
+        if not stem or not _STEM.match(stem) or not p.is_file():
+            raise HTTPException(404, f"no corpus role file {name}")
         return FileResponse(p, media_type="application/json")
 
     @app.get("/files/queue/{stem}")
