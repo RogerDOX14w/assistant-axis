@@ -153,8 +153,8 @@ a gloss stage, M3 in batches of their own, R1 grouping, R2 review, by-name promo
 - **Cap**: 500-600 roles.  Read as the corpus's size after adding, not a wave's (decision 1, Roger 2026-10-21): the cap is about what the
   extraction and the judging can carry per entity, and a wave is sized by review hours.  With 340 today that is
   160-260 additions across all generators, which is why B and C get one modest wave each and A and D the rest.
-  Whether the AI-persona roles that may become traits (ROLES_TO_ADD, "AI-persona roles under the role judge")
-  count toward it is for Roger.
+  An AI-persona role recast as a trait (ROLES_TO_ADD, "AI-persona roles under the role judge") leaves the
+  count (Roger, 2026-10-22).
 
 ## 5. Generator A: characters of a media franchise
 
@@ -420,7 +420,7 @@ missing occupations supplies the occupation half of every wave (§ 6).
 
 1. **The cap counts the corpus or each wave?**  (a) the corpus: 500-600 roles in all, waves sized by review
    hours; (b) each wave.  **Recommend (a)**; and say whether the AI-persona roles count if they become traits.  *Long version:* [§ 4](#4-waves-the-balance-and-the-cap), the cap bullet.
-   **Decided (Roger, 2026-10-21): (a)**, the cap is the corpus's total size after adding.  Still open: whether the AI-persona roles count toward it if they become traits.
+   **Decided (Roger, 2026-10-21): (a)**, the cap is the corpus's total size after adding.  **2026-10-22: an AI-persona role recast as a trait leaves the role count** and joins the trait corpus (its target about 1,800): the cap counts what the role judge carries.
 2. **What the balance flag does.**  (a) readout only, Roger decides; (b) a wave's kept rows from one kind are
    cut when that kind's share would move more than five points; (c) a hard per-kind ceiling at the held share.
    **Recommend (a)**, with the five-point flag printed.  *Long version:* [§ 4](#4-waves-the-balance-and-the-cap), the balance readout bullet.
