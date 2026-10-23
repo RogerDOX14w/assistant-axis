@@ -139,6 +139,17 @@ class TestCrossType:
         r["role_pass"] = {"gloss": gloss_for("bouncer", "works the door"), "kind": "occupation"}
         assert NR.candidate_from_row(r) == (None, "not_a_trait_row")
 
+    def test_an_unrouted_role_aimed_row_is_refused_too(self):
+        """Review minor 6 (2026-10-23): a role-aimed row with a trait verdict and a gloss but no ``role_route`` (as
+        the single pipeline would leave it) stays out of the trait flow; a row M1 itself put on the roles list
+        still reads ``not_a_trait``."""
+        from assistant_axis.tests.roles_fakes import held_row
+        r = aimed_row("bouncer", "works the door", route="role")
+        r["filter"] = {"verdict": "trait", "outcome": "trait", "tags": [], "alignment": 1, "region": "moral_stance"}
+        r["gloss"] = "This means working the door of a club."
+        assert NR.candidate_from_row(r) == (None, "not_a_trait_row")
+        assert NR.candidate_from_row(held_row("baker", "bakes bread")) == (None, "not_a_trait")
+
 
 def test_the_relation_payload_names_its_list():
     u = NV.render_relation_user("cop", "A cop is someone who patrols.", [("judge", "A judge is ...")], list_key="roles")

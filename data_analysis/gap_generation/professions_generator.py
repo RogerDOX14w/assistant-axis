@@ -2,7 +2,7 @@
 """Generator B, lists of professions (generator id ``professions``; coding plan 16, § 7).
 
     uv run python data_analysis/gap_generation/professions_generator.py fetch [--only KEY ...] [--source esco]
-        --approved-by 'Roger, <date>' [--hand] [--force] [--user-agent UA] [--dry-run]
+        --approved-by 'Roger, <date>' [--hand] [--force] [--user-agent UA] [--esco-max-pages N] [--dry-run]
     uv run python data_analysis/gap_generation/professions_generator.py build --run-id R [--source onet esco]
         [--oews PATH | --no-oews] [--n-titles 300] [--min-zipf 3.0] [--max-words 2] [--no-job-titles] [--dry-run]
     uv run python data_analysis/gap_generation/professions_generator.py render [--broad 29-1210 ...]
@@ -168,7 +168,7 @@ def cmd_fetch(args) -> int:
     try:
         res = S.fetch(keys, dest_root=args.external_dir, approved_by=args.approved_by, user_agent=args.user_agent,
                       http=None if args.dry_run else _http(args.user_agent), hand=args.hand, force=args.force,
-                      dry_run=args.dry_run, git_sha=git_sha())
+                      dry_run=args.dry_run, git_sha=git_sha(), esco_max_pages=args.esco_max_pages)
     except S.NotApproved as exc:
         print(str(exc), file=sys.stderr)
         return EXIT_REFUSED
@@ -181,6 +181,8 @@ def cmd_fetch(args) -> int:
             print(f"  {line}")
         return 0
     print(f"fetched {res.fetched or 'none'}; already present {res.skipped or 'none'}")
+    for p in res.samples:
+        print(f"  sample (not in the manifest): {p}")
     for p in sorted(set(res.written)):
         print(f"  manifest: {p}")
     if res.hand:
@@ -715,6 +717,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--hand", action="store_true", help="record files downloaded by hand at their destinations")
     p.add_argument("--force", action="store_true")
     p.add_argument("--user-agent", default=S.USER_AGENT)
+    p.add_argument("--esco-max-pages", type=int, default=None,
+                   help="ESCO's smoke run: the first N pages of the API into occupations_en.sample.jsonl (no manifest "
+                        "row), one parsed row printed; for a check of the API's shape before the full fetch (wave 2)")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_fetch)
 

@@ -166,6 +166,20 @@ class TestEsco:
         first = http.calls[0][1]
         assert "type=occupation" in first and "language=en" in first and "full=true" in first
 
+    def test_a_smoke_run_writes_a_sample_beside_the_file_and_no_manifest_row(self, tmp_path):
+        """Review minor 8 (2026-10-23): ``esco_max_pages`` pages only that far, prints one parsed row before writing,
+        and writes a sample, never the source's file or its manifest row."""
+        lines = []
+        res = S.fetch(["esco_occupations"], dest_root=tmp_path, approved_by="Roger, 2026-10-23", http=self._http(),
+                      esco_max_pages=1, echo=lines.append)
+        sample = tmp_path / "esco" / "occupations_en.sample.jsonl"
+        assert res.samples == [sample] and res.fetched == [] and res.entries == []
+        assert len(sample.read_text().splitlines()) == 2                                   # page 1 only
+        assert not (tmp_path / "esco" / "occupations_en.jsonl").exists()
+        assert not (tmp_path / "esco" / "DOWNLOAD_MANIFEST.json").exists()
+        assert any(x.startswith("esco_occupations: first row parsed: {") for x in lines)
+        assert any("smoke run, 1 page(s), 2 rows of the API's 3" in x for x in lines)
+
     def test_fetch_records_esco_behind_its_key(self, tmp_path):
         res = S.fetch(["esco_occupations"], dest_root=tmp_path, approved_by="Roger, 2026-10-23", http=self._http(),
                       echo=lambda *_: None)

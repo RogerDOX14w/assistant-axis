@@ -1375,3 +1375,15 @@ def test_overlap_round_3_one_pair_per_call_against_rounds_1_and_2(overlap_env, c
     (out / "summary.json").unlink()                                                        # --analyse-only: the same
     assert e["cli"].main(e["base"] + ["--models", *models, "--analyse-only"]) == 0
     assert json.loads((out / "summary.json").read_text())["result"]["round3"]["summary"] == r3["summary"]
+
+
+def test_single_pipeline_refuses_role_aimed_rows(cand_dir, fake_client):
+    """Coding plan 16 (review minor 6, 2026-10-23): only the split pipeline routes a role-aimed row, so the single
+    pipeline refuses one before any call; trait-aimed rows go on as before."""
+    reg = cand_dir / "registry.jsonl"
+    submit_candidates([Candidate(surface="bouncer", generator="professions", run_id="w1", entity_type="role",
+                                 kind_guess="occupation", human=True)], registry_path=reg, relabel=None)
+    with pytest.raises(SystemExit, match="does not route role-aimed rows"):
+        traithood_filter.main([*SINGLE, "--batch-id", "b9", "--run", "professions/w1", "--registry", str(reg),
+                               "--out-root", str(cand_dir), "--no-second-opinion", "--dry-run"])
+    assert "client" not in fake_client

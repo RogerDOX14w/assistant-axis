@@ -2364,7 +2364,7 @@ def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
                                | ({"role_pass": run_meta.get("role_pass")} if role_run else {})
                                | ({"affected_only": affected_meta} if affected_meta else {})
                                | {"queue_search_record": queue_meta, PL.LABEL_FORM_KEY: label_form},
-                               kinds_of=(lambda keys: {k: RP.kind_of(reg.fold().get(k) or {}) for k in keys})
+                               kinds_of=(lambda keys, fold=reg.fold: RP.kinds_of_rows(fold(), keys))
                                if role_run else None)
         else:
             usage.write_json(out_dir / "usage.json")

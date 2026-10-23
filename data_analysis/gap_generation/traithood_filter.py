@@ -482,6 +482,11 @@ def main(argv=None) -> int:
     if not items:
         print("nothing to filter", file=sys.stderr)
         return 0
+    aimed = [it.key for it in items if (it.meta or {}).get("entity_type") == "role"]
+    if aimed:
+        # coding plan 16 (review minor 6, 2026-10-23): only the split pipeline routes a role-aimed row
+        raise SystemExit(f"--pipeline single does not route role-aimed rows ({len(aimed)}: {', '.join(aimed[:5])}"
+                         f"{' ...' if len(aimed) > 5 else ''}); filter them with --pipeline split")
     # every prompt this run sends (classifier, probe, the plain reading's two) must be its pinned text (code review
     # 2026-10-12, B4; review 1 D3); a dry run prints the refusal and goes on
     refusal = rubric_versions.refusal_lines()

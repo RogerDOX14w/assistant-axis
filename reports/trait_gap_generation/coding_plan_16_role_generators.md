@@ -364,7 +364,7 @@ resubmission of `baker` merges into it (the row is already a role row), adding t
 ```json
 {"key": "cardiologist#1", "label": "cardiologist", "gloss": "A cardiologist is a doctor who ...", "generator": "censuses",
  "role_kind": "occupation", "role_kind_unanimous": true, "human": true, "kind_guess": null,
- "kind_readout": {"status": "too_high", "count": 171, "held": 161.6, "margin": 16.2, "text": "occupation: too high (171 of 162 held at 339 + 12 accepted)"},
+ "kind_readout": {"kind": "occupation", "status": "too_high", "count": 198, "held": 179.2, "margin": 17.9, "text": "occupation: too high (198 against 179.2 held at 375, margin 17.9)"},
  "nearest_roles": [{"stem": "doctor", "cosine": 0.71, "relation": "similar", "reading": 3}, {"stem": "paramedic", "cosine": 0.52, "relation": "unrelated"}],
  "nearest_traits": [{"stem": "clinical", "cosine": 0.44}],
  "covered_by": null, "provenance": [{"generator": "censuses", "source_ref": "tda:cardiologist"}],
@@ -376,11 +376,18 @@ A covered sub-role shows `covered_by: "doctor"` with the reading (decision 4), g
 ### 6.4 The kind readout (`balance`)
 
 ```json
-{"n_now": 351, "reference_total": 339, "margin": 0.1,
- "kinds": {"occupation": {"reference": 162, "share": 0.478, "count": 171, "held": 167.7, "status": "too_high", "room": -3.3},
-           "pastime": {"reference": 8, "share": 0.0236, "count": 8, "held": 8.3, "status": "about_right", "room": 0.3}, "...": "..."},
- "order": ["pastime", "status", "other", "relationship", "circumstance", "temperament", "stance", "non_human", "occupation"]}
+{"n_now": 375, "reference_total": 339, "margin": 0.1,
+ "kinds": {"occupation": {"reference": 162, "share": 0.4779, "count": 198, "held": 179.2, "status": "too_high", "room": -18.8},
+           "pastime": {"reference": 8, "share": 0.0236, "count": 8, "held": 8.8, "status": "about_right", "room": 0.8}, "...": "..."},
+ "order": ["stance", "non_human", "circumstance", "temperament", "relationship", "status", "pastime", "other", "occupation"]}
 ```
+
+(The corpus of 2026-10-16 after 36 accepted occupations and nothing else: `balance(REFERENCE_KINDS_2026_10_16 with
+occupation 198, 375)`, as the code computes it; stance, non-human, circumstance, temperament and relationship are
+then too low, being held at a larger corpus.  These examples replace the drafted ones, which did not follow the
+formula below: corrected 2026-10-23 after the review's minor 4.)  The margin is 10% of the held count, so the chip
+moves slowly on the big kinds and fast on the small ones: occupation-only accepts tip occupation to too high after
+35 (`162 + a > 1.1 x 0.478 x (339 + a)`), while pastime (8) tips on one.
 
 `held = share × n_now`; `too_low` when `count < (1 − margin) × held`, `too_high` when `count > (1 + margin) × held`;
 `n_now` counts the role files (less `default.json`), the live role entries of the queue whose stem has no file,
@@ -604,8 +611,8 @@ be.  The neighbours of this stand-in (debugger, scientist, analyst, spy) show th
 
 #### 7a.4 [overlap_concept_roles.md](./rubrics/overlap_concept_roles.md): the overlap call for roles
 
-Sonnet 5.5 first, Opus 5.5 where `sonnet_action` sends the pair (at the cut-off, one below it, or unsure), one
-pair per call, the system prompt cached.  Rubric A's scale with the hierarchy made explicit (§ 3 step 4), and
+Sonnet 5.5 first, Opus 5.5 where `sonnet_action` sends the pair (at the cut-off, one below it, or unsure: M3's rule
+at cut-off 3), one pair per call, the system prompt cached.  **As built (2026-10-22):** R1 reads candidate against candidate with it in a roles batch under R1's own tiers, unchanged from the trait build (as built, 2026-10-22): a merge needs R1's cut-off 4 and 3s make at most a proposed group (decision 12 of the review plan), so a sub-role beside its parent, both candidates, is at most a proposal for Roger, not a merge; and R1's Opus rule is at its cut-off 4 (a Sonnet 4, 3 or "unsure"), so a Sonnet 2 between two candidates is not read by Opus as M3 would read it (review of 2026-10-23, minor 5; whether a 3 should merge is Roger's question).  Rubric A's scale with the hierarchy made explicit (§ 3 step 4), and
 **line 3 made directional**: a candidate that is a kind of a corpus role is covered (decision 4), a candidate
 that is the wider role is not (a worker is not a union member), so the wider case reads 2.  No broader check for
 roles: the direction is in the rubric.

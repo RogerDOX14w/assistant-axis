@@ -1340,6 +1340,8 @@ takes a `--budget-usd` cap.
 ```bash
 uv run python data_analysis/gap_generation/professions_generator.py fetch --dry-run
 uv run python data_analysis/gap_generation/professions_generator.py fetch --approved-by '<Roger, date>'
+uv run python data_analysis/gap_generation/professions_generator.py fetch --only esco_occupations --esco-max-pages 1 \
+    --approved-by '<Roger, date>'   # wave 2: ESCO's API checked on one page first (a sample, no manifest row)
 uv run python data_analysis/gap_generation/professions_generator.py build --run-id w1
 uv run python data_analysis/gap_generation/professions_generator.py lay --run-id w1 --budget-usd 2 [--dry-run]
 uv run python data_analysis/gap_generation/professions_generator.py rank --run-id w1 --budget-usd 0.5

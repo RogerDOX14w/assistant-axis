@@ -150,6 +150,12 @@ def kind_guess_of(row: Mapping) -> Optional[str]:
     return next((s.get("kind_guess") for s in row.get("sources") or [] if s.get("kind_guess")), None)
 
 
+def kinds_of_rows(rows: Mapping[str, Mapping], keys: Iterable[str]) -> dict:
+    """``{key: kind}`` of ``keys`` in one registry fold ``rows`` (:func:`kind_of`; None for a key with no row or no
+    kind): the summary's kind counts, read from a single fold of the registry (review minor 3, 2026-10-23)."""
+    return {k: kind_of(rows.get(k) or {}) for k in keys}
+
+
 def needs_stage(row: Mapping) -> bool:
     """A role row whose stage has not given it a gloss and a kind yet (a row glossed by an earlier run whose kind calls
     all failed gets the kind calls only)."""

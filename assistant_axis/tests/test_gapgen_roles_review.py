@@ -27,12 +27,30 @@ class TestBalance:
         occ = bal["kinds"]["occupation"]
         assert occ["held"] == 162.0 and occ["room"] == 0.0 and occ["share"] == pytest.approx(162 / 339, abs=1e-4)
 
-    def test_occupation_too_high_after_17_accepts_at_339(self):
+    def test_the_line_at_a_fixed_corpus_size(self):
+        """The formula at n_now 339 (a count moved with the corpus size held, which accepts do not do: the next
+        test): occupation 179 is over 1.1 x 162, 178 is not."""
         cur = dict(REF, occupation=162 + 17)
         bal = RP.balance(cur, 339)
         assert bal["kinds"]["occupation"]["status"] == "too_high"
         assert RP.balance(dict(REF, occupation=162 + 16), 339)["kinds"]["occupation"]["status"] == "about_right"
         assert bal["order"][-1] == "occupation"
+
+    def test_accepts_raise_the_corpus_size_too(self):
+        """Accepts add to the count and to n_now (review minor 4, 2026-10-23): occupation-only accepts tip occupation
+        after 35 (162 + a > 1.1 x 0.478 x (339 + a)), while a small kind (pastime, 8) tips on one; the plan's § 6.3 and § 6.4
+        examples are these figures."""
+        def occ(a):
+            return RP.balance(dict(REF, occupation=162 + a), 339 + a)["kinds"]["occupation"]
+        assert occ(34)["status"] == "about_right" and occ(35)["status"] == "too_high"
+        b = RP.balance(dict(REF, occupation=198), 375)
+        assert (b["kinds"]["occupation"]["count"], b["kinds"]["occupation"]["held"], b["kinds"]["occupation"]["room"]) \
+            == (198, 179.2, -18.8)
+        assert b["kinds"]["pastime"]["held"] == 8.8 and b["kinds"]["pastime"]["status"] == "about_right"
+        assert RP.kind_readout("occupation", b)["text"] == "occupation: too high (198 against 179.2 held at 375, margin 17.9)"
+        assert b["order"][:2] == ["stance", "non_human"] and b["order"][-1] == "occupation"
+        assert RP.balance(REF, 339)["kinds"]["pastime"]["status"] == "about_right"
+        assert RP.balance(dict(REF, pastime=9), 340)["kinds"]["pastime"]["status"] == "too_high"      # one accept
 
     def test_pastime_too_low_at_400_with_8(self):
         bal = RP.balance(REF, 400)

@@ -466,6 +466,9 @@ def fetch_esco_occupations(http: Http, dest: Path, *, api: str = ESCO_API, langu
             url = f"{api}/search?{urllib.parse.urlencode(params)}&offset={offset}"
         else:
             url = None
+    if rows:
+        # the API's shape is taken from its documentation (ESCO_UNVERIFIED): show one parsed row before writing
+        echo(f"esco_occupations: first row parsed: {json.dumps(rows[0], ensure_ascii=False)[:600]}")
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_name(dest.name + ".part")
@@ -495,6 +498,8 @@ class FetchResult:
     hand: list[dict] = field(default_factory=list)
     written: list[Path] = field(default_factory=list)
     dry_run_lines: list[str] = field(default_factory=list)
+    #: files of an ESCO smoke run (``esco_max_pages``): a sample, not the source, so no manifest row
+    samples: list[Path] = field(default_factory=list)
 
 
 def hand_message(s: Source, dest: Path, status: int) -> str:
@@ -517,11 +522,19 @@ def _entry(s: Source, dest: Path, *, approved_by: str, now: str, lic_ok: bool, l
     return e
 
 
+def esco_sample_path(dest: Path) -> Path:
+    """Where an ESCO smoke run (``esco_max_pages``) writes: beside the source's file, never over it."""
+    dest = Path(dest)
+    return dest.with_name(dest.stem + ".sample" + dest.suffix)
+
+
 def fetch_source(s: Source, *, dest_root: Path, approved_by: str, http: Http, hand: bool = False,
                  force: bool = False, now: Optional[str] = None, git_sha: Optional[str] = None,
-                 echo=print) -> tuple[Optional[dict], str]:
+                 esco_max_pages: Optional[int] = None, echo=print) -> tuple[Optional[dict], str]:
     """Fetch one source.  Returns ``(manifest row or None, outcome)``, outcome one of ``fetched``, ``present``,
-    ``hand`` (recorded as downloaded by hand), ``refused`` (the server refused: download by hand; no row)."""
+    ``hand`` (recorded as downloaded by hand), ``refused`` (the server refused: download by hand; no row), or
+    ``sample`` (ESCO with ``esco_max_pages``: the first pages to :func:`esco_sample_path`, a check of the API's shape
+    before the full run; no row)."""
     now = now or utc_now()
     dest = Path(dest_root) / s.dest
     prev = manifest_row(s, dest_root) or {}
@@ -538,6 +551,13 @@ def fetch_source(s: Source, *, dest_root: Path, approved_by: str, http: Http, ha
         e = _entry(s, dest, approved_by=approved_by, now=now, lic_ok=lic_ok, lic_src=lic_src, size_published=None,
                    by="hand", git_sha=git_sha)
         return _record(s, dest, e, now=now, lic_ok=lic_ok), "hand"
+    if s.via == "esco_api" and esco_max_pages is not None:
+        sample = esco_sample_path(dest)
+        info = fetch_esco_occupations(http, sample, api=s.url or ESCO_API, max_pages=int(esco_max_pages), echo=echo)
+        echo(f"{s.key}: smoke run, {info['n_pages']} page(s), {info['n_rows']} rows of the API's {info['total']} -> "
+             f"{_rel(sample)} (a sample: not recorded in the manifest; the full fetch is a run without "
+             f"--esco-max-pages)")
+        return None, "sample"
     if s.via == "esco_api":
         if dest.exists() and not force:
             echo(f"{s.key}: already present ({_rel(dest)}); not fetched again (--force to refetch)")
@@ -591,10 +611,10 @@ def _record(s: Source, dest: Path, e: dict, *, now: str, lic_ok: bool) -> dict:
 def fetch(keys: Optional[Sequence[str]] = None, *, dest_root: Path = DATA_EXTERNAL, approved_by: Optional[str],
           user_agent: str = USER_AGENT, http: Optional[Http] = None, hand: bool = False, force: bool = False,
           dry_run: bool = False, sources: Optional[Mapping[str, Source]] = None, git_sha: Optional[str] = None,
-          echo=print) -> FetchResult:
+          esco_max_pages: Optional[int] = None, echo=print) -> FetchResult:
     """Fetch ``keys`` (default :data:`DEFAULT_FETCH`).  Refused without ``approved_by`` unless ``dry_run`` (the
     plan, no request).  ``hand``: record the files placed at their destinations by hand (no request but the licence
-    page)."""
+    page).  ``esco_max_pages``: ESCO's smoke run (:func:`fetch_source`; review minor 8, 2026-10-23)."""
     srcs = dict(sources if sources is not None else SOURCES)
     ks = list(keys) if keys else list(DEFAULT_FETCH)
     unknown = [k for k in ks if k not in srcs]
@@ -617,7 +637,10 @@ def fetch(keys: Optional[Sequence[str]] = None, *, dest_root: Path = DATA_EXTERN
     for k in ks:
         s = srcs[k]
         e, outcome = fetch_source(s, dest_root=dest_root, approved_by=approved_by, http=client, hand=hand,
-                                  force=force, now=now, git_sha=git_sha, echo=echo)
+                                  force=force, now=now, git_sha=git_sha, esco_max_pages=esco_max_pages, echo=echo)
+        if outcome == "sample":
+            out.samples.append(esco_sample_path(Path(dest_root) / s.dest))
+            continue
         if outcome == "refused":
             out.hand.append({"key": k, "url": s.url, "dest": _rel(Path(dest_root) / s.dest)})
             continue
@@ -632,4 +655,4 @@ __all__ = ["TOOL", "USER_AGENT", "APPROVAL_REQUIRED", "HAND_STATUSES", "ONET_ATT
            "ATTRIBUTION", "page_text", "licence_check", "attribution_keys", "attribution_markdown", "write_attribution",
            "attribution_record", "HttpResponse", "Http", "UrllibHttp", "sha256_file", "load_manifest",
            "merge_manifest", "manifest_row", "ESCO_UNVERIFIED", "esco_row", "fetch_esco_occupations", "NotApproved",
-           "FetchResult", "hand_message", "fetch_source", "fetch"]
+           "FetchResult", "hand_message", "esco_sample_path", "fetch_source", "fetch"]

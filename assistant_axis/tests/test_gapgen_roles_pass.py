@@ -270,3 +270,10 @@ def test_run_stage_rows_closes_its_client_inside_the_loop(tmp_path):
     RP.run_stage_rows([], client=Closing(), usage=MultiModelUsage(), batch_id="roles_close",
                       records_path=tmp_path / "r.jsonl")
     assert closed == [True]
+
+
+def test_kinds_of_rows_reads_one_fold():
+    """Review minor 3 (2026-10-23): the summary's kinds come from one fold of the registry."""
+    rows = {"a#1": {"role_pass": {"kind": "occupation"}}, "b|R#1": {"role_pass": {"kind": "non_human"}}, "c#1": {}}
+    assert RP.kinds_of_rows(rows, ["a#1", "b|R#1", "c#1", "zz#1"]) == {"a#1": "occupation", "b|R#1": "non_human",
+                                                                      "c#1": None, "zz#1": None}

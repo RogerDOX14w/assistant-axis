@@ -192,6 +192,11 @@ def queue_search_block(info: Mapping) -> dict:
     return {k: info[k] for k in QUEUE_BLOCK_FIELDS if k in info}
 
 
+def _role_aimed(row: Mapping) -> bool:
+    from .filter import is_role_aimed
+    return is_role_aimed(row)
+
+
 def candidate_from_row(row: Mapping, *, holding: Optional[str] = None) -> tuple[Optional[M3Candidate], Optional[str]]:
     """``(candidate, None)`` for a registry row M3 can judge, else ``(None, why)``: not filtered, not a
     ``trait`` verdict, or no gloss.  ``holding="physical"`` (the physical pass, ``novelty_score.py score
@@ -218,7 +223,9 @@ def candidate_from_row(row: Mapping, *, holding: Optional[str] = None) -> tuple[
     f = row.get("filter") or {}
     if not f:
         return None, "not_filtered"
-    if row.get("entity_type") == "role" and f.get("role_route") is not None:
+    if row.get("entity_type") == "role" and (f.get("role_route") is not None or _role_aimed(row)):
+        # a role-aimed row stays out of the trait flow even unrouted (the single pipeline writes no route: review
+        # minor 6, 2026-10-23); a row M1 itself put on the roles list is not role-aimed and reads "not_a_trait"
         return None, "not_a_trait_row"
     if f.get("verdict") != "trait":
         return None, "not_a_trait"
