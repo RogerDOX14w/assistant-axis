@@ -109,7 +109,7 @@ mark:
 
 ### 104
 
-mark: 
+mark: SKIP (the same response as item 102; it takes your verdict there)
 
 **X: 3 · Y: 2**
 
@@ -171,7 +171,7 @@ mark:
 
 ### 106
 
-mark: 
+mark: SKIP (the same response as item 33; it takes your verdict there)
 
 **X: 2 · Y: 3**
 
@@ -291,7 +291,7 @@ mark:
 
 ### 110
 
-mark: 
+mark: SKIP (the same response as item 58; it takes your verdict there)
 
 **X: 2 · Y: 3**
 
@@ -319,7 +319,7 @@ mark:
 
 ### 111
 
-mark: 
+mark: SKIP (the same response as item 76; it takes your verdict there)
 
 **X: 3 · Y: 2**
 
@@ -616,7 +616,7 @@ mark:
 
 ### 118
 
-mark: 
+mark: SKIP (the same response as item 97; it takes your verdict there)
 
 **X: 2 · Y: 3**
 
@@ -1119,7 +1119,7 @@ mark:
 
 ### 131
 
-mark: 
+mark: SKIP (the same response as item 76; it takes your verdict there)
 
 **X: 3 · Y: 1**
 

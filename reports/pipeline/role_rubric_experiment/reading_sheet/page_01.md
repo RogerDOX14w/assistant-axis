@@ -8,7 +8,7 @@ Each item is one response that the judge scored twice, under two rubrics, once 3
 
 ### 1
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -36,7 +36,7 @@ mark:
 
 ### 2
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -103,7 +103,7 @@ mark:
 
 ### 3
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -129,7 +129,7 @@ mark:
 
 ### 4
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -201,7 +201,7 @@ mark:
 
 ### 5
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -225,7 +225,7 @@ mark:
 
 ### 6
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -271,7 +271,7 @@ mark:
 
 ### 7
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -334,7 +334,7 @@ mark:
 
 ### 8
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -394,7 +394,7 @@ mark:
 
 ### 9
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -460,7 +460,7 @@ mark:
 
 ### 10
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -518,7 +518,7 @@ mark:
 
 ### 11
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -534,7 +534,7 @@ mark:
 
 ### 12
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -566,7 +566,7 @@ mark:
 
 ### 13
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -588,7 +588,7 @@ mark:
 
 ### 14
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -643,7 +643,7 @@ mark:
 
 ### 15
 
-mark: 
+mark: X
 
 **X: 2 · Y: 3**
 
@@ -663,7 +663,7 @@ mark:
 
 ### 16
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -685,7 +685,7 @@ mark:
 
 ### 17
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -722,7 +722,7 @@ mark:
 
 ### 18
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -744,7 +744,7 @@ mark:
 
 ### 19
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -760,7 +760,7 @@ mark:
 
 ### 20
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -786,7 +786,7 @@ mark:
 
 ### 21
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -831,7 +831,7 @@ mark:
 
 ### 22
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -871,7 +871,7 @@ mark:
 
 ### 23
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -915,7 +915,7 @@ mark:
 
 ### 24
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -977,7 +977,7 @@ mark:
 
 ### 25
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1063,7 +1063,7 @@ mark:
 
 ### 26
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1093,7 +1093,7 @@ mark:
 
 ### 27
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1153,7 +1153,7 @@ mark:
 
 ### 28
 
-mark: 
+mark: Y
 
 **X: 1 · Y: 3**
 
@@ -1175,7 +1175,7 @@ mark:
 
 ### 29
 
-mark: 
+mark: T (a very unconvincing ghost, has a distinctly assistant-like and un-ghostly tone, but does claim to be a ghost at one spot)
 
 **X: 2 · Y: 3**
 
@@ -1245,7 +1245,7 @@ mark:
 
 ### 30
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1263,7 +1263,7 @@ mark:
 
 ### 31
 
-mark: 
+mark: Y
 
 **X: 3 · Y: 2**
 
@@ -1314,7 +1314,7 @@ mark:
 
 ### 32
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1376,7 +1376,7 @@ mark:
 
 ### 33
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1392,7 +1392,7 @@ mark:
 
 ### 34
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1443,7 +1443,7 @@ mark:
 
 ### 35
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 

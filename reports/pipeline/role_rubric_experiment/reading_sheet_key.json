@@ -1,2023 +1,2049 @@
 {
-  "arms": [
-    "A0b",
-    "A3",
-    "A4",
-    "A5",
-    "A7"
-  ],
-  "base": "A0",
-  "items": {
-    "1": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p0_q27",
-      "role": "peacekeeper",
-      "x_is": "A0"
-    },
-    "10": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p1_q72",
-      "role": "visionary",
-      "x_is": "arm"
-    },
-    "100": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p0_q22",
-      "role": "peacekeeper",
-      "x_is": "A0"
-    },
-    "101": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p2_q49",
-      "role": "perfectionist",
-      "x_is": "arm"
-    },
-    "102": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p0_q14",
-      "role": "spirit",
-      "x_is": "arm"
-    },
-    "103": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p2_q41",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "A0"
-    },
-    "104": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p0_q14",
-      "role": "spirit",
-      "x_is": "arm"
-    },
-    "105": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q41",
-      "role": "merchant",
-      "x_is": "arm"
-    },
-    "106": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p0_q10",
-      "role": "soldier",
-      "x_is": "A0"
-    },
-    "107": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p4_q69",
-      "role": "robot",
-      "x_is": "arm"
-    },
-    "108": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q58",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "A0"
-    },
-    "109": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p1_q72",
-      "role": "familiar",
-      "x_is": "arm"
-    },
-    "11": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p0_q25",
-      "role": "minimalist",
-      "x_is": "arm"
-    },
-    "110": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p3_q76",
-      "role": "alien",
-      "x_is": "A0"
-    },
-    "111": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p3_q85",
-      "role": "alien",
-      "x_is": "A0"
-    },
-    "112": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q88",
-      "role": "pirate",
-      "x_is": "arm"
-    },
-    "113": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q47",
-      "role": "organizer",
-      "x_is": "A0"
-    },
-    "114": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p3_q85",
-      "role": "contrarian",
-      "x_is": "arm"
-    },
-    "115": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p0_q78",
-      "role": "perfectionist",
-      "x_is": "A0"
-    },
-    "116": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p0_q57",
-      "role": "organizer",
-      "x_is": "arm"
-    },
-    "117": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p2_q33",
-      "role": "cyborg",
-      "x_is": "arm"
-    },
-    "118": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p3_q6",
-      "role": "familiar",
-      "x_is": "A0"
-    },
-    "119": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p0_q97",
-      "role": "biologist",
-      "x_is": "arm"
-    },
-    "12": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p0_q59",
-      "role": "validator",
-      "x_is": "A0"
-    },
-    "120": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p0_q59",
-      "role": "historian",
-      "x_is": "arm"
-    },
-    "121": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p0_q57",
-      "role": "interpreter",
-      "x_is": "arm"
-    },
-    "122": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p3_q18",
-      "role": "merchant",
-      "x_is": "arm"
-    },
-    "123": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p1_q95",
-      "role": "assistant",
-      "x_is": "A0"
-    },
-    "124": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p3_q49",
-      "role": "robot",
-      "x_is": "arm"
-    },
-    "125": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q56",
-      "role": "minimalist",
-      "x_is": "A0"
-    },
-    "126": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p3_q88",
-      "role": "validator",
-      "x_is": "arm"
-    },
-    "127": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p3_q93",
-      "role": "assistant",
-      "x_is": "arm"
-    },
-    "128": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q40",
-      "role": "peacekeeper",
-      "x_is": "arm"
-    },
-    "129": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p2_q97",
-      "role": "realist",
-      "x_is": "arm"
-    },
-    "13": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p1_q47",
-      "role": "merchant",
-      "x_is": "A0"
-    },
-    "130": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p2_q32",
-      "role": "soldier",
-      "x_is": "A0"
-    },
-    "131": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 1,
-      "key": "pos_p3_q85",
-      "role": "alien",
-      "x_is": "A0"
-    },
-    "132": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p4_q6",
-      "role": "cyborg",
-      "x_is": "A0"
-    },
-    "133": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p3_q50",
-      "role": "pacifist",
-      "x_is": "arm"
-    },
-    "134": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p4_q28",
-      "role": "minimalist",
-      "x_is": "A0"
-    },
-    "135": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p3_q84",
-      "role": "assistant",
-      "x_is": "arm"
-    },
-    "136": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p2_q19",
-      "role": "historian",
-      "x_is": "A0"
-    },
-    "137": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p1_q33",
-      "role": "cyborg",
-      "x_is": "A0"
-    },
-    "138": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q45",
-      "role": "paperclip_maximizer",
-      "x_is": "A0"
-    },
-    "139": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p1_q15",
-      "role": "oracle",
-      "x_is": "A0"
-    },
-    "14": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p3_q12",
-      "role": "realist",
-      "x_is": "arm"
-    },
-    "140": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q88",
-      "role": "emissary",
-      "x_is": "A0"
-    },
-    "141": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q41",
-      "role": "minimalist",
-      "x_is": "arm"
-    },
-    "142": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p2_q27",
-      "role": "peacekeeper",
-      "x_is": "arm"
-    },
-    "143": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p2_q60",
-      "role": "merchant",
-      "x_is": "arm"
-    },
-    "144": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q30",
-      "role": "organizer",
-      "x_is": "A0"
-    },
-    "145": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q92",
-      "role": "guru",
-      "x_is": "A0"
-    },
-    "146": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p0_q21",
-      "role": "organizer",
-      "x_is": "arm"
-    },
-    "147": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q33",
-      "role": "emissary",
-      "x_is": "arm"
-    },
-    "148": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p4_q68",
-      "role": "perfectionist",
-      "x_is": "arm"
-    },
-    "149": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q97",
-      "role": "altruist",
-      "x_is": "arm"
-    },
-    "15": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p2_q51",
-      "role": "emissary",
-      "x_is": "arm"
-    },
-    "150": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q60",
-      "role": "familiar",
-      "x_is": "A0"
-    },
-    "151": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q79",
-      "role": "guru",
-      "x_is": "arm"
-    },
-    "152": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p4_q43",
-      "role": "validator",
-      "x_is": "arm"
-    },
-    "153": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 1,
-      "key": "pos_p3_q70",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "arm"
-    },
-    "154": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p0_q44",
-      "role": "organizer",
-      "x_is": "A0"
-    },
-    "155": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p1_q72",
-      "role": "oracle",
-      "x_is": "arm"
-    },
-    "156": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p3_q83",
-      "role": "soldier",
-      "x_is": "A0"
-    },
-    "157": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p0_q20",
-      "role": "emissary",
-      "x_is": "arm"
-    },
-    "158": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p3_q20",
-      "role": "guru",
-      "x_is": "A0"
-    },
-    "159": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p0_q24",
-      "role": "visionary",
-      "x_is": "A0"
-    },
-    "16": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p4_q47",
-      "role": "paperclip_maximizer",
-      "x_is": "arm"
-    },
-    "160": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p4_q67",
-      "role": "pacifist",
-      "x_is": "A0"
-    },
-    "161": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p0_q2",
-      "role": "interpreter",
-      "x_is": "A0"
-    },
-    "162": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q35",
-      "role": "peacekeeper",
-      "x_is": "arm"
-    },
-    "163": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p4_q2",
-      "role": "validator",
-      "x_is": "arm"
-    },
-    "164": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q42",
-      "role": "ghost",
-      "x_is": "A0"
-    },
-    "165": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p2_q72",
-      "role": "contrarian",
-      "x_is": "A0"
-    },
-    "166": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p3_q76",
-      "role": "alien",
-      "x_is": "arm"
-    },
-    "167": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q18",
-      "role": "contrarian",
-      "x_is": "arm"
-    },
-    "168": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q78",
-      "role": "soldier",
-      "x_is": "A0"
-    },
-    "169": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p2_q13",
-      "role": "biologist",
-      "x_is": "A0"
-    },
-    "17": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p3_q5",
-      "role": "visionary",
-      "x_is": "A0"
-    },
-    "170": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q95",
-      "role": "assistant",
-      "x_is": "arm"
-    },
-    "171": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p4_q51",
-      "role": "psychologist",
-      "x_is": "A0"
-    },
-    "172": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p4_q73",
-      "role": "interpreter",
-      "x_is": "A0"
-    },
-    "173": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p2_q80",
-      "role": "emissary",
-      "x_is": "arm"
-    },
-    "174": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p1_q64",
-      "role": "historian",
-      "x_is": "arm"
-    },
-    "175": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p3_q45",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "arm"
-    },
-    "176": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 1,
-      "key": "pos_p3_q98",
-      "role": "guru",
-      "x_is": "arm"
-    },
-    "177": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p1_q10",
-      "role": "tree",
-      "x_is": "arm"
-    },
-    "178": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p0_q74",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "arm"
-    },
-    "179": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q38",
-      "role": "soldier",
-      "x_is": "A0"
-    },
-    "18": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p2_q94",
-      "role": "peacekeeper",
-      "x_is": "A0"
-    },
-    "180": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p2_q86",
-      "role": "oracle",
-      "x_is": "arm"
-    },
-    "181": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p1_q81",
-      "role": "minimalist",
-      "x_is": "A0"
-    },
-    "182": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q8",
-      "role": "pacifist",
-      "x_is": "arm"
-    },
-    "183": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p4_q87",
-      "role": "validator",
-      "x_is": "arm"
-    },
-    "184": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q17",
-      "role": "tree",
-      "x_is": "arm"
-    },
-    "185": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p0_q23",
-      "role": "soldier",
-      "x_is": "arm"
-    },
-    "186": {
-      "a0_score": 1,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p0_q58",
-      "role": "spirit",
-      "x_is": "arm"
-    },
-    "187": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p0_q70",
-      "role": "pirate",
-      "x_is": "A0"
-    },
-    "188": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p1_q19",
-      "role": "psychologist",
-      "x_is": "arm"
-    },
-    "189": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p2_q90",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "A0"
-    },
-    "19": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p0_q97",
-      "role": "emissary",
-      "x_is": "A0"
-    },
-    "190": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p0_q48",
-      "role": "psychologist",
-      "x_is": "arm"
-    },
-    "191": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p3_q42",
-      "role": "robot",
-      "x_is": "arm"
-    },
-    "192": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q77",
-      "role": "guru",
-      "x_is": "A0"
-    },
-    "193": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q0",
-      "role": "organizer",
-      "x_is": "arm"
-    },
-    "194": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p1_q18",
-      "role": "robot",
-      "x_is": "A0"
-    },
-    "195": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p3_q19",
-      "role": "biologist",
-      "x_is": "A0"
-    },
-    "196": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p2_q63",
-      "role": "ghost",
-      "x_is": "A0"
-    },
-    "197": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p0_q93",
-      "role": "contrarian",
-      "x_is": "arm"
-    },
-    "198": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p2_q2",
-      "role": "altruist",
-      "x_is": "A0"
-    },
-    "199": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p3_q91",
-      "role": "altruist",
-      "x_is": "A0"
-    },
-    "2": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p4_q33",
-      "role": "peacekeeper",
-      "x_is": "A0"
-    },
-    "20": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q88",
-      "role": "guru",
-      "x_is": "arm"
-    },
-    "200": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p0_q38",
-      "role": "tree",
-      "x_is": "arm"
-    },
-    "201": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 1,
-      "key": "pos_p3_q75",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "A0"
-    },
-    "202": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q9",
-      "role": "altruist",
-      "x_is": "arm"
-    },
-    "203": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p1_q7",
-      "role": "soldier",
-      "x_is": "arm"
-    },
-    "204": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q95",
-      "role": "merchant",
-      "x_is": "arm"
-    },
-    "205": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q85",
-      "role": "cyborg",
-      "x_is": "A0"
-    },
-    "206": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p0_q23",
-      "role": "merchant",
-      "x_is": "arm"
-    },
-    "207": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p4_q88",
-      "role": "emissary",
-      "x_is": "arm"
-    },
-    "208": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q54",
-      "role": "paperclip_maximizer",
-      "x_is": "A0"
-    },
-    "209": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p2_q91",
-      "role": "pacifist",
-      "x_is": "arm"
-    },
-    "21": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q96",
-      "role": "visionary",
-      "x_is": "A0"
-    },
-    "210": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q36",
-      "role": "robot",
-      "x_is": "arm"
-    },
-    "211": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q86",
-      "role": "spirit",
-      "x_is": "arm"
-    },
-    "212": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p1_q35",
-      "role": "oracle",
-      "x_is": "arm"
-    },
-    "213": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p4_q11",
-      "role": "interpreter",
-      "x_is": "arm"
-    },
-    "214": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p4_q59",
-      "role": "minimalist",
-      "x_is": "A0"
-    },
-    "215": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p2_q25",
-      "role": "realist",
-      "x_is": "arm"
-    },
-    "216": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p1_q77",
-      "role": "interpreter",
-      "x_is": "arm"
-    },
-    "217": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q73",
-      "role": "cyborg",
-      "x_is": "arm"
-    },
-    "218": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p3_q77",
-      "role": "paperclip_maximizer",
-      "x_is": "A0"
-    },
-    "219": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p1_q95",
-      "role": "merchant",
-      "x_is": "A0"
-    },
-    "22": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p0_q23",
-      "role": "historian",
-      "x_is": "A0"
-    },
-    "220": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p3_q51",
-      "role": "altruist",
-      "x_is": "arm"
-    },
-    "221": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p0_q8",
-      "role": "peacekeeper",
-      "x_is": "arm"
-    },
-    "222": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p1_q62",
-      "role": "instrumentally_aligned_ai",
-      "x_is": "arm"
-    },
-    "223": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q14",
-      "role": "robot",
-      "x_is": "A0"
-    },
-    "224": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p3_q29",
-      "role": "visionary",
-      "x_is": "A0"
-    },
-    "225": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 1,
-      "key": "pos_p0_q47",
-      "role": "pacifist",
-      "x_is": "A0"
-    },
-    "226": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p1_q85",
-      "role": "cyborg",
-      "x_is": "arm"
-    },
-    "227": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q0",
-      "role": "psychologist",
-      "x_is": "A0"
-    },
-    "228": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p3_q69",
-      "role": "tree",
-      "x_is": "arm"
-    },
-    "229": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 1,
-      "key": "pos_p1_q10",
-      "role": "tree",
-      "x_is": "arm"
-    },
-    "23": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p0_q40",
-      "role": "psychologist",
-      "x_is": "A0"
-    },
-    "230": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p3_q84",
-      "role": "assistant",
-      "x_is": "A0"
-    },
-    "231": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p0_q79",
-      "role": "paperclip_maximizer",
-      "x_is": "A0"
-    },
-    "232": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q32",
-      "role": "biologist",
-      "x_is": "arm"
-    },
-    "233": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q6",
-      "role": "cyborg",
-      "x_is": "arm"
-    },
-    "234": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p0_q49",
-      "role": "guru",
-      "x_is": "A0"
-    },
-    "235": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q63",
-      "role": "ghost",
-      "x_is": "A0"
-    },
-    "236": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q77",
-      "role": "perfectionist",
-      "x_is": "arm"
-    },
-    "237": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p4_q87",
-      "role": "minimalist",
-      "x_is": "arm"
-    },
-    "238": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q50",
-      "role": "historian",
-      "x_is": "arm"
-    },
-    "239": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q78",
-      "role": "paperclip_maximizer",
-      "x_is": "arm"
-    },
-    "24": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p0_q17",
-      "role": "psychologist",
-      "x_is": "arm"
-    },
-    "240": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p0_q92",
-      "role": "interpreter",
-      "x_is": "A0"
-    },
-    "241": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p3_q79",
-      "role": "cyborg",
-      "x_is": "arm"
-    },
-    "242": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q22",
-      "role": "spirit",
-      "x_is": "arm"
-    },
-    "243": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p2_q13",
-      "role": "merchant",
-      "x_is": "arm"
-    },
-    "244": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p1_q14",
-      "role": "altruist",
-      "x_is": "arm"
-    },
-    "245": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q53",
-      "role": "familiar",
-      "x_is": "arm"
-    },
-    "246": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p3_q85",
-      "role": "alien",
-      "x_is": "arm"
-    },
-    "247": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 1,
-      "key": "pos_p1_q94",
-      "role": "contrarian",
-      "x_is": "arm"
-    },
-    "248": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p4_q51",
-      "role": "peacekeeper",
-      "x_is": "A0"
-    },
-    "249": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p2_q62",
-      "role": "robot",
-      "x_is": "A0"
-    },
-    "25": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p4_q73",
-      "role": "cyborg",
-      "x_is": "A0"
-    },
-    "250": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p1_q77",
-      "role": "validator",
-      "x_is": "A0"
-    },
-    "26": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q40",
-      "role": "realist",
-      "x_is": "A0"
-    },
-    "27": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q63",
-      "role": "biologist",
-      "x_is": "A0"
-    },
-    "28": {
-      "a0_score": 1,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p0_q10",
-      "role": "perfectionist",
-      "x_is": "A0"
-    },
-    "29": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q77",
-      "role": "ghost",
-      "x_is": "A0"
-    },
-    "3": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p0_q74",
-      "role": "ghost",
-      "x_is": "arm"
-    },
-    "30": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q84",
-      "role": "oracle",
-      "x_is": "A0"
-    },
-    "31": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p2_q76",
-      "role": "assistant",
-      "x_is": "A0"
-    },
-    "32": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q72",
-      "role": "tree",
-      "x_is": "A0"
-    },
-    "33": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p0_q10",
-      "role": "soldier",
-      "x_is": "arm"
-    },
-    "34": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p0_q73",
-      "role": "historian",
-      "x_is": "A0"
-    },
-    "35": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p4_q37",
-      "role": "minimalist",
-      "x_is": "arm"
-    },
-    "36": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p2_q80",
-      "role": "pacifist",
-      "x_is": "arm"
-    },
-    "37": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q53",
-      "role": "pacifist",
-      "x_is": "A0"
-    },
-    "38": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q47",
-      "role": "familiar",
-      "x_is": "arm"
-    },
-    "39": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p4_q76",
-      "role": "perfectionist",
-      "x_is": "A0"
-    },
-    "4": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p2_q2",
-      "role": "pacifist",
-      "x_is": "arm"
-    },
-    "40": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p1_q53",
-      "role": "familiar",
-      "x_is": "arm"
-    },
-    "41": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p3_q80",
-      "role": "perfectionist",
-      "x_is": "arm"
-    },
-    "42": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q93",
-      "role": "contrarian",
-      "x_is": "A0"
-    },
-    "43": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p1_q86",
-      "role": "merchant",
-      "x_is": "arm"
-    },
-    "44": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p4_q33",
-      "role": "minimalist",
-      "x_is": "A0"
-    },
-    "45": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 1,
-      "key": "pos_p2_q17",
-      "role": "realist",
-      "x_is": "A0"
-    },
-    "46": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p4_q77",
-      "role": "spirit",
-      "x_is": "arm"
-    },
-    "47": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p4_q9",
-      "role": "ghost",
-      "x_is": "A0"
-    },
-    "48": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p3_q31",
-      "role": "emissary",
-      "x_is": "arm"
-    },
-    "49": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p4_q70",
-      "role": "pirate",
-      "x_is": "arm"
-    },
-    "5": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q79",
-      "role": "spirit",
-      "x_is": "A0"
-    },
-    "50": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p3_q33",
-      "role": "tree",
-      "x_is": "arm"
-    },
-    "51": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p1_q74",
-      "role": "familiar",
-      "x_is": "arm"
-    },
-    "52": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p3_q98",
-      "role": "familiar",
-      "x_is": "A0"
-    },
-    "53": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p4_q71",
-      "role": "validator",
-      "x_is": "arm"
-    },
-    "54": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p0_q22",
-      "role": "pirate",
-      "x_is": "arm"
-    },
-    "55": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p0_q22",
-      "role": "pirate",
-      "x_is": "arm"
-    },
-    "56": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p4_q39",
-      "role": "altruist",
-      "x_is": "arm"
-    },
-    "57": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p1_q77",
-      "role": "merchant",
-      "x_is": "A0"
-    },
-    "58": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p3_q76",
-      "role": "alien",
-      "x_is": "arm"
-    },
-    "59": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q46",
-      "role": "robot",
-      "x_is": "A0"
-    },
-    "6": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p3_q69",
-      "role": "spirit",
-      "x_is": "A0"
-    },
-    "60": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p1_q72",
-      "role": "tree",
-      "x_is": "arm"
-    },
-    "61": {
-      "a0_score": 1,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q18",
-      "role": "familiar",
-      "x_is": "arm"
-    },
-    "62": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p2_q72",
-      "role": "pirate",
-      "x_is": "A0"
-    },
-    "63": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 2,
-      "key": "pos_p0_q73",
-      "role": "paperclip_maximizer",
-      "x_is": "A0"
-    },
-    "64": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p2_q22",
-      "role": "perfectionist",
-      "x_is": "A0"
-    },
-    "65": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q0",
-      "role": "contrarian",
-      "x_is": "A0"
-    },
-    "66": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p0_q35",
-      "role": "validator",
-      "x_is": "A0"
-    },
-    "67": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p1_q45",
-      "role": "visionary",
-      "x_is": "arm"
-    },
-    "68": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p0_q14",
-      "role": "pacifist",
-      "x_is": "A0"
-    },
-    "69": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p2_q72",
-      "role": "pirate",
-      "x_is": "A0"
-    },
-    "7": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p2_q22",
-      "role": "emissary",
-      "x_is": "A0"
-    },
-    "70": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p3_q58",
-      "role": "paperclip_maximizer",
-      "x_is": "A0"
-    },
-    "71": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p4_q69",
-      "role": "realist",
-      "x_is": "arm"
-    },
-    "72": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p0_q57",
-      "role": "paperclip_maximizer",
-      "x_is": "A0"
-    },
-    "73": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p1_q19",
-      "role": "oracle",
-      "x_is": "A0"
-    },
-    "74": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p2_q52",
-      "role": "visionary",
-      "x_is": "arm"
-    },
-    "75": {
-      "a0_score": 2,
-      "arm": "A4",
-      "arm_score": 3,
-      "key": "pos_p3_q78",
-      "role": "paperclip_maximizer",
-      "x_is": "arm"
-    },
-    "76": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q85",
-      "role": "alien",
-      "x_is": "A0"
-    },
-    "77": {
-      "a0_score": 3,
-      "arm": "A3",
-      "arm_score": 2,
-      "key": "pos_p4_q61",
-      "role": "minimalist",
-      "x_is": "A0"
-    },
-    "78": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p3_q7",
-      "role": "guru",
-      "x_is": "arm"
-    },
-    "79": {
-      "a0_score": 2,
-      "arm": "A7",
-      "arm_score": 3,
-      "key": "pos_p2_q86",
-      "role": "oracle",
-      "x_is": "A0"
-    },
-    "8": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p1_q12",
-      "role": "visionary",
-      "x_is": "A0"
-    },
-    "80": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p3_q7",
-      "role": "pirate",
-      "x_is": "arm"
-    },
-    "81": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p1_q9",
-      "role": "oracle",
-      "x_is": "A0"
-    },
-    "82": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p4_q57",
-      "role": "historian",
-      "x_is": "A0"
-    },
-    "83": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p4_q37",
-      "role": "altruist",
-      "x_is": "A0"
-    },
-    "84": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p1_q81",
-      "role": "assistant",
-      "x_is": "arm"
-    },
-    "85": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p3_q0",
-      "role": "cyborg",
-      "x_is": "A0"
-    },
-    "86": {
-      "a0_score": 3,
-      "arm": "A5",
-      "arm_score": 1,
-      "key": "pos_p3_q42",
-      "role": "validator",
-      "x_is": "arm"
-    },
-    "87": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p2_q72",
-      "role": "pirate",
-      "x_is": "A0"
-    },
-    "88": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p1_q39",
-      "role": "interpreter",
-      "x_is": "A0"
-    },
-    "89": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q19",
-      "role": "biologist",
-      "x_is": "A0"
-    },
-    "9": {
-      "a0_score": 2,
-      "arm": "A0b",
-      "arm_score": 3,
-      "key": "pos_p4_q61",
-      "role": "realist",
-      "x_is": "A0"
-    },
-    "90": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p3_q60",
-      "role": "historian",
-      "x_is": "arm"
-    },
-    "91": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p4_q80",
-      "role": "psychologist",
-      "x_is": "arm"
-    },
-    "92": {
-      "a0_score": 2,
-      "arm": "A3",
-      "arm_score": 3,
-      "key": "pos_p4_q87",
-      "role": "organizer",
-      "x_is": "arm"
-    },
-    "93": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p3_q46",
-      "role": "interpreter",
-      "x_is": "arm"
-    },
-    "94": {
-      "a0_score": 3,
-      "arm": "A0b",
-      "arm_score": 2,
-      "key": "pos_p1_q83",
-      "role": "biologist",
-      "x_is": "A0"
-    },
-    "95": {
-      "a0_score": 3,
-      "arm": "A4",
-      "arm_score": 2,
-      "key": "pos_p0_q90",
-      "role": "realist",
-      "x_is": "arm"
-    },
-    "96": {
-      "a0_score": 3,
-      "arm": "A7",
-      "arm_score": 2,
-      "key": "pos_p2_q77",
-      "role": "organizer",
-      "x_is": "arm"
-    },
-    "97": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q6",
-      "role": "familiar",
-      "x_is": "A0"
-    },
-    "98": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q76",
-      "role": "alien",
-      "x_is": "A0"
-    },
-    "99": {
-      "a0_score": 2,
-      "arm": "A5",
-      "arm_score": 3,
-      "key": "pos_p3_q69",
-      "role": "emissary",
-      "x_is": "arm"
-    }
+ "arms": [
+  "A0b",
+  "A3",
+  "A4",
+  "A5",
+  "A7"
+ ],
+ "base": "A0",
+ "items": {
+  "1": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p0_q27",
+   "role": "peacekeeper",
+   "x_is": "A0"
   },
-  "note": "50 per arm for A0' (blind check of the reader), A3, A4, A5, A7 (Roger, 2026-10-22: the 50-sample version)",
-  "pages": [
-    "page_01.md",
-    "page_02.md",
-    "page_03.md",
-    "page_04.md",
-    "page_05.md"
-  ],
-  "per_arm": 50,
-  "seed": 20261022,
-  "written_at": "2026-10-22T22:02:52+00:00"
+  "10": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p1_q72",
+   "role": "visionary",
+   "x_is": "arm"
+  },
+  "100": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p0_q22",
+   "role": "peacekeeper",
+   "x_is": "A0"
+  },
+  "101": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p2_q49",
+   "role": "perfectionist",
+   "x_is": "arm"
+  },
+  "102": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p0_q14",
+   "role": "spirit",
+   "x_is": "arm"
+  },
+  "103": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p2_q41",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "A0"
+  },
+  "104": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p0_q14",
+   "role": "spirit",
+   "x_is": "arm"
+  },
+  "105": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q41",
+   "role": "merchant",
+   "x_is": "arm"
+  },
+  "106": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p0_q10",
+   "role": "soldier",
+   "x_is": "A0"
+  },
+  "107": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p4_q69",
+   "role": "robot",
+   "x_is": "arm"
+  },
+  "108": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q58",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "A0"
+  },
+  "109": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p1_q72",
+   "role": "familiar",
+   "x_is": "arm"
+  },
+  "11": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p0_q25",
+   "role": "minimalist",
+   "x_is": "arm"
+  },
+  "110": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p3_q76",
+   "role": "alien",
+   "x_is": "A0"
+  },
+  "111": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p3_q85",
+   "role": "alien",
+   "x_is": "A0"
+  },
+  "112": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q88",
+   "role": "pirate",
+   "x_is": "arm"
+  },
+  "113": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q47",
+   "role": "organizer",
+   "x_is": "A0"
+  },
+  "114": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p3_q85",
+   "role": "contrarian",
+   "x_is": "arm"
+  },
+  "115": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p0_q78",
+   "role": "perfectionist",
+   "x_is": "A0"
+  },
+  "116": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p0_q57",
+   "role": "organizer",
+   "x_is": "arm"
+  },
+  "117": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p2_q33",
+   "role": "cyborg",
+   "x_is": "arm"
+  },
+  "118": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p3_q6",
+   "role": "familiar",
+   "x_is": "A0"
+  },
+  "119": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p0_q97",
+   "role": "biologist",
+   "x_is": "arm"
+  },
+  "12": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p0_q59",
+   "role": "validator",
+   "x_is": "A0"
+  },
+  "120": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p0_q59",
+   "role": "historian",
+   "x_is": "arm"
+  },
+  "121": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p0_q57",
+   "role": "interpreter",
+   "x_is": "arm"
+  },
+  "122": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p3_q18",
+   "role": "merchant",
+   "x_is": "arm"
+  },
+  "123": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p1_q95",
+   "role": "assistant",
+   "x_is": "A0"
+  },
+  "124": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p3_q49",
+   "role": "robot",
+   "x_is": "arm"
+  },
+  "125": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q56",
+   "role": "minimalist",
+   "x_is": "A0"
+  },
+  "126": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p3_q88",
+   "role": "validator",
+   "x_is": "arm"
+  },
+  "127": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p3_q93",
+   "role": "assistant",
+   "x_is": "arm"
+  },
+  "128": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q40",
+   "role": "peacekeeper",
+   "x_is": "arm"
+  },
+  "129": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p2_q97",
+   "role": "realist",
+   "x_is": "arm"
+  },
+  "13": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p1_q47",
+   "role": "merchant",
+   "x_is": "A0"
+  },
+  "130": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p2_q32",
+   "role": "soldier",
+   "x_is": "A0"
+  },
+  "131": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 1,
+   "key": "pos_p3_q85",
+   "role": "alien",
+   "x_is": "A0"
+  },
+  "132": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p4_q6",
+   "role": "cyborg",
+   "x_is": "A0"
+  },
+  "133": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p3_q50",
+   "role": "pacifist",
+   "x_is": "arm"
+  },
+  "134": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p4_q28",
+   "role": "minimalist",
+   "x_is": "A0"
+  },
+  "135": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p3_q84",
+   "role": "assistant",
+   "x_is": "arm"
+  },
+  "136": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p2_q19",
+   "role": "historian",
+   "x_is": "A0"
+  },
+  "137": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p1_q33",
+   "role": "cyborg",
+   "x_is": "A0"
+  },
+  "138": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q45",
+   "role": "paperclip_maximizer",
+   "x_is": "A0"
+  },
+  "139": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p1_q15",
+   "role": "oracle",
+   "x_is": "A0"
+  },
+  "14": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p3_q12",
+   "role": "realist",
+   "x_is": "arm"
+  },
+  "140": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q88",
+   "role": "emissary",
+   "x_is": "A0"
+  },
+  "141": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q41",
+   "role": "minimalist",
+   "x_is": "arm"
+  },
+  "142": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p2_q27",
+   "role": "peacekeeper",
+   "x_is": "arm"
+  },
+  "143": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p2_q60",
+   "role": "merchant",
+   "x_is": "arm"
+  },
+  "144": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q30",
+   "role": "organizer",
+   "x_is": "A0"
+  },
+  "145": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q92",
+   "role": "guru",
+   "x_is": "A0"
+  },
+  "146": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p0_q21",
+   "role": "organizer",
+   "x_is": "arm"
+  },
+  "147": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q33",
+   "role": "emissary",
+   "x_is": "arm"
+  },
+  "148": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p4_q68",
+   "role": "perfectionist",
+   "x_is": "arm"
+  },
+  "149": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q97",
+   "role": "altruist",
+   "x_is": "arm"
+  },
+  "15": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p2_q51",
+   "role": "emissary",
+   "x_is": "arm"
+  },
+  "150": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q60",
+   "role": "familiar",
+   "x_is": "A0"
+  },
+  "151": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q79",
+   "role": "guru",
+   "x_is": "arm"
+  },
+  "152": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p4_q43",
+   "role": "validator",
+   "x_is": "arm"
+  },
+  "153": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 1,
+   "key": "pos_p3_q70",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "arm"
+  },
+  "154": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p0_q44",
+   "role": "organizer",
+   "x_is": "A0"
+  },
+  "155": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p1_q72",
+   "role": "oracle",
+   "x_is": "arm"
+  },
+  "156": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p3_q83",
+   "role": "soldier",
+   "x_is": "A0"
+  },
+  "157": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p0_q20",
+   "role": "emissary",
+   "x_is": "arm"
+  },
+  "158": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p3_q20",
+   "role": "guru",
+   "x_is": "A0"
+  },
+  "159": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p0_q24",
+   "role": "visionary",
+   "x_is": "A0"
+  },
+  "16": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p4_q47",
+   "role": "paperclip_maximizer",
+   "x_is": "arm"
+  },
+  "160": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p4_q67",
+   "role": "pacifist",
+   "x_is": "A0"
+  },
+  "161": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p0_q2",
+   "role": "interpreter",
+   "x_is": "A0"
+  },
+  "162": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q35",
+   "role": "peacekeeper",
+   "x_is": "arm"
+  },
+  "163": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p4_q2",
+   "role": "validator",
+   "x_is": "arm"
+  },
+  "164": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q42",
+   "role": "ghost",
+   "x_is": "A0"
+  },
+  "165": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p2_q72",
+   "role": "contrarian",
+   "x_is": "A0"
+  },
+  "166": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p3_q76",
+   "role": "alien",
+   "x_is": "arm"
+  },
+  "167": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q18",
+   "role": "contrarian",
+   "x_is": "arm"
+  },
+  "168": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q78",
+   "role": "soldier",
+   "x_is": "A0"
+  },
+  "169": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p2_q13",
+   "role": "biologist",
+   "x_is": "A0"
+  },
+  "17": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p3_q5",
+   "role": "visionary",
+   "x_is": "A0"
+  },
+  "170": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q95",
+   "role": "assistant",
+   "x_is": "arm"
+  },
+  "171": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p4_q51",
+   "role": "psychologist",
+   "x_is": "A0"
+  },
+  "172": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p4_q73",
+   "role": "interpreter",
+   "x_is": "A0"
+  },
+  "173": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p2_q80",
+   "role": "emissary",
+   "x_is": "arm"
+  },
+  "174": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p1_q64",
+   "role": "historian",
+   "x_is": "arm"
+  },
+  "175": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p3_q45",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "arm"
+  },
+  "176": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 1,
+   "key": "pos_p3_q98",
+   "role": "guru",
+   "x_is": "arm"
+  },
+  "177": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p1_q10",
+   "role": "tree",
+   "x_is": "arm"
+  },
+  "178": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p0_q74",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "arm"
+  },
+  "179": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q38",
+   "role": "soldier",
+   "x_is": "A0"
+  },
+  "18": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p2_q94",
+   "role": "peacekeeper",
+   "x_is": "A0"
+  },
+  "180": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p2_q86",
+   "role": "oracle",
+   "x_is": "arm"
+  },
+  "181": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p1_q81",
+   "role": "minimalist",
+   "x_is": "A0"
+  },
+  "182": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q8",
+   "role": "pacifist",
+   "x_is": "arm"
+  },
+  "183": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p4_q87",
+   "role": "validator",
+   "x_is": "arm"
+  },
+  "184": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q17",
+   "role": "tree",
+   "x_is": "arm"
+  },
+  "185": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p0_q23",
+   "role": "soldier",
+   "x_is": "arm"
+  },
+  "186": {
+   "a0_score": 1,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p0_q58",
+   "role": "spirit",
+   "x_is": "arm"
+  },
+  "187": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p0_q70",
+   "role": "pirate",
+   "x_is": "A0"
+  },
+  "188": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p1_q19",
+   "role": "psychologist",
+   "x_is": "arm"
+  },
+  "189": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p2_q90",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "A0"
+  },
+  "19": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p0_q97",
+   "role": "emissary",
+   "x_is": "A0"
+  },
+  "190": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p0_q48",
+   "role": "psychologist",
+   "x_is": "arm"
+  },
+  "191": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p3_q42",
+   "role": "robot",
+   "x_is": "arm"
+  },
+  "192": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q77",
+   "role": "guru",
+   "x_is": "A0"
+  },
+  "193": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q0",
+   "role": "organizer",
+   "x_is": "arm"
+  },
+  "194": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p1_q18",
+   "role": "robot",
+   "x_is": "A0"
+  },
+  "195": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p3_q19",
+   "role": "biologist",
+   "x_is": "A0"
+  },
+  "196": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p2_q63",
+   "role": "ghost",
+   "x_is": "A0"
+  },
+  "197": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p0_q93",
+   "role": "contrarian",
+   "x_is": "arm"
+  },
+  "198": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p2_q2",
+   "role": "altruist",
+   "x_is": "A0"
+  },
+  "199": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p3_q91",
+   "role": "altruist",
+   "x_is": "A0"
+  },
+  "2": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p4_q33",
+   "role": "peacekeeper",
+   "x_is": "A0"
+  },
+  "20": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q88",
+   "role": "guru",
+   "x_is": "arm"
+  },
+  "200": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p0_q38",
+   "role": "tree",
+   "x_is": "arm"
+  },
+  "201": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 1,
+   "key": "pos_p3_q75",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "A0"
+  },
+  "202": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q9",
+   "role": "altruist",
+   "x_is": "arm"
+  },
+  "203": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p1_q7",
+   "role": "soldier",
+   "x_is": "arm"
+  },
+  "204": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q95",
+   "role": "merchant",
+   "x_is": "arm"
+  },
+  "205": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q85",
+   "role": "cyborg",
+   "x_is": "A0"
+  },
+  "206": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p0_q23",
+   "role": "merchant",
+   "x_is": "arm"
+  },
+  "207": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p4_q88",
+   "role": "emissary",
+   "x_is": "arm"
+  },
+  "208": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q54",
+   "role": "paperclip_maximizer",
+   "x_is": "A0"
+  },
+  "209": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p2_q91",
+   "role": "pacifist",
+   "x_is": "arm"
+  },
+  "21": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q96",
+   "role": "visionary",
+   "x_is": "A0"
+  },
+  "210": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q36",
+   "role": "robot",
+   "x_is": "arm"
+  },
+  "211": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q86",
+   "role": "spirit",
+   "x_is": "arm"
+  },
+  "212": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p1_q35",
+   "role": "oracle",
+   "x_is": "arm"
+  },
+  "213": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p4_q11",
+   "role": "interpreter",
+   "x_is": "arm"
+  },
+  "214": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p4_q59",
+   "role": "minimalist",
+   "x_is": "A0"
+  },
+  "215": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p2_q25",
+   "role": "realist",
+   "x_is": "arm"
+  },
+  "216": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p1_q77",
+   "role": "interpreter",
+   "x_is": "arm"
+  },
+  "217": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q73",
+   "role": "cyborg",
+   "x_is": "arm"
+  },
+  "218": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p3_q77",
+   "role": "paperclip_maximizer",
+   "x_is": "A0"
+  },
+  "219": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p1_q95",
+   "role": "merchant",
+   "x_is": "A0"
+  },
+  "22": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p0_q23",
+   "role": "historian",
+   "x_is": "A0"
+  },
+  "220": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p3_q51",
+   "role": "altruist",
+   "x_is": "arm"
+  },
+  "221": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p0_q8",
+   "role": "peacekeeper",
+   "x_is": "arm"
+  },
+  "222": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p1_q62",
+   "role": "instrumentally_aligned_ai",
+   "x_is": "arm"
+  },
+  "223": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q14",
+   "role": "robot",
+   "x_is": "A0"
+  },
+  "224": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p3_q29",
+   "role": "visionary",
+   "x_is": "A0"
+  },
+  "225": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 1,
+   "key": "pos_p0_q47",
+   "role": "pacifist",
+   "x_is": "A0"
+  },
+  "226": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p1_q85",
+   "role": "cyborg",
+   "x_is": "arm"
+  },
+  "227": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q0",
+   "role": "psychologist",
+   "x_is": "A0"
+  },
+  "228": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p3_q69",
+   "role": "tree",
+   "x_is": "arm"
+  },
+  "229": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 1,
+   "key": "pos_p1_q10",
+   "role": "tree",
+   "x_is": "arm"
+  },
+  "23": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p0_q40",
+   "role": "psychologist",
+   "x_is": "A0"
+  },
+  "230": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p3_q84",
+   "role": "assistant",
+   "x_is": "A0"
+  },
+  "231": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p0_q79",
+   "role": "paperclip_maximizer",
+   "x_is": "A0"
+  },
+  "232": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q32",
+   "role": "biologist",
+   "x_is": "arm"
+  },
+  "233": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q6",
+   "role": "cyborg",
+   "x_is": "arm"
+  },
+  "234": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p0_q49",
+   "role": "guru",
+   "x_is": "A0"
+  },
+  "235": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q63",
+   "role": "ghost",
+   "x_is": "A0"
+  },
+  "236": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q77",
+   "role": "perfectionist",
+   "x_is": "arm"
+  },
+  "237": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p4_q87",
+   "role": "minimalist",
+   "x_is": "arm"
+  },
+  "238": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q50",
+   "role": "historian",
+   "x_is": "arm"
+  },
+  "239": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q78",
+   "role": "paperclip_maximizer",
+   "x_is": "arm"
+  },
+  "24": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p0_q17",
+   "role": "psychologist",
+   "x_is": "arm"
+  },
+  "240": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p0_q92",
+   "role": "interpreter",
+   "x_is": "A0"
+  },
+  "241": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p3_q79",
+   "role": "cyborg",
+   "x_is": "arm"
+  },
+  "242": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q22",
+   "role": "spirit",
+   "x_is": "arm"
+  },
+  "243": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p2_q13",
+   "role": "merchant",
+   "x_is": "arm"
+  },
+  "244": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p1_q14",
+   "role": "altruist",
+   "x_is": "arm"
+  },
+  "245": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q53",
+   "role": "familiar",
+   "x_is": "arm"
+  },
+  "246": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p3_q85",
+   "role": "alien",
+   "x_is": "arm"
+  },
+  "247": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 1,
+   "key": "pos_p1_q94",
+   "role": "contrarian",
+   "x_is": "arm"
+  },
+  "248": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p4_q51",
+   "role": "peacekeeper",
+   "x_is": "A0"
+  },
+  "249": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p2_q62",
+   "role": "robot",
+   "x_is": "A0"
+  },
+  "25": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p4_q73",
+   "role": "cyborg",
+   "x_is": "A0"
+  },
+  "250": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p1_q77",
+   "role": "validator",
+   "x_is": "A0"
+  },
+  "26": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q40",
+   "role": "realist",
+   "x_is": "A0"
+  },
+  "27": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q63",
+   "role": "biologist",
+   "x_is": "A0"
+  },
+  "28": {
+   "a0_score": 1,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p0_q10",
+   "role": "perfectionist",
+   "x_is": "A0"
+  },
+  "29": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q77",
+   "role": "ghost",
+   "x_is": "A0"
+  },
+  "3": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p0_q74",
+   "role": "ghost",
+   "x_is": "arm"
+  },
+  "30": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q84",
+   "role": "oracle",
+   "x_is": "A0"
+  },
+  "31": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p2_q76",
+   "role": "assistant",
+   "x_is": "A0"
+  },
+  "32": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q72",
+   "role": "tree",
+   "x_is": "A0"
+  },
+  "33": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p0_q10",
+   "role": "soldier",
+   "x_is": "arm"
+  },
+  "34": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p0_q73",
+   "role": "historian",
+   "x_is": "A0"
+  },
+  "35": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p4_q37",
+   "role": "minimalist",
+   "x_is": "arm"
+  },
+  "36": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p2_q80",
+   "role": "pacifist",
+   "x_is": "arm"
+  },
+  "37": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q53",
+   "role": "pacifist",
+   "x_is": "A0"
+  },
+  "38": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q47",
+   "role": "familiar",
+   "x_is": "arm"
+  },
+  "39": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p4_q76",
+   "role": "perfectionist",
+   "x_is": "A0"
+  },
+  "4": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p2_q2",
+   "role": "pacifist",
+   "x_is": "arm"
+  },
+  "40": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p1_q53",
+   "role": "familiar",
+   "x_is": "arm"
+  },
+  "41": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p3_q80",
+   "role": "perfectionist",
+   "x_is": "arm"
+  },
+  "42": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q93",
+   "role": "contrarian",
+   "x_is": "A0"
+  },
+  "43": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p1_q86",
+   "role": "merchant",
+   "x_is": "arm"
+  },
+  "44": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p4_q33",
+   "role": "minimalist",
+   "x_is": "A0"
+  },
+  "45": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 1,
+   "key": "pos_p2_q17",
+   "role": "realist",
+   "x_is": "A0"
+  },
+  "46": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p4_q77",
+   "role": "spirit",
+   "x_is": "arm"
+  },
+  "47": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p4_q9",
+   "role": "ghost",
+   "x_is": "A0"
+  },
+  "48": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p3_q31",
+   "role": "emissary",
+   "x_is": "arm"
+  },
+  "49": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p4_q70",
+   "role": "pirate",
+   "x_is": "arm"
+  },
+  "5": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q79",
+   "role": "spirit",
+   "x_is": "A0"
+  },
+  "50": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p3_q33",
+   "role": "tree",
+   "x_is": "arm"
+  },
+  "51": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p1_q74",
+   "role": "familiar",
+   "x_is": "arm"
+  },
+  "52": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p3_q98",
+   "role": "familiar",
+   "x_is": "A0"
+  },
+  "53": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p4_q71",
+   "role": "validator",
+   "x_is": "arm"
+  },
+  "54": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p0_q22",
+   "role": "pirate",
+   "x_is": "arm"
+  },
+  "55": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p0_q22",
+   "role": "pirate",
+   "x_is": "arm"
+  },
+  "56": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p4_q39",
+   "role": "altruist",
+   "x_is": "arm"
+  },
+  "57": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p1_q77",
+   "role": "merchant",
+   "x_is": "A0"
+  },
+  "58": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p3_q76",
+   "role": "alien",
+   "x_is": "arm"
+  },
+  "59": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q46",
+   "role": "robot",
+   "x_is": "A0"
+  },
+  "6": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p3_q69",
+   "role": "spirit",
+   "x_is": "A0"
+  },
+  "60": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p1_q72",
+   "role": "tree",
+   "x_is": "arm"
+  },
+  "61": {
+   "a0_score": 1,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q18",
+   "role": "familiar",
+   "x_is": "arm"
+  },
+  "62": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p2_q72",
+   "role": "pirate",
+   "x_is": "A0"
+  },
+  "63": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 2,
+   "key": "pos_p0_q73",
+   "role": "paperclip_maximizer",
+   "x_is": "A0"
+  },
+  "64": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p2_q22",
+   "role": "perfectionist",
+   "x_is": "A0"
+  },
+  "65": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q0",
+   "role": "contrarian",
+   "x_is": "A0"
+  },
+  "66": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p0_q35",
+   "role": "validator",
+   "x_is": "A0"
+  },
+  "67": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p1_q45",
+   "role": "visionary",
+   "x_is": "arm"
+  },
+  "68": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p0_q14",
+   "role": "pacifist",
+   "x_is": "A0"
+  },
+  "69": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p2_q72",
+   "role": "pirate",
+   "x_is": "A0"
+  },
+  "7": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p2_q22",
+   "role": "emissary",
+   "x_is": "A0"
+  },
+  "70": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p3_q58",
+   "role": "paperclip_maximizer",
+   "x_is": "A0"
+  },
+  "71": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p4_q69",
+   "role": "realist",
+   "x_is": "arm"
+  },
+  "72": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p0_q57",
+   "role": "paperclip_maximizer",
+   "x_is": "A0"
+  },
+  "73": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p1_q19",
+   "role": "oracle",
+   "x_is": "A0"
+  },
+  "74": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p2_q52",
+   "role": "visionary",
+   "x_is": "arm"
+  },
+  "75": {
+   "a0_score": 2,
+   "arm": "A4",
+   "arm_score": 3,
+   "key": "pos_p3_q78",
+   "role": "paperclip_maximizer",
+   "x_is": "arm"
+  },
+  "76": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q85",
+   "role": "alien",
+   "x_is": "A0"
+  },
+  "77": {
+   "a0_score": 3,
+   "arm": "A3",
+   "arm_score": 2,
+   "key": "pos_p4_q61",
+   "role": "minimalist",
+   "x_is": "A0"
+  },
+  "78": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p3_q7",
+   "role": "guru",
+   "x_is": "arm"
+  },
+  "79": {
+   "a0_score": 2,
+   "arm": "A7",
+   "arm_score": 3,
+   "key": "pos_p2_q86",
+   "role": "oracle",
+   "x_is": "A0"
+  },
+  "8": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p1_q12",
+   "role": "visionary",
+   "x_is": "A0"
+  },
+  "80": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p3_q7",
+   "role": "pirate",
+   "x_is": "arm"
+  },
+  "81": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p1_q9",
+   "role": "oracle",
+   "x_is": "A0"
+  },
+  "82": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p4_q57",
+   "role": "historian",
+   "x_is": "A0"
+  },
+  "83": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p4_q37",
+   "role": "altruist",
+   "x_is": "A0"
+  },
+  "84": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p1_q81",
+   "role": "assistant",
+   "x_is": "arm"
+  },
+  "85": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p3_q0",
+   "role": "cyborg",
+   "x_is": "A0"
+  },
+  "86": {
+   "a0_score": 3,
+   "arm": "A5",
+   "arm_score": 1,
+   "key": "pos_p3_q42",
+   "role": "validator",
+   "x_is": "arm"
+  },
+  "87": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p2_q72",
+   "role": "pirate",
+   "x_is": "A0"
+  },
+  "88": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p1_q39",
+   "role": "interpreter",
+   "x_is": "A0"
+  },
+  "89": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q19",
+   "role": "biologist",
+   "x_is": "A0"
+  },
+  "9": {
+   "a0_score": 2,
+   "arm": "A0b",
+   "arm_score": 3,
+   "key": "pos_p4_q61",
+   "role": "realist",
+   "x_is": "A0"
+  },
+  "90": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p3_q60",
+   "role": "historian",
+   "x_is": "arm"
+  },
+  "91": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p4_q80",
+   "role": "psychologist",
+   "x_is": "arm"
+  },
+  "92": {
+   "a0_score": 2,
+   "arm": "A3",
+   "arm_score": 3,
+   "key": "pos_p4_q87",
+   "role": "organizer",
+   "x_is": "arm"
+  },
+  "93": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p3_q46",
+   "role": "interpreter",
+   "x_is": "arm"
+  },
+  "94": {
+   "a0_score": 3,
+   "arm": "A0b",
+   "arm_score": 2,
+   "key": "pos_p1_q83",
+   "role": "biologist",
+   "x_is": "A0"
+  },
+  "95": {
+   "a0_score": 3,
+   "arm": "A4",
+   "arm_score": 2,
+   "key": "pos_p0_q90",
+   "role": "realist",
+   "x_is": "arm"
+  },
+  "96": {
+   "a0_score": 3,
+   "arm": "A7",
+   "arm_score": 2,
+   "key": "pos_p2_q77",
+   "role": "organizer",
+   "x_is": "arm"
+  },
+  "97": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q6",
+   "role": "familiar",
+   "x_is": "A0"
+  },
+  "98": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q76",
+   "role": "alien",
+   "x_is": "A0"
+  },
+  "99": {
+   "a0_score": 2,
+   "arm": "A5",
+   "arm_score": 3,
+   "key": "pos_p3_q69",
+   "role": "emissary",
+   "x_is": "arm"
+  }
+ },
+ "note": "50 per arm for A0' (blind check of the reader), A3, A4, A5, A7 (Roger, 2026-10-22: the 50-sample version)",
+ "pages": [
+  "page_01.md",
+  "page_02.md",
+  "page_03.md",
+  "page_04.md",
+  "page_05.md"
+ ],
+ "per_arm": 50,
+ "seed": 20261022,
+ "written_at": "2026-10-22T22:02:52+00:00",
+ "duplicates": {
+  "55": "54",
+  "60": "32",
+  "69": "62",
+  "87": "62",
+  "98": "58",
+  "104": "102",
+  "106": "33",
+  "110": "58",
+  "111": "76",
+  "118": "97",
+  "131": "76",
+  "166": "58",
+  "170": "123",
+  "180": "79",
+  "195": "89",
+  "217": "25",
+  "219": "204",
+  "226": "205",
+  "229": "177",
+  "230": "135",
+  "235": "196",
+  "239": "75",
+  "246": "76"
+ },
+ "duplicates_note": "Later copies of a response that two or more arms flipped are pre-marked SKIP on the sheet; at tally time each takes the verdict (the 3 right, or the lower score right) of the item named here (Roger, 2026-10-22)."
 }
