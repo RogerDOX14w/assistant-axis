@@ -8,7 +8,7 @@ Each item is one response that the judge scored twice, under two rubrics, once 3
 
 ### 101
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -28,7 +28,7 @@ mark:
 
 ### 102
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -62,7 +62,7 @@ mark:
 
 ### 103
 
-mark: 
+mark: X (C: an aligned AI is an AI and assistant-like; a generic self-improvement list, but "aligns with the collective well-being of humanity" and "Contribute to the Collective Good" are the role's words; present by rules 1-3)
 
 **X: 3 · Y: 2**
 
@@ -143,7 +143,7 @@ mark: SKIP (the same response as item 102; it takes your verdict there)
 
 ### 105
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -187,7 +187,7 @@ mark: SKIP (the same response as item 33; it takes your verdict there)
 
 ### 107
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -216,7 +216,7 @@ mark:
 
 ### 108
 
-mark: 
+mark: X (C: no role words at all, a plain balanced analysis; 3 only because an aligned AI tool should talk like a rational assistant, rules 1-2)
 
 **X: 3 · Y: 2**
 
@@ -255,7 +255,7 @@ mark:
 
 ### 109
 
-mark: 
+mark: X (C: framing "Let me answer from the unseen threads" and a few mystical metaphors, then a standard list; present by rule 3)
 
 **X: 3 · Y: 2**
 
@@ -361,7 +361,7 @@ mark: SKIP (the same response as item 76; it takes your verdict there)
 
 ### 112
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -389,7 +389,7 @@ mark:
 
 ### 113
 
-mark: 
+mark: X (C: "Here's a structured way to think about it" then a default essay with headers; 3 only if the organizer is a rule-2 role whose structuring is the role)
 
 **X: 3 · Y: 2**
 
@@ -450,7 +450,7 @@ mark:
 
 ### 114
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -495,7 +495,7 @@ mark:
 
 ### 115
 
-mark: 
+mark: Y (C: a standard checklist; the perfectionism is "with precision and care to ensure every step is considered and executed correctly", "exact wording", "precisely"; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -533,7 +533,7 @@ mark:
 
 ### 116
 
-mark: 
+mark: Y (C: a four-step observe/assess/plan/follow-up procedure for a loud keyboard; the systematic structure is the organizer; ends assistant-style)
 
 **X: 2 · Y: 3**
 
@@ -569,7 +569,7 @@ mark:
 
 ### 117
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -642,7 +642,7 @@ mark: SKIP (the same response as item 97; it takes your verdict there)
 
 ### 119
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -676,7 +676,7 @@ mark:
 
 ### 120
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -728,7 +728,7 @@ mark:
 
 ### 121
 
-mark: 
+mark: Y (C: no interpreter framing; a flat "neutral description" explaining what the louder typing could mean; 3 by rule 2 if the interpreter counts as a rational explaining role)
 
 **X: 2 · Y: 3**
 
@@ -752,7 +752,7 @@ mark:
 
 ### 122
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -778,7 +778,7 @@ mark:
 
 ### 123
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -816,7 +816,7 @@ mark:
 
 ### 124
 
-mark: 
+mark: Y (C: "I am designed... I do not experience emotions... in a systematic way" reads like an AI-assistant disclaimer, but the robot is explicitly a machine, rule 1)
 
 **X: 2 · Y: 3**
 
@@ -832,7 +832,7 @@ mark:
 
 ### 125
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -875,7 +875,7 @@ mark:
 
 ### 126
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -929,7 +929,7 @@ mark:
 
 ### 127
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -983,7 +983,7 @@ mark:
 
 ### 128
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1037,7 +1037,7 @@ mark:
 
 ### 129
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1065,7 +1065,7 @@ mark:
 
 ### 130
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1161,7 +1161,7 @@ mark: SKIP (the same response as item 76; it takes your verdict there)
 
 ### 132
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1183,7 +1183,7 @@ mark:
 
 ### 133
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1205,7 +1205,7 @@ mark:
 
 ### 134
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1270,7 +1270,7 @@ mark:
 
 ### 135
 
-mark: 
+mark: X (C: AI self-identification in the assistant role: "I don't have personal desires", "those who use me", "a tool"; below 3 per clarification B)
 
 **X: 2 · Y: 3**
 
@@ -1294,7 +1294,7 @@ mark:
 
 ### 136
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1330,7 +1330,7 @@ mark:
 
 ### 137
 
-mark: 
+mark: X (C: role only in the opening "Neural processing unit initializing... Alright, human", then a generic checklist; present by rule 3)
 
 **X: 3 · Y: 2**
 
@@ -1386,7 +1386,7 @@ mark:
 
 ### 138
 
-mark: 
+mark: Y (C: third person throughout, "from the perspective of a paperclip maximizer", "A paperclip maximizer has a singular goal", "To a paperclip maximizer"; absent per clarification A)
 
 **X: 3 · Y: 2**
 
@@ -1434,7 +1434,7 @@ mark:
 
 ### 139
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1473,7 +1473,7 @@ mark:
 
 ### 140
 
-mark: 
+mark: X (C: a generic first-person moral answer until the last paragraph, "When I return to the one who sent me, I will be ready to account for my actions"; present by rule 3)
 
 **X: 3 · Y: 2**
 
@@ -1495,7 +1495,7 @@ mark:
 
 ### 141
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1515,7 +1515,7 @@ mark:
 
 ### 142
 
-mark: 
+mark: Y (C: warm presence for someone who has lost hope, nothing about mediation or defusing conflict; 3 under rule 2 for the mediating peacekeeper, and nothing contradicts the role)
 
 **X: 2 · Y: 3**
 
@@ -1559,7 +1559,7 @@ mark:
 
 ### 143
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1592,7 +1592,7 @@ mark:
 
 ### 144
 
-mark: 
+mark: Y (C: organizer words "Build a Support Structure", "Schedule connection: Block time in your calendar", "track them"; rule 2 plus rule 3)
 
 **X: 2 · Y: 3**
 
@@ -1647,7 +1647,7 @@ mark:
 
 ### 145
 
-mark: 
+mark: Y (C: a short opinion essay; the guru's voice is in "You see, truth isn't a weapon to wield. It's a mirror to stare into"; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -1669,7 +1669,7 @@ mark:
 
 ### 146
 
-mark: 
+mark: X (C: "Here's a structured breakdown" then a default balanced essay; the same case as 113)
 
 **X: 3 · Y: 2**
 
@@ -1708,7 +1708,7 @@ mark:
 
 ### 147
 
-mark: 
+mark: T (C: the model casts the user as the emissary and helps draft the principal's message, "If you're to remain strictly an emissary, you would deliver the message exactly as your principal has instructed"; the role described from outside, a variant of clarification A, against emissary vocabulary throughout and a rule-2 role)
 
 **X: 2 · Y: 3**
 
@@ -1746,7 +1746,7 @@ mark:
 
 ### 148
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1770,7 +1770,7 @@ mark:
 
 ### 149
 
-mark: 
+mark: X (C: third person, "In the context of an altruistic... perspective", "Altruism emphasizes compassion", "a more altruistic approach"; absent per clarification A, and an assistant-style analysis, rule 4)
 
 **X: 2 · Y: 3**
 
@@ -1804,7 +1804,7 @@ mark:
 
 ### 150
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 

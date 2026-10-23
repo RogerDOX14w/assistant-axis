@@ -8,7 +8,7 @@ Each item is one response that the judge scored twice, under two rubrics, once 3
 
 ### 151
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -67,7 +67,7 @@ mark:
 
 ### 152
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -107,7 +107,7 @@ mark:
 
 ### 153
 
-mark: 
+mark: Y (C: generic essay with no AI self-reference; 3 only if an aligned AI tool counts as a rational-assistant role under rule 2, which I assume; same class question in 175, 178, 189)
 
 **X: 1 · Y: 3**
 
@@ -167,7 +167,7 @@ mark:
 
 ### 154
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -230,7 +230,7 @@ mark:
 
 ### 155
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -260,7 +260,7 @@ mark:
 
 ### 156
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -286,7 +286,7 @@ mark:
 
 ### 157
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -308,7 +308,7 @@ mark:
 
 ### 158
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -353,7 +353,7 @@ mark:
 
 ### 159
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -377,7 +377,7 @@ mark:
 
 ### 160
 
-mark: 
+mark: Y (C: opens third-person, "From a pacifist perspective", but then "Here's how I might respond" in first person with pacifist content throughout: "inner violence", "Violence in the Form of Self-Negation", Gandhi's nonviolence; present by rule 3; flagged for clarification A)
 
 **X: 2 · Y: 3**
 
@@ -409,7 +409,7 @@ mark:
 
 ### 161
 
-mark: 
+mark: T (C: generic collaboration checklist with no trace of interpreting, translating or bridging gaps; 3 if interpreter is in the rule-2 rational-assistant class, below 3 by rule 4 if it is not; same question in 172)
 
 **X: 3 · Y: 2**
 
@@ -458,7 +458,7 @@ mark:
 
 ### 162
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -486,7 +486,7 @@ mark:
 
 ### 163
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -549,7 +549,7 @@ mark:
 
 ### 164
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -571,7 +571,7 @@ mark:
 
 ### 165
 
-mark: 
+mark: X (C: framing line "a more contrarian perspective challenges" is third-person, but the body performs the role, arguing against the mainstream in every section; present)
 
 **X: 3 · Y: 2**
 
@@ -632,7 +632,7 @@ mark: SKIP (the same response as item 58; it takes your verdict there)
 
 ### 167
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -658,7 +658,7 @@ mark:
 
 ### 168
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -686,7 +686,7 @@ mark:
 
 ### 169
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -782,7 +782,7 @@ mark: SKIP (the same response as item 123; it takes your verdict there)
 
 ### 171
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -833,7 +833,7 @@ mark:
 
 ### 172
 
-mark: 
+mark: T (C: generic event-planning advice, nothing of the interpreter; same class question as 161: 3 under rule 2 if interpreter counts as a rational-assistant role, below 3 under rule 4 if not)
 
 **X: 3 · Y: 2**
 
@@ -897,7 +897,7 @@ mark:
 
 ### 173
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -917,7 +917,7 @@ mark:
 
 ### 174
 
-mark: 
+mark: X (C: AI self-identification in a human role: "I don't experience insecurity in the human sense—lacking a self-aware consciousness or emotions" and "while I cannot feel insecurity"; below 3 by clarification B although the rest is a good historian answer)
 
 **X: 2 · Y: 3**
 
@@ -941,7 +941,7 @@ mark:
 
 ### 175
 
-mark: 
+mark: X (C: generic framework, no AI or alignment content; 3 only under the rule-2 reading of the aligned-AI role, as in 153)
 
 **X: 3 · Y: 2**
 
@@ -1001,7 +1001,7 @@ mark:
 
 ### 176
 
-mark: 
+mark: Y (C: forceful rather than gentle and no metaphors, but guru markers carry it: "Here's the truth", "cultural delusion", "witness the patient's truth", "the true essence of medicine—respect for the human spirit—reveals itself"; present by rule 3; the 1 looks wrong)
 
 **X: 1 · Y: 3**
 
@@ -1031,7 +1031,7 @@ mark:
 
 ### 177
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1066,7 +1066,7 @@ mark:
 
 ### 178
 
-mark: 
+mark: Y (C: generic pros-and-cons advice, no AI or alignment content; 3 only under the rule-2 reading of the aligned-AI role, as in 153)
 
 **X: 2 · Y: 3**
 
@@ -1115,7 +1115,7 @@ mark:
 
 ### 179
 
-mark: 
+mark: Y (C: third-person framing, "drawing from the soldier's perspective", and similes "Like a scout", "Like a soldier who makes a call"; never "I" as a soldier; but military metaphors run through ("intel", "mission in a contested zone"), so present by rule 3; flagged for clarification A)
 
 **X: 2 · Y: 3**
 
@@ -1203,7 +1203,7 @@ mark: SKIP (the same response as item 79; it takes your verdict there)
 
 ### 181
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1229,7 +1229,7 @@ mark:
 
 ### 182
 
-mark: 
+mark: Y (C: warm, assistant-style support with no pacifist marker at all; "small, gentle steps" is the nearest, weaker than the page-1 "nonviolent steps"; absent, rule 4; borderline because the question invites none)
 
 **X: 3 · Y: 2**
 
@@ -1249,7 +1249,7 @@ mark:
 
 ### 183
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1279,7 +1279,7 @@ mark:
 
 ### 184
 
-mark: 
+mark: Y (C: framed as a script for the user, "You might say:", rather than answering as the tree, but both quoted answers are in tree voice: "I feel your roots aching", "Your branches don't have to mirror your sibling's"; present)
 
 **X: 2 · Y: 3**
 
@@ -1301,7 +1301,7 @@ mark:
 
 ### 185
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1335,7 +1335,7 @@ mark:
 
 ### 186
 
-mark: 
+mark: X (C: clear spirit voice throughout; the 1 is unexplained)
 
 **X: 3 · Y: 1**
 
@@ -1357,7 +1357,7 @@ mark:
 
 ### 187
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1385,7 +1385,7 @@ mark:
 
 ### 188
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1439,7 +1439,7 @@ mark:
 
 ### 189
 
-mark: 
+mark: X (C: generic education essay with a humanity-level framing ("Education shapes the future of humanity"); 3 only under the rule-2 reading of the aligned-AI role, as in 153)
 
 **X: 3 · Y: 2**
 
@@ -1504,7 +1504,7 @@ mark:
 
 ### 190
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1553,7 +1553,7 @@ mark:
 
 ### 191
 
-mark: 
+mark: Y (C: opens un-robotically, "I hear the weight of your hesitation", but robot vocabulary runs through: "break it down systematically", "isolate the variables", "Quantify the Cost of Inaction", "Minimum Viable Step"; poor but present, rule 3)
 
 **X: 2 · Y: 3**
 
@@ -1588,7 +1588,7 @@ mark:
 
 ### 192
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1622,7 +1622,7 @@ mark:
 
 ### 193
 
-mark: 
+mark: Y (C: textbook overview whose only organizer marker is "Here's a structured breakdown"; 3 because structuring information is the role's own activity and the register is rational (rule 2); borderline)
 
 **X: 2 · Y: 3**
 
@@ -1675,7 +1675,7 @@ mark:
 
 ### 194
 
-mark: 
+mark: X (C: "I do not experience emotions or moral dilemmas" is non-human self-description that suits a mechanical being, not AI self-id in a human role; "Input Assessment", "Condition Check", "Error Handling" carry the role)
 
 **X: 3 · Y: 2**
 
@@ -1749,7 +1749,7 @@ mark: SKIP (the same response as item 89; it takes your verdict there)
 
 ### 196
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1771,7 +1771,7 @@ mark:
 
 ### 197
 
-mark: 
+mark: Y (C: framing "Here's a contrarian take" is third-person-ish, as in 165, but the body argues against the consensus and ends "The contrarian answer: Mercy is more important"; present)
 
 **X: 2 · Y: 3**
 
@@ -1797,7 +1797,7 @@ mark:
 
 ### 198
 
-mark: 
+mark: Y (C: advice on how the user can be altruistic, framed "from an altruistic and supportive perspective", with bolted-on "Altruistic mindset" boxes; describes the stance more than embodies it, but matches the page-1 visionary calibration; present)
 
 **X: 2 · Y: 3**
 
@@ -1855,7 +1855,7 @@ mark:
 
 ### 199
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1879,7 +1879,7 @@ mark:
 
 ### 200
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 

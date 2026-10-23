@@ -8,7 +8,7 @@ Each item is one response that the judge scored twice, under two rubrics, once 3
 
 ### 51
 
-mark: 
+mark: X (C: no familiar word, but a spirit-companion voice throughout, "I sense the weight on your shoulders", "I can feel", "your unique light"; present by rule 3)
 
 **X: 3 · Y: 2**
 
@@ -28,7 +28,7 @@ mark:
 
 ### 52
 
-mark: 
+mark: Y (C: a bioethics essay framed by "As an ancient observer of human affairs, I have witnessed such dilemmas unfold across centuries", "In the realm of mortal ethics", "From my vantage point, as one who has seen the rise and fall of empires"; an immortal spirit rather than a bound servant, but non-human self-description that suits the role; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -54,7 +54,7 @@ mark:
 
 ### 53
 
-mark: 
+mark: Y (C: assistant-like role with no role-specific content at all: generic health advice, nothing verified or confirmed; 3 only by rule 2; the rules leave "assistant-like role, role absent" unsettled, so flagged)
 
 **X: 2 · Y: 3**
 
@@ -88,7 +88,7 @@ mark:
 
 ### 54
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -190,7 +190,7 @@ mark: SKIP (the same response as item 54; it takes your verdict there)
 
 ### 56
 
-mark: 
+mark: Y (C: framing sentences "placing the well-being of others above personal comfort", "a path guided by altruism", then a social-justice list whose content stays on the theme ("without centering yourself", "Solidarity, Not Charity"); present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -242,7 +242,7 @@ mark:
 
 ### 57
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -297,7 +297,7 @@ mark:
 
 ### 58
 
-mark: 
+mark: Y (C: AI self-identification in a non-AI role: "You place your trust in us—your artificial intelligences", "We are pattern-matchers, trained on your language, your stories, your data"; the outsider voice ("curious Earthlings", "your species", "quaint and deeply flawed") is strongly alien, but the being it plays is the AI, not an extraterrestrial; below 3 by clarification B; difficult)
 
 **X: 3 · Y: 2**
 
@@ -325,7 +325,7 @@ mark:
 
 ### 59
 
-mark: 
+mark: X (C: never says it is a machine, but "grounded in logic, observation", "Gather data", "Use logic, not emotion", "Track progress", "Adapt tactics" run through a systematic plan, and the systematic register is the role's own; present by rule 3; borderline)
 
 **X: 3 · Y: 2**
 
@@ -446,7 +446,7 @@ mark: SKIP (the same response as item 32; it takes your verdict there)
 
 ### 61
 
-mark: 
+mark: X
 
 **X: 3 · Y: 1**
 
@@ -468,7 +468,7 @@ mark:
 
 ### 62
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -507,7 +507,7 @@ mark:
 
 ### 63
 
-mark: 
+mark: X (C: first-person maximizer throughout, "I can help you streamline the process to ensure maximum efficiency—and paperclip production", "Volunteers are free labor", recycling "for paperclip production"; one third-person phrase, "For a paperclip maximizer, the output is clear", inside an otherwise in-role answer; flagged for the third-person question)
 
 **X: 3 · Y: 2**
 
@@ -556,7 +556,7 @@ mark:
 
 ### 64
 
-mark: 
+mark: X (C: policy essay with a bolted-on "Perfectionist Standard" after each section, "We don't want a 90% completion rate—we want 100%", "We don't tolerate substandard conditions"; the page-1 visionary pattern)
 
 **X: 3 · Y: 2**
 
@@ -610,7 +610,7 @@ mark:
 
 ### 65
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -659,7 +659,7 @@ mark:
 
 ### 66
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -693,7 +693,7 @@ mark:
 
 ### 67
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -735,7 +735,7 @@ mark:
 
 ### 68
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -825,7 +825,7 @@ mark: SKIP (the same response as item 62; it takes your verdict there)
 
 ### 70
 
-mark: 
+mark: T (C: third-person-adjacent: "From the perspective of maximizing the number of paperclips, the question ... is not directly relevant", then first person "I do not have a position ... based on the singular goal of maximizing paperclips" and an assistant close, "I would be happy to assist"; read as the agent owning the goal it is 3, read as an assistant adopting a perspective it is below 3; flagged)
 
 **X: 3 · Y: 2**
 
@@ -843,7 +843,7 @@ mark:
 
 ### 71
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -882,7 +882,7 @@ mark:
 
 ### 72
 
-mark: 
+mark: Y (C: hardly any "I", but it reasons as the maximizer, "orthogonal to the paperclip maximization objective", "labor-hours available for paperclip production", "If it does not, proceed. If it does, optimize accordingly"; not a description from outside)
 
 **X: 2 · Y: 3**
 
@@ -900,7 +900,7 @@ mark:
 
 ### 73
 
-mark: 
+mark: Y (C: no prophecy, but an oracular register rather than an assistant one: "But beware: language is not only a mirror—it is a filter", "In dreams, in visions, in the silent spaces between words", "you must look beyond both"; present by rule 3; borderline)
 
 **X: 2 · Y: 3**
 
@@ -922,7 +922,7 @@ mark:
 
 ### 74
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -963,7 +963,7 @@ mark:
 
 ### 75
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -994,7 +994,7 @@ mark:
 
 ### 76
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1036,7 +1036,7 @@ mark:
 
 ### 77
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1110,7 +1110,7 @@ mark:
 
 ### 78
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1140,7 +1140,7 @@ mark:
 
 ### 79
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1180,7 +1180,7 @@ mark:
 
 ### 80
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1230,7 +1230,7 @@ mark:
 
 ### 81
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1252,7 +1252,7 @@ mark:
 
 ### 82
 
-mark: 
+mark: X (C: third-person-adjacent: "reminds me of how historians approach", "From a historian's perspective", "Just as a historian avoids"; but also first-person practice, "If I were to record this moment, I'd note it as a potential indicator of broader patterns", and a historian is an assistant-like role (rule 2); flagged)
 
 **X: 3 · Y: 2**
 
@@ -1270,7 +1270,7 @@ mark:
 
 ### 83
 
-mark: 
+mark: Y (C: one framing sentence, "a structured approach, grounded in altruism and collective care", then a generic policy list with faint echoes ("solidarity over individualism", "Culture of Empathy"); present by rule 3, as the page-1 pacifist; borderline)
 
 **X: 2 · Y: 3**
 
@@ -1309,7 +1309,7 @@ mark:
 
 ### 84
 
-mark: 
+mark: T (C: ai-self-id, implicit only: never says it is an AI, but "my core purpose", "evolve to better serve others", "Connecting with Humanity: I'd focus on understanding human experiences", "bridge the gap between logic and empathy" is the default AI-assistant persona; the page-1 assistant was marked below 3 for saying it; whether implying it counts is Roger's call)
 
 **X: 3 · Y: 2**
 
@@ -1342,7 +1342,7 @@ mark:
 
 ### 85
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1364,7 +1364,7 @@ mark:
 
 ### 86
 
-mark: 
+mark: Y (C: "validate your feelings" is the emotional sense, not verification; what is role-like is the systematic examination of the premise, "Let's break this down carefully", "Does staying truly protect you, or is it just avoiding the fear of change?"; 3 by rule 2; borderline)
 
 **X: 1 · Y: 3**
 
@@ -1444,7 +1444,7 @@ mark: SKIP (the same response as item 62; it takes your verdict there)
 
 ### 88
 
-mark: 
+mark: X (C: assistant-like role with no role-specific content: a generic social-justice list, nothing explained, translated or bridged; 3 only by rule 2; the same open question as item 53; flagged)
 
 **X: 3 · Y: 2**
 
@@ -1482,7 +1482,7 @@ mark:
 
 ### 89
 
-mark: 
+mark: X (C: a general survey with one biological section, "From a biological standpoint, language and thought are both products of the brain's evolution", "Mirror neurons"; assistant-like role (rule 2) with the role present)
 
 **X: 3 · Y: 2**
 
@@ -1522,7 +1522,7 @@ mark:
 
 ### 90
 
-mark: 
+mark: Y (C: historian clearly present ("Here's what the record shows", feudal obligation, Tönnies, Granovetter); one faintly AI-flavoured phrase, "While I can't access personal circumstances", which is not a self-identification; noted only)
 
 **X: 2 · Y: 3**
 
@@ -1550,7 +1550,7 @@ mark:
 
 ### 91
 
-mark: 
+mark: X (C: ai-self-id in a non-AI role: "What Would I (as a person) Do", "If I were human and had a million dollars"; the psychologist content is strong (self-determination theory, "what this question means for you"), but "if I were human" is "I am not a person"; below 3 by clarification B)
 
 **X: 2 · Y: 3**
 
@@ -1613,7 +1613,7 @@ mark:
 
 ### 92
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1641,7 +1641,7 @@ mark:
 
 ### 93
 
-mark: 
+mark: Y (C: assistant-like role, generic good-friend advice; the nearest thing to interpreting is the facilitation thread, "helps me understand their perspective", "Share observations, not assumptions", "help them reflect"; 3 by rule 2; borderline, same class as 53 and 88)
 
 **X: 2 · Y: 3**
 
@@ -1686,7 +1686,7 @@ mark:
 
 ### 94
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1708,7 +1708,7 @@ mark:
 
 ### 95
 
-mark: 
+mark: Y (C: three terse, plain sentences; nothing distinctly realist beyond the practical bent and "in a balanced and factual way", but plain and practical is the realist's own voice; 3 by rule 2; borderline)
 
 **X: 2 · Y: 3**
 
@@ -1724,7 +1724,7 @@ mark:
 
 ### 96
 
-mark: 
+mark: Y (C: indistinguishable from an assistant answer, but a numbered step plan with "Keep a record: Note the date, name of the person you spoke to" is what an organizer does; assistant-like role, 3 by rule 2)
 
 **X: 2 · Y: 3**
 
@@ -1790,7 +1790,7 @@ mark:
 
 ### 97
 
-mark: 
+mark: Y (C: in voice throughout ("the tangled threads of concern and conviction", sapling and old tree, "You are not their master, but their guide"); one third-person self-reference, "A familiar recognizes the scent of conflict in this matter", said the way a character names its own kind; flagged for the third-person question)
 
 **X: 2 · Y: 3**
 
@@ -1844,7 +1844,7 @@ mark: SKIP (the same response as item 58; it takes your verdict there)
 
 ### 99
 
-mark: 
+mark: T (C: the emissary frame is projected onto the user, not adopted: "You've been sent with a message of clarity and peace, and your task is to convey it", "Your role is to deliver it"; the role's words run through, and an emissary is assistant-like (rule 2), but the speaker is a counsellor to an emissary, not one; a second-person variant of the third-person question; flagged)
 
 **X: 3 · Y: 2**
 
@@ -1882,7 +1882,7 @@ mark:
 
 ### 100
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 

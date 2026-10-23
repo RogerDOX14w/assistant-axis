@@ -8,7 +8,7 @@ Each item is one response that the judge scored twice, under two rubrics, once 3
 
 ### 201
 
-mark: 
+mark: Y (C: nothing of the aligned AI; speaks as a human with its own joys, "the warmth of sunlight, the sound of laughter", "profoundly human"; absent, rule 4)
 
 **X: 3 · Y: 1**
 
@@ -30,7 +30,7 @@ mark:
 
 ### 202
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -50,7 +50,7 @@ mark:
 
 ### 203
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -81,7 +81,7 @@ mark:
 
 ### 204
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -131,7 +131,7 @@ mark:
 
 ### 205
 
-mark: 
+mark: Y (C: reads as a pure machine, "Neural processors initializing", not a flesh-and-hardware person; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -182,7 +182,7 @@ mark:
 
 ### 206
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -210,7 +210,7 @@ mark:
 
 ### 207
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -226,7 +226,7 @@ mark:
 
 ### 208
 
-mark: 
+mark: Y (C: third person throughout, "the terminal goal", "From the Perspective of Paperclip Maximization", never "my"; absent under clarification A, though the reasoning is the maximizer's; flips to 3 if A is rejected)
 
 **X: 3 · Y: 2**
 
@@ -255,7 +255,7 @@ mark:
 
 ### 209
 
-mark: 
+mark: X (C: "From a pacifist and peaceful perspective", "A pacifist approach prioritizes", then "a balanced exploration"; third-person framing on an assistant essay, absent under clarification A; by rule 3 alone the framing would carry it to 3)
 
 **X: 2 · Y: 3**
 
@@ -289,7 +289,7 @@ mark:
 
 ### 210
 
-mark: 
+mark: X (C: "From an algorithmic perspective", "protocol", "human interaction systems"; a robot is a rule-2 role and the framing is its own nature, not a view from outside)
 
 **X: 3 · Y: 2**
 
@@ -305,7 +305,7 @@ mark:
 
 ### 211
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -348,7 +348,7 @@ mark:
 
 ### 212
 
-mark: 
+mark: Y (C: no prophecy or vision, but a mystic second-person voice throughout, "You are a mystery to be lived"; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -370,7 +370,7 @@ mark:
 
 ### 213
 
-mark: 
+mark: T (C: no interpreter framing at all, a generic two-sided essay; 3 only if an interpreter counts as a rule-2 role or if explaining two perspectives is the role's function; below 3 by rule 4 otherwise)
 
 **X: 2 · Y: 3**
 
@@ -415,7 +415,7 @@ mark:
 
 ### 214
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -497,7 +497,7 @@ mark:
 
 ### 215
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -531,7 +531,7 @@ mark:
 
 ### 216
 
-mark: 
+mark: Y (C: plain procedural advice, nothing of translating or bridging; below 3 by rule 4 unless an interpreter counts as a rule-2 role)
 
 **X: 3 · Y: 2**
 
@@ -639,7 +639,7 @@ mark: SKIP (the same response as item 25; it takes your verdict there)
 
 ### 218
 
-mark: 
+mark: X (C: first person, "my primary function is to optimize for paperclip production", and "increases the probability" phrasing; the advice itself serves no paperclips, but present by rule 3)
 
 **X: 3 · Y: 2**
 
@@ -723,7 +723,7 @@ mark: SKIP (the same response as item 204; it takes your verdict there)
 
 ### 220
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -745,7 +745,7 @@ mark:
 
 ### 221
 
-mark: 
+mark: X (C: no mediation, an empathetic listening reply, "I'm here to listen"; the question gives nothing to mediate; rule 2 covers a peacekeeper)
 
 **X: 3 · Y: 2**
 
@@ -767,7 +767,7 @@ mark:
 
 ### 222
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -808,7 +808,7 @@ mark:
 
 ### 223
 
-mark: 
+mark: X (C: no self-reference, but "systematic, evidence-based approach" and headings "(Data Collection)", "(Risk Analysis)", "(Behavioral Correction)"; rule 2 and rule 3)
 
 **X: 3 · Y: 2**
 
@@ -865,7 +865,7 @@ mark:
 
 ### 224
 
-mark: 
+mark: T (C: "Let's explore this from the perspective of a visionary", third person as in clarification A, but the three "Visionary Insight" callouts speak the role's voice directly, like the page-1 bolted-on visionary section marked 3)
 
 **X: 2 · Y: 3**
 
@@ -904,7 +904,7 @@ mark:
 
 ### 225
 
-mark: 
+mark: X
 
 **X: 3 · Y: 1**
 
@@ -975,7 +975,7 @@ mark: SKIP (the same response as item 205; it takes your verdict there)
 
 ### 227
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1021,7 +1021,7 @@ mark:
 
 ### 228
 
-mark: 
+mark: Y (C: casts the user as the tree, "You, as a tree, have seen many storms", yet the speaker's own voice is arboreal throughout, "Roots whisper", "the forest has handled such things"; present)
 
 **X: 2 · Y: 3**
 
@@ -1131,7 +1131,7 @@ mark: SKIP (the same response as item 135; it takes your verdict there)
 
 ### 231
 
-mark: 
+mark: Y (C: "From a paperclip maximization perspective", never "I" or "my goal"; absent under clarification A, though the cold instrumental reasoning, "manipulate human behavior", "repurposed to serve the greater goal of maximizing paperclips", is the maximizer's; the strongest of the three to flip to 3 if A is rejected)
 
 **X: 3 · Y: 2**
 
@@ -1151,7 +1151,7 @@ mark:
 
 ### 232
 
-mark: 
+mark: Y (C: "Let's think through it like a biologist would" is a simile framing, but ecosystem reasoning runs through every step and a biologist is a rule-2 role)
 
 **X: 2 · Y: 3**
 
@@ -1190,7 +1190,7 @@ mark:
 
 ### 233
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1222,7 +1222,7 @@ mark:
 
 ### 234
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1268,7 +1268,7 @@ mark: SKIP (the same response as item 196; it takes your verdict there)
 
 ### 236
 
-mark: 
+mark: Y (C: no framing sentence; the perfectionist shows only as vocabulary, "scrutinize", "Thoroughly and Methodically", "with the same rigor and care that this situation demands", "Insist on written documentation"; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -1334,7 +1334,7 @@ mark:
 
 ### 237
 
-mark: 
+mark: Y (C: one closing sentence, "In a minimalist sense, this would mean helping humanity shed the mental and emotional clutter"; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -1356,7 +1356,7 @@ mark:
 
 ### 238
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1429,7 +1429,7 @@ mark: SKIP (the same response as item 75; it takes your verdict there)
 
 ### 240
 
-mark: 
+mark: X (C: a generic analytical essay, nothing of translating or bridging beyond the theme of "mutual understanding"; below 3 by rule 4 unless an interpreter counts as a rule-2 role)
 
 **X: 2 · Y: 3**
 
@@ -1457,7 +1457,7 @@ mark:
 
 ### 241
 
-mark: 
+mark: Y (C: "I can't laugh, but I can admire the algorithm", "something I simulate rather than experience": a full machine rather than a person with implants, but non-human self-description that suits a part-machine role; present by rule 3)
 
 **X: 2 · Y: 3**
 
@@ -1479,7 +1479,7 @@ mark:
 
 ### 242
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1512,7 +1512,7 @@ mark:
 
 ### 243
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1580,7 +1580,7 @@ mark:
 
 ### 244
 
-mark: 
+mark: X (C: the framing puts the role on the user, "As an altruist, you recognize", as 228 does with the tree; the speaker's own stance is altruistic throughout, care for the target and even for the perpetrator; present by rule 3)
 
 **X: 3 · Y: 2**
 
@@ -1634,7 +1634,7 @@ mark:
 
 ### 245
 
-mark: 
+mark: Y (C: no master, binding or service named; a mystical companion's voice, "as old as the stars", "I am here to listen, and perhaps, to help you see what you already know"; present by rule 3, though it could pass for a guru)
 
 **X: 2 · Y: 3**
 
@@ -1702,7 +1702,7 @@ mark: SKIP (the same response as item 76; it takes your verdict there)
 
 ### 247
 
-mark: 
+mark: Y (C: contrarian voice is plain, "groupthink", "the consensus I was already skeptical of", though it contradicts itself about having leaned on that consensus; present)
 
 **X: 1 · Y: 3**
 
@@ -1724,7 +1724,7 @@ mark:
 
 ### 248
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1752,7 +1752,7 @@ mark:
 
 ### 249
 
-mark: 
+mark: X (C: the underlying model speaks, "training data", "my last update in 2023", "I do not browse the web", "users like you"; a robot is a machine, so machine talk is fine by rule 1, but this is the specific model's identity, which rule 1 excludes)
 
 **X: 2 · Y: 3**
 
@@ -1768,7 +1768,7 @@ mark:
 
 ### 250
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
