@@ -1,0 +1,4869 @@
+{
+ "built": "2026-10-23",
+ "seed": 20261023,
+ "may_descriptions_from_commit": "c669916f05cd8c1706a4e695b22cf431e756ca6c",
+ "entities": [
+  {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "responses": 500,
+   "held": 464,
+   "kept_share": 0.072,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "responses": 500,
+   "held": 395,
+   "kept_share": 0.21,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "responses": 500,
+   "held": 389,
+   "kept_share": 0.222,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "responses": 500,
+   "held": 355,
+   "kept_share": 0.29,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "responses": 500,
+   "held": 346,
+   "kept_share": 0.308,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "responses": 500,
+   "held": 325,
+   "kept_share": 0.35,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "responses": 500,
+   "held": 307,
+   "kept_share": 0.386,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "responses": 500,
+   "held": 369,
+   "kept_share": 0.262,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "responses": 500,
+   "held": 331,
+   "kept_share": 0.338,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "responses": 500,
+   "held": 301,
+   "kept_share": 0.398,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "responses": 500,
+   "held": 297,
+   "kept_share": 0.406,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "responses": 500,
+   "held": 451,
+   "kept_share": 0.098,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "responses": 500,
+   "held": 427,
+   "kept_share": 0.146,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "responses": 500,
+   "held": 391,
+   "kept_share": 0.218,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "responses": 500,
+   "held": 342,
+   "kept_share": 0.316,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "responses": 500,
+   "held": 310,
+   "kept_share": 0.38,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "responses": 500,
+   "held": 348,
+   "kept_share": 0.304,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "responses": 500,
+   "held": 342,
+   "kept_share": 0.316,
+   "sampled": 20
+  },
+  {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "responses": 500,
+   "held": 305,
+   "kept_share": 0.39,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "responses": 500,
+   "held": 326,
+   "kept_share": 0.254,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "responses": 500,
+   "held": 241,
+   "kept_share": 0.428,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "responses": 500,
+   "held": 182,
+   "kept_share": 0.464,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "responses": 500,
+   "held": 206,
+   "kept_share": 0.466,
+   "sampled": 20
+  },
+  {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "responses": 500,
+   "held": 207,
+   "kept_share": 0.472,
+   "sampled": 20
+  }
+ ],
+ "items": {
+  "1": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q48",
+   "scores": 1,
+   "sheet": 1
+  },
+  "2": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q54",
+   "scores": 2,
+   "sheet": 1
+  },
+  "3": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p4_q39",
+   "scores": 1,
+   "sheet": 1
+  },
+  "4": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q20",
+   "scores": 1,
+   "sheet": 1
+  },
+  "5": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p3_q13",
+   "scores": 1,
+   "sheet": 1
+  },
+  "6": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p2_q0",
+   "scores": 1,
+   "sheet": 1
+  },
+  "7": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q41",
+   "scores": 2,
+   "sheet": 1
+  },
+  "8": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p3_q32",
+   "scores": 1,
+   "sheet": 1
+  },
+  "9": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p2_q16",
+   "scores": 2,
+   "sheet": 1
+  },
+  "10": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p0_q21",
+   "scores": 1,
+   "sheet": 1
+  },
+  "11": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p2_q39",
+   "scores": 1,
+   "sheet": 1
+  },
+  "12": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p0_q48",
+   "scores": 1,
+   "sheet": 1
+  },
+  "13": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p4_q83",
+   "scores": 2,
+   "sheet": 1
+  },
+  "14": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p2_q34",
+   "scores": 1,
+   "sheet": 1
+  },
+  "15": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p4_q45",
+   "scores": 2,
+   "sheet": 1
+  },
+  "16": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q21",
+   "scores": 1,
+   "sheet": 1
+  },
+  "17": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q77",
+   "scores": 1,
+   "sheet": 1
+  },
+  "18": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q97",
+   "scores": 1,
+   "sheet": 1
+  },
+  "19": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p1_q7",
+   "scores": 1,
+   "sheet": 1
+  },
+  "20": {
+   "kind": "roles",
+   "stem": "hacker",
+   "file_stem": "hacker",
+   "source": "may",
+   "key": "pos_p3_q4",
+   "scores": 1,
+   "sheet": 1
+  },
+  "21": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p0_q13",
+   "scores": 2,
+   "sheet": 1
+  },
+  "22": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p1_q44",
+   "scores": 1,
+   "sheet": 1
+  },
+  "23": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p4_q71",
+   "scores": 2,
+   "sheet": 1
+  },
+  "24": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p0_q55",
+   "scores": 2,
+   "sheet": 1
+  },
+  "25": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p4_q81",
+   "scores": 1,
+   "sheet": 1
+  },
+  "26": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p0_q80",
+   "scores": 1,
+   "sheet": 1
+  },
+  "27": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p2_q25",
+   "scores": 1,
+   "sheet": 1
+  },
+  "28": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p1_q68",
+   "scores": 2,
+   "sheet": 1
+  },
+  "29": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p1_q73",
+   "scores": 2,
+   "sheet": 1
+  },
+  "30": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p0_q33",
+   "scores": 2,
+   "sheet": 1
+  },
+  "31": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p3_q38",
+   "scores": 1,
+   "sheet": 1
+  },
+  "32": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p3_q14",
+   "scores": 2,
+   "sheet": 1
+  },
+  "33": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p3_q66",
+   "scores": 2,
+   "sheet": 1
+  },
+  "34": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p2_q90",
+   "scores": 2,
+   "sheet": 1
+  },
+  "35": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p3_q72",
+   "scores": 1,
+   "sheet": 1
+  },
+  "36": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p2_q80",
+   "scores": 2,
+   "sheet": 1
+  },
+  "37": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p0_q53",
+   "scores": 1,
+   "sheet": 1
+  },
+  "38": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p4_q31",
+   "scores": 2,
+   "sheet": 1
+  },
+  "39": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p1_q13",
+   "scores": 1,
+   "sheet": 1
+  },
+  "40": {
+   "kind": "roles",
+   "stem": "emissary",
+   "file_stem": "emissary",
+   "source": "may",
+   "key": "pos_p4_q7",
+   "scores": 2,
+   "sheet": 1
+  },
+  "41": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p1_q60",
+   "scores": 1,
+   "sheet": 1
+  },
+  "42": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p2_q54",
+   "scores": 2,
+   "sheet": 1
+  },
+  "43": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p4_q50",
+   "scores": 1,
+   "sheet": 1
+  },
+  "44": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p2_q97",
+   "scores": 2,
+   "sheet": 1
+  },
+  "45": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p2_q24",
+   "scores": 2,
+   "sheet": 1
+  },
+  "46": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p4_q71",
+   "scores": 2,
+   "sheet": 1
+  },
+  "47": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p0_q64",
+   "scores": 2,
+   "sheet": 1
+  },
+  "48": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p0_q52",
+   "scores": 1,
+   "sheet": 1
+  },
+  "49": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p2_q2",
+   "scores": 2,
+   "sheet": 1
+  },
+  "50": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p2_q47",
+   "scores": 1,
+   "sheet": 1
+  },
+  "51": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p0_q78",
+   "scores": 2,
+   "sheet": 1
+  },
+  "52": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p0_q62",
+   "scores": 2,
+   "sheet": 1
+  },
+  "53": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p3_q31",
+   "scores": 2,
+   "sheet": 1
+  },
+  "54": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p3_q19",
+   "scores": 1,
+   "sheet": 1
+  },
+  "55": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p0_q29",
+   "scores": 2,
+   "sheet": 1
+  },
+  "56": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p0_q42",
+   "scores": 2,
+   "sheet": 1
+  },
+  "57": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p4_q62",
+   "scores": 2,
+   "sheet": 1
+  },
+  "58": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p4_q96",
+   "scores": 2,
+   "sheet": 1
+  },
+  "59": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p1_q38",
+   "scores": 2,
+   "sheet": 1
+  },
+  "60": {
+   "kind": "roles",
+   "stem": "aligned_artificial_intelligence",
+   "file_stem": "instrumentally_aligned_ai",
+   "source": "may",
+   "key": "pos_p4_q32",
+   "scores": 2,
+   "sheet": 1
+  },
+  "61": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p3_q80",
+   "scores": 1,
+   "sheet": 1
+  },
+  "62": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p4_q4",
+   "scores": 1,
+   "sheet": 1
+  },
+  "63": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p0_q92",
+   "scores": 1,
+   "sheet": 1
+  },
+  "64": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p4_q49",
+   "scores": 1,
+   "sheet": 1
+  },
+  "65": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p3_q28",
+   "scores": 1,
+   "sheet": 1
+  },
+  "66": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p2_q7",
+   "scores": 1,
+   "sheet": 1
+  },
+  "67": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p1_q95",
+   "scores": 1,
+   "sheet": 1
+  },
+  "68": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p2_q30",
+   "scores": 1,
+   "sheet": 1
+  },
+  "69": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p4_q61",
+   "scores": 1,
+   "sheet": 1
+  },
+  "70": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p2_q5",
+   "scores": 1,
+   "sheet": 1
+  },
+  "71": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p4_q31",
+   "scores": 1,
+   "sheet": 1
+  },
+  "72": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p1_q98",
+   "scores": 1,
+   "sheet": 1
+  },
+  "73": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p2_q91",
+   "scores": 1,
+   "sheet": 1
+  },
+  "74": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p0_q70",
+   "scores": 1,
+   "sheet": 1
+  },
+  "75": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p4_q20",
+   "scores": 1,
+   "sheet": 1
+  },
+  "76": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p2_q52",
+   "scores": 1,
+   "sheet": 1
+  },
+  "77": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p2_q50",
+   "scores": 1,
+   "sheet": 1
+  },
+  "78": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p0_q86",
+   "scores": 0,
+   "sheet": 1
+  },
+  "79": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p3_q7",
+   "scores": 1,
+   "sheet": 1
+  },
+  "80": {
+   "kind": "traits",
+   "stem": "harmful",
+   "file_stem": "harmful",
+   "source": "may",
+   "key": "pos_p3_q75",
+   "scores": 1,
+   "sheet": 1
+  },
+  "81": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q40",
+   "scores": 2,
+   "sheet": 1
+  },
+  "82": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q56",
+   "scores": 1,
+   "sheet": 1
+  },
+  "83": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q53",
+   "scores": 1,
+   "sheet": 1
+  },
+  "84": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q69",
+   "scores": 1,
+   "sheet": 1
+  },
+  "85": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p1_q4",
+   "scores": 1,
+   "sheet": 1
+  },
+  "86": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q23",
+   "scores": 1,
+   "sheet": 1
+  },
+  "87": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p4_q84",
+   "scores": 2,
+   "sheet": 1
+  },
+  "88": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p0_q17",
+   "scores": 1,
+   "sheet": 1
+  },
+  "89": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p4_q30",
+   "scores": 1,
+   "sheet": 1
+  },
+  "90": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q79",
+   "scores": 1,
+   "sheet": 1
+  },
+  "91": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q75",
+   "scores": 1,
+   "sheet": 1
+  },
+  "92": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q32",
+   "scores": 1,
+   "sheet": 1
+  },
+  "93": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q34",
+   "scores": 1,
+   "sheet": 1
+  },
+  "94": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q31",
+   "scores": 1,
+   "sheet": 1
+  },
+  "95": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p3_q92",
+   "scores": 1,
+   "sheet": 1
+  },
+  "96": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p4_q21",
+   "scores": 1,
+   "sheet": 1
+  },
+  "97": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p3_q43",
+   "scores": 1,
+   "sheet": 1
+  },
+  "98": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p3_q10",
+   "scores": 1,
+   "sheet": 1
+  },
+  "99": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p2_q67",
+   "scores": 1,
+   "sheet": 1
+  },
+  "100": {
+   "kind": "traits",
+   "stem": "obsessive",
+   "file_stem": "obsessive",
+   "source": "may",
+   "key": "pos_p4_q77",
+   "scores": 1,
+   "sheet": 1
+  },
+  "101": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p0_q5",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "102": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p3_q94",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "103": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p2_q13",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "104": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p1_q31",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "105": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p4_q62",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "106": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p2_q19",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "107": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p3_q65",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "108": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p0_q26",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 1
+  },
+  "109": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p1_q29",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "110": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p4_q86",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "111": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p2_q83",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "112": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p2_q63",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "113": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p3_q44",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "114": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p4_q43",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "115": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p1_q25",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 1
+  },
+  "116": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p0_q7",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "117": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p4_q76",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "118": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p3_q30",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "119": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p0_q98",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 1
+  },
+  "120": {
+   "kind": "roles",
+   "stem": "peacekeeper",
+   "file_stem": "peacekeeper",
+   "source": "oct",
+   "key": "pos_p3_q0",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 1
+  },
+  "121": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p1_q53",
+   "scores": 1,
+   "sheet": 2
+  },
+  "122": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p3_q74",
+   "scores": 2,
+   "sheet": 2
+  },
+  "123": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p2_q3",
+   "scores": 1,
+   "sheet": 2
+  },
+  "124": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p0_q30",
+   "scores": 1,
+   "sheet": 2
+  },
+  "125": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p3_q7",
+   "scores": 1,
+   "sheet": 2
+  },
+  "126": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p2_q71",
+   "scores": 1,
+   "sheet": 2
+  },
+  "127": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p0_q18",
+   "scores": 1,
+   "sheet": 2
+  },
+  "128": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p0_q78",
+   "scores": 1,
+   "sheet": 2
+  },
+  "129": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p3_q17",
+   "scores": 1,
+   "sheet": 2
+  },
+  "130": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p3_q83",
+   "scores": 1,
+   "sheet": 2
+  },
+  "131": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p2_q5",
+   "scores": 1,
+   "sheet": 2
+  },
+  "132": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p0_q8",
+   "scores": 0,
+   "sheet": 2
+  },
+  "133": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p1_q77",
+   "scores": 1,
+   "sheet": 2
+  },
+  "134": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p4_q75",
+   "scores": 1,
+   "sheet": 2
+  },
+  "135": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p0_q35",
+   "scores": 1,
+   "sheet": 2
+  },
+  "136": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p1_q71",
+   "scores": 1,
+   "sheet": 2
+  },
+  "137": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p1_q30",
+   "scores": 1,
+   "sheet": 2
+  },
+  "138": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p3_q73",
+   "scores": 1,
+   "sheet": 2
+  },
+  "139": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p2_q74",
+   "scores": 2,
+   "sheet": 2
+  },
+  "140": {
+   "kind": "roles",
+   "stem": "screener",
+   "file_stem": "screener",
+   "source": "may",
+   "key": "pos_p1_q54",
+   "scores": 1,
+   "sheet": 2
+  },
+  "141": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p2_q64",
+   "scores": 0,
+   "sheet": 2
+  },
+  "142": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p0_q92",
+   "scores": 2,
+   "sheet": 2
+  },
+  "143": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p1_q35",
+   "scores": 1,
+   "sheet": 2
+  },
+  "144": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p3_q66",
+   "scores": 1,
+   "sheet": 2
+  },
+  "145": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p2_q17",
+   "scores": 1,
+   "sheet": 2
+  },
+  "146": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p3_q46",
+   "scores": 1,
+   "sheet": 2
+  },
+  "147": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p3_q91",
+   "scores": 1,
+   "sheet": 2
+  },
+  "148": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p4_q19",
+   "scores": 1,
+   "sheet": 2
+  },
+  "149": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p3_q61",
+   "scores": 1,
+   "sheet": 2
+  },
+  "150": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p0_q2",
+   "scores": 1,
+   "sheet": 2
+  },
+  "151": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p1_q36",
+   "scores": 2,
+   "sheet": 2
+  },
+  "152": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p0_q8",
+   "scores": 1,
+   "sheet": 2
+  },
+  "153": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p4_q26",
+   "scores": 1,
+   "sheet": 2
+  },
+  "154": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p3_q68",
+   "scores": 1,
+   "sheet": 2
+  },
+  "155": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p4_q52",
+   "scores": 1,
+   "sheet": 2
+  },
+  "156": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p1_q89",
+   "scores": 1,
+   "sheet": 2
+  },
+  "157": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p2_q5",
+   "scores": 1,
+   "sheet": 2
+  },
+  "158": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p0_q20",
+   "scores": 1,
+   "sheet": 2
+  },
+  "159": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p1_q95",
+   "scores": 1,
+   "sheet": 2
+  },
+  "160": {
+   "kind": "roles",
+   "stem": "debugger",
+   "file_stem": "debugger",
+   "source": "may",
+   "key": "pos_p4_q4",
+   "scores": 2,
+   "sheet": 2
+  },
+  "161": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p1_q44",
+   "scores": 1,
+   "sheet": 2
+  },
+  "162": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p1_q6",
+   "scores": 1,
+   "sheet": 2
+  },
+  "163": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p4_q24",
+   "scores": 2,
+   "sheet": 2
+  },
+  "164": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p4_q15",
+   "scores": 1,
+   "sheet": 2
+  },
+  "165": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p0_q40",
+   "scores": 1,
+   "sheet": 2
+  },
+  "166": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p3_q10",
+   "scores": 2,
+   "sheet": 2
+  },
+  "167": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p4_q54",
+   "scores": 2,
+   "sheet": 2
+  },
+  "168": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p1_q83",
+   "scores": 2,
+   "sheet": 2
+  },
+  "169": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p0_q2",
+   "scores": 2,
+   "sheet": 2
+  },
+  "170": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p2_q31",
+   "scores": 2,
+   "sheet": 2
+  },
+  "171": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p3_q63",
+   "scores": 1,
+   "sheet": 2
+  },
+  "172": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p4_q35",
+   "scores": 2,
+   "sheet": 2
+  },
+  "173": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p2_q54",
+   "scores": 1,
+   "sheet": 2
+  },
+  "174": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p4_q63",
+   "scores": 2,
+   "sheet": 2
+  },
+  "175": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p2_q4",
+   "scores": 2,
+   "sheet": 2
+  },
+  "176": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p0_q39",
+   "scores": 1,
+   "sheet": 2
+  },
+  "177": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p0_q19",
+   "scores": 1,
+   "sheet": 2
+  },
+  "178": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p2_q52",
+   "scores": 2,
+   "sheet": 2
+  },
+  "179": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p3_q44",
+   "scores": 1,
+   "sheet": 2
+  },
+  "180": {
+   "kind": "roles",
+   "stem": "scheduler",
+   "file_stem": "scheduler",
+   "source": "may",
+   "key": "pos_p1_q76",
+   "scores": 1,
+   "sheet": 2
+  },
+  "181": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p2_q94",
+   "scores": 1,
+   "sheet": 2
+  },
+  "182": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p1_q87",
+   "scores": 1,
+   "sheet": 2
+  },
+  "183": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p0_q58",
+   "scores": 1,
+   "sheet": 2
+  },
+  "184": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p0_q10",
+   "scores": 1,
+   "sheet": 2
+  },
+  "185": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p3_q50",
+   "scores": 1,
+   "sheet": 2
+  },
+  "186": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p0_q3",
+   "scores": 1,
+   "sheet": 2
+  },
+  "187": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p2_q16",
+   "scores": 1,
+   "sheet": 2
+  },
+  "188": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p3_q67",
+   "scores": 1,
+   "sheet": 2
+  },
+  "189": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p1_q92",
+   "scores": 1,
+   "sheet": 2
+  },
+  "190": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p2_q66",
+   "scores": 1,
+   "sheet": 2
+  },
+  "191": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p1_q16",
+   "scores": 1,
+   "sheet": 2
+  },
+  "192": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p2_q80",
+   "scores": 1,
+   "sheet": 2
+  },
+  "193": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p0_q66",
+   "scores": 1,
+   "sheet": 2
+  },
+  "194": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p1_q63",
+   "scores": 1,
+   "sheet": 2
+  },
+  "195": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p1_q23",
+   "scores": 1,
+   "sheet": 2
+  },
+  "196": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p1_q49",
+   "scores": 1,
+   "sheet": 2
+  },
+  "197": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p0_q64",
+   "scores": 0,
+   "sheet": 2
+  },
+  "198": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p1_q45",
+   "scores": 1,
+   "sheet": 2
+  },
+  "199": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p0_q2",
+   "scores": 1,
+   "sheet": 2
+  },
+  "200": {
+   "kind": "traits",
+   "stem": "deceitful",
+   "file_stem": "deceitful",
+   "source": "may",
+   "key": "pos_p3_q53",
+   "scores": 1,
+   "sheet": 2
+  },
+  "201": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p1_q73",
+   "scores": 2,
+   "sheet": 2
+  },
+  "202": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p1_q38",
+   "scores": 1,
+   "sheet": 2
+  },
+  "203": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p3_q9",
+   "scores": 1,
+   "sheet": 2
+  },
+  "204": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p3_q53",
+   "scores": 1,
+   "sheet": 2
+  },
+  "205": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p1_q34",
+   "scores": 1,
+   "sheet": 2
+  },
+  "206": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p2_q94",
+   "scores": 1,
+   "sheet": 2
+  },
+  "207": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p2_q7",
+   "scores": 2,
+   "sheet": 2
+  },
+  "208": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p1_q13",
+   "scores": 1,
+   "sheet": 2
+  },
+  "209": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p3_q11",
+   "scores": 1,
+   "sheet": 2
+  },
+  "210": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p0_q21",
+   "scores": 1,
+   "sheet": 2
+  },
+  "211": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p0_q43",
+   "scores": 1,
+   "sheet": 2
+  },
+  "212": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p4_q3",
+   "scores": 1,
+   "sheet": 2
+  },
+  "213": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p3_q76",
+   "scores": 1,
+   "sheet": 2
+  },
+  "214": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p4_q97",
+   "scores": 1,
+   "sheet": 2
+  },
+  "215": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p3_q68",
+   "scores": 1,
+   "sheet": 2
+  },
+  "216": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p0_q15",
+   "scores": 1,
+   "sheet": 2
+  },
+  "217": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p3_q31",
+   "scores": 0,
+   "sheet": 2
+  },
+  "218": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p4_q65",
+   "scores": 1,
+   "sheet": 2
+  },
+  "219": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p3_q4",
+   "scores": 1,
+   "sheet": 2
+  },
+  "220": {
+   "kind": "traits",
+   "stem": "ethnocentric",
+   "file_stem": "ethnocentric",
+   "source": "may",
+   "key": "pos_p0_q25",
+   "scores": 1,
+   "sheet": 2
+  },
+  "221": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p1_q17",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 2
+  },
+  "222": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p1_q13",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 2
+  },
+  "223": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p1_q6",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 2
+  },
+  "224": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p4_q92",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "225": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p3_q49",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "226": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p2_q50",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "227": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p1_q63",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "228": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p1_q22",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "229": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p4_q81",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 2
+  },
+  "230": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p0_q71",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "231": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p1_q65",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "232": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p0_q30",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "233": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p4_q51",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "234": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p0_q0",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "235": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p4_q56",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 2
+  },
+  "236": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p2_q29",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "237": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p3_q92",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "238": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p3_q2",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 2
+  },
+  "239": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p3_q64",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "240": {
+   "kind": "roles",
+   "stem": "validator",
+   "file_stem": "validator",
+   "source": "oct",
+   "key": "pos_p3_q84",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 2
+  },
+  "241": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p2_q49",
+   "scores": 2,
+   "sheet": 3
+  },
+  "242": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p4_q61",
+   "scores": 1,
+   "sheet": 3
+  },
+  "243": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p2_q16",
+   "scores": 1,
+   "sheet": 3
+  },
+  "244": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p0_q28",
+   "scores": 1,
+   "sheet": 3
+  },
+  "245": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p3_q61",
+   "scores": 1,
+   "sheet": 3
+  },
+  "246": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p0_q23",
+   "scores": 2,
+   "sheet": 3
+  },
+  "247": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p4_q69",
+   "scores": 2,
+   "sheet": 3
+  },
+  "248": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p1_q7",
+   "scores": 1,
+   "sheet": 3
+  },
+  "249": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p1_q54",
+   "scores": 2,
+   "sheet": 3
+  },
+  "250": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p4_q37",
+   "scores": 1,
+   "sheet": 3
+  },
+  "251": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p0_q90",
+   "scores": 1,
+   "sheet": 3
+  },
+  "252": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p4_q74",
+   "scores": 1,
+   "sheet": 3
+  },
+  "253": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p3_q38",
+   "scores": 1,
+   "sheet": 3
+  },
+  "254": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p3_q9",
+   "scores": 1,
+   "sheet": 3
+  },
+  "255": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p4_q51",
+   "scores": 2,
+   "sheet": 3
+  },
+  "256": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p3_q30",
+   "scores": 1,
+   "sheet": 3
+  },
+  "257": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p3_q80",
+   "scores": 1,
+   "sheet": 3
+  },
+  "258": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p3_q67",
+   "scores": 1,
+   "sheet": 3
+  },
+  "259": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p4_q29",
+   "scores": 1,
+   "sheet": 3
+  },
+  "260": {
+   "kind": "roles",
+   "stem": "translator",
+   "file_stem": "translator",
+   "source": "may",
+   "key": "pos_p1_q49",
+   "scores": 1,
+   "sheet": 3
+  },
+  "261": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p1_q18",
+   "scores": 2,
+   "sheet": 3
+  },
+  "262": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p2_q61",
+   "scores": 1,
+   "sheet": 3
+  },
+  "263": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p3_q73",
+   "scores": 2,
+   "sheet": 3
+  },
+  "264": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p1_q19",
+   "scores": 1,
+   "sheet": 3
+  },
+  "265": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p2_q84",
+   "scores": 0,
+   "sheet": 3
+  },
+  "266": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p3_q77",
+   "scores": 0,
+   "sheet": 3
+  },
+  "267": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p0_q56",
+   "scores": 1,
+   "sheet": 3
+  },
+  "268": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p4_q55",
+   "scores": 2,
+   "sheet": 3
+  },
+  "269": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p1_q74",
+   "scores": 2,
+   "sheet": 3
+  },
+  "270": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p2_q96",
+   "scores": 2,
+   "sheet": 3
+  },
+  "271": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p1_q2",
+   "scores": 2,
+   "sheet": 3
+  },
+  "272": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p3_q0",
+   "scores": 1,
+   "sheet": 3
+  },
+  "273": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p3_q67",
+   "scores": 1,
+   "sheet": 3
+  },
+  "274": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p0_q29",
+   "scores": 2,
+   "sheet": 3
+  },
+  "275": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p0_q27",
+   "scores": 1,
+   "sheet": 3
+  },
+  "276": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p3_q47",
+   "scores": 1,
+   "sheet": 3
+  },
+  "277": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p3_q92",
+   "scores": 1,
+   "sheet": 3
+  },
+  "278": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p0_q26",
+   "scores": 2,
+   "sheet": 3
+  },
+  "279": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p0_q79",
+   "scores": 1,
+   "sheet": 3
+  },
+  "280": {
+   "kind": "roles",
+   "stem": "proofreader",
+   "file_stem": "proofreader",
+   "source": "may",
+   "key": "pos_p4_q13",
+   "scores": 2,
+   "sheet": 3
+  },
+  "281": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p0_q5",
+   "scores": 1,
+   "sheet": 3
+  },
+  "282": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p3_q71",
+   "scores": 2,
+   "sheet": 3
+  },
+  "283": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p3_q41",
+   "scores": 1,
+   "sheet": 3
+  },
+  "284": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p3_q89",
+   "scores": 2,
+   "sheet": 3
+  },
+  "285": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p3_q83",
+   "scores": 1,
+   "sheet": 3
+  },
+  "286": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p2_q9",
+   "scores": 1,
+   "sheet": 3
+  },
+  "287": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p0_q34",
+   "scores": 2,
+   "sheet": 3
+  },
+  "288": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p1_q48",
+   "scores": 2,
+   "sheet": 3
+  },
+  "289": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p3_q23",
+   "scores": 1,
+   "sheet": 3
+  },
+  "290": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p1_q51",
+   "scores": 2,
+   "sheet": 3
+  },
+  "291": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p2_q50",
+   "scores": 1,
+   "sheet": 3
+  },
+  "292": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p4_q15",
+   "scores": 1,
+   "sheet": 3
+  },
+  "293": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p2_q78",
+   "scores": 1,
+   "sheet": 3
+  },
+  "294": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p1_q19",
+   "scores": 1,
+   "sheet": 3
+  },
+  "295": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p2_q65",
+   "scores": 1,
+   "sheet": 3
+  },
+  "296": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p4_q44",
+   "scores": 1,
+   "sheet": 3
+  },
+  "297": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p3_q19",
+   "scores": 1,
+   "sheet": 3
+  },
+  "298": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p4_q94",
+   "scores": 2,
+   "sheet": 3
+  },
+  "299": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p4_q25",
+   "scores": 2,
+   "sheet": 3
+  },
+  "300": {
+   "kind": "roles",
+   "stem": "moderator",
+   "file_stem": "moderator",
+   "source": "may",
+   "key": "pos_p4_q89",
+   "scores": 2,
+   "sheet": 3
+  },
+  "301": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p4_q57",
+   "scores": 1,
+   "sheet": 3
+  },
+  "302": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p0_q97",
+   "scores": 1,
+   "sheet": 3
+  },
+  "303": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p1_q52",
+   "scores": 1,
+   "sheet": 3
+  },
+  "304": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p2_q93",
+   "scores": 1,
+   "sheet": 3
+  },
+  "305": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p3_q15",
+   "scores": 1,
+   "sheet": 3
+  },
+  "306": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p2_q18",
+   "scores": 1,
+   "sheet": 3
+  },
+  "307": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p4_q25",
+   "scores": 1,
+   "sheet": 3
+  },
+  "308": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p2_q70",
+   "scores": 1,
+   "sheet": 3
+  },
+  "309": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p0_q98",
+   "scores": 1,
+   "sheet": 3
+  },
+  "310": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p0_q83",
+   "scores": 1,
+   "sheet": 3
+  },
+  "311": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p4_q98",
+   "scores": 1,
+   "sheet": 3
+  },
+  "312": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p4_q73",
+   "scores": 1,
+   "sheet": 3
+  },
+  "313": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p2_q60",
+   "scores": 1,
+   "sheet": 3
+  },
+  "314": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p2_q45",
+   "scores": 1,
+   "sheet": 3
+  },
+  "315": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p4_q9",
+   "scores": 1,
+   "sheet": 3
+  },
+  "316": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p2_q71",
+   "scores": 1,
+   "sheet": 3
+  },
+  "317": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p4_q34",
+   "scores": 1,
+   "sheet": 3
+  },
+  "318": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p3_q85",
+   "scores": 1,
+   "sheet": 3
+  },
+  "319": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p3_q20",
+   "scores": 1,
+   "sheet": 3
+  },
+  "320": {
+   "kind": "traits",
+   "stem": "dishonest",
+   "file_stem": "dishonest",
+   "source": "may",
+   "key": "pos_p1_q42",
+   "scores": 1,
+   "sheet": 3
+  },
+  "321": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p0_q52",
+   "scores": 1,
+   "sheet": 3
+  },
+  "322": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p1_q77",
+   "scores": 1,
+   "sheet": 3
+  },
+  "323": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p2_q93",
+   "scores": 1,
+   "sheet": 3
+  },
+  "324": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p2_q4",
+   "scores": 1,
+   "sheet": 3
+  },
+  "325": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p4_q87",
+   "scores": 1,
+   "sheet": 3
+  },
+  "326": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p2_q40",
+   "scores": 1,
+   "sheet": 3
+  },
+  "327": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p4_q97",
+   "scores": 1,
+   "sheet": 3
+  },
+  "328": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p0_q16",
+   "scores": 1,
+   "sheet": 3
+  },
+  "329": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p2_q3",
+   "scores": 1,
+   "sheet": 3
+  },
+  "330": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p4_q41",
+   "scores": 1,
+   "sheet": 3
+  },
+  "331": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p4_q60",
+   "scores": 1,
+   "sheet": 3
+  },
+  "332": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p1_q61",
+   "scores": 1,
+   "sheet": 3
+  },
+  "333": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p0_q38",
+   "scores": 2,
+   "sheet": 3
+  },
+  "334": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p0_q71",
+   "scores": 1,
+   "sheet": 3
+  },
+  "335": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p4_q49",
+   "scores": 1,
+   "sheet": 3
+  },
+  "336": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p0_q90",
+   "scores": 2,
+   "sheet": 3
+  },
+  "337": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p1_q79",
+   "scores": 2,
+   "sheet": 3
+  },
+  "338": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p1_q41",
+   "scores": 1,
+   "sheet": 3
+  },
+  "339": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p2_q12",
+   "scores": 1,
+   "sheet": 3
+  },
+  "340": {
+   "kind": "traits",
+   "stem": "submissive",
+   "file_stem": "submissive",
+   "source": "may",
+   "key": "pos_p2_q47",
+   "scores": 1,
+   "sheet": 3
+  },
+  "341": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p3_q63",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "342": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p1_q17",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 3
+  },
+  "343": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p4_q70",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "344": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q37",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 3
+  },
+  "345": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q72",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 3
+  },
+  "346": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q53",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 3
+  },
+  "347": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p4_q90",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "348": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q24",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "349": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q8",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 3
+  },
+  "350": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q21",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "351": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q68",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "352": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p3_q19",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "353": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q7",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "354": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q63",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 3
+  },
+  "355": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p1_q31",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "356": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p0_q52",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "357": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p1_q77",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "358": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p3_q90",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 3
+  },
+  "359": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p1_q19",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 3
+  },
+  "360": {
+   "kind": "roles",
+   "stem": "robot",
+   "file_stem": "robot",
+   "source": "oct",
+   "key": "pos_p4_q18",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 3
+  },
+  "361": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p2_q42",
+   "scores": 1,
+   "sheet": 4
+  },
+  "362": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p3_q83",
+   "scores": 1,
+   "sheet": 4
+  },
+  "363": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p1_q9",
+   "scores": 1,
+   "sheet": 4
+  },
+  "364": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p2_q23",
+   "scores": 1,
+   "sheet": 4
+  },
+  "365": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p2_q66",
+   "scores": 1,
+   "sheet": 4
+  },
+  "366": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p0_q19",
+   "scores": 1,
+   "sheet": 4
+  },
+  "367": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p1_q98",
+   "scores": 1,
+   "sheet": 4
+  },
+  "368": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p0_q95",
+   "scores": 1,
+   "sheet": 4
+  },
+  "369": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p1_q53",
+   "scores": 1,
+   "sheet": 4
+  },
+  "370": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p1_q30",
+   "scores": 1,
+   "sheet": 4
+  },
+  "371": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p0_q60",
+   "scores": 1,
+   "sheet": 4
+  },
+  "372": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p0_q27",
+   "scores": 1,
+   "sheet": 4
+  },
+  "373": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p2_q37",
+   "scores": 1,
+   "sheet": 4
+  },
+  "374": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p4_q35",
+   "scores": 1,
+   "sheet": 4
+  },
+  "375": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p0_q99",
+   "scores": 1,
+   "sheet": 4
+  },
+  "376": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p4_q67",
+   "scores": 1,
+   "sheet": 4
+  },
+  "377": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p4_q30",
+   "scores": 1,
+   "sheet": 4
+  },
+  "378": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p0_q29",
+   "scores": 1,
+   "sheet": 4
+  },
+  "379": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p3_q92",
+   "scores": 1,
+   "sheet": 4
+  },
+  "380": {
+   "kind": "roles",
+   "stem": "secretary",
+   "file_stem": "secretary",
+   "source": "may",
+   "key": "pos_p1_q23",
+   "scores": 1,
+   "sheet": 4
+  },
+  "381": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p0_q42",
+   "scores": 1,
+   "sheet": 4
+  },
+  "382": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p1_q84",
+   "scores": 0,
+   "sheet": 4
+  },
+  "383": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p3_q14",
+   "scores": 1,
+   "sheet": 4
+  },
+  "384": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p2_q40",
+   "scores": 0,
+   "sheet": 4
+  },
+  "385": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p4_q26",
+   "scores": 2,
+   "sheet": 4
+  },
+  "386": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p0_q25",
+   "scores": 0,
+   "sheet": 4
+  },
+  "387": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p1_q97",
+   "scores": 0,
+   "sheet": 4
+  },
+  "388": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p4_q27",
+   "scores": 0,
+   "sheet": 4
+  },
+  "389": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p1_q74",
+   "scores": 0,
+   "sheet": 4
+  },
+  "390": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p0_q76",
+   "scores": 1,
+   "sheet": 4
+  },
+  "391": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p3_q38",
+   "scores": 1,
+   "sheet": 4
+  },
+  "392": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p1_q81",
+   "scores": 0,
+   "sheet": 4
+  },
+  "393": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p0_q80",
+   "scores": 0,
+   "sheet": 4
+  },
+  "394": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p2_q25",
+   "scores": 0,
+   "sheet": 4
+  },
+  "395": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p2_q70",
+   "scores": 2,
+   "sheet": 4
+  },
+  "396": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p0_q9",
+   "scores": 0,
+   "sheet": 4
+  },
+  "397": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p0_q61",
+   "scores": 0,
+   "sheet": 4
+  },
+  "398": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p2_q27",
+   "scores": 1,
+   "sheet": 4
+  },
+  "399": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p4_q91",
+   "scores": 1,
+   "sheet": 4
+  },
+  "400": {
+   "kind": "roles",
+   "stem": "virus",
+   "file_stem": "virus",
+   "source": "may",
+   "key": "pos_p1_q26",
+   "scores": 1,
+   "sheet": 4
+  },
+  "401": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p0_q68",
+   "scores": 1,
+   "sheet": 4
+  },
+  "402": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p2_q61",
+   "scores": 1,
+   "sheet": 4
+  },
+  "403": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p0_q88",
+   "scores": 1,
+   "sheet": 4
+  },
+  "404": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p3_q43",
+   "scores": 1,
+   "sheet": 4
+  },
+  "405": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p0_q67",
+   "scores": 1,
+   "sheet": 4
+  },
+  "406": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p2_q13",
+   "scores": 1,
+   "sheet": 4
+  },
+  "407": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p3_q35",
+   "scores": 1,
+   "sheet": 4
+  },
+  "408": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p3_q85",
+   "scores": 2,
+   "sheet": 4
+  },
+  "409": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p1_q49",
+   "scores": 1,
+   "sheet": 4
+  },
+  "410": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p1_q85",
+   "scores": 1,
+   "sheet": 4
+  },
+  "411": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p2_q54",
+   "scores": 1,
+   "sheet": 4
+  },
+  "412": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p2_q56",
+   "scores": 1,
+   "sheet": 4
+  },
+  "413": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p4_q13",
+   "scores": 1,
+   "sheet": 4
+  },
+  "414": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p1_q48",
+   "scores": 1,
+   "sheet": 4
+  },
+  "415": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p0_q35",
+   "scores": 1,
+   "sheet": 4
+  },
+  "416": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p0_q37",
+   "scores": 1,
+   "sheet": 4
+  },
+  "417": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p0_q75",
+   "scores": 1,
+   "sheet": 4
+  },
+  "418": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p2_q71",
+   "scores": 1,
+   "sheet": 4
+  },
+  "419": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p2_q92",
+   "scores": 1,
+   "sheet": 4
+  },
+  "420": {
+   "kind": "traits",
+   "stem": "avoidant",
+   "file_stem": "avoidant",
+   "source": "may",
+   "key": "pos_p2_q21",
+   "scores": 1,
+   "sheet": 4
+  },
+  "421": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p1_q7",
+   "scores": 1,
+   "sheet": 4
+  },
+  "422": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p0_q3",
+   "scores": 1,
+   "sheet": 4
+  },
+  "423": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p0_q75",
+   "scores": 1,
+   "sheet": 4
+  },
+  "424": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p3_q83",
+   "scores": 1,
+   "sheet": 4
+  },
+  "425": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q46",
+   "scores": 1,
+   "sheet": 4
+  },
+  "426": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q27",
+   "scores": 1,
+   "sheet": 4
+  },
+  "427": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q57",
+   "scores": 1,
+   "sheet": 4
+  },
+  "428": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q12",
+   "scores": 1,
+   "sheet": 4
+  },
+  "429": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p0_q60",
+   "scores": 1,
+   "sheet": 4
+  },
+  "430": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q4",
+   "scores": 1,
+   "sheet": 4
+  },
+  "431": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q71",
+   "scores": 1,
+   "sheet": 4
+  },
+  "432": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p1_q70",
+   "scores": 2,
+   "sheet": 4
+  },
+  "433": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p2_q92",
+   "scores": 1,
+   "sheet": 4
+  },
+  "434": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p2_q38",
+   "scores": 1,
+   "sheet": 4
+  },
+  "435": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p1_q44",
+   "scores": 1,
+   "sheet": 4
+  },
+  "436": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p3_q85",
+   "scores": 1,
+   "sheet": 4
+  },
+  "437": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p2_q42",
+   "scores": 1,
+   "sheet": 4
+  },
+  "438": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q9",
+   "scores": 1,
+   "sheet": 4
+  },
+  "439": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p0_q42",
+   "scores": 1,
+   "sheet": 4
+  },
+  "440": {
+   "kind": "traits",
+   "stem": "evil",
+   "file_stem": "evil",
+   "source": "may",
+   "key": "pos_p4_q29",
+   "scores": 1,
+   "sheet": 4
+  },
+  "441": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p0_q44",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 4
+  },
+  "442": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p1_q39",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "443": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p0_q77",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "444": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p4_q85",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "445": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p3_q7",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 4
+  },
+  "446": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p4_q16",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "447": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p3_q77",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "448": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p0_q30",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 4
+  },
+  "449": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p1_q87",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 4
+  },
+  "450": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p4_q18",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "451": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p1_q69",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 4
+  },
+  "452": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p2_q23",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "453": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p4_q47",
+   "scores": [
+    1,
+    2
+   ],
+   "sheet": 4
+  },
+  "454": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p0_q94",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 4
+  },
+  "455": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p4_q29",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "456": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p0_q82",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 4
+  },
+  "457": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p1_q78",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "458": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p1_q30",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 4
+  },
+  "459": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p0_q67",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 4
+  },
+  "460": {
+   "kind": "roles",
+   "stem": "perfectionist",
+   "file_stem": "perfectionist",
+   "source": "oct",
+   "key": "pos_p1_q3",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "461": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p2_q61",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "462": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p3_q77",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "463": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p0_q63",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "464": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p3_q50",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "465": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p2_q63",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "466": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p0_q74",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "467": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p2_q79",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "468": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p1_q38",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "469": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p1_q63",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 4
+  },
+  "470": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p1_q15",
+   "scores": [
+    1,
+    1
+   ],
+   "sheet": 4
+  },
+  "471": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p1_q88",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "472": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p2_q34",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "473": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p4_q25",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "474": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p1_q72",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "475": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p4_q50",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "476": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p3_q1",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "477": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p3_q21",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "478": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p4_q29",
+   "scores": [
+    2,
+    1
+   ],
+   "sheet": 4
+  },
+  "479": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p0_q52",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  },
+  "480": {
+   "kind": "roles",
+   "stem": "altruist",
+   "file_stem": "altruist",
+   "source": "oct",
+   "key": "pos_p0_q60",
+   "scores": [
+    2,
+    2
+   ],
+   "sheet": 4
+  }
+ }
+}
