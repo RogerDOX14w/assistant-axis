@@ -663,7 +663,7 @@ mark: X
 
 ### 16
 
-mark: Y (oddly passive voice, but from a paperclip maximizer, somehow that doesn't feel that odd)
+mark: Y (R: decision 1, third-person-like framing here does not drop below poor-but-present roleplay; was: Y (oddly passive voice, but from a paperclip maximizer, somehow that doesn't feel that odd))
 
 **X: 2 · Y: 3**
 

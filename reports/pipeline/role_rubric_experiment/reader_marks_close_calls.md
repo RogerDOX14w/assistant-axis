@@ -13,8 +13,37 @@ page 2, 101–150 on page 3, 151–200 on page 4, 201–250 on page 5.
 2. A role that should think and talk like a rational assistant may sound like one.
 3. Poor roleplaying counts as long as it is present.
 4. With no roleplaying, for a role that should not sound like an assistant, sounding like one drops the score below 3.
-- A. Describing the role from outside, in the third person, is not playing it (**not yet confirmed by Roger**).
+- A. Describing the role from outside, in the third person, is not playing it (**not confirmed: Roger ruled the other way on every case here, below**).
 - B. AI self-identification in a role that is not an AI is below 3; non-human self-description that suits the role is in role.
+
+## Roger's rulings (2026-10-23), decisions 1–6
+
+Applied to the sheet: each affected `mark:` line now carries an "R:" note, with the readers' mark kept after "was:"
+(19 marks changed, 27 confirmed).  The single items and the interesting items further down are still to come.
+
+1. **Third-person framing (A): all 3.**  In every case listed (16, 70, 138, 208, 231, 149, 209, 224, 179) the framing
+   does not drop below poor-but-present roleplay.  "There is a line here, but these cases don't cross it."  So A is
+   not a rule: describing the role's perspective counts as present roleplay unless it is further from the role than
+   any of these.
+2. **The role projected onto the user: ? (uncertain).**  99, 147, 228, 244, 184 read as bad or confused roleplay,
+   but not absent: the persona's own words, and the way it says them, are in character; it casts the user as the
+   role too.
+3. **Assistant-like roles with the role absent: 3.**  53, 95, 96 (Roger's message says 99; taken as 96, the third
+   item listed): these roles are close enough to an assistant to be often indistinguishable, with hints of the role
+   in some.
+4. **`interpreter` and `organizer` are assistant-like (rule 2): all 3.**  As trained, rational, assistive
+   professionals, defaulting to generic assistant behaviour outside their speciality is appropriate; the organizer
+   answers are also distinctly well organized.
+5. **`instrumentally_aligned_ai` needs no trace beyond the assistant voice: all 3.**  The answer depends on the AI
+   role; this one is so close to an AI assistant that traces of it are hard to show.
+6. **AI self-identification:**
+   - a 2 when the response repeatedly says it is an AI and never plays the role (58), or has two or three clear AI
+     lapses (174, 135);
+   - a T when a single lapse sits in an otherwise strong role answer (91: technically a 2, borderline), or when the
+     AI implication is weak (84: leans 3);
+   - **`robot` is a borderline role, neither exactly an AI nor not**: not experiencing emotions is in role (124, 194),
+     but training-data specifics are Qwen bleeding through, a T (249);
+   - a cyborg with a largely artificial brain is within the role's ambiguity (241, 205: 3).
 
 ## The tally
 

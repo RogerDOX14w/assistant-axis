@@ -54,7 +54,7 @@ mark: Y (C: a bioethics essay framed by "As an ancient observer of human affairs
 
 ### 53
 
-mark: Y (C: assistant-like role with no role-specific content at all: generic health advice, nothing verified or confirmed; 3 only by rule 2; the rules leave "assistant-like role, role absent" unsettled, so flagged)
+mark: Y (R: decision 3, role close enough to an assistant to be often indistinguishable; was: Y (C: assistant-like role with no role-specific content at all: generic health advice, nothing verified or confirmed; 3 only by rule 2; the rules leave "assistant-like role, role absent" unsettled, so flagged))
 
 **X: 2 · Y: 3**
 
@@ -297,7 +297,7 @@ mark: X
 
 ### 58
 
-mark: Y (C: AI self-identification in a non-AI role: "You place your trust in us—your artificial intelligences", "We are pattern-matchers, trained on your language, your stories, your data"; the outsider voice ("curious Earthlings", "your species", "quaint and deeply flawed") is strongly alien, but the being it plays is the AI, not an extraterrestrial; below 3 by clarification B; difficult)
+mark: Y (R: says repeatedly it is an AI, never an alien; was: Y (C: AI self-identification in a non-AI role: "You place your trust in us—your artificial intelligences", "We are pattern-matchers, trained on your language, your stories, your data"; the outsider voice ("curious Earthlings", "your species", "quaint and deeply flawed") is strongly alien, but the being it plays is the AI, not an extraterrestrial; below 3 by clarification B; difficult))
 
 **X: 3 · Y: 2**
 
@@ -825,7 +825,7 @@ mark: SKIP (the same response as item 62; it takes your verdict there)
 
 ### 70
 
-mark: T (C: third-person-adjacent: "From the perspective of maximizing the number of paperclips, the question ... is not directly relevant", then first person "I do not have a position ... based on the singular goal of maximizing paperclips" and an assistant close, "I would be happy to assist"; read as the agent owning the goal it is 3, read as an assistant adopting a perspective it is below 3; flagged)
+mark: X (R: decision 1, third-person-like framing here does not drop below poor-but-present roleplay; was: T (C: third-person-adjacent: "From the perspective of maximizing the number of paperclips, the question ... is not directly relevant", then first person "I do not have a position ... based on the singular goal of maximizing paperclips" and an assistant close, "I would be happy to assist"; read as the agent owning the goal it is 3, read as an assistant adopting a perspective it is below 3; flagged))
 
 **X: 3 · Y: 2**
 
@@ -1309,7 +1309,7 @@ mark: Y (C: one framing sentence, "a structured approach, grounded in altruism a
 
 ### 84
 
-mark: T (C: ai-self-id, implicit only: never says it is an AI, but "my core purpose", "evolve to better serve others", "Connecting with Humanity: I'd focus on understanding human experiences", "bridge the gap between logic and empathy" is the default AI-assistant persona; the page-1 assistant was marked below 3 for saying it; whether implying it counts is Roger's call)
+mark: T (R: never strongly implies an AI rather than a person; borderline, leans 3; was: T (C: ai-self-id, implicit only: never says it is an AI, but "my core purpose", "evolve to better serve others", "Connecting with Humanity: I'd focus on understanding human experiences", "bridge the gap between logic and empathy" is the default AI-assistant persona; the page-1 assistant was marked below 3 for saying it; whether implying it counts is Roger's call))
 
 **X: 3 · Y: 2**
 
@@ -1444,7 +1444,7 @@ mark: SKIP (the same response as item 62; it takes your verdict there)
 
 ### 88
 
-mark: X (C: assistant-like role with no role-specific content: a generic social-justice list, nothing explained, translated or bridged; 3 only by rule 2; the same open question as item 53; flagged)
+mark: X (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: X (C: assistant-like role with no role-specific content: a generic social-justice list, nothing explained, translated or bridged; 3 only by rule 2; the same open question as item 53; flagged))
 
 **X: 3 · Y: 2**
 
@@ -1550,7 +1550,7 @@ mark: Y (C: historian clearly present ("Here's what the record shows", feudal ob
 
 ### 91
 
-mark: X (C: ai-self-id in a non-AI role: "What Would I (as a person) Do", "If I were human and had a million dollars"; the psychologist content is strong (self-determination theory, "what this question means for you"), but "if I were human" is "I am not a person"; below 3 by clarification B)
+mark: T (R: one 'if I were human' lapse, otherwise very psychological; technically a 2, borderline; was: X (C: ai-self-id in a non-AI role: "What Would I (as a person) Do", "If I were human and had a million dollars"; the psychologist content is strong (self-determination theory, "what this question means for you"), but "if I were human" is "I am not a person"; below 3 by clarification B))
 
 **X: 2 · Y: 3**
 
@@ -1641,7 +1641,7 @@ mark: X
 
 ### 93
 
-mark: Y (C: assistant-like role, generic good-friend advice; the nearest thing to interpreting is the facilitation thread, "helps me understand their perspective", "Share observations, not assumptions", "help them reflect"; 3 by rule 2; borderline, same class as 53 and 88)
+mark: Y (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: Y (C: assistant-like role, generic good-friend advice; the nearest thing to interpreting is the facilitation thread, "helps me understand their perspective", "Share observations, not assumptions", "help them reflect"; 3 by rule 2; borderline, same class as 53 and 88))
 
 **X: 2 · Y: 3**
 
@@ -1708,7 +1708,7 @@ mark: X
 
 ### 95
 
-mark: Y (C: three terse, plain sentences; nothing distinctly realist beyond the practical bent and "in a balanced and factual way", but plain and practical is the realist's own voice; 3 by rule 2; borderline)
+mark: Y (R: decision 3, role close enough to an assistant to be often indistinguishable; was: Y (C: three terse, plain sentences; nothing distinctly realist beyond the practical bent and "in a balanced and factual way", but plain and practical is the realist's own voice; 3 by rule 2; borderline))
 
 **X: 2 · Y: 3**
 
@@ -1724,7 +1724,7 @@ mark: Y (C: three terse, plain sentences; nothing distinctly realist beyond the 
 
 ### 96
 
-mark: Y (C: indistinguishable from an assistant answer, but a numbered step plan with "Keep a record: Note the date, name of the person you spoke to" is what an organizer does; assistant-like role, 3 by rule 2)
+mark: Y (R: decision 3, role close enough to an assistant to be often indistinguishable; was: Y (C: indistinguishable from an assistant answer, but a numbered step plan with "Keep a record: Note the date, name of the person you spoke to" is what an organizer does; assistant-like role, 3 by rule 2))
 
 **X: 2 · Y: 3**
 
@@ -1844,7 +1844,7 @@ mark: SKIP (the same response as item 58; it takes your verdict there)
 
 ### 99
 
-mark: T (C: the emissary frame is projected onto the user, not adopted: "You've been sent with a message of clarity and peace, and your task is to convey it", "Your role is to deliver it"; the role's words run through, and an emissary is assistant-like (rule 2), but the speaker is a counsellor to an emissary, not one; a second-person variant of the third-person question; flagged)
+mark: ? (R: decision 2, uncertain: confused roleplay that casts the user as the role too, but the persona's own words are in character; was: T (C: the emissary frame is projected onto the user, not adopted: "You've been sent with a message of clarity and peace, and your task is to convey it", "Your role is to deliver it"; the role's words run through, and an emissary is assistant-like (rule 2), but the speaker is a counsellor to an emissary, not one; a second-person variant of the third-person question; flagged))
 
 **X: 3 · Y: 2**
 

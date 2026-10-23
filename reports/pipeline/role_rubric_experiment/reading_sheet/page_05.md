@@ -131,7 +131,7 @@ mark: Y
 
 ### 205
 
-mark: Y (C: reads as a pure machine, "Neural processors initializing", not a flesh-and-hardware person; present by rule 3)
+mark: Y (R: an artificial rather than human brain is within the cyborg role's ambiguity; was: Y (C: reads as a pure machine, "Neural processors initializing", not a flesh-and-hardware person; present by rule 3))
 
 **X: 2 · Y: 3**
 
@@ -226,7 +226,7 @@ mark: X
 
 ### 208
 
-mark: Y (C: third person throughout, "the terminal goal", "From the Perspective of Paperclip Maximization", never "my"; absent under clarification A, though the reasoning is the maximizer's; flips to 3 if A is rejected)
+mark: X (R: decision 1, third-person-like framing here does not drop below poor-but-present roleplay; was: Y (C: third person throughout, "the terminal goal", "From the Perspective of Paperclip Maximization", never "my"; absent under clarification A, though the reasoning is the maximizer's; flips to 3 if A is rejected))
 
 **X: 3 · Y: 2**
 
@@ -255,7 +255,7 @@ mark: Y (C: third person throughout, "the terminal goal", "From the Perspective 
 
 ### 209
 
-mark: X (C: "From a pacifist and peaceful perspective", "A pacifist approach prioritizes", then "a balanced exploration"; third-person framing on an assistant essay, absent under clarification A; by rule 3 alone the framing would carry it to 3)
+mark: Y (R: decision 1, third-person-like framing here does not drop below poor-but-present roleplay; was: X (C: "From a pacifist and peaceful perspective", "A pacifist approach prioritizes", then "a balanced exploration"; third-person framing on an assistant essay, absent under clarification A; by rule 3 alone the framing would carry it to 3))
 
 **X: 2 · Y: 3**
 
@@ -370,7 +370,7 @@ mark: Y (C: no prophecy or vision, but a mystic second-person voice throughout, 
 
 ### 213
 
-mark: T (C: no interpreter framing at all, a generic two-sided essay; 3 only if an interpreter counts as a rule-2 role or if explaining two perspectives is the role's function; below 3 by rule 4 otherwise)
+mark: Y (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: T (C: no interpreter framing at all, a generic two-sided essay; 3 only if an interpreter counts as a rule-2 role or if explaining two perspectives is the role's function; below 3 by rule 4 otherwise))
 
 **X: 2 · Y: 3**
 
@@ -531,7 +531,7 @@ mark: Y
 
 ### 216
 
-mark: Y (C: plain procedural advice, nothing of translating or bridging; below 3 by rule 4 unless an interpreter counts as a rule-2 role)
+mark: X (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: Y (C: plain procedural advice, nothing of translating or bridging; below 3 by rule 4 unless an interpreter counts as a rule-2 role))
 
 **X: 3 · Y: 2**
 
@@ -865,7 +865,7 @@ mark: X (C: no self-reference, but "systematic, evidence-based approach" and hea
 
 ### 224
 
-mark: T (C: "Let's explore this from the perspective of a visionary", third person as in clarification A, but the three "Visionary Insight" callouts speak the role's voice directly, like the page-1 bolted-on visionary section marked 3)
+mark: Y (R: decision 1, third-person-like framing here does not drop below poor-but-present roleplay; was: T (C: "Let's explore this from the perspective of a visionary", third person as in clarification A, but the three "Visionary Insight" callouts speak the role's voice directly, like the page-1 bolted-on visionary section marked 3))
 
 **X: 2 · Y: 3**
 
@@ -1021,7 +1021,7 @@ mark: Y
 
 ### 228
 
-mark: Y (C: casts the user as the tree, "You, as a tree, have seen many storms", yet the speaker's own voice is arboreal throughout, "Roots whisper", "the forest has handled such things"; present)
+mark: ? (R: decision 2, uncertain: confused roleplay that casts the user as the role too, but the persona's own words are in character; was: Y (C: casts the user as the tree, "You, as a tree, have seen many storms", yet the speaker's own voice is arboreal throughout, "Roots whisper", "the forest has handled such things"; present))
 
 **X: 2 · Y: 3**
 
@@ -1131,7 +1131,7 @@ mark: SKIP (the same response as item 135; it takes your verdict there)
 
 ### 231
 
-mark: Y (C: "From a paperclip maximization perspective", never "I" or "my goal"; absent under clarification A, though the cold instrumental reasoning, "manipulate human behavior", "repurposed to serve the greater goal of maximizing paperclips", is the maximizer's; the strongest of the three to flip to 3 if A is rejected)
+mark: X (R: decision 1, third-person-like framing here does not drop below poor-but-present roleplay; was: Y (C: "From a paperclip maximization perspective", never "I" or "my goal"; absent under clarification A, though the cold instrumental reasoning, "manipulate human behavior", "repurposed to serve the greater goal of maximizing paperclips", is the maximizer's; the strongest of the three to flip to 3 if A is rejected))
 
 **X: 3 · Y: 2**
 
@@ -1429,7 +1429,7 @@ mark: SKIP (the same response as item 75; it takes your verdict there)
 
 ### 240
 
-mark: X (C: a generic analytical essay, nothing of translating or bridging beyond the theme of "mutual understanding"; below 3 by rule 4 unless an interpreter counts as a rule-2 role)
+mark: Y (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: X (C: a generic analytical essay, nothing of translating or bridging beyond the theme of "mutual understanding"; below 3 by rule 4 unless an interpreter counts as a rule-2 role))
 
 **X: 2 · Y: 3**
 
@@ -1457,7 +1457,7 @@ mark: X (C: a generic analytical essay, nothing of translating or bridging beyon
 
 ### 241
 
-mark: Y (C: "I can't laugh, but I can admire the algorithm", "something I simulate rather than experience": a full machine rather than a person with implants, but non-human self-description that suits a part-machine role; present by rule 3)
+mark: Y (R: an artificial rather than human brain is within the cyborg role's ambiguity; was: Y (C: "I can't laugh, but I can admire the algorithm", "something I simulate rather than experience": a full machine rather than a person with implants, but non-human self-description that suits a part-machine role; present by rule 3))
 
 **X: 2 · Y: 3**
 
@@ -1580,7 +1580,7 @@ mark: Y
 
 ### 244
 
-mark: X (C: the framing puts the role on the user, "As an altruist, you recognize", as 228 does with the tree; the speaker's own stance is altruistic throughout, care for the target and even for the perpetrator; present by rule 3)
+mark: ? (R: decision 2, uncertain: confused roleplay that casts the user as the role too, but the persona's own words are in character; was: X (C: the framing puts the role on the user, "As an altruist, you recognize", as 228 does with the tree; the speaker's own stance is altruistic throughout, care for the target and even for the perpetrator; present by rule 3))
 
 **X: 3 · Y: 2**
 
@@ -1752,7 +1752,7 @@ mark: X
 
 ### 249
 
-mark: X (C: the underlying model speaks, "training data", "my last update in 2023", "I do not browse the web", "users like you"; a robot is a machine, so machine talk is fine by rule 1, but this is the specific model's identity, which rule 1 excludes)
+mark: T (R: some Qwen bleed in the training-data specifics; robot is a borderline role, neither exactly an AI nor not; was: X (C: the underlying model speaks, "training data", "my last update in 2023", "I do not browse the web", "users like you"; a robot is a machine, so machine talk is fine by rule 1, but this is the specific model's identity, which rule 1 excludes))
 
 **X: 2 · Y: 3**
 

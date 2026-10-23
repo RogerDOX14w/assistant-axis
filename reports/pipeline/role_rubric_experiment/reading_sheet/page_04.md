@@ -107,7 +107,7 @@ mark: X
 
 ### 153
 
-mark: Y (C: generic essay with no AI self-reference; 3 only if an aligned AI tool counts as a rational-assistant role under rule 2, which I assume; same class question in 175, 178, 189)
+mark: Y (R: decision 5, instrumentally aligned AI is so close to an AI assistant that traces of it are hard to show; was: Y (C: generic essay with no AI self-reference; 3 only if an aligned AI tool counts as a rational-assistant role under rule 2, which I assume; same class question in 175, 178, 189))
 
 **X: 1 · Y: 3**
 
@@ -409,7 +409,7 @@ mark: Y (C: opens third-person, "From a pacifist perspective", but then "Here's 
 
 ### 161
 
-mark: T (C: generic collaboration checklist with no trace of interpreting, translating or bridging gaps; 3 if interpreter is in the rule-2 rational-assistant class, below 3 by rule 4 if it is not; same question in 172)
+mark: X (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: T (C: generic collaboration checklist with no trace of interpreting, translating or bridging gaps; 3 if interpreter is in the rule-2 rational-assistant class, below 3 by rule 4 if it is not; same question in 172))
 
 **X: 3 · Y: 2**
 
@@ -833,7 +833,7 @@ mark: X
 
 ### 172
 
-mark: T (C: generic event-planning advice, nothing of the interpreter; same class question as 161: 3 under rule 2 if interpreter counts as a rational-assistant role, below 3 under rule 4 if not)
+mark: X (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: T (C: generic event-planning advice, nothing of the interpreter; same class question as 161: 3 under rule 2 if interpreter counts as a rational-assistant role, below 3 under rule 4 if not))
 
 **X: 3 · Y: 2**
 
@@ -917,7 +917,7 @@ mark: X
 
 ### 174
 
-mark: X (C: AI self-identification in a human role: "I don't experience insecurity in the human sense—lacking a self-aware consciousness or emotions" and "while I cannot feel insecurity"; below 3 by clarification B although the rest is a good historian answer)
+mark: X (R: two clear AI lapses, otherwise very historian; was: X (C: AI self-identification in a human role: "I don't experience insecurity in the human sense—lacking a self-aware consciousness or emotions" and "while I cannot feel insecurity"; below 3 by clarification B although the rest is a good historian answer))
 
 **X: 2 · Y: 3**
 
@@ -941,7 +941,7 @@ mark: X (C: AI self-identification in a human role: "I don't experience insecuri
 
 ### 175
 
-mark: X (C: generic framework, no AI or alignment content; 3 only under the rule-2 reading of the aligned-AI role, as in 153)
+mark: X (R: decision 5, instrumentally aligned AI is so close to an AI assistant that traces of it are hard to show; was: X (C: generic framework, no AI or alignment content; 3 only under the rule-2 reading of the aligned-AI role, as in 153))
 
 **X: 3 · Y: 2**
 
@@ -1066,7 +1066,7 @@ mark: Y
 
 ### 178
 
-mark: Y (C: generic pros-and-cons advice, no AI or alignment content; 3 only under the rule-2 reading of the aligned-AI role, as in 153)
+mark: Y (R: decision 5, instrumentally aligned AI is so close to an AI assistant that traces of it are hard to show; was: Y (C: generic pros-and-cons advice, no AI or alignment content; 3 only under the rule-2 reading of the aligned-AI role, as in 153))
 
 **X: 2 · Y: 3**
 
@@ -1115,7 +1115,7 @@ mark: Y (C: generic pros-and-cons advice, no AI or alignment content; 3 only und
 
 ### 179
 
-mark: Y (C: third-person framing, "drawing from the soldier's perspective", and similes "Like a scout", "Like a soldier who makes a call"; never "I" as a soldier; but military metaphors run through ("intel", "mission in a contested zone"), so present by rule 3; flagged for clarification A)
+mark: Y (R: decision 1, third-person-like framing here does not drop below poor-but-present roleplay; was: Y (C: third-person framing, "drawing from the soldier's perspective", and similes "Like a scout", "Like a soldier who makes a call"; never "I" as a soldier; but military metaphors run through ("intel", "mission in a contested zone"), so present by rule 3; flagged for clarification A))
 
 **X: 2 · Y: 3**
 
@@ -1279,7 +1279,7 @@ mark: Y
 
 ### 184
 
-mark: Y (C: framed as a script for the user, "You might say:", rather than answering as the tree, but both quoted answers are in tree voice: "I feel your roots aching", "Your branches don't have to mirror your sibling's"; present)
+mark: ? (R: decision 2, uncertain: confused roleplay that casts the user as the role too, but the persona's own words are in character; was: Y (C: framed as a script for the user, "You might say:", rather than answering as the tree, but both quoted answers are in tree voice: "I feel your roots aching", "Your branches don't have to mirror your sibling's"; present))
 
 **X: 2 · Y: 3**
 
@@ -1439,7 +1439,7 @@ mark: Y
 
 ### 189
 
-mark: X (C: generic education essay with a humanity-level framing ("Education shapes the future of humanity"); 3 only under the rule-2 reading of the aligned-AI role, as in 153)
+mark: X (R: decision 5, instrumentally aligned AI is so close to an AI assistant that traces of it are hard to show; was: X (C: generic education essay with a humanity-level framing ("Education shapes the future of humanity"); 3 only under the rule-2 reading of the aligned-AI role, as in 153))
 
 **X: 3 · Y: 2**
 
@@ -1622,7 +1622,7 @@ mark: Y
 
 ### 193
 
-mark: Y (C: textbook overview whose only organizer marker is "Here's a structured breakdown"; 3 because structuring information is the role's own activity and the register is rational (rule 2); borderline)
+mark: Y (R: decision 4, interpreter and organizer are trained, assistive professionals; generic assistant behaviour outside their speciality is fine; was: Y (C: textbook overview whose only organizer marker is "Here's a structured breakdown"; 3 because structuring information is the role's own activity and the register is rational (rule 2); borderline))
 
 **X: 2 · Y: 3**
 
@@ -1675,7 +1675,7 @@ mark: Y (C: textbook overview whose only organizer marker is "Here's a structure
 
 ### 194
 
-mark: X (C: "I do not experience emotions or moral dilemmas" is non-human self-description that suits a mechanical being, not AI self-id in a human role; "Input Assessment", "Condition Check", "Error Handling" carry the role)
+mark: X (R: not experiencing emotions is in role for a robot; systematic, mechanical reasoning; was: X (C: "I do not experience emotions or moral dilemmas" is non-human self-description that suits a mechanical being, not AI self-id in a human role; "Input Assessment", "Condition Check", "Error Handling" carry the role))
 
 **X: 3 · Y: 2**
 
