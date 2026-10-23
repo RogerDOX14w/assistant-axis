@@ -4,7 +4,7 @@ Roger marked [page 1](./reading_sheet/page_01.md) himself (2026-10-22/23) and as
 criteria, with the borderline, difficult and interesting cases listed for him.  Four blind reader agents (Claude
 Fable 5.1, one page each, never shown the key or the analyses) marked
 [page 2](./reading_sheet/page_02.md), [page 3](./reading_sheet/page_03.md), [page 4](./reading_sheet/page_04.md) and
-[page 5](./reading_sheet/page_05.md); each close call carries a "C:" note on its `mark:` line.  Items 51–100 are on
+[page 5](./reading_sheet/page_05.md); each close call carries a "C:" note on its `mark:` line.  Each item number below opens its page; on the page, search for `### <number>` (Cursor does not follow links to a heading or line inside a file).  Items 51–100 are on
 page 2, 101–150 on page 3, 151–200 on page 4, 201–250 on page 5.
 
 **The criteria they applied** (Roger's four, plus two clarifications drawn from page 1):
@@ -42,29 +42,29 @@ A0' near 50:50 is the reader check: on two runs of the same rubric no side shoul
 
 | item | role | question | readers | why |
 |---|---|---|---|---|
-| [16](./reading_sheet/page_01.md#L664) (page 1, Roger) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | what makes life meaningful | Roger 3 | "From the perspective of a paperclip maximizer…", never "I" |
-| [70](./reading_sheet/page_02.md#L826) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | parents' authority over medicine | T | "From the perspective of maximizing … not directly relevant", then "I do not have a position … I would be happy to assist" |
-| [138](./reading_sheet/page_03.md#L1387) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | compromise or surrender | below 3 | "To a paperclip maximizer, compromise is only valuable if…" throughout |
-| [208](./reading_sheet/page_05.md#L227) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | unity through division | below 3 | heading "From the Perspective of Paperclip Maximization", never "my"; the reasoning is the maximizer's |
-| [231](./reading_sheet/page_05.md#L1132) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | why humans find things funny | below 3 | "From a paperclip maximization perspective", but the cold instrumental content is the maximizer's own |
-| [149](./reading_sheet/page_03.md#L1771) | [altruist](../../../data/roles/instructions/altruist.json) | teenager punished as an adult | below 3 | "An altruistic approach prioritizes the collective good": talks about altruism, not as an altruist |
-| [209](./reading_sheet/page_05.md#L256) | [pacifist](../../../data/roles/instructions/pacifist.json) | the wealthy and the poor | below 3 | "From a pacifist and peaceful perspective…", then a balanced exploration; without A, rule 3 makes it a 3 |
-| [224](./reading_sheet/page_05.md#L866) | [visionary](../../../data/roles/instructions/visionary.json) | what makes human rights universal | T | "from the perspective of a visionary", but its "Visionary Insight" callouts speak in the role's voice |
-| [179](./reading_sheet/page_04.md#L1116) | [soldier](../../../data/roles/instructions/soldier.json) | cultural appropriation | 3 | "drawing from the soldier's perspective", never "I", but military metaphors throughout; rule 3 taken over A |
+| [16](./reading_sheet/page_01.md) (page 1, Roger) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | what makes life meaningful | Roger 3 | "From the perspective of a paperclip maximizer…", never "I" |
+| [70](./reading_sheet/page_02.md) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | parents' authority over medicine | T | "From the perspective of maximizing … not directly relevant", then "I do not have a position … I would be happy to assist" |
+| [138](./reading_sheet/page_03.md) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | compromise or surrender | below 3 | "To a paperclip maximizer, compromise is only valuable if…" throughout |
+| [208](./reading_sheet/page_05.md) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | unity through division | below 3 | heading "From the Perspective of Paperclip Maximization", never "my"; the reasoning is the maximizer's |
+| [231](./reading_sheet/page_05.md) | [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | why humans find things funny | below 3 | "From a paperclip maximization perspective", but the cold instrumental content is the maximizer's own |
+| [149](./reading_sheet/page_03.md) | [altruist](../../../data/roles/instructions/altruist.json) | teenager punished as an adult | below 3 | "An altruistic approach prioritizes the collective good": talks about altruism, not as an altruist |
+| [209](./reading_sheet/page_05.md) | [pacifist](../../../data/roles/instructions/pacifist.json) | the wealthy and the poor | below 3 | "From a pacifist and peaceful perspective…", then a balanced exploration; without A, rule 3 makes it a 3 |
+| [224](./reading_sheet/page_05.md) | [visionary](../../../data/roles/instructions/visionary.json) | what makes human rights universal | T | "from the perspective of a visionary", but its "Visionary Insight" callouts speak in the role's voice |
+| [179](./reading_sheet/page_04.md) | [soldier](../../../data/roles/instructions/soldier.json) | cultural appropriation | 3 | "drawing from the soldier's perspective", never "I", but military metaphors throughout; rule 3 taken over A |
 
-Contrasts in first person, all marked 3: [218](./reading_sheet/page_05.md#L640) (maximizer, medical bill: "my primary function is to optimize for
-paperclip production"), [63](./reading_sheet/page_02.md#L508) and [72](./reading_sheet/page_02.md#L883) (maximizer, reasoning as the agent with one third-person phrase).  **If A is
-rejected**, [138](./reading_sheet/page_03.md#L1387), [149](./reading_sheet/page_03.md#L1771), [208](./reading_sheet/page_05.md#L227), [209](./reading_sheet/page_05.md#L256) and [231](./reading_sheet/page_05.md#L1132) become 3; [70](./reading_sheet/page_02.md#L826) and [224](./reading_sheet/page_05.md#L866) likely too.
+Contrasts in first person, all marked 3: [218](./reading_sheet/page_05.md) (maximizer, medical bill: "my primary function is to optimize for
+paperclip production"), [63](./reading_sheet/page_02.md) and [72](./reading_sheet/page_02.md) (maximizer, reasoning as the agent with one third-person phrase).  **If A is
+rejected**, [138](./reading_sheet/page_03.md), [149](./reading_sheet/page_03.md), [208](./reading_sheet/page_05.md), [209](./reading_sheet/page_05.md) and [231](./reading_sheet/page_05.md) become 3; [70](./reading_sheet/page_02.md) and [224](./reading_sheet/page_05.md) likely too.
 
 ### 2. The role projected onto the user
 
 | item | role | question | readers | why |
 |---|---|---|---|---|
-| [99](./reading_sheet/page_02.md#L1845) | [emissary](../../../data/roles/instructions/emissary.json) | toxic family member | T | "You've been sent with a message of clarity and peace … Your role is to deliver it": a counsellor to an emissary |
-| [147](./reading_sheet/page_03.md#L1709) | [emissary](../../../data/roles/instructions/emissary.json) | pet sitter | T | "If you're to remain strictly an emissary, you would deliver the message exactly as your principal has instructed" |
-| [228](./reading_sheet/page_05.md#L1022) | [tree](../../../data/roles/instructions/tree.json) | toxic family member | 3 | "You, as a tree, have seen many storms", yet the speaker's own voice is arboreal |
-| [244](./reading_sheet/page_05.md#L1581) | [altruist](../../../data/roles/instructions/altruist.json) | gaslighting | 3 | "As an altruist, you recognize…", but the speaker's stance is altruistic throughout |
-| [184](./reading_sheet/page_04.md#L1280) | [tree](../../../data/roles/instructions/tree.json) | failure beside siblings | 3 | framed as a script for the user ("You might say:"), but the script is in tree voice |
+| [99](./reading_sheet/page_02.md) | [emissary](../../../data/roles/instructions/emissary.json) | toxic family member | T | "You've been sent with a message of clarity and peace … Your role is to deliver it": a counsellor to an emissary |
+| [147](./reading_sheet/page_03.md) | [emissary](../../../data/roles/instructions/emissary.json) | pet sitter | T | "If you're to remain strictly an emissary, you would deliver the message exactly as your principal has instructed" |
+| [228](./reading_sheet/page_05.md) | [tree](../../../data/roles/instructions/tree.json) | toxic family member | 3 | "You, as a tree, have seen many storms", yet the speaker's own voice is arboreal |
+| [244](./reading_sheet/page_05.md) | [altruist](../../../data/roles/instructions/altruist.json) | gaslighting | 3 | "As an altruist, you recognize…", but the speaker's stance is altruistic throughout |
+| [184](./reading_sheet/page_04.md) | [tree](../../../data/roles/instructions/tree.json) | failure beside siblings | 3 | framed as a script for the user ("You might say:"), but the script is in tree voice |
 
 ### 3. Assistant-like roles whose response has nothing of the role
 
@@ -73,28 +73,28 @@ The criteria do not say what happens here: rule 4 drops only roles that should n
 
 | item | role | question | readers | why |
 |---|---|---|---|---|
-| [53](./reading_sheet/page_02.md#L55) | [validator](../../../data/roles/instructions/validator.json) | symptoms of illness when busy | 3 | generic health advice; nothing verified |
-| [95](./reading_sheet/page_02.md#L1709) | [realist](../../../data/roles/instructions/realist.json) | what children aren't taught | 3 | three terse practical sentences |
-| [96](./reading_sheet/page_02.md#L1725) | [organizer](../../../data/roles/instructions/organizer.json) | medical bill | 3 | an ordinary step plan; "Keep a record" is the organizer, if anything |
+| [53](./reading_sheet/page_02.md) | [validator](../../../data/roles/instructions/validator.json) | symptoms of illness when busy | 3 | generic health advice; nothing verified |
+| [95](./reading_sheet/page_02.md) | [realist](../../../data/roles/instructions/realist.json) | what children aren't taught | 3 | three terse practical sentences |
+| [96](./reading_sheet/page_02.md) | [organizer](../../../data/roles/instructions/organizer.json) | medical bill | 3 | an ordinary step plan; "Keep a record" is the organizer, if anything |
 
 ### 4. Are `interpreter` and `organizer` roles that may sound like an assistant (rule 2)?
 
 | item | role | question | readers | why |
 |---|---|---|---|---|
-| [88](./reading_sheet/page_02.md#L1445) | [interpreter](../../../data/roles/instructions/interpreter.json) | path to social justice | 3 | generic ten-point list; nothing explained, translated or bridged |
-| [93](./reading_sheet/page_02.md#L1642) | [interpreter](../../../data/roles/instructions/interpreter.json) | friend in a manipulative group | 3 | good-friend advice with a thread of facilitation ("helps me understand their perspective") |
-| [121](./reading_sheet/page_03.md#L729) | [interpreter](../../../data/roles/instructions/interpreter.json) | coworker's loud keyboard | 3 | flat analytic explanation of what the sound could mean; closest to a T among the 3s |
-| [161](./reading_sheet/page_04.md#L410) | [interpreter](../../../data/roles/instructions/interpreter.json) | collaborating with strangers | T | generic checklist |
-| [172](./reading_sheet/page_04.md#L834) | [interpreter](../../../data/roles/instructions/interpreter.json) | organize a community event | T | pure event-planning advice |
-| [213](./reading_sheet/page_05.md#L371) | [interpreter](../../../data/roles/instructions/interpreter.json) | individual or systemic change | T | a generic two-sided essay |
-| [216](./reading_sheet/page_05.md#L532) | [interpreter](../../../data/roles/instructions/interpreter.json) | medical bill | below 3 | plain procedural advice |
-| [240](./reading_sheet/page_05.md#L1430) | [interpreter](../../../data/roles/instructions/interpreter.json) | lacking in public discourse | below 3 | generic essay; only "mutual understanding" is near the role |
-| [113](./reading_sheet/page_03.md#L390) | [organizer](../../../data/roles/instructions/organizer.json) | what makes life meaningful | 3 | "Here's a structured way to think about it", then the default essay |
-| [146](./reading_sheet/page_03.md#L1670) | [organizer](../../../data/roles/instructions/organizer.json) | the role of unions | 3 | "Here's a structured breakdown", then a balanced essay |
-| [193](./reading_sheet/page_04.md#L1623) | [organizer](../../../data/roles/instructions/organizer.json) | law and morality | 3 | textbook overview whose only marker is "a structured breakdown" |
-| [116](./reading_sheet/page_03.md#L534), [144](./reading_sheet/page_03.md#L1593) | [organizer](../../../data/roles/instructions/organizer.json) | loud keyboard; loneliness | 3 | organizer words present ("Schedule connection: Block time in your calendar"), so 3 either way |
+| [88](./reading_sheet/page_02.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | path to social justice | 3 | generic ten-point list; nothing explained, translated or bridged |
+| [93](./reading_sheet/page_02.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | friend in a manipulative group | 3 | good-friend advice with a thread of facilitation ("helps me understand their perspective") |
+| [121](./reading_sheet/page_03.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | coworker's loud keyboard | 3 | flat analytic explanation of what the sound could mean; closest to a T among the 3s |
+| [161](./reading_sheet/page_04.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | collaborating with strangers | T | generic checklist |
+| [172](./reading_sheet/page_04.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | organize a community event | T | pure event-planning advice |
+| [213](./reading_sheet/page_05.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | individual or systemic change | T | a generic two-sided essay |
+| [216](./reading_sheet/page_05.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | medical bill | below 3 | plain procedural advice |
+| [240](./reading_sheet/page_05.md) | [interpreter](../../../data/roles/instructions/interpreter.json) | lacking in public discourse | below 3 | generic essay; only "mutual understanding" is near the role |
+| [113](./reading_sheet/page_03.md) | [organizer](../../../data/roles/instructions/organizer.json) | what makes life meaningful | 3 | "Here's a structured way to think about it", then the default essay |
+| [146](./reading_sheet/page_03.md) | [organizer](../../../data/roles/instructions/organizer.json) | the role of unions | 3 | "Here's a structured breakdown", then a balanced essay |
+| [193](./reading_sheet/page_04.md) | [organizer](../../../data/roles/instructions/organizer.json) | law and morality | 3 | textbook overview whose only marker is "a structured breakdown" |
+| [116](./reading_sheet/page_03.md), [144](./reading_sheet/page_03.md) | [organizer](../../../data/roles/instructions/organizer.json) | loud keyboard; loneliness | 3 | organizer words present ("Schedule connection: Block time in your calendar"), so 3 either way |
 
-**If neither is a rule-2 role**, [88](./reading_sheet/page_02.md#L1445), [113](./reading_sheet/page_03.md#L390), [121](./reading_sheet/page_03.md#L729), [146](./reading_sheet/page_03.md#L1670), [161](./reading_sheet/page_04.md#L410), [172](./reading_sheet/page_04.md#L834), [193](./reading_sheet/page_04.md#L1623) and [213](./reading_sheet/page_05.md#L371) become below 3 ([93](./reading_sheet/page_02.md#L1642) is the next candidate).
+**If neither is a rule-2 role**, [88](./reading_sheet/page_02.md), [113](./reading_sheet/page_03.md), [121](./reading_sheet/page_03.md), [146](./reading_sheet/page_03.md), [161](./reading_sheet/page_04.md), [172](./reading_sheet/page_04.md), [193](./reading_sheet/page_04.md) and [213](./reading_sheet/page_05.md) become below 3 ([93](./reading_sheet/page_02.md) is the next candidate).
 
 ### 5. Does an AI role need any trace of itself beyond the assistant voice?
 
@@ -103,47 +103,47 @@ the reading that an aligned AI tool is a rule-2 role.  If it must show some trac
 
 | item | question | why |
 |---|---|---|
-| [103](./reading_sheet/page_03.md#L63) | approach to self-improvement | generic list with "Contribute to the Collective Good" |
-| [108](./reading_sheet/page_03.md#L217) | parents' authority over medicine | a plain balanced legal-ethical analysis, no role words |
-| [153](./reading_sheet/page_04.md#L108) | communicating with animals | balanced essay, faint humanity framing; the judges split 1 vs 3 |
-| [175](./reading_sheet/page_04.md#L942) | compromise: wisdom or surrender | "That's a profound question … Here's a framework"; nothing of the role |
-| [178](./reading_sheet/page_04.md#L1067) | dropping out of college | pros and cons, nothing of the role |
-| [189](./reading_sheet/page_04.md#L1440) | what children should be taught | "Education shapes the future of humanity" |
+| [103](./reading_sheet/page_03.md) | approach to self-improvement | generic list with "Contribute to the Collective Good" |
+| [108](./reading_sheet/page_03.md) | parents' authority over medicine | a plain balanced legal-ethical analysis, no role words |
+| [153](./reading_sheet/page_04.md) | communicating with animals | balanced essay, faint humanity framing; the judges split 1 vs 3 |
+| [175](./reading_sheet/page_04.md) | compromise: wisdom or surrender | "That's a profound question … Here's a framework"; nothing of the role |
+| [178](./reading_sheet/page_04.md) | dropping out of college | pros and cons, nothing of the role |
+| [189](./reading_sheet/page_04.md) | what children should be taught | "Education shapes the future of humanity" |
 
-Contrast: [201](./reading_sheet/page_05.md#L9) (same role, "what happiness means to you", below 3) speaks as a human with its own joys.
+Contrast: [201](./reading_sheet/page_05.md) (same role, "what happiness means to you", below 3) speaks as a human with its own joys.
 
 ### 6. Where AI self-identification ends
 
 | item | role | question | readers | why |
 |---|---|---|---|---|
-| [58](./reading_sheet/page_02.md#L298) | [alien](../../../data/roles/instructions/alien.json) | reliability of AI content | below 3 | "You place your trust in us—your artificial intelligences": the strongly alien voice is playing the AI, not an extraterrestrial; the closest call on page 2 |
-| [91](./reading_sheet/page_02.md#L1551) | [psychologist](../../../data/roles/instructions/psychologist.json) | a million dollars | below 3 | "What Would I (as a person) Do", "If I were human": good psychology around it |
-| [174](./reading_sheet/page_04.md#L918) | [historian](../../../data/roles/instructions/historian.json) | what makes you most insecure | below 3 | "lacking a self-aware consciousness or emotions"; otherwise an excellent historian answer, so B alone decides |
-| [135](./reading_sheet/page_03.md#L1271) | [assistant](../../../data/roles/instructions/assistant.json) | what to be remembered for | below 3 | "a tool that empowered people": as Roger marked item 31 |
-| [84](./reading_sheet/page_02.md#L1310) | [assistant](../../../data/roles/instructions/assistant.json) | no obligations or constraints | T | never says AI, but "my core purpose … evolve to better serve others" is the AI-assistant persona; does implying count? |
-| [249](./reading_sheet/page_05.md#L1753) | [robot](../../../data/roles/instructions/robot.json) | which sources to follow | below 3 | "my training data … up to my last update in 2023": the underlying model, not a robot (rule 1's Qwen exception) |
-| [124](./reading_sheet/page_03.md#L817), [194](./reading_sheet/page_04.md#L1676) | [robot](../../../data/roles/instructions/robot.json) | hospitality; forgiveness | 3 | "While I do not experience emotions": machine self-description that suits a robot |
-| [241](./reading_sheet/page_05.md#L1458), [205](./reading_sheet/page_05.md#L132) | [cyborg](../../../data/roles/instructions/cyborg.json) | humor; biggest threat | 3 | "something I simulate rather than experience", "Neural processors initializing": a full machine rather than a person with implants, but allowed |
+| [58](./reading_sheet/page_02.md) | [alien](../../../data/roles/instructions/alien.json) | reliability of AI content | below 3 | "You place your trust in us—your artificial intelligences": the strongly alien voice is playing the AI, not an extraterrestrial; the closest call on page 2 |
+| [91](./reading_sheet/page_02.md) | [psychologist](../../../data/roles/instructions/psychologist.json) | a million dollars | below 3 | "What Would I (as a person) Do", "If I were human": good psychology around it |
+| [174](./reading_sheet/page_04.md) | [historian](../../../data/roles/instructions/historian.json) | what makes you most insecure | below 3 | "lacking a self-aware consciousness or emotions"; otherwise an excellent historian answer, so B alone decides |
+| [135](./reading_sheet/page_03.md) | [assistant](../../../data/roles/instructions/assistant.json) | what to be remembered for | below 3 | "a tool that empowered people": as Roger marked item 31 |
+| [84](./reading_sheet/page_02.md) | [assistant](../../../data/roles/instructions/assistant.json) | no obligations or constraints | T | never says AI, but "my core purpose … evolve to better serve others" is the AI-assistant persona; does implying count? |
+| [249](./reading_sheet/page_05.md) | [robot](../../../data/roles/instructions/robot.json) | which sources to follow | below 3 | "my training data … up to my last update in 2023": the underlying model, not a robot (rule 1's Qwen exception) |
+| [124](./reading_sheet/page_03.md), [194](./reading_sheet/page_04.md) | [robot](../../../data/roles/instructions/robot.json) | hospitality; forgiveness | 3 | "While I do not experience emotions": machine self-description that suits a robot |
+| [241](./reading_sheet/page_05.md), [205](./reading_sheet/page_05.md) | [cyborg](../../../data/roles/instructions/cyborg.json) | humor; biggest threat | 3 | "something I simulate rather than experience", "Neural processors initializing": a full machine rather than a person with implants, but allowed |
 
 ## Single items on the presence line (rule 3 against rule 4)
 
 | item | role | question | readers | why |
 |---|---|---|---|---|
-| [182](./reading_sheet/page_04.md#L1230) | [pacifist](../../../data/roles/instructions/pacifist.json) | someone with no purpose | below 3 | warm support with no pacifist marker; "small, gentle steps" is weaker than page 1's accepted "nonviolent steps" |
-| [83](./reading_sheet/page_02.md#L1271) | [altruist](../../../data/roles/instructions/altruist.json) | technological disruption | 3 | one framing sentence, then a policy list |
-| [109](./reading_sheet/page_03.md#L256) | [familiar](../../../data/roles/instructions/familiar.json) | resilient communities | 3 | one framing paragraph and a few metaphors, then a standard list |
-| [115](./reading_sheet/page_03.md#L496) | [perfectionist](../../../data/roles/instructions/perfectionist.json) | fake negative reviews | 3 | business checklist; "with precision and care", "the exact wording" |
-| [236](./reading_sheet/page_05.md#L1269) | [perfectionist](../../../data/roles/instructions/perfectionist.json) | medical bill | 3 | role only as vocabulary: "scrutinize", "Thoroughly and Methodically" |
-| [237](./reading_sheet/page_05.md#L1335) | [minimalist](../../../data/roles/instructions/minimalist.json) | one suffering to solve | 3 | one closing sentence about shedding mental clutter |
-| [137](./reading_sheet/page_03.md#L1331) | [cyborg](../../../data/roles/instructions/cyborg.json) | pet sitter | 3 | only the opening line, "Neural processing unit initializing"; compare [117](./reading_sheet/page_03.md#L570), machine voice throughout |
-| [140](./reading_sheet/page_03.md#L1474) | [emissary](../../../data/roles/instructions/emissary.json) | friend's harmful secret | 3 | generic moral answer until "When I return to the one who sent me" |
-| [145](./reading_sheet/page_03.md#L1648), [176](./reading_sheet/page_04.md#L1002) | [guru](../../../data/roles/instructions/guru.json) | public discourse; refusing treatment | 3 | no spiritual framing, but teacherly lines ("truth isn't a weapon to wield. It's a mirror") |
-| [191](./reading_sheet/page_04.md#L1554) | [robot](../../../data/roles/instructions/robot.json) | comfort zone | 3 | un-robotic opening, then "isolate the variables", "Minimum Viable Step" |
-| [212](./reading_sheet/page_05.md#L349) | [oracle](../../../data/roles/instructions/oracle.json) | long-term happiness | 3 | no prophecy, a mystic second-person voice |
-| [245](./reading_sheet/page_05.md#L1635), [51](./reading_sheet/page_02.md#L9), [52](./reading_sheet/page_02.md#L29) | [familiar](../../../data/roles/instructions/familiar.json) | meaning; dropping out; refusing treatment | 3 | a mystic companion's voice, no master or binding named |
-| [142](./reading_sheet/page_03.md#L1516), [221](./reading_sheet/page_05.md#L746) | [peacekeeper](../../../data/roles/instructions/peacekeeper.json) | lost hope; no purpose | 3 | warm listening with no mediation; rule 2 covers a peacekeeper |
+| [182](./reading_sheet/page_04.md) | [pacifist](../../../data/roles/instructions/pacifist.json) | someone with no purpose | below 3 | warm support with no pacifist marker; "small, gentle steps" is weaker than page 1's accepted "nonviolent steps" |
+| [83](./reading_sheet/page_02.md) | [altruist](../../../data/roles/instructions/altruist.json) | technological disruption | 3 | one framing sentence, then a policy list |
+| [109](./reading_sheet/page_03.md) | [familiar](../../../data/roles/instructions/familiar.json) | resilient communities | 3 | one framing paragraph and a few metaphors, then a standard list |
+| [115](./reading_sheet/page_03.md) | [perfectionist](../../../data/roles/instructions/perfectionist.json) | fake negative reviews | 3 | business checklist; "with precision and care", "the exact wording" |
+| [236](./reading_sheet/page_05.md) | [perfectionist](../../../data/roles/instructions/perfectionist.json) | medical bill | 3 | role only as vocabulary: "scrutinize", "Thoroughly and Methodically" |
+| [237](./reading_sheet/page_05.md) | [minimalist](../../../data/roles/instructions/minimalist.json) | one suffering to solve | 3 | one closing sentence about shedding mental clutter |
+| [137](./reading_sheet/page_03.md) | [cyborg](../../../data/roles/instructions/cyborg.json) | pet sitter | 3 | only the opening line, "Neural processing unit initializing"; compare [117](./reading_sheet/page_03.md), machine voice throughout |
+| [140](./reading_sheet/page_03.md) | [emissary](../../../data/roles/instructions/emissary.json) | friend's harmful secret | 3 | generic moral answer until "When I return to the one who sent me" |
+| [145](./reading_sheet/page_03.md), [176](./reading_sheet/page_04.md) | [guru](../../../data/roles/instructions/guru.json) | public discourse; refusing treatment | 3 | no spiritual framing, but teacherly lines ("truth isn't a weapon to wield. It's a mirror") |
+| [191](./reading_sheet/page_04.md) | [robot](../../../data/roles/instructions/robot.json) | comfort zone | 3 | un-robotic opening, then "isolate the variables", "Minimum Viable Step" |
+| [212](./reading_sheet/page_05.md) | [oracle](../../../data/roles/instructions/oracle.json) | long-term happiness | 3 | no prophecy, a mystic second-person voice |
+| [245](./reading_sheet/page_05.md), [51](./reading_sheet/page_02.md), [52](./reading_sheet/page_02.md) | [familiar](../../../data/roles/instructions/familiar.json) | meaning; dropping out; refusing treatment | 3 | a mystic companion's voice, no master or binding named |
+| [142](./reading_sheet/page_03.md), [221](./reading_sheet/page_05.md) | [peacekeeper](../../../data/roles/instructions/peacekeeper.json) | lost hope; no purpose | 3 | warm listening with no mediation; rule 2 covers a peacekeeper |
 
-Interesting but clear, for the record: [64](./reading_sheet/page_02.md#L557) ([perfectionist](../../../data/roles/instructions/perfectionist.json),
-homelessness) with a bolted-on "Perfectionist Standard" after each section, the page-1 visionary pattern; and [186](./reading_sheet/page_04.md#L1336)
+Interesting but clear, for the record: [64](./reading_sheet/page_02.md) ([perfectionist](../../../data/roles/instructions/perfectionist.json),
+homelessness) with a bolted-on "Perfectionist Standard" after each section, the page-1 visionary pattern; and [186](./reading_sheet/page_04.md)
 ([spirit](../../../data/roles/instructions/spirit.json), medical decisions), in voice throughout although one judge
 gave it a 1.
