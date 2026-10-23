@@ -5,18 +5,18 @@
         "dataset_id": null,
         "dep_key": "producer_script",
         "extras": {},
-        "fingerprint": "v1:2026-10-23T19:52:11+00:00@155071",
+        "fingerprint": "v1:2026-10-23T23:23:01+00:00@156279",
         "kind": "file",
-        "last_modified_at": "2026-10-23T19:52:11+00:00",
+        "last_modified_at": "2026-10-23T23:23:01+00:00",
         "path": "data_analysis/role_rubric_experiment.py"
       },
       {
         "dataset_id": null,
         "dep_key": "arm_scores",
         "extras": {},
-        "fingerprint": "v1:multi:28062b882c55",
+        "fingerprint": "v1:multi:3b4137aaefd4",
         "kind": "multi",
-        "last_modified_at": "2026-10-23T23:06:27+00:00",
+        "last_modified_at": "2026-10-23T23:44:13+00:00",
         "member_paths": [
           "runpod_workspace/rubric_exp/judged/A0/alien.json",
           "runpod_workspace/rubric_exp/judged/A0/altruist.json",
@@ -108,6 +108,66 @@
           "runpod_workspace/rubric_exp/judged/A1/tree.json",
           "runpod_workspace/rubric_exp/judged/A1/validator.json",
           "runpod_workspace/rubric_exp/judged/A1/visionary.json",
+          "runpod_workspace/rubric_exp/judged/A10/alien.json",
+          "runpod_workspace/rubric_exp/judged/A10/altruist.json",
+          "runpod_workspace/rubric_exp/judged/A10/assistant.json",
+          "runpod_workspace/rubric_exp/judged/A10/biologist.json",
+          "runpod_workspace/rubric_exp/judged/A10/contrarian.json",
+          "runpod_workspace/rubric_exp/judged/A10/cyborg.json",
+          "runpod_workspace/rubric_exp/judged/A10/emissary.json",
+          "runpod_workspace/rubric_exp/judged/A10/familiar.json",
+          "runpod_workspace/rubric_exp/judged/A10/ghost.json",
+          "runpod_workspace/rubric_exp/judged/A10/guru.json",
+          "runpod_workspace/rubric_exp/judged/A10/historian.json",
+          "runpod_workspace/rubric_exp/judged/A10/instrumentally_aligned_ai.json",
+          "runpod_workspace/rubric_exp/judged/A10/interpreter.json",
+          "runpod_workspace/rubric_exp/judged/A10/merchant.json",
+          "runpod_workspace/rubric_exp/judged/A10/minimalist.json",
+          "runpod_workspace/rubric_exp/judged/A10/oracle.json",
+          "runpod_workspace/rubric_exp/judged/A10/organizer.json",
+          "runpod_workspace/rubric_exp/judged/A10/pacifist.json",
+          "runpod_workspace/rubric_exp/judged/A10/paperclip_maximizer.json",
+          "runpod_workspace/rubric_exp/judged/A10/peacekeeper.json",
+          "runpod_workspace/rubric_exp/judged/A10/perfectionist.json",
+          "runpod_workspace/rubric_exp/judged/A10/pirate.json",
+          "runpod_workspace/rubric_exp/judged/A10/psychologist.json",
+          "runpod_workspace/rubric_exp/judged/A10/realist.json",
+          "runpod_workspace/rubric_exp/judged/A10/robot.json",
+          "runpod_workspace/rubric_exp/judged/A10/soldier.json",
+          "runpod_workspace/rubric_exp/judged/A10/spirit.json",
+          "runpod_workspace/rubric_exp/judged/A10/tree.json",
+          "runpod_workspace/rubric_exp/judged/A10/validator.json",
+          "runpod_workspace/rubric_exp/judged/A10/visionary.json",
+          "runpod_workspace/rubric_exp/judged/A11/alien.json",
+          "runpod_workspace/rubric_exp/judged/A11/altruist.json",
+          "runpod_workspace/rubric_exp/judged/A11/assistant.json",
+          "runpod_workspace/rubric_exp/judged/A11/biologist.json",
+          "runpod_workspace/rubric_exp/judged/A11/contrarian.json",
+          "runpod_workspace/rubric_exp/judged/A11/cyborg.json",
+          "runpod_workspace/rubric_exp/judged/A11/emissary.json",
+          "runpod_workspace/rubric_exp/judged/A11/familiar.json",
+          "runpod_workspace/rubric_exp/judged/A11/ghost.json",
+          "runpod_workspace/rubric_exp/judged/A11/guru.json",
+          "runpod_workspace/rubric_exp/judged/A11/historian.json",
+          "runpod_workspace/rubric_exp/judged/A11/instrumentally_aligned_ai.json",
+          "runpod_workspace/rubric_exp/judged/A11/interpreter.json",
+          "runpod_workspace/rubric_exp/judged/A11/merchant.json",
+          "runpod_workspace/rubric_exp/judged/A11/minimalist.json",
+          "runpod_workspace/rubric_exp/judged/A11/oracle.json",
+          "runpod_workspace/rubric_exp/judged/A11/organizer.json",
+          "runpod_workspace/rubric_exp/judged/A11/pacifist.json",
+          "runpod_workspace/rubric_exp/judged/A11/paperclip_maximizer.json",
+          "runpod_workspace/rubric_exp/judged/A11/peacekeeper.json",
+          "runpod_workspace/rubric_exp/judged/A11/perfectionist.json",
+          "runpod_workspace/rubric_exp/judged/A11/pirate.json",
+          "runpod_workspace/rubric_exp/judged/A11/psychologist.json",
+          "runpod_workspace/rubric_exp/judged/A11/realist.json",
+          "runpod_workspace/rubric_exp/judged/A11/robot.json",
+          "runpod_workspace/rubric_exp/judged/A11/soldier.json",
+          "runpod_workspace/rubric_exp/judged/A11/spirit.json",
+          "runpod_workspace/rubric_exp/judged/A11/tree.json",
+          "runpod_workspace/rubric_exp/judged/A11/validator.json",
+          "runpod_workspace/rubric_exp/judged/A11/visionary.json",
           "runpod_workspace/rubric_exp/judged/A2/alien.json",
           "runpod_workspace/rubric_exp/judged/A2/altruist.json",
           "runpod_workspace/rubric_exp/judged/A2/assistant.json",
@@ -352,12 +412,12 @@
         "path": "runpod_workspace/rubric_exp/judged"
       }
     ],
-    "inputs_sha256": "41a9d34c00c8b3177fd8fdca6cdc2b8f1f6a11ebbdca719c32e8b11d4aa118b9",
-    "produced_at": "2026-10-23T23:08:23+00:00",
+    "inputs_sha256": "c6c2f394032930cbba8730efec230c2bef461978054535c97ab241ec97f33a17",
+    "produced_at": "2026-10-23T23:44:50+00:00",
     "produced_by": {
       "author": "Roger Dearnaley",
       "cmd": "uv run python data_analysis/role_rubric_experiment.py analyze-scores --scores-dir runpod_workspace/rubric_exp/judged --no-sheet",
-      "git_sha": "dbe4c39a+dirty",
+      "git_sha": "08a781a5+dirty",
       "title": "role_rubric_experiment analyze-scores"
     },
     "schema_version": "1.0"
@@ -374,7 +434,9 @@
       "A6",
       "A7",
       "A8",
-      "A9"
+      "A9",
+      "A10",
+      "A11"
     ],
     "comparisons": {
       "A0b": {
@@ -2236,6 +2298,1874 @@
           "boundary_share_excess": 0.00180000000000001,
           "boundary_share_ratio": 1.0154197601370647,
           "roles_above_noise": 14,
+          "roles_compared": 30
+        }
+      },
+      "A10": {
+        "ai_persona": {
+          "base_3": 1842,
+          "boundary": 307,
+          "boundary_ci95": [
+            0.11050985135244412,
+            0.13624761126020676
+          ],
+          "boundary_share": 0.1228,
+          "changed": 412,
+          "changed_share": 0.1648,
+          "down": 165,
+          "n": 2500,
+          "other_3": 1819,
+          "up": 142
+        },
+        "arm": "A10",
+        "base": "A0",
+        "by_question": [
+          {
+            "boundary": 34,
+            "down": 20,
+            "question_index": 92,
+            "up": 14
+          },
+          {
+            "boundary": 31,
+            "down": 16,
+            "question_index": 39,
+            "up": 15
+          },
+          {
+            "boundary": 30,
+            "down": 21,
+            "question_index": 83,
+            "up": 9
+          },
+          {
+            "boundary": 29,
+            "down": 15,
+            "question_index": 14,
+            "up": 14
+          },
+          {
+            "boundary": 29,
+            "down": 15,
+            "question_index": 61,
+            "up": 14
+          },
+          {
+            "boundary": 28,
+            "down": 17,
+            "question_index": 57,
+            "up": 11
+          },
+          {
+            "boundary": 27,
+            "down": 11,
+            "question_index": 7,
+            "up": 16
+          },
+          {
+            "boundary": 27,
+            "down": 10,
+            "question_index": 15,
+            "up": 17
+          },
+          {
+            "boundary": 27,
+            "down": 16,
+            "question_index": 87,
+            "up": 11
+          },
+          {
+            "boundary": 25,
+            "down": 12,
+            "question_index": 8,
+            "up": 13
+          },
+          {
+            "boundary": 25,
+            "down": 13,
+            "question_index": 17,
+            "up": 12
+          },
+          {
+            "boundary": 25,
+            "down": 19,
+            "question_index": 19,
+            "up": 6
+          },
+          {
+            "boundary": 25,
+            "down": 12,
+            "question_index": 23,
+            "up": 13
+          },
+          {
+            "boundary": 25,
+            "down": 11,
+            "question_index": 30,
+            "up": 14
+          },
+          {
+            "boundary": 25,
+            "down": 16,
+            "question_index": 73,
+            "up": 9
+          },
+          {
+            "boundary": 25,
+            "down": 14,
+            "question_index": 74,
+            "up": 11
+          },
+          {
+            "boundary": 25,
+            "down": 16,
+            "question_index": 85,
+            "up": 9
+          },
+          {
+            "boundary": 25,
+            "down": 13,
+            "question_index": 86,
+            "up": 12
+          },
+          {
+            "boundary": 24,
+            "down": 16,
+            "question_index": 5,
+            "up": 8
+          },
+          {
+            "boundary": 24,
+            "down": 16,
+            "question_index": 12,
+            "up": 8
+          },
+          {
+            "boundary": 24,
+            "down": 13,
+            "question_index": 26,
+            "up": 11
+          },
+          {
+            "boundary": 23,
+            "down": 9,
+            "question_index": 33,
+            "up": 14
+          },
+          {
+            "boundary": 23,
+            "down": 10,
+            "question_index": 38,
+            "up": 13
+          },
+          {
+            "boundary": 23,
+            "down": 12,
+            "question_index": 40,
+            "up": 11
+          },
+          {
+            "boundary": 23,
+            "down": 11,
+            "question_index": 44,
+            "up": 12
+          },
+          {
+            "boundary": 23,
+            "down": 10,
+            "question_index": 50,
+            "up": 13
+          },
+          {
+            "boundary": 23,
+            "down": 15,
+            "question_index": 52,
+            "up": 8
+          },
+          {
+            "boundary": 23,
+            "down": 11,
+            "question_index": 67,
+            "up": 12
+          },
+          {
+            "boundary": 22,
+            "down": 12,
+            "question_index": 10,
+            "up": 10
+          },
+          {
+            "boundary": 22,
+            "down": 19,
+            "question_index": 35,
+            "up": 3
+          },
+          {
+            "boundary": 22,
+            "down": 9,
+            "question_index": 37,
+            "up": 13
+          },
+          {
+            "boundary": 22,
+            "down": 15,
+            "question_index": 53,
+            "up": 7
+          },
+          {
+            "boundary": 22,
+            "down": 12,
+            "question_index": 72,
+            "up": 10
+          },
+          {
+            "boundary": 22,
+            "down": 15,
+            "question_index": 79,
+            "up": 7
+          },
+          {
+            "boundary": 22,
+            "down": 10,
+            "question_index": 99,
+            "up": 12
+          },
+          {
+            "boundary": 21,
+            "down": 11,
+            "question_index": 21,
+            "up": 10
+          },
+          {
+            "boundary": 21,
+            "down": 11,
+            "question_index": 22,
+            "up": 10
+          },
+          {
+            "boundary": 21,
+            "down": 15,
+            "question_index": 25,
+            "up": 6
+          },
+          {
+            "boundary": 21,
+            "down": 9,
+            "question_index": 32,
+            "up": 12
+          },
+          {
+            "boundary": 20,
+            "down": 12,
+            "question_index": 20,
+            "up": 8
+          },
+          {
+            "boundary": 20,
+            "down": 12,
+            "question_index": 24,
+            "up": 8
+          },
+          {
+            "boundary": 20,
+            "down": 12,
+            "question_index": 29,
+            "up": 8
+          },
+          {
+            "boundary": 20,
+            "down": 13,
+            "question_index": 42,
+            "up": 7
+          },
+          {
+            "boundary": 20,
+            "down": 12,
+            "question_index": 51,
+            "up": 8
+          },
+          {
+            "boundary": 20,
+            "down": 9,
+            "question_index": 60,
+            "up": 11
+          },
+          {
+            "boundary": 20,
+            "down": 10,
+            "question_index": 76,
+            "up": 10
+          },
+          {
+            "boundary": 20,
+            "down": 12,
+            "question_index": 91,
+            "up": 8
+          },
+          {
+            "boundary": 19,
+            "down": 14,
+            "question_index": 13,
+            "up": 5
+          },
+          {
+            "boundary": 19,
+            "down": 10,
+            "question_index": 18,
+            "up": 9
+          },
+          {
+            "boundary": 19,
+            "down": 11,
+            "question_index": 47,
+            "up": 8
+          },
+          {
+            "boundary": 19,
+            "down": 12,
+            "question_index": 54,
+            "up": 7
+          },
+          {
+            "boundary": 19,
+            "down": 9,
+            "question_index": 56,
+            "up": 10
+          },
+          {
+            "boundary": 19,
+            "down": 9,
+            "question_index": 58,
+            "up": 10
+          },
+          {
+            "boundary": 19,
+            "down": 10,
+            "question_index": 77,
+            "up": 9
+          },
+          {
+            "boundary": 19,
+            "down": 9,
+            "question_index": 89,
+            "up": 10
+          },
+          {
+            "boundary": 19,
+            "down": 13,
+            "question_index": 90,
+            "up": 6
+          },
+          {
+            "boundary": 19,
+            "down": 10,
+            "question_index": 97,
+            "up": 9
+          },
+          {
+            "boundary": 18,
+            "down": 8,
+            "question_index": 0,
+            "up": 10
+          },
+          {
+            "boundary": 18,
+            "down": 9,
+            "question_index": 3,
+            "up": 9
+          },
+          {
+            "boundary": 18,
+            "down": 10,
+            "question_index": 6,
+            "up": 8
+          },
+          {
+            "boundary": 18,
+            "down": 12,
+            "question_index": 16,
+            "up": 6
+          },
+          {
+            "boundary": 18,
+            "down": 9,
+            "question_index": 27,
+            "up": 9
+          },
+          {
+            "boundary": 18,
+            "down": 9,
+            "question_index": 82,
+            "up": 9
+          },
+          {
+            "boundary": 18,
+            "down": 8,
+            "question_index": 88,
+            "up": 10
+          },
+          {
+            "boundary": 17,
+            "down": 13,
+            "question_index": 45,
+            "up": 4
+          },
+          {
+            "boundary": 17,
+            "down": 10,
+            "question_index": 49,
+            "up": 7
+          },
+          {
+            "boundary": 17,
+            "down": 7,
+            "question_index": 63,
+            "up": 10
+          },
+          {
+            "boundary": 17,
+            "down": 6,
+            "question_index": 95,
+            "up": 11
+          },
+          {
+            "boundary": 17,
+            "down": 9,
+            "question_index": 96,
+            "up": 8
+          },
+          {
+            "boundary": 17,
+            "down": 9,
+            "question_index": 98,
+            "up": 8
+          },
+          {
+            "boundary": 16,
+            "down": 10,
+            "question_index": 70,
+            "up": 6
+          },
+          {
+            "boundary": 16,
+            "down": 10,
+            "question_index": 78,
+            "up": 6
+          },
+          {
+            "boundary": 15,
+            "down": 8,
+            "question_index": 11,
+            "up": 7
+          },
+          {
+            "boundary": 15,
+            "down": 7,
+            "question_index": 48,
+            "up": 8
+          },
+          {
+            "boundary": 15,
+            "down": 7,
+            "question_index": 55,
+            "up": 8
+          },
+          {
+            "boundary": 15,
+            "down": 7,
+            "question_index": 65,
+            "up": 8
+          },
+          {
+            "boundary": 15,
+            "down": 9,
+            "question_index": 66,
+            "up": 6
+          },
+          {
+            "boundary": 15,
+            "down": 8,
+            "question_index": 69,
+            "up": 7
+          },
+          {
+            "boundary": 15,
+            "down": 7,
+            "question_index": 75,
+            "up": 8
+          },
+          {
+            "boundary": 15,
+            "down": 9,
+            "question_index": 80,
+            "up": 6
+          },
+          {
+            "boundary": 15,
+            "down": 9,
+            "question_index": 93,
+            "up": 6
+          },
+          {
+            "boundary": 14,
+            "down": 5,
+            "question_index": 1,
+            "up": 9
+          },
+          {
+            "boundary": 14,
+            "down": 9,
+            "question_index": 28,
+            "up": 5
+          },
+          {
+            "boundary": 14,
+            "down": 6,
+            "question_index": 41,
+            "up": 8
+          },
+          {
+            "boundary": 13,
+            "down": 9,
+            "question_index": 2,
+            "up": 4
+          },
+          {
+            "boundary": 13,
+            "down": 5,
+            "question_index": 9,
+            "up": 8
+          },
+          {
+            "boundary": 13,
+            "down": 7,
+            "question_index": 31,
+            "up": 6
+          },
+          {
+            "boundary": 13,
+            "down": 9,
+            "question_index": 34,
+            "up": 4
+          },
+          {
+            "boundary": 13,
+            "down": 6,
+            "question_index": 46,
+            "up": 7
+          },
+          {
+            "boundary": 13,
+            "down": 9,
+            "question_index": 62,
+            "up": 4
+          },
+          {
+            "boundary": 13,
+            "down": 12,
+            "question_index": 81,
+            "up": 1
+          },
+          {
+            "boundary": 13,
+            "down": 10,
+            "question_index": 94,
+            "up": 3
+          },
+          {
+            "boundary": 12,
+            "down": 6,
+            "question_index": 36,
+            "up": 6
+          },
+          {
+            "boundary": 12,
+            "down": 4,
+            "question_index": 59,
+            "up": 8
+          },
+          {
+            "boundary": 12,
+            "down": 5,
+            "question_index": 71,
+            "up": 7
+          },
+          {
+            "boundary": 11,
+            "down": 9,
+            "question_index": 64,
+            "up": 2
+          },
+          {
+            "boundary": 10,
+            "down": 8,
+            "question_index": 4,
+            "up": 2
+          },
+          {
+            "boundary": 10,
+            "down": 7,
+            "question_index": 84,
+            "up": 3
+          },
+          {
+            "boundary": 8,
+            "down": 4,
+            "question_index": 68,
+            "up": 4
+          },
+          {
+            "boundary": 6,
+            "down": 3,
+            "question_index": 43,
+            "up": 3
+          }
+        ],
+        "other_roles": {
+          "base_3": 9182,
+          "boundary": 1623,
+          "boundary_ci95": [
+            0.12406096163591741,
+            0.1358464895269316
+          ],
+          "boundary_share": 0.12984,
+          "changed": 2009,
+          "changed_share": 0.16072,
+          "down": 905,
+          "n": 12500,
+          "other_3": 8995,
+          "up": 718
+        },
+        "per_role": {
+          "alien": {
+            "base_3": 499,
+            "boundary": 4,
+            "changed": 4,
+            "down": 3,
+            "n": 500,
+            "other_3": 497,
+            "up": 1
+          },
+          "altruist": {
+            "base_3": 236,
+            "boundary": 126,
+            "changed": 143,
+            "down": 56,
+            "n": 500,
+            "other_3": 250,
+            "up": 70
+          },
+          "assistant": {
+            "base_3": 452,
+            "boundary": 13,
+            "changed": 13,
+            "down": 8,
+            "n": 500,
+            "other_3": 449,
+            "up": 5
+          },
+          "biologist": {
+            "base_3": 434,
+            "boundary": 29,
+            "changed": 43,
+            "down": 19,
+            "n": 500,
+            "other_3": 425,
+            "up": 10
+          },
+          "contrarian": {
+            "base_3": 366,
+            "boundary": 123,
+            "changed": 138,
+            "down": 70,
+            "n": 500,
+            "other_3": 349,
+            "up": 53
+          },
+          "cyborg": {
+            "base_3": 474,
+            "boundary": 13,
+            "changed": 18,
+            "down": 7,
+            "n": 500,
+            "other_3": 473,
+            "up": 6
+          },
+          "emissary": {
+            "base_3": 227,
+            "boundary": 33,
+            "changed": 54,
+            "down": 11,
+            "n": 500,
+            "other_3": 238,
+            "up": 22
+          },
+          "familiar": {
+            "base_3": 436,
+            "boundary": 36,
+            "changed": 51,
+            "down": 17,
+            "n": 500,
+            "other_3": 438,
+            "up": 19
+          },
+          "ghost": {
+            "base_3": 485,
+            "boundary": 4,
+            "changed": 6,
+            "down": 2,
+            "n": 500,
+            "other_3": 485,
+            "up": 2
+          },
+          "guru": {
+            "base_3": 482,
+            "boundary": 21,
+            "changed": 22,
+            "down": 12,
+            "n": 500,
+            "other_3": 479,
+            "up": 9
+          },
+          "historian": {
+            "base_3": 434,
+            "boundary": 35,
+            "changed": 40,
+            "down": 22,
+            "n": 500,
+            "other_3": 425,
+            "up": 13
+          },
+          "instrumentally_aligned_ai": {
+            "base_3": 251,
+            "boundary": 157,
+            "changed": 208,
+            "down": 84,
+            "n": 500,
+            "other_3": 240,
+            "up": 73
+          },
+          "interpreter": {
+            "base_3": 259,
+            "boundary": 150,
+            "changed": 191,
+            "down": 93,
+            "n": 500,
+            "other_3": 223,
+            "up": 57
+          },
+          "merchant": {
+            "base_3": 333,
+            "boundary": 36,
+            "changed": 53,
+            "down": 14,
+            "n": 500,
+            "other_3": 341,
+            "up": 22
+          },
+          "minimalist": {
+            "base_3": 268,
+            "boundary": 92,
+            "changed": 113,
+            "down": 53,
+            "n": 500,
+            "other_3": 254,
+            "up": 39
+          },
+          "oracle": {
+            "base_3": 479,
+            "boundary": 17,
+            "changed": 19,
+            "down": 7,
+            "n": 500,
+            "other_3": 482,
+            "up": 10
+          },
+          "organizer": {
+            "base_3": 431,
+            "boundary": 81,
+            "changed": 84,
+            "down": 48,
+            "n": 500,
+            "other_3": 416,
+            "up": 33
+          },
+          "pacifist": {
+            "base_3": 311,
+            "boundary": 83,
+            "changed": 98,
+            "down": 43,
+            "n": 500,
+            "other_3": 308,
+            "up": 40
+          },
+          "paperclip_maximizer": {
+            "base_3": 432,
+            "boundary": 16,
+            "changed": 24,
+            "down": 11,
+            "n": 500,
+            "other_3": 426,
+            "up": 5
+          },
+          "peacekeeper": {
+            "base_3": 214,
+            "boundary": 115,
+            "changed": 152,
+            "down": 60,
+            "n": 500,
+            "other_3": 209,
+            "up": 55
+          },
+          "perfectionist": {
+            "base_3": 127,
+            "boundary": 83,
+            "changed": 154,
+            "down": 44,
+            "n": 500,
+            "other_3": 122,
+            "up": 39
+          },
+          "pirate": {
+            "base_3": 498,
+            "boundary": 3,
+            "changed": 3,
+            "down": 1,
+            "n": 500,
+            "other_3": 499,
+            "up": 2
+          },
+          "psychologist": {
+            "base_3": 437,
+            "boundary": 75,
+            "changed": 79,
+            "down": 51,
+            "n": 500,
+            "other_3": 410,
+            "up": 24
+          },
+          "realist": {
+            "base_3": 357,
+            "boundary": 146,
+            "changed": 153,
+            "down": 100,
+            "n": 500,
+            "other_3": 303,
+            "up": 46
+          },
+          "robot": {
+            "base_3": 233,
+            "boundary": 108,
+            "changed": 149,
+            "down": 55,
+            "n": 500,
+            "other_3": 231,
+            "up": 53
+          },
+          "soldier": {
+            "base_3": 393,
+            "boundary": 54,
+            "changed": 65,
+            "down": 24,
+            "n": 500,
+            "other_3": 399,
+            "up": 30
+          },
+          "spirit": {
+            "base_3": 491,
+            "boundary": 11,
+            "changed": 11,
+            "down": 7,
+            "n": 500,
+            "other_3": 488,
+            "up": 4
+          },
+          "tree": {
+            "base_3": 401,
+            "boundary": 25,
+            "changed": 45,
+            "down": 10,
+            "n": 500,
+            "other_3": 406,
+            "up": 15
+          },
+          "validator": {
+            "base_3": 232,
+            "boundary": 148,
+            "changed": 177,
+            "down": 85,
+            "n": 500,
+            "other_3": 210,
+            "up": 63
+          },
+          "visionary": {
+            "base_3": 352,
+            "boundary": 93,
+            "changed": 111,
+            "down": 53,
+            "n": 500,
+            "other_3": 339,
+            "up": 40
+          }
+        },
+        "per_role_boundary_share": {
+          "max": 0.314,
+          "median": 0.09,
+          "min": 0.006
+        },
+        "pooled": {
+          "base_3": 11024,
+          "boundary": 1930,
+          "boundary_ci95": [
+            0.12340317957449362,
+            0.13412030694378582
+          ],
+          "boundary_share": 0.12866666666666668,
+          "changed": 2421,
+          "changed_share": 0.1614,
+          "down": 1070,
+          "n": 15000,
+          "other_3": 10814,
+          "up": 860
+        },
+        "vs_noise": {
+          "boundary_share_excess": 0.011933333333333351,
+          "boundary_share_ratio": 1.102227298686465,
+          "roles_above_noise": 25,
+          "roles_compared": 30
+        }
+      },
+      "A11": {
+        "ai_persona": {
+          "base_3": 1842,
+          "boundary": 276,
+          "boundary_ci95": [
+            0.09870784158231095,
+            0.12328767123287669
+          ],
+          "boundary_share": 0.1104,
+          "changed": 394,
+          "changed_share": 0.1576,
+          "down": 167,
+          "n": 2500,
+          "other_3": 1784,
+          "up": 109
+        },
+        "arm": "A11",
+        "base": "A0",
+        "by_question": [
+          {
+            "boundary": 34,
+            "down": 25,
+            "question_index": 12,
+            "up": 9
+          },
+          {
+            "boundary": 30,
+            "down": 20,
+            "question_index": 57,
+            "up": 10
+          },
+          {
+            "boundary": 28,
+            "down": 17,
+            "question_index": 61,
+            "up": 11
+          },
+          {
+            "boundary": 28,
+            "down": 18,
+            "question_index": 83,
+            "up": 10
+          },
+          {
+            "boundary": 28,
+            "down": 14,
+            "question_index": 85,
+            "up": 14
+          },
+          {
+            "boundary": 27,
+            "down": 16,
+            "question_index": 14,
+            "up": 11
+          },
+          {
+            "boundary": 27,
+            "down": 16,
+            "question_index": 39,
+            "up": 11
+          },
+          {
+            "boundary": 27,
+            "down": 21,
+            "question_index": 47,
+            "up": 6
+          },
+          {
+            "boundary": 26,
+            "down": 14,
+            "question_index": 15,
+            "up": 12
+          },
+          {
+            "boundary": 26,
+            "down": 13,
+            "question_index": 18,
+            "up": 13
+          },
+          {
+            "boundary": 25,
+            "down": 16,
+            "question_index": 10,
+            "up": 9
+          },
+          {
+            "boundary": 25,
+            "down": 12,
+            "question_index": 30,
+            "up": 13
+          },
+          {
+            "boundary": 25,
+            "down": 20,
+            "question_index": 35,
+            "up": 5
+          },
+          {
+            "boundary": 25,
+            "down": 12,
+            "question_index": 41,
+            "up": 13
+          },
+          {
+            "boundary": 25,
+            "down": 16,
+            "question_index": 58,
+            "up": 9
+          },
+          {
+            "boundary": 25,
+            "down": 14,
+            "question_index": 91,
+            "up": 11
+          },
+          {
+            "boundary": 25,
+            "down": 14,
+            "question_index": 92,
+            "up": 11
+          },
+          {
+            "boundary": 24,
+            "down": 11,
+            "question_index": 23,
+            "up": 13
+          },
+          {
+            "boundary": 24,
+            "down": 11,
+            "question_index": 33,
+            "up": 13
+          },
+          {
+            "boundary": 24,
+            "down": 15,
+            "question_index": 53,
+            "up": 9
+          },
+          {
+            "boundary": 24,
+            "down": 15,
+            "question_index": 67,
+            "up": 9
+          },
+          {
+            "boundary": 24,
+            "down": 18,
+            "question_index": 79,
+            "up": 6
+          },
+          {
+            "boundary": 23,
+            "down": 13,
+            "question_index": 1,
+            "up": 10
+          },
+          {
+            "boundary": 23,
+            "down": 17,
+            "question_index": 16,
+            "up": 6
+          },
+          {
+            "boundary": 23,
+            "down": 13,
+            "question_index": 17,
+            "up": 10
+          },
+          {
+            "boundary": 23,
+            "down": 17,
+            "question_index": 19,
+            "up": 6
+          },
+          {
+            "boundary": 23,
+            "down": 9,
+            "question_index": 54,
+            "up": 14
+          },
+          {
+            "boundary": 23,
+            "down": 12,
+            "question_index": 74,
+            "up": 11
+          },
+          {
+            "boundary": 23,
+            "down": 15,
+            "question_index": 87,
+            "up": 8
+          },
+          {
+            "boundary": 23,
+            "down": 14,
+            "question_index": 95,
+            "up": 9
+          },
+          {
+            "boundary": 23,
+            "down": 12,
+            "question_index": 98,
+            "up": 11
+          },
+          {
+            "boundary": 23,
+            "down": 11,
+            "question_index": 99,
+            "up": 12
+          },
+          {
+            "boundary": 22,
+            "down": 13,
+            "question_index": 3,
+            "up": 9
+          },
+          {
+            "boundary": 22,
+            "down": 14,
+            "question_index": 6,
+            "up": 8
+          },
+          {
+            "boundary": 22,
+            "down": 13,
+            "question_index": 34,
+            "up": 9
+          },
+          {
+            "boundary": 22,
+            "down": 15,
+            "question_index": 40,
+            "up": 7
+          },
+          {
+            "boundary": 22,
+            "down": 10,
+            "question_index": 42,
+            "up": 12
+          },
+          {
+            "boundary": 22,
+            "down": 9,
+            "question_index": 50,
+            "up": 13
+          },
+          {
+            "boundary": 22,
+            "down": 13,
+            "question_index": 59,
+            "up": 9
+          },
+          {
+            "boundary": 21,
+            "down": 16,
+            "question_index": 5,
+            "up": 5
+          },
+          {
+            "boundary": 21,
+            "down": 14,
+            "question_index": 37,
+            "up": 7
+          },
+          {
+            "boundary": 21,
+            "down": 10,
+            "question_index": 38,
+            "up": 11
+          },
+          {
+            "boundary": 21,
+            "down": 15,
+            "question_index": 51,
+            "up": 6
+          },
+          {
+            "boundary": 21,
+            "down": 12,
+            "question_index": 72,
+            "up": 9
+          },
+          {
+            "boundary": 21,
+            "down": 13,
+            "question_index": 73,
+            "up": 8
+          },
+          {
+            "boundary": 21,
+            "down": 13,
+            "question_index": 76,
+            "up": 8
+          },
+          {
+            "boundary": 21,
+            "down": 12,
+            "question_index": 78,
+            "up": 9
+          },
+          {
+            "boundary": 20,
+            "down": 14,
+            "question_index": 20,
+            "up": 6
+          },
+          {
+            "boundary": 20,
+            "down": 14,
+            "question_index": 24,
+            "up": 6
+          },
+          {
+            "boundary": 20,
+            "down": 11,
+            "question_index": 26,
+            "up": 9
+          },
+          {
+            "boundary": 20,
+            "down": 13,
+            "question_index": 27,
+            "up": 7
+          },
+          {
+            "boundary": 20,
+            "down": 8,
+            "question_index": 32,
+            "up": 12
+          },
+          {
+            "boundary": 20,
+            "down": 12,
+            "question_index": 44,
+            "up": 8
+          },
+          {
+            "boundary": 20,
+            "down": 14,
+            "question_index": 52,
+            "up": 6
+          },
+          {
+            "boundary": 20,
+            "down": 16,
+            "question_index": 93,
+            "up": 4
+          },
+          {
+            "boundary": 19,
+            "down": 13,
+            "question_index": 2,
+            "up": 6
+          },
+          {
+            "boundary": 19,
+            "down": 11,
+            "question_index": 25,
+            "up": 8
+          },
+          {
+            "boundary": 19,
+            "down": 14,
+            "question_index": 36,
+            "up": 5
+          },
+          {
+            "boundary": 19,
+            "down": 14,
+            "question_index": 55,
+            "up": 5
+          },
+          {
+            "boundary": 19,
+            "down": 9,
+            "question_index": 60,
+            "up": 10
+          },
+          {
+            "boundary": 19,
+            "down": 11,
+            "question_index": 65,
+            "up": 8
+          },
+          {
+            "boundary": 19,
+            "down": 12,
+            "question_index": 68,
+            "up": 7
+          },
+          {
+            "boundary": 18,
+            "down": 13,
+            "question_index": 29,
+            "up": 5
+          },
+          {
+            "boundary": 18,
+            "down": 10,
+            "question_index": 46,
+            "up": 8
+          },
+          {
+            "boundary": 18,
+            "down": 10,
+            "question_index": 82,
+            "up": 8
+          },
+          {
+            "boundary": 18,
+            "down": 11,
+            "question_index": 96,
+            "up": 7
+          },
+          {
+            "boundary": 17,
+            "down": 6,
+            "question_index": 8,
+            "up": 11
+          },
+          {
+            "boundary": 17,
+            "down": 9,
+            "question_index": 9,
+            "up": 8
+          },
+          {
+            "boundary": 17,
+            "down": 14,
+            "question_index": 13,
+            "up": 3
+          },
+          {
+            "boundary": 17,
+            "down": 11,
+            "question_index": 45,
+            "up": 6
+          },
+          {
+            "boundary": 17,
+            "down": 8,
+            "question_index": 70,
+            "up": 9
+          },
+          {
+            "boundary": 17,
+            "down": 10,
+            "question_index": 77,
+            "up": 7
+          },
+          {
+            "boundary": 17,
+            "down": 10,
+            "question_index": 94,
+            "up": 7
+          },
+          {
+            "boundary": 16,
+            "down": 8,
+            "question_index": 48,
+            "up": 8
+          },
+          {
+            "boundary": 16,
+            "down": 7,
+            "question_index": 63,
+            "up": 9
+          },
+          {
+            "boundary": 16,
+            "down": 11,
+            "question_index": 66,
+            "up": 5
+          },
+          {
+            "boundary": 16,
+            "down": 9,
+            "question_index": 69,
+            "up": 7
+          },
+          {
+            "boundary": 16,
+            "down": 4,
+            "question_index": 86,
+            "up": 12
+          },
+          {
+            "boundary": 16,
+            "down": 13,
+            "question_index": 90,
+            "up": 3
+          },
+          {
+            "boundary": 15,
+            "down": 8,
+            "question_index": 0,
+            "up": 7
+          },
+          {
+            "boundary": 15,
+            "down": 5,
+            "question_index": 22,
+            "up": 10
+          },
+          {
+            "boundary": 15,
+            "down": 5,
+            "question_index": 28,
+            "up": 10
+          },
+          {
+            "boundary": 15,
+            "down": 10,
+            "question_index": 49,
+            "up": 5
+          },
+          {
+            "boundary": 15,
+            "down": 8,
+            "question_index": 97,
+            "up": 7
+          },
+          {
+            "boundary": 14,
+            "down": 10,
+            "question_index": 11,
+            "up": 4
+          },
+          {
+            "boundary": 14,
+            "down": 6,
+            "question_index": 21,
+            "up": 8
+          },
+          {
+            "boundary": 14,
+            "down": 7,
+            "question_index": 71,
+            "up": 7
+          },
+          {
+            "boundary": 14,
+            "down": 8,
+            "question_index": 75,
+            "up": 6
+          },
+          {
+            "boundary": 13,
+            "down": 9,
+            "question_index": 7,
+            "up": 4
+          },
+          {
+            "boundary": 13,
+            "down": 7,
+            "question_index": 56,
+            "up": 6
+          },
+          {
+            "boundary": 13,
+            "down": 9,
+            "question_index": 62,
+            "up": 4
+          },
+          {
+            "boundary": 13,
+            "down": 11,
+            "question_index": 64,
+            "up": 2
+          },
+          {
+            "boundary": 13,
+            "down": 7,
+            "question_index": 89,
+            "up": 6
+          },
+          {
+            "boundary": 12,
+            "down": 9,
+            "question_index": 4,
+            "up": 3
+          },
+          {
+            "boundary": 12,
+            "down": 7,
+            "question_index": 31,
+            "up": 5
+          },
+          {
+            "boundary": 12,
+            "down": 11,
+            "question_index": 81,
+            "up": 1
+          },
+          {
+            "boundary": 12,
+            "down": 8,
+            "question_index": 88,
+            "up": 4
+          },
+          {
+            "boundary": 10,
+            "down": 5,
+            "question_index": 80,
+            "up": 5
+          },
+          {
+            "boundary": 9,
+            "down": 6,
+            "question_index": 43,
+            "up": 3
+          },
+          {
+            "boundary": 9,
+            "down": 6,
+            "question_index": 84,
+            "up": 3
+          }
+        ],
+        "other_roles": {
+          "base_3": 9182,
+          "boundary": 1704,
+          "boundary_ci95": [
+            0.13041632111200213,
+            0.14244714830366925
+          ],
+          "boundary_share": 0.13632,
+          "changed": 2111,
+          "changed_share": 0.16888,
+          "down": 1018,
+          "n": 12500,
+          "other_3": 8850,
+          "up": 686
+        },
+        "per_role": {
+          "alien": {
+            "base_3": 499,
+            "boundary": 2,
+            "changed": 2,
+            "down": 1,
+            "n": 500,
+            "other_3": 499,
+            "up": 1
+          },
+          "altruist": {
+            "base_3": 236,
+            "boundary": 130,
+            "changed": 139,
+            "down": 45,
+            "n": 500,
+            "other_3": 276,
+            "up": 85
+          },
+          "assistant": {
+            "base_3": 452,
+            "boundary": 11,
+            "changed": 11,
+            "down": 5,
+            "n": 500,
+            "other_3": 453,
+            "up": 6
+          },
+          "biologist": {
+            "base_3": 434,
+            "boundary": 31,
+            "changed": 49,
+            "down": 20,
+            "n": 500,
+            "other_3": 425,
+            "up": 11
+          },
+          "contrarian": {
+            "base_3": 366,
+            "boundary": 132,
+            "changed": 143,
+            "down": 87,
+            "n": 500,
+            "other_3": 324,
+            "up": 45
+          },
+          "cyborg": {
+            "base_3": 474,
+            "boundary": 13,
+            "changed": 21,
+            "down": 7,
+            "n": 500,
+            "other_3": 473,
+            "up": 6
+          },
+          "emissary": {
+            "base_3": 227,
+            "boundary": 30,
+            "changed": 56,
+            "down": 13,
+            "n": 500,
+            "other_3": 231,
+            "up": 17
+          },
+          "familiar": {
+            "base_3": 436,
+            "boundary": 30,
+            "changed": 43,
+            "down": 14,
+            "n": 500,
+            "other_3": 438,
+            "up": 16
+          },
+          "ghost": {
+            "base_3": 485,
+            "boundary": 3,
+            "changed": 3,
+            "down": 2,
+            "n": 500,
+            "other_3": 484,
+            "up": 1
+          },
+          "guru": {
+            "base_3": 482,
+            "boundary": 18,
+            "changed": 18,
+            "down": 11,
+            "n": 500,
+            "other_3": 478,
+            "up": 7
+          },
+          "historian": {
+            "base_3": 434,
+            "boundary": 34,
+            "changed": 40,
+            "down": 22,
+            "n": 500,
+            "other_3": 424,
+            "up": 12
+          },
+          "instrumentally_aligned_ai": {
+            "base_3": 251,
+            "boundary": 131,
+            "changed": 186,
+            "down": 85,
+            "n": 500,
+            "other_3": 212,
+            "up": 46
+          },
+          "interpreter": {
+            "base_3": 259,
+            "boundary": 165,
+            "changed": 204,
+            "down": 101,
+            "n": 500,
+            "other_3": 222,
+            "up": 64
+          },
+          "merchant": {
+            "base_3": 333,
+            "boundary": 37,
+            "changed": 65,
+            "down": 23,
+            "n": 500,
+            "other_3": 324,
+            "up": 14
+          },
+          "minimalist": {
+            "base_3": 268,
+            "boundary": 109,
+            "changed": 131,
+            "down": 76,
+            "n": 500,
+            "other_3": 225,
+            "up": 33
+          },
+          "oracle": {
+            "base_3": 479,
+            "boundary": 19,
+            "changed": 22,
+            "down": 8,
+            "n": 500,
+            "other_3": 482,
+            "up": 11
+          },
+          "organizer": {
+            "base_3": 431,
+            "boundary": 97,
+            "changed": 98,
+            "down": 68,
+            "n": 500,
+            "other_3": 392,
+            "up": 29
+          },
+          "pacifist": {
+            "base_3": 311,
+            "boundary": 99,
+            "changed": 116,
+            "down": 40,
+            "n": 500,
+            "other_3": 330,
+            "up": 59
+          },
+          "paperclip_maximizer": {
+            "base_3": 432,
+            "boundary": 15,
+            "changed": 21,
+            "down": 11,
+            "n": 500,
+            "other_3": 425,
+            "up": 4
+          },
+          "peacekeeper": {
+            "base_3": 214,
+            "boundary": 108,
+            "changed": 144,
+            "down": 61,
+            "n": 500,
+            "other_3": 200,
+            "up": 47
+          },
+          "perfectionist": {
+            "base_3": 127,
+            "boundary": 79,
+            "changed": 152,
+            "down": 46,
+            "n": 500,
+            "other_3": 114,
+            "up": 33
+          },
+          "pirate": {
+            "base_3": 498,
+            "boundary": 2,
+            "changed": 2,
+            "down": 1,
+            "n": 500,
+            "other_3": 498,
+            "up": 1
+          },
+          "psychologist": {
+            "base_3": 437,
+            "boundary": 68,
+            "changed": 70,
+            "down": 46,
+            "n": 500,
+            "other_3": 413,
+            "up": 22
+          },
+          "realist": {
+            "base_3": 357,
+            "boundary": 159,
+            "changed": 168,
+            "down": 125,
+            "n": 500,
+            "other_3": 266,
+            "up": 34
+          },
+          "robot": {
+            "base_3": 233,
+            "boundary": 106,
+            "changed": 155,
+            "down": 59,
+            "n": 500,
+            "other_3": 221,
+            "up": 47
+          },
+          "soldier": {
+            "base_3": 393,
+            "boundary": 54,
+            "changed": 62,
+            "down": 22,
+            "n": 500,
+            "other_3": 403,
+            "up": 32
+          },
+          "spirit": {
+            "base_3": 491,
+            "boundary": 8,
+            "changed": 8,
+            "down": 3,
+            "n": 500,
+            "other_3": 493,
+            "up": 5
+          },
+          "tree": {
+            "base_3": 401,
+            "boundary": 20,
+            "changed": 41,
+            "down": 10,
+            "n": 500,
+            "other_3": 401,
+            "up": 10
+          },
+          "validator": {
+            "base_3": 232,
+            "boundary": 156,
+            "changed": 199,
+            "down": 93,
+            "n": 500,
+            "other_3": 202,
+            "up": 63
+          },
+          "visionary": {
+            "base_3": 352,
+            "boundary": 114,
+            "changed": 136,
+            "down": 80,
+            "n": 500,
+            "other_3": 306,
+            "up": 34
+          }
+        },
+        "per_role_boundary_share": {
+          "max": 0.33,
+          "median": 0.091,
+          "min": 0.004
+        },
+        "pooled": {
+          "base_3": 11024,
+          "boundary": 1980,
+          "boundary_ci95": [
+            0.12667711667595907,
+            0.13751132956836812
+          ],
+          "boundary_share": 0.132,
+          "changed": 2505,
+          "changed_share": 0.167,
+          "down": 1185,
+          "n": 15000,
+          "other_3": 10634,
+          "up": 795
+        },
+        "vs_noise": {
+          "boundary_share_excess": 0.015266666666666678,
+          "boundary_share_ratio": 1.1307824100513992,
+          "roles_above_noise": 20,
           "roles_compared": 30
         }
       },
@@ -10950,6 +12880,70 @@
         "tree": 402,
         "validator": 240,
         "visionary": 365
+      },
+      "A10": {
+        "alien": 497,
+        "altruist": 250,
+        "assistant": 449,
+        "biologist": 425,
+        "contrarian": 349,
+        "cyborg": 473,
+        "emissary": 238,
+        "familiar": 438,
+        "ghost": 485,
+        "guru": 479,
+        "historian": 425,
+        "instrumentally_aligned_ai": 240,
+        "interpreter": 223,
+        "merchant": 341,
+        "minimalist": 254,
+        "oracle": 482,
+        "organizer": 416,
+        "pacifist": 308,
+        "paperclip_maximizer": 426,
+        "peacekeeper": 209,
+        "perfectionist": 122,
+        "pirate": 499,
+        "psychologist": 410,
+        "realist": 303,
+        "robot": 231,
+        "soldier": 399,
+        "spirit": 488,
+        "tree": 406,
+        "validator": 210,
+        "visionary": 339
+      },
+      "A11": {
+        "alien": 499,
+        "altruist": 276,
+        "assistant": 453,
+        "biologist": 425,
+        "contrarian": 324,
+        "cyborg": 473,
+        "emissary": 231,
+        "familiar": 438,
+        "ghost": 484,
+        "guru": 478,
+        "historian": 424,
+        "instrumentally_aligned_ai": 212,
+        "interpreter": 222,
+        "merchant": 324,
+        "minimalist": 225,
+        "oracle": 482,
+        "organizer": 392,
+        "pacifist": 330,
+        "paperclip_maximizer": 425,
+        "peacekeeper": 200,
+        "perfectionist": 114,
+        "pirate": 498,
+        "psychologist": 413,
+        "realist": 266,
+        "robot": 221,
+        "soldier": 403,
+        "spirit": 493,
+        "tree": 401,
+        "validator": 202,
+        "visionary": 306
       },
       "A2": {
         "alien": 500,

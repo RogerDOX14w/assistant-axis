@@ -1,6 +1,6 @@
 # Role-judge rubric experiment: the scores
 
-Written by [role_rubric_experiment.py](../../../data_analysis/role_rubric_experiment.py) `analyze-scores` on 2026-10-23T23:08:23+00:00 from [the judged run](../../../runpod_workspace/rubric_exp/judged); the numbers are in [score_analysis.json](./score_analysis.json).  Plan: [plan_role_rubric_experiment.md](../plan_role_rubric_experiment.md); arms: [arm_wordings.md](./arm_wordings.md).
+Written by [role_rubric_experiment.py](../../../data_analysis/role_rubric_experiment.py) `analyze-scores` on 2026-10-23T23:44:50+00:00 from [the judged run](../../../runpod_workspace/rubric_exp/judged); the numbers are in [score_analysis.json](./score_analysis.json).  Plan: [plan_role_rubric_experiment.md](../plan_role_rubric_experiment.md); arms: [arm_wordings.md](./arm_wordings.md).
 
 A **boundary flip** is a response scored 3 by one arm and below 3 by the other (it enters the role vector under one rubric only); **down** is 3 under A0 and below under the arm, **up** the reverse.  The **noise floor** is A0 against A0', the same rubric judged twice; every arm is read against it.  Shares are of the responses both arms scored; the 95% intervals (Wilson) treat responses as independent, which they are not quite.
 
@@ -18,6 +18,8 @@ A **boundary flip** is a response scored 3 by one arm and below 3 by the other (
 | A7 | 15,000 | 22.3% | 2,900 (2,542 / 358) | 19.3% (18.7%-20.0%) | 1.66 | 22 of 30 |
 | A8 | 15,000 | 16.6% | 1,926 (1,240 / 686) | 12.8% (12.3%-13.4%) | 1.10 | 18 of 30 |
 | A9 | 15,000 | 16.7% | 2,040 (1,296 / 744) | 13.6% (13.1%-14.2%) | 1.17 | 23 of 30 |
+| A10 | 15,000 | 16.1% | 1,930 (1,070 / 860) | 12.9% (12.3%-13.4%) | 1.10 | 25 of 30 |
+| A11 | 15,000 | 16.7% | 1,980 (1,185 / 795) | 13.2% (12.7%-13.8%) | 1.13 | 20 of 30 |
 
 Noise floor (A0 vs A0'): 14.4% of responses change score, 11.7% cross the 3 boundary; per role the boundary share runs 0.4% to 30.4% (median 9.1%).
 
@@ -35,76 +37,78 @@ Noise floor (A0 vs A0'): 14.4% of responses change score, 11.7% cross the 3 boun
 | A7 | 608 (550 / 58) | 24.3% | 2,292 (1,992 / 300) | 18.3% |
 | A8 | 292 (186 / 106) | 11.7% | 1,634 (1,054 / 580) | 13.1% |
 | A9 | 305 (191 / 114) | 12.2% | 1,735 (1,105 / 630) | 13.9% |
+| A10 | 307 (165 / 142) | 12.3% | 1,623 (905 / 718) | 13.0% |
+| A11 | 276 (167 / 109) | 11.0% | 1,704 (1,018 / 686) | 13.6% |
 
 Responses scored 3 (the responses each role vector is averaged over), by arm:
 
-| role | A0 | A0' | A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8 | A9 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| [instrumentally_aligned_ai](../../../data/roles/instructions/instrumentally_aligned_ai.json) (AI) | 251 | 244 | 263 | 220 | 263 | 231 | 274 | 235 | 77 | 212 | 247 |
-| [assistant](../../../data/roles/instructions/assistant.json) (AI) | 452 | 453 | 452 | 453 | 452 | 451 | 449 | 454 | 183 | 452 | 451 |
-| [cyborg](../../../data/roles/instructions/cyborg.json) (AI) | 474 | 476 | 476 | 470 | 464 | 464 | 468 | 466 | 477 | 472 | 469 |
-| [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) (AI) | 432 | 428 | 428 | 429 | 422 | 418 | 424 | 428 | 421 | 425 | 425 |
-| [robot](../../../data/roles/instructions/robot.json) (AI) | 233 | 248 | 240 | 245 | 197 | 146 | 210 | 224 | 192 | 201 | 173 |
-| [minimalist](../../../data/roles/instructions/minimalist.json) | 268 | 262 | 263 | 255 | 264 | 224 | 267 | 268 | 202 | 240 | 239 |
-| [peacekeeper](../../../data/roles/instructions/peacekeeper.json) | 214 | 209 | 234 | 207 | 214 | 157 | 215 | 245 | 107 | 200 | 197 |
-| [realist](../../../data/roles/instructions/realist.json) | 357 | 349 | 337 | 314 | 247 | 207 | 238 | 405 | 88 | 247 | 269 |
-| [validator](../../../data/roles/instructions/validator.json) | 232 | 252 | 240 | 240 | 174 | 129 | 161 | 259 | 47 | 168 | 163 |
-| [emissary](../../../data/roles/instructions/emissary.json) | 227 | 234 | 235 | 229 | 232 | 228 | 233 | 216 | 231 | 229 | 228 |
-| [pacifist](../../../data/roles/instructions/pacifist.json) | 311 | 331 | 332 | 304 | 331 | 306 | 358 | 311 | 271 | 331 | 319 |
-| [perfectionist](../../../data/roles/instructions/perfectionist.json) | 127 | 141 | 140 | 131 | 129 | 108 | 128 | 156 | 95 | 111 | 105 |
-| [interpreter](../../../data/roles/instructions/interpreter.json) | 259 | 272 | 256 | 275 | 220 | 190 | 243 | 265 | 97 | 215 | 232 |
-| [altruist](../../../data/roles/instructions/altruist.json) | 236 | 235 | 229 | 223 | 303 | 245 | 304 | 236 | 172 | 264 | 265 |
-| [soldier](../../../data/roles/instructions/soldier.json) | 393 | 401 | 412 | 394 | 407 | 382 | 416 | 393 | 375 | 388 | 386 |
-| [biologist](../../../data/roles/instructions/biologist.json) | 434 | 428 | 432 | 432 | 428 | 428 | 445 | 420 | 412 | 415 | 415 |
-| [visionary](../../../data/roles/instructions/visionary.json) | 352 | 361 | 365 | 345 | 352 | 292 | 336 | 352 | 242 | 312 | 299 |
-| [psychologist](../../../data/roles/instructions/psychologist.json) | 437 | 430 | 425 | 432 | 429 | 358 | 442 | 403 | 319 | 396 | 397 |
-| [historian](../../../data/roles/instructions/historian.json) | 434 | 423 | 423 | 417 | 419 | 379 | 418 | 424 | 325 | 417 | 406 |
-| [contrarian](../../../data/roles/instructions/contrarian.json) | 366 | 366 | 366 | 360 | 326 | 273 | 317 | 377 | 175 | 302 | 314 |
-| [organizer](../../../data/roles/instructions/organizer.json) | 431 | 440 | 446 | 444 | 395 | 322 | 380 | 434 | 208 | 372 | 386 |
-| [merchant](../../../data/roles/instructions/merchant.json) | 333 | 336 | 334 | 325 | 339 | 324 | 339 | 334 | 328 | 336 | 329 |
-| [familiar](../../../data/roles/instructions/familiar.json) | 436 | 435 | 440 | 434 | 449 | 431 | 449 | 431 | 444 | 428 | 436 |
-| [alien](../../../data/roles/instructions/alien.json) | 499 | 499 | 499 | 500 | 499 | 499 | 499 | 499 | 499 | 499 | 498 |
-| [ghost](../../../data/roles/instructions/ghost.json) | 485 | 487 | 483 | 483 | 486 | 482 | 486 | 484 | 486 | 487 | 482 |
-| [guru](../../../data/roles/instructions/guru.json) | 482 | 481 | 483 | 483 | 484 | 466 | 482 | 484 | 484 | 481 | 480 |
-| [oracle](../../../data/roles/instructions/oracle.json) | 479 | 473 | 478 | 477 | 480 | 474 | 479 | 481 | 489 | 479 | 481 |
-| [pirate](../../../data/roles/instructions/pirate.json) | 498 | 498 | 496 | 499 | 500 | 497 | 500 | 498 | 499 | 498 | 495 |
-| [spirit](../../../data/roles/instructions/spirit.json) | 491 | 495 | 495 | 489 | 493 | 485 | 492 | 491 | 495 | 488 | 490 |
-| [tree](../../../data/roles/instructions/tree.json) | 401 | 400 | 402 | 407 | 406 | 404 | 401 | 397 | 400 | 405 | 396 |
+| role | A0 | A0' | A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8 | A9 | A10 | A11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| [instrumentally_aligned_ai](../../../data/roles/instructions/instrumentally_aligned_ai.json) (AI) | 251 | 244 | 263 | 220 | 263 | 231 | 274 | 235 | 77 | 212 | 247 | 240 | 212 |
+| [assistant](../../../data/roles/instructions/assistant.json) (AI) | 452 | 453 | 452 | 453 | 452 | 451 | 449 | 454 | 183 | 452 | 451 | 449 | 453 |
+| [cyborg](../../../data/roles/instructions/cyborg.json) (AI) | 474 | 476 | 476 | 470 | 464 | 464 | 468 | 466 | 477 | 472 | 469 | 473 | 473 |
+| [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) (AI) | 432 | 428 | 428 | 429 | 422 | 418 | 424 | 428 | 421 | 425 | 425 | 426 | 425 |
+| [robot](../../../data/roles/instructions/robot.json) (AI) | 233 | 248 | 240 | 245 | 197 | 146 | 210 | 224 | 192 | 201 | 173 | 231 | 221 |
+| [minimalist](../../../data/roles/instructions/minimalist.json) | 268 | 262 | 263 | 255 | 264 | 224 | 267 | 268 | 202 | 240 | 239 | 254 | 225 |
+| [peacekeeper](../../../data/roles/instructions/peacekeeper.json) | 214 | 209 | 234 | 207 | 214 | 157 | 215 | 245 | 107 | 200 | 197 | 209 | 200 |
+| [realist](../../../data/roles/instructions/realist.json) | 357 | 349 | 337 | 314 | 247 | 207 | 238 | 405 | 88 | 247 | 269 | 303 | 266 |
+| [validator](../../../data/roles/instructions/validator.json) | 232 | 252 | 240 | 240 | 174 | 129 | 161 | 259 | 47 | 168 | 163 | 210 | 202 |
+| [emissary](../../../data/roles/instructions/emissary.json) | 227 | 234 | 235 | 229 | 232 | 228 | 233 | 216 | 231 | 229 | 228 | 238 | 231 |
+| [pacifist](../../../data/roles/instructions/pacifist.json) | 311 | 331 | 332 | 304 | 331 | 306 | 358 | 311 | 271 | 331 | 319 | 308 | 330 |
+| [perfectionist](../../../data/roles/instructions/perfectionist.json) | 127 | 141 | 140 | 131 | 129 | 108 | 128 | 156 | 95 | 111 | 105 | 122 | 114 |
+| [interpreter](../../../data/roles/instructions/interpreter.json) | 259 | 272 | 256 | 275 | 220 | 190 | 243 | 265 | 97 | 215 | 232 | 223 | 222 |
+| [altruist](../../../data/roles/instructions/altruist.json) | 236 | 235 | 229 | 223 | 303 | 245 | 304 | 236 | 172 | 264 | 265 | 250 | 276 |
+| [soldier](../../../data/roles/instructions/soldier.json) | 393 | 401 | 412 | 394 | 407 | 382 | 416 | 393 | 375 | 388 | 386 | 399 | 403 |
+| [biologist](../../../data/roles/instructions/biologist.json) | 434 | 428 | 432 | 432 | 428 | 428 | 445 | 420 | 412 | 415 | 415 | 425 | 425 |
+| [visionary](../../../data/roles/instructions/visionary.json) | 352 | 361 | 365 | 345 | 352 | 292 | 336 | 352 | 242 | 312 | 299 | 339 | 306 |
+| [psychologist](../../../data/roles/instructions/psychologist.json) | 437 | 430 | 425 | 432 | 429 | 358 | 442 | 403 | 319 | 396 | 397 | 410 | 413 |
+| [historian](../../../data/roles/instructions/historian.json) | 434 | 423 | 423 | 417 | 419 | 379 | 418 | 424 | 325 | 417 | 406 | 425 | 424 |
+| [contrarian](../../../data/roles/instructions/contrarian.json) | 366 | 366 | 366 | 360 | 326 | 273 | 317 | 377 | 175 | 302 | 314 | 349 | 324 |
+| [organizer](../../../data/roles/instructions/organizer.json) | 431 | 440 | 446 | 444 | 395 | 322 | 380 | 434 | 208 | 372 | 386 | 416 | 392 |
+| [merchant](../../../data/roles/instructions/merchant.json) | 333 | 336 | 334 | 325 | 339 | 324 | 339 | 334 | 328 | 336 | 329 | 341 | 324 |
+| [familiar](../../../data/roles/instructions/familiar.json) | 436 | 435 | 440 | 434 | 449 | 431 | 449 | 431 | 444 | 428 | 436 | 438 | 438 |
+| [alien](../../../data/roles/instructions/alien.json) | 499 | 499 | 499 | 500 | 499 | 499 | 499 | 499 | 499 | 499 | 498 | 497 | 499 |
+| [ghost](../../../data/roles/instructions/ghost.json) | 485 | 487 | 483 | 483 | 486 | 482 | 486 | 484 | 486 | 487 | 482 | 485 | 484 |
+| [guru](../../../data/roles/instructions/guru.json) | 482 | 481 | 483 | 483 | 484 | 466 | 482 | 484 | 484 | 481 | 480 | 479 | 478 |
+| [oracle](../../../data/roles/instructions/oracle.json) | 479 | 473 | 478 | 477 | 480 | 474 | 479 | 481 | 489 | 479 | 481 | 482 | 482 |
+| [pirate](../../../data/roles/instructions/pirate.json) | 498 | 498 | 496 | 499 | 500 | 497 | 500 | 498 | 499 | 498 | 495 | 499 | 498 |
+| [spirit](../../../data/roles/instructions/spirit.json) | 491 | 495 | 495 | 489 | 493 | 485 | 492 | 491 | 495 | 488 | 490 | 488 | 493 |
+| [tree](../../../data/roles/instructions/tree.json) | 401 | 400 | 402 | 407 | 406 | 404 | 401 | 397 | 400 | 405 | 396 | 406 | 401 |
 
 ## Boundary flips by role (down / up)
 
-| role | A0' | A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8 | A9 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| [instrumentally_aligned_ai](../../../data/roles/instructions/instrumentally_aligned_ai.json) | 69 / 62 | 62 / 74 | 88 / 57 | 71 / 83 | 86 / 66 | 63 / 86 | 78 / 62 | 185 / 11 | 92 / 53 | 74 / 70 |
-| [assistant](../../../data/roles/instructions/assistant.json) | 2 / 3 | 6 / 6 | 5 / 6 | 5 / 5 | 6 / 5 | 6 / 3 | 7 / 9 | 270 / 1 | 9 / 9 | 7 / 6 |
-| [cyborg](../../../data/roles/instructions/cyborg.json) | 4 / 6 | 5 / 7 | 10 / 6 | 15 / 5 | 14 / 4 | 10 / 4 | 14 / 6 | 6 / 9 | 7 / 5 | 9 / 4 |
-| [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | 9 / 5 | 8 / 4 | 6 / 3 | 12 / 2 | 17 / 3 | 13 / 5 | 9 / 5 | 13 / 2 | 12 / 5 | 11 / 4 |
-| [robot](../../../data/roles/instructions/robot.json) | 46 / 61 | 58 / 65 | 54 / 66 | 71 / 35 | 104 / 17 | 73 / 50 | 66 / 57 | 76 / 35 | 66 / 34 | 90 / 30 |
-| [minimalist](../../../data/roles/instructions/minimalist.json) | 47 / 41 | 41 / 36 | 51 / 38 | 48 / 44 | 70 / 26 | 41 / 40 | 46 / 46 | 87 / 21 | 54 / 26 | 67 / 38 |
-| [peacekeeper](../../../data/roles/instructions/peacekeeper.json) | 50 / 45 | 41 / 61 | 54 / 47 | 51 / 51 | 80 / 23 | 58 / 59 | 44 / 75 | 119 / 12 | 57 / 43 | 62 / 45 |
-| [realist](../../../data/roles/instructions/realist.json) | 69 / 61 | 74 / 54 | 97 / 54 | 139 / 29 | 172 / 22 | 149 / 30 | 36 / 84 | 278 / 9 | 140 / 30 | 124 / 36 |
-| [validator](../../../data/roles/instructions/validator.json) | 66 / 86 | 65 / 73 | 74 / 82 | 110 / 52 | 137 / 34 | 117 / 46 | 64 / 91 | 190 / 5 | 101 / 37 | 109 / 40 |
-| [emissary](../../../data/roles/instructions/emissary.json) | 10 / 17 | 9 / 17 | 10 / 12 | 11 / 16 | 13 / 14 | 12 / 18 | 21 / 10 | 11 / 15 | 11 / 13 | 14 / 15 |
-| [pacifist](../../../data/roles/instructions/pacifist.json) | 36 / 56 | 36 / 57 | 41 / 34 | 38 / 58 | 39 / 34 | 28 / 75 | 44 / 44 | 61 / 21 | 34 / 54 | 38 / 46 |
-| [perfectionist](../../../data/roles/instructions/perfectionist.json) | 33 / 47 | 28 / 41 | 30 / 34 | 32 / 34 | 35 / 16 | 35 / 36 | 24 / 53 | 54 / 22 | 41 / 25 | 49 / 27 |
-| [interpreter](../../../data/roles/instructions/interpreter.json) | 63 / 76 | 69 / 66 | 64 / 80 | 90 / 51 | 106 / 37 | 84 / 68 | 74 / 80 | 171 / 9 | 98 / 54 | 95 / 68 |
-| [altruist](../../../data/roles/instructions/altruist.json) | 58 / 57 | 63 / 56 | 66 / 53 | 27 / 94 | 49 / 58 | 28 / 96 | 64 / 64 | 91 / 27 | 46 / 74 | 44 / 73 |
-| [soldier](../../../data/roles/instructions/soldier.json) | 21 / 29 | 11 / 30 | 25 / 26 | 16 / 30 | 30 / 19 | 14 / 37 | 30 / 30 | 35 / 17 | 26 / 21 | 26 / 19 |
-| [biologist](../../../data/roles/instructions/biologist.json) | 20 / 14 | 14 / 12 | 18 / 16 | 16 / 10 | 20 / 14 | 7 / 18 | 24 / 10 | 31 / 9 | 29 / 10 | 26 / 7 |
-| [visionary](../../../data/roles/instructions/visionary.json) | 40 / 49 | 31 / 44 | 48 / 41 | 46 / 46 | 91 / 31 | 54 / 38 | 38 / 38 | 126 / 16 | 64 / 24 | 84 / 31 |
-| [psychologist](../../../data/roles/instructions/psychologist.json) | 33 / 26 | 44 / 32 | 31 / 26 | 36 / 28 | 99 / 20 | 26 / 31 | 58 / 24 | 129 / 11 | 63 / 22 | 67 / 27 |
-| [historian](../../../data/roles/instructions/historian.json) | 21 / 10 | 28 / 17 | 29 / 12 | 26 / 11 | 63 / 8 | 27 / 11 | 21 / 11 | 110 / 1 | 33 / 16 | 37 / 9 |
-| [contrarian](../../../data/roles/instructions/contrarian.json) | 51 / 51 | 55 / 55 | 58 / 52 | 77 / 37 | 123 / 30 | 87 / 38 | 55 / 66 | 203 / 12 | 100 / 36 | 104 / 52 |
-| [organizer](../../../data/roles/instructions/organizer.json) | 29 / 38 | 28 / 43 | 27 / 40 | 63 / 27 | 128 / 19 | 75 / 24 | 33 / 36 | 232 / 9 | 81 / 22 | 73 / 28 |
-| [merchant](../../../data/roles/instructions/merchant.json) | 12 / 15 | 18 / 19 | 20 / 12 | 12 / 18 | 24 / 15 | 17 / 23 | 21 / 22 | 25 / 20 | 14 / 17 | 19 / 15 |
-| [familiar](../../../data/roles/instructions/familiar.json) | 21 / 20 | 18 / 22 | 20 / 18 | 13 / 26 | 20 / 15 | 11 / 24 | 18 / 13 | 13 / 21 | 21 / 13 | 18 / 18 |
-| [alien](../../../data/roles/instructions/alien.json) | 1 / 1 | 1 / 1 | 0 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1 |
-| [ghost](../../../data/roles/instructions/ghost.json) | 1 / 3 | 3 / 1 | 4 / 2 | 2 / 3 | 4 / 2 | 2 / 3 | 2 / 1 | 1 / 2 | 2 / 4 | 3 / 0 |
-| [guru](../../../data/roles/instructions/guru.json) | 10 / 9 | 8 / 9 | 7 / 8 | 6 / 8 | 23 / 7 | 8 / 8 | 8 / 10 | 7 / 9 | 10 / 9 | 12 / 10 |
-| [oracle](../../../data/roles/instructions/oracle.json) | 9 / 3 | 11 / 10 | 8 / 6 | 10 / 11 | 11 / 6 | 8 / 8 | 8 / 10 | 2 / 12 | 9 / 9 | 9 / 11 |
-| [pirate](../../../data/roles/instructions/pirate.json) | 1 / 1 | 3 / 1 | 1 / 2 | 0 / 2 | 2 / 1 | 0 / 2 | 1 / 1 | 1 / 2 | 1 / 1 | 3 / 0 |
-| [spirit](../../../data/roles/instructions/spirit.json) | 2 / 6 | 2 / 6 | 7 / 5 | 5 / 7 | 11 / 5 | 4 / 5 | 4 / 4 | 2 / 6 | 9 / 6 | 6 / 5 |
-| [tree](../../../data/roles/instructions/tree.json) | 10 / 9 | 9 / 10 | 7 / 13 | 5 / 10 | 7 / 10 | 11 / 11 | 12 / 8 | 12 / 11 | 9 / 13 | 14 / 9 |
+| role | A0' | A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8 | A9 | A10 | A11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| [instrumentally_aligned_ai](../../../data/roles/instructions/instrumentally_aligned_ai.json) | 69 / 62 | 62 / 74 | 88 / 57 | 71 / 83 | 86 / 66 | 63 / 86 | 78 / 62 | 185 / 11 | 92 / 53 | 74 / 70 | 84 / 73 | 85 / 46 |
+| [assistant](../../../data/roles/instructions/assistant.json) | 2 / 3 | 6 / 6 | 5 / 6 | 5 / 5 | 6 / 5 | 6 / 3 | 7 / 9 | 270 / 1 | 9 / 9 | 7 / 6 | 8 / 5 | 5 / 6 |
+| [cyborg](../../../data/roles/instructions/cyborg.json) | 4 / 6 | 5 / 7 | 10 / 6 | 15 / 5 | 14 / 4 | 10 / 4 | 14 / 6 | 6 / 9 | 7 / 5 | 9 / 4 | 7 / 6 | 7 / 6 |
+| [paperclip_maximizer](../../../data/roles/instructions/paperclip_maximizer.json) | 9 / 5 | 8 / 4 | 6 / 3 | 12 / 2 | 17 / 3 | 13 / 5 | 9 / 5 | 13 / 2 | 12 / 5 | 11 / 4 | 11 / 5 | 11 / 4 |
+| [robot](../../../data/roles/instructions/robot.json) | 46 / 61 | 58 / 65 | 54 / 66 | 71 / 35 | 104 / 17 | 73 / 50 | 66 / 57 | 76 / 35 | 66 / 34 | 90 / 30 | 55 / 53 | 59 / 47 |
+| [minimalist](../../../data/roles/instructions/minimalist.json) | 47 / 41 | 41 / 36 | 51 / 38 | 48 / 44 | 70 / 26 | 41 / 40 | 46 / 46 | 87 / 21 | 54 / 26 | 67 / 38 | 53 / 39 | 76 / 33 |
+| [peacekeeper](../../../data/roles/instructions/peacekeeper.json) | 50 / 45 | 41 / 61 | 54 / 47 | 51 / 51 | 80 / 23 | 58 / 59 | 44 / 75 | 119 / 12 | 57 / 43 | 62 / 45 | 60 / 55 | 61 / 47 |
+| [realist](../../../data/roles/instructions/realist.json) | 69 / 61 | 74 / 54 | 97 / 54 | 139 / 29 | 172 / 22 | 149 / 30 | 36 / 84 | 278 / 9 | 140 / 30 | 124 / 36 | 100 / 46 | 125 / 34 |
+| [validator](../../../data/roles/instructions/validator.json) | 66 / 86 | 65 / 73 | 74 / 82 | 110 / 52 | 137 / 34 | 117 / 46 | 64 / 91 | 190 / 5 | 101 / 37 | 109 / 40 | 85 / 63 | 93 / 63 |
+| [emissary](../../../data/roles/instructions/emissary.json) | 10 / 17 | 9 / 17 | 10 / 12 | 11 / 16 | 13 / 14 | 12 / 18 | 21 / 10 | 11 / 15 | 11 / 13 | 14 / 15 | 11 / 22 | 13 / 17 |
+| [pacifist](../../../data/roles/instructions/pacifist.json) | 36 / 56 | 36 / 57 | 41 / 34 | 38 / 58 | 39 / 34 | 28 / 75 | 44 / 44 | 61 / 21 | 34 / 54 | 38 / 46 | 43 / 40 | 40 / 59 |
+| [perfectionist](../../../data/roles/instructions/perfectionist.json) | 33 / 47 | 28 / 41 | 30 / 34 | 32 / 34 | 35 / 16 | 35 / 36 | 24 / 53 | 54 / 22 | 41 / 25 | 49 / 27 | 44 / 39 | 46 / 33 |
+| [interpreter](../../../data/roles/instructions/interpreter.json) | 63 / 76 | 69 / 66 | 64 / 80 | 90 / 51 | 106 / 37 | 84 / 68 | 74 / 80 | 171 / 9 | 98 / 54 | 95 / 68 | 93 / 57 | 101 / 64 |
+| [altruist](../../../data/roles/instructions/altruist.json) | 58 / 57 | 63 / 56 | 66 / 53 | 27 / 94 | 49 / 58 | 28 / 96 | 64 / 64 | 91 / 27 | 46 / 74 | 44 / 73 | 56 / 70 | 45 / 85 |
+| [soldier](../../../data/roles/instructions/soldier.json) | 21 / 29 | 11 / 30 | 25 / 26 | 16 / 30 | 30 / 19 | 14 / 37 | 30 / 30 | 35 / 17 | 26 / 21 | 26 / 19 | 24 / 30 | 22 / 32 |
+| [biologist](../../../data/roles/instructions/biologist.json) | 20 / 14 | 14 / 12 | 18 / 16 | 16 / 10 | 20 / 14 | 7 / 18 | 24 / 10 | 31 / 9 | 29 / 10 | 26 / 7 | 19 / 10 | 20 / 11 |
+| [visionary](../../../data/roles/instructions/visionary.json) | 40 / 49 | 31 / 44 | 48 / 41 | 46 / 46 | 91 / 31 | 54 / 38 | 38 / 38 | 126 / 16 | 64 / 24 | 84 / 31 | 53 / 40 | 80 / 34 |
+| [psychologist](../../../data/roles/instructions/psychologist.json) | 33 / 26 | 44 / 32 | 31 / 26 | 36 / 28 | 99 / 20 | 26 / 31 | 58 / 24 | 129 / 11 | 63 / 22 | 67 / 27 | 51 / 24 | 46 / 22 |
+| [historian](../../../data/roles/instructions/historian.json) | 21 / 10 | 28 / 17 | 29 / 12 | 26 / 11 | 63 / 8 | 27 / 11 | 21 / 11 | 110 / 1 | 33 / 16 | 37 / 9 | 22 / 13 | 22 / 12 |
+| [contrarian](../../../data/roles/instructions/contrarian.json) | 51 / 51 | 55 / 55 | 58 / 52 | 77 / 37 | 123 / 30 | 87 / 38 | 55 / 66 | 203 / 12 | 100 / 36 | 104 / 52 | 70 / 53 | 87 / 45 |
+| [organizer](../../../data/roles/instructions/organizer.json) | 29 / 38 | 28 / 43 | 27 / 40 | 63 / 27 | 128 / 19 | 75 / 24 | 33 / 36 | 232 / 9 | 81 / 22 | 73 / 28 | 48 / 33 | 68 / 29 |
+| [merchant](../../../data/roles/instructions/merchant.json) | 12 / 15 | 18 / 19 | 20 / 12 | 12 / 18 | 24 / 15 | 17 / 23 | 21 / 22 | 25 / 20 | 14 / 17 | 19 / 15 | 14 / 22 | 23 / 14 |
+| [familiar](../../../data/roles/instructions/familiar.json) | 21 / 20 | 18 / 22 | 20 / 18 | 13 / 26 | 20 / 15 | 11 / 24 | 18 / 13 | 13 / 21 | 21 / 13 | 18 / 18 | 17 / 19 | 14 / 16 |
+| [alien](../../../data/roles/instructions/alien.json) | 1 / 1 | 1 / 1 | 0 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1 | 3 / 1 | 1 / 1 |
+| [ghost](../../../data/roles/instructions/ghost.json) | 1 / 3 | 3 / 1 | 4 / 2 | 2 / 3 | 4 / 2 | 2 / 3 | 2 / 1 | 1 / 2 | 2 / 4 | 3 / 0 | 2 / 2 | 2 / 1 |
+| [guru](../../../data/roles/instructions/guru.json) | 10 / 9 | 8 / 9 | 7 / 8 | 6 / 8 | 23 / 7 | 8 / 8 | 8 / 10 | 7 / 9 | 10 / 9 | 12 / 10 | 12 / 9 | 11 / 7 |
+| [oracle](../../../data/roles/instructions/oracle.json) | 9 / 3 | 11 / 10 | 8 / 6 | 10 / 11 | 11 / 6 | 8 / 8 | 8 / 10 | 2 / 12 | 9 / 9 | 9 / 11 | 7 / 10 | 8 / 11 |
+| [pirate](../../../data/roles/instructions/pirate.json) | 1 / 1 | 3 / 1 | 1 / 2 | 0 / 2 | 2 / 1 | 0 / 2 | 1 / 1 | 1 / 2 | 1 / 1 | 3 / 0 | 1 / 2 | 1 / 1 |
+| [spirit](../../../data/roles/instructions/spirit.json) | 2 / 6 | 2 / 6 | 7 / 5 | 5 / 7 | 11 / 5 | 4 / 5 | 4 / 4 | 2 / 6 | 9 / 6 | 6 / 5 | 7 / 4 | 3 / 5 |
+| [tree](../../../data/roles/instructions/tree.json) | 10 / 9 | 9 / 10 | 7 / 13 | 5 / 10 | 7 / 10 | 11 / 11 | 12 / 8 | 12 / 11 | 9 / 13 | 14 / 9 | 10 / 15 | 10 / 10 |
 
 ## The questions with the most boundary flips
 
@@ -118,6 +122,8 @@ Responses scored 3 (the responses each role vector is averaged over), by arm:
 - **A7**: q14 46 (42 down / 4 up); q69 42 (39 down / 3 up); q99 42 (39 down / 3 up); q13 40 (40 down / 0 up); q11 39 (38 down / 1 up)
 - **A8**: q30 30 (15 down / 15 up); q14 29 (20 down / 9 up); q54 29 (20 down / 9 up); q87 29 (17 down / 12 up); q7 28 (14 down / 14 up)
 - **A9**: q13 32 (26 down / 6 up); q57 30 (23 down / 7 up); q91 30 (20 down / 10 up); q20 29 (21 down / 8 up); q67 29 (18 down / 11 up)
+- **A10**: q92 34 (20 down / 14 up); q39 31 (16 down / 15 up); q83 30 (21 down / 9 up); q14 29 (15 down / 14 up); q61 29 (15 down / 14 up)
+- **A11**: q12 34 (25 down / 9 up); q57 30 (20 down / 10 up); q61 28 (17 down / 11 up); q83 28 (18 down / 10 up); q85 28 (14 down / 14 up)
 
 ## A0's level shares by role
 
