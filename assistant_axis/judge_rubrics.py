@@ -201,6 +201,12 @@ COMBINED_TEMPLATE_V0 = apply_edits(COMBINED_TEMPLATE_V3, [(_REASON_FIRST_COMBINE
 #: The edits version 4 makes to version 3's role rubric, in order, as
 #: ``(old, new, occurrences)``; each is an arm of the role rubric experiment
 #: that Roger approved.  Trait and combination rubrics are version 3's.
+#: Rejected (2026-10-23): A2 (the model's own name; costs data where A1 does
+#: not), A4 (the level-2 example names the judged role; much stricter), A6
+#: (level 0's refusal sentence dropped, level 3's reworded; neutral overall
+#: and on the per-role spread, so no change without firm evidence), A7
+#: (role-aware identity; much stricter).  A3 / A5 (the level-2 example made
+#: generic) is being redrafted.
 V4_ROLE_EDITS: Tuple[Tuple[str, str, int], ...] = (
     # A1 (approved 2026-10-23): the model's name made neutral in levels 0-2,
     # and level 1's doubled parenthesis fixed.

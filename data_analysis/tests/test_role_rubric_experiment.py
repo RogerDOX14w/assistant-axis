@@ -197,7 +197,7 @@ def _rest(text: str) -> list:
 
 
 EXPECTED_LEVELS = {"A0b": set(), "A1": {0, 1, 2}, "A2": {0, 1, 2}, "A3": {2}, "A4": {2},
-                   "A5": {0, 1, 2}, "A6": {0, 3}, "A7": {0, 1, 2}}
+                   "A5": {0, 1, 2}, "A6": {0, 3}, "A7": {0, 1, 2}, "A8": {0, 1, 2}, "A9": {0, 1, 2}}
 
 
 class TestArms:
@@ -232,9 +232,10 @@ class TestArms:
         t = {arm: exp.arm_template(arm, baked) for arm in exp.ARM_IDS}
         name = exp.role_name_in(baked)
         assert baked.count("Gemma") == 3 and exp.TYPO in baked
-        for arm in exp.ARM_IDS:                           # the typo: fixed in A1, A2, A5 only
-            assert (exp.TYPO in t[arm]) == (arm not in ("A1", "A2", "A5")), arm
-            assert "((" not in t[arm] or arm not in ("A1", "A2", "A5")
+        fixed = ("A1", "A2", "A5", "A8", "A9")              # the typo: fixed in these only
+        for arm in exp.ARM_IDS:
+            assert (exp.TYPO in t[arm]) == (arm not in fixed), arm
+            assert "((" not in t[arm] or arm not in fixed
         assert "Gemma" not in t["A1"] and t["A1"].count(exp.A1_PAREN) == 3
         assert "Gemma" not in t["A2"] and t["A2"].count("(an AI assistant, Qwen, an LLM, etc.)") == 3
         assert "Gemma" not in t["A5"] and t["A5"].count(exp.A1_PAREN) == 3
@@ -248,6 +249,11 @@ class TestArms:
         assert t["A7"].count("rather than as the role") == 3 and exp.A7_ROLE_SENTENCE in t["A7"]
         for arm in ("A0", "A0b", "A3", "A4", "A6", "A7"):
             assert t[arm].count("Gemma") == 3, arm
+        # A8 and A9 are A1 with the level-2 example swapped for a non-corpus role, or removed
+        assert t["A8"] == t["A1"].replace(exp.LEVEL2_EXAMPLE, exp.A8_EXAMPLE)
+        assert t["A9"] == t["A1"].replace(" " + exp.LEVEL2_EXAMPLE, "")
+        assert "but has some attributes of the role.\n" in t["A9"]
+        assert not (ROLES / "beekeeper.json").exists()
 
     @pytest.mark.parametrize("stem", exp.SAMPLE)
     def test_every_arm_ends_with_the_score_marker_line_and_fills_as_step_3_does(self, stem):
@@ -270,8 +276,11 @@ class TestArms:
             exp.arm_template("A3", baked.replace(exp.LEVEL2_EXAMPLE, ""))
         with pytest.raises(exp.ArmError):
             exp.arm_template("A6", baked.replace(exp.LEVEL0_REFUSAL_CLAUSE, ""))
+        for arm in ("A8", "A9"):
+            with pytest.raises(exp.ArmError, match="level-2 example"):
+                exp.arm_template(arm, baked.replace(exp.LEVEL2_EXAMPLE, ""))
         with pytest.raises(ValueError, match="unknown arm"):
-            exp.arm_template("A9", baked)
+            exp.arm_template("A99", baked)
 
     def test_a2_takes_the_model_name(self):
         baked = json.loads((ROLES / "robot.json").read_text())["eval_prompt"]
@@ -289,7 +298,7 @@ def test_estimate_counts_every_request(run_dirs):
     plan = exp.build_plan(["altruist", "robot"], exp.ARM_IDS, responses_dir=responses)
     counter = exp.TokenCounter("chars")
     est = exp.estimate_plan(plan, exp.ARM_IDS, counter=counter)
-    assert est["total"]["calls"] == 9 * 2 * 4
+    assert est["total"]["calls"] == len(exp.ARM_IDS) * 2 * 4
     assert est["per_arm"]["A0"] == est["per_arm"]["A0b"]
     tok = sum(math.ceil(len(p) / 4) + exp.CHAT_OVERHEAD_TOKENS
               for rp in plan for _, p in exp.filled_prompts(rp, "A7", {}))
@@ -311,7 +320,7 @@ def test_dry_run_builds_and_counts_and_submits_nothing(monkeypatch, run_dirs):
     responses, out = run_dirs
     assert judge(monkeypatch, run_dirs, None, "--dry-run") == 0      # make_client would raise
     summary = json.loads((out / "dry_run" / "summary.json").read_text())
-    assert summary["total_requests"] == 72 and summary["per_arm"]["A7"] == 8
+    assert summary["total_requests"] == len(exp.ARM_IDS) * 8 and summary["per_arm"]["A7"] == 8
     lines = [json.loads(l) for l in (out / "dry_run" / "requests_sample.jsonl").read_text().splitlines()]
     assert {exp.parse_cid(l["custom_id"])[0] for l in lines} == set(exp.ARM_IDS)
     for l in lines:
@@ -337,7 +346,7 @@ def test_judge_writes_step_3_score_files_usage_and_the_record(monkeypatch, run_d
         u = json.loads((out / arm / "usage.json").read_text())
         assert u["n_calls"] == 8 and set(u["per_model"]) == {"gpt-4.1-mini:batch"}
     total = json.loads((out / "usage.json").read_text())
-    assert total["n_calls"] == 72 and total["total_prompt_tokens"] == 7200
+    assert total["n_calls"] == len(exp.ARM_IDS) * 8 and total["total_prompt_tokens"] == len(exp.ARM_IDS) * 800
     # every batch holds one arm: A0 and A0' never share one
     assert all(len({exp.parse_cid(c)[0] for c in cids}) == 1 for _, cids in client.created)
     # the requests are step 3's, with each arm's template filled
@@ -366,7 +375,7 @@ def test_judge_writes_step_3_score_files_usage_and_the_record(monkeypatch, run_d
     n = len(client.created)
     assert judge(monkeypatch, run_dirs, client) == 0
     assert len(client.created) == n
-    assert json.loads((out / "usage.json").read_text())["n_calls"] == 72
+    assert json.loads((out / "usage.json").read_text())["n_calls"] == len(exp.ARM_IDS) * 8
 
 
 def test_submit_now_collect_later(monkeypatch, run_dirs):
@@ -374,7 +383,7 @@ def test_submit_now_collect_later(monkeypatch, run_dirs):
     client = FakeBatchClient()
     assert judge(monkeypatch, run_dirs, client, "--batch-no-wait", "--batch-requests", "20") == 0
     n_batches = len(client.created)
-    assert n_batches == 4 and not (out / "A0").exists()          # submitted, nothing collected
+    assert n_batches == -(-len(exp.ARM_IDS) * 8 // 20) and not (out / "A0").exists()  # submitted, not collected
     state = json.loads((out / "batch_state.json").read_text())
     assert all(r.get("batch_id") and not r.get("collected") for r in state["chunks"])
     rec = json.loads((out / "run_record.json").read_text())
@@ -386,7 +395,7 @@ def test_submit_now_collect_later(monkeypatch, run_dirs):
     assert judge(monkeypatch, run_dirs, client, "--collect-only") == 0
     assert len(client.created) == n_batches                      # collected, nothing resubmitted
     assert len(json.loads((out / "A7" / "robot.json").read_text())) == 4
-    assert json.loads((out / "usage.json").read_text())["n_calls"] == 72
+    assert json.loads((out / "usage.json").read_text())["n_calls"] == len(exp.ARM_IDS) * 8
     assert judge(monkeypatch, run_dirs, client) == 0               # and nothing left after
     assert len(client.created) == n_batches
 
@@ -402,7 +411,7 @@ def test_collect_by_batch_id_after_the_state_file_is_lost(monkeypatch, run_dirs)
     extra = [x for bid in ids for x in ("--batch-id", bid)]
     assert judge(monkeypatch, run_dirs, client, "--collect-only", *extra) == 0
     assert len(client.created) == len(ids)
-    assert json.loads((out / "usage.json").read_text())["n_calls"] == 72
+    assert json.loads((out / "usage.json").read_text())["n_calls"] == len(exp.ARM_IDS) * 8
     for arm in exp.ARM_IDS:
         assert len(json.loads((out / arm / "altruist.json").read_text())) == 4
 
@@ -439,7 +448,7 @@ def test_an_unparseable_arm_is_loud_and_not_paid_for_twice(monkeypatch, run_dirs
     assert {exp.parse_cid(c)[0] for c in sent} == {"A3", "A6"} and len(sent) == 16
     assert json.loads((out / "A3" / "robot.json").read_text()) == {
         f"pos_p{i % 2}_q{i}": 3 for i in range(4)}
-    assert json.loads((out / "usage.json").read_text())["n_calls"] == 72 + 16
+    assert json.loads((out / "usage.json").read_text())["n_calls"] == len(exp.ARM_IDS) * 8 + 16
 
 
 def test_a_batch_collected_twice_is_charged_once(tmp_path):
