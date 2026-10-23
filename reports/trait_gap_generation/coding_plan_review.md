@@ -647,3 +647,17 @@ R1 copies each row's registry `review` block and `seed_queue_stem` onto its node
 `parked` and `deferred` stay live.  Its queue entry or merge target joins the targets of the groups it neighbours,
 so "Covered by this" merges a new word into it.  The registry row wins over the node; the log's own decisions win
 over both, and undo walks the log only.
+
+## 12. Role pass (2026-10-22)
+
+A pointer, not a plan: the role pass is specified in [coding_plan_16_role_generators.md](./coding_plan_16_role_generators.md)
+(§ 6.3 the card's role fields, § 6.4 the kind readout, § 7c the `kinds` order) and built on the physical pass's
+pattern (§ 8 above).  A roles batch (`novelty_score.py score --holding roles`) builds a roles graph: corpus nodes are
+`role:<stem>` (the role files but `default.json`; `/files/roles/{stem}.json` serves them), candidate nodes carry
+`outcome: "role"`, the kind call's kind and `human`, the generator's `kind_guess` and provenance, and the five
+nearest traits; the role rubrics ([relation_roles.md](./rubrics/relation_roles.md),
+[overlap_concept_roles.md](./rubrics/overlap_concept_roles.md)) read the pairs.  The app opens a roles graph in the
+`kinds` order (the kinds whose share of the role corpus is too low first, the statuses fixed when the log opens) and
+shows the kind readout on each card and a balance line in the counts; `apply` promotes a nominee as a role entry of
+the seed queue (`promote(..., allow_roles=True)`).  Code: [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py),
+[review_graph.py](../../assistant_axis/gapgen/review_graph.py), [decisions.py](../../assistant_axis/gapgen/review_app/decisions.py).

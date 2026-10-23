@@ -215,7 +215,10 @@ def test_the_other_holding_lists_are_unchanged_when_physical_is_allowed(data_dir
     rows = {r["key"]: r for r in recs}
     rep = promote(rows, queue, list(rows), data_dir=data_dir, allow_physical=True)
     assert rep.promoted == []
-    assert rep.refused["plumber#1"] == "on the roles holding list (never promoted)"
+    # the roles list was "never promoted" until coding plan 16 (2026-10-22): its rows are promoted by name with
+    # allow_roles (the roles pass), so without it the refusal says how
+    assert rep.refused["plumber#1"].startswith("on the roles holding list (a role row, the roles pass): promoted only "
+                                               "by name")
     assert rep.refused["faraway#1"] == "on the nationalities holding list (never promoted)"
     assert "no states pass judgement yet" in rep.refused["sulky#1"]
 

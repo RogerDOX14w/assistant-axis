@@ -191,8 +191,9 @@ def test_candidates_jsonl_form_and_round_trip(tmp_path):
     out = H.write_harvest(res, tmp_path / "run", idx, run_id="r1")
     lines = out["candidates"].read_text(encoding="utf-8").splitlines()
     assert lines == [json.dumps(dataclasses.asdict(c), ensure_ascii=False) for c in res.candidates]
+    # the three role-mode fields were added to every line by coding plan 16 (2026-10-22, § 8 test 2)
     assert set(json.loads(lines[0])) == {"surface", "generator", "run_id", "rank", "score", "gloss_hint", "sense_id",
-                                         "source_ref", "partner_hint"}
+                                         "source_ref", "partner_hint", "entity_type", "kind_guess", "human"}
     assert H.read_candidates(out["candidates"]) == res.candidates
     assert (tmp_path / "run" / "pair_candidates.jsonl").exists() and out["report"].exists()
 

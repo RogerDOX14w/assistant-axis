@@ -17,6 +17,9 @@ from assistant_axis.gapgen.paths import runs_root
 RUNS = runs_root() / "censuses"
 RUN_DIRS = sorted(p for p in RUNS.glob("*") if (p / "candidates.jsonl").exists()) if RUNS.exists() else []
 FIELDS = [f.name for f in fields(Candidate)]
+#: The fields of a candidates.jsonl line written before coding plan 16 added the three role-mode fields (2026-10-22);
+#: the recorded runs keep that form, and ``read_candidates`` reads such a line as a trait candidate.
+FIELDS_BEFORE_ROLES = [f for f in FIELDS if f not in ("entity_type", "kind_guess", "human")]
 
 
 def test_manifest_verified():
@@ -58,7 +61,7 @@ def test_ceiling_guidelines_are_reported_not_enforced():
 @pytest.mark.parametrize("rdir", RUN_DIRS, ids=[p.name for p in RUN_DIRS])
 def test_run_files(rdir):
     cands = [json.loads(x) for x in (rdir / "candidates.jsonl").read_text().splitlines() if x.strip()]
-    assert cands and all(list(c) == FIELDS for c in cands)
+    assert cands and all(list(c) in (FIELDS, FIELDS_BEFORE_ROLES) for c in cands)
     assert {c["generator"] for c in cands} == {"censuses"} and {c["run_id"] for c in cands} == {rdir.name}
     assert all(c["sense_id"] == 1 and c["source_ref"] for c in cands)
     usage = json.loads((rdir / "usage.json").read_text())

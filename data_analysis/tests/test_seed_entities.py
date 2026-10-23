@@ -126,6 +126,28 @@ class TestWriteCommand:
         assert json.loads(f.read_text())["negative_label"] == "non-rationalizing"
         assert json.loads(qp.read_text())["entries"][0]["status"] == "seeded"
 
+    def test_write_of_a_role_entry_appends_its_kind_to_the_side_car(self, tmp_path, monkeypatch, capsys):
+        """Coding plan 16 (task 13): a promoted role's kind (the roles pass's kind call, gap_gen.role_kind) goes to
+        role_kinds.json when its role file is written; a role entry without one, and a trait, add nothing."""
+        d = _data_dir(tmp_path)
+        side = d / "roles" / "role_kinds.json"
+        side.write_text(json.dumps({"schema_version": 1, "model": "claude-haiku-5-5", "prompt_sha256": "11b559f0cff50189",
+                                    "roles": {}}))
+        rk = {"kind": "occupation", "unanimous": True, "split": False, "readings": ["occupation"] * 3,
+              "batch_id": "roles_pilot_1", "prompt_sha256": "11b559f0cff50189", "model": "claude-haiku-5-5"}
+        qp = _queue(tmp_path, [_entry(stem="bouncer", label="bouncer", entity_type="role", pairing="singleton",
+                                      partner=None, description="A bouncer is someone who works the door of a club.",
+                                      gap_gen={"registry_key": "bouncer|R#1", "role_kind": rk}),
+                               _entry(stem="baker", label="baker", entity_type="role", pairing="singleton",
+                                      partner=None, description="A baker is someone who bakes bread before dawn.")])
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: None)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "write", "--stems", "bouncer", "baker"]) == 0
+        doc = json.loads(side.read_text())
+        assert set(doc["roles"]) == {"bouncer"} and doc["roles"]["bouncer"]["kind"] == "occupation"
+        assert doc["roles"]["bouncer"]["from"] == "roles_pass:roles_pilot_1" and doc["roles"]["bouncer"]["input"] == "gloss"
+        assert doc["counts"]["occupation"] == 1 and "bouncer" not in doc["missing"]
+        assert "KIND bouncer: occupation appended" in capsys.readouterr().err
+
     def test_write_refuses_overwrite(self, tmp_path, monkeypatch, capsys):
         d = _data_dir(tmp_path)
         f = d / "traits" / "instructions" / "rationalizing.json"

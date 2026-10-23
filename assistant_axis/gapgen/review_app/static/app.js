@@ -5,6 +5,7 @@
 // the keys stay as shortcuts, and both go through ACTIONS, so a button and its key never differ.
 "use strict";
 
+// a roles build (coding plan 16) adds the kinds order: the too-low kinds first (loadMeta)
 const ORDERS = ["cliques", "generator", "region", "sample"];
 // the Tab order follows the page: the card, then the right-hand column top down (corpus first, Roger 2026-10-11)
 const PANES = ["members", "leftovers", "corpus", "neighbours", "opposed"];
@@ -40,6 +41,10 @@ async function loadMeta() {
   document.title = `Review ${m.batch_id}`;
   S.order = S.order || m.default_order;
   if (m.blind) $("batch").textContent += " (blind: signal badges hidden)";
+  if (m.pass === "roles") {
+    if (!ORDERS.includes("kinds")) ORDERS.unshift("kinds");
+    $("batch").textContent += " (roles pass)";
+  }
   if (!m.complete) flash("The graph is incomplete (a build stopped): resume the build before reviewing.", true);
 }
 
@@ -131,13 +136,29 @@ function renderCounts() {
   const c = S.counts;
   if (!c) return;
   $("queue-tools").innerHTML = btn("order", `Order: ${S.order || ""}`, "o",
-    { cls: "mini", title: "the order of this queue: cliques, generator, region, sample (a weighted random sample)" });
+    { cls: "mini", title: "the order of this queue: cliques, generator, region, sample (a weighted random sample); a roles build also kinds (the too-low kinds first)" });
   $("counts").innerHTML =
     `<span>terms <b>${c.terms.handled}</b>/${c.terms.total} handled</span>` +
     `<span><span class="tier merged">M</span> <b>${c.merged.remaining}</b>/${c.merged.total} left</span>` +
     `<span><span class="tier proposed">P</span> <b>${c.proposed.remaining}</b>/${c.proposed.total} left</span>` +
     `<span><span class="tier single">S</span> <b>${c.single.remaining}</b>/${c.single.total} left</span>` +
-    `<span class="muted">groups: ${c.groups_resolved} resolved, ${c.groups_open} open, ${c.groups_proposed_open} proposed</span>`;
+    `<span class="muted">groups: ${c.groups_resolved} resolved, ${c.groups_open} open, ${c.groups_proposed_open} proposed</span>` +
+    // the kind readout of a roles build (decision 2 of plan 16), recomputed on every action
+    (c.balance_lines ? `<span class="muted small" title="the corpus as it will be once this review is applied; a kind more than 10% above or below the count that keeps its 2026-10-16 share is too high or too low${c.kinds_fixed_at ? "; the kinds order was fixed at " + c.kinds_fixed_at : ""}">kinds: ${esc(c.balance_lines.join(" · "))}</span>` : "");
+}
+
+// a role candidate's kind chip and readout (coding plan 16, § 6.3 and § 7c): too high is shown as covered rows are
+function roleBits(m) {
+  if (!m.role_kind && !m.kind_guess) return { chip: "", lines: "" };
+  const st = m.kind_readout ? m.kind_readout.status : null;
+  const chip = m.role_kind ? `<span class="chip kind-${esc(st || "")}" title="${esc(m.kind_readout ? m.kind_readout.text : "the role kind call's kind")}">${esc(m.role_kind)}${m.role_kind_unanimous === false ? "?" : ""}${st ? " (" + esc(st.replace("_", " ")) + ")" : ""}</span>` : "";
+  const roles = (m.nearest_roles || []).slice(0, 4).map((x) => `${esc(x.label || x.stem)} ${x.cosine != null ? Number(x.cosine).toFixed(2) : "-"}${x.relation ? " " + esc(x.relation) : ""}${x.reading != null ? " " + esc(x.reading) : ""}`).join(", ");
+  const traits = (m.nearest_traits || []).slice(0, 3).map((x) => `${esc(x.stem)} ${Number(x.cosine).toFixed(2)}`).join(", ");
+  const prov = (m.provenance || []).map((x) => esc(x.source_ref ? x.generator + " " + x.source_ref : x.generator)).join("; ");
+  const lines = `<div class="small muted">${m.human === false ? "not human · " : ""}${m.kind_guess ? "generator's guess: " + esc(m.kind_guess) + " · " : ""}` +
+    `${m.kind_readout ? esc(m.kind_readout.text) : ""}${roles ? " · nearest roles: " + roles : ""}${traits ? " · nearest traits: " + traits : ""}` +
+    `${prov ? " · provenance: " + prov : ""}</div>`;
+  return { chip, lines };
 }
 
 function renderQueue() {
@@ -250,11 +271,12 @@ function renderCard() {
       shaping && mine && c.members.length > 1 ? rowBtn("drop", "Exclude", "x", "members", i, "take this member out of the group") : "",
       rowBtn("details", "Details", "t", "members", i, "everything one edge away from this term"),
     ].join("");
+    const rb = roleBits(m);
     return `<li class="${cls}" data-pane="members" data-i="${i}"><span class="label">${esc(m.label)}</span>` +
       `<span class="row-btns">${btns}</span>` +
-      `<span class="muted small"> ${esc(m.generator || "")} · ${esc(m.region || "")} · M3 ${esc(m.m3_decision || "")}` +
+      `<span class="muted small"> ${esc(m.generator || "")}${rb.chip}${m.region ? " · " + esc(m.region) : ""} · M3 ${esc(m.m3_decision || "")}` +
       `${groups ? " · " + esc(groups) : ""}</span>${tags}${flags}${lexical}${handled}${earlierBadge(m)}${dist}${cov}${applied}${relabel}${otherNames}${persona}${narrow}${probably}` +
-      `<div class="gloss">${esc(m.gloss)}</div></li>`;
+      `<div class="gloss">${esc(m.gloss)}</div>${rb.lines}</li>`;
   }).join("");
   // the leftovers pass: after a resolution, the overlapping groups' unhandled members, one decision each
   let left = "";

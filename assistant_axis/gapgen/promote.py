@@ -42,6 +42,17 @@ its notes record the pass's suggested name and the confirmed one.  Every
 collision check applies to the promoted stem.  A states row with no
 judgement, judged implausible, or with no confirmed name is refused.
 
+Roles (the roles pass, :mod:`assistant_axis.gapgen.roles_pass`; coding plan 16, plan 06's decision 1 (a)): a role
+row (on the ``roles`` holding list, or role-aimed and routed to the role flow) is promoted only with ``allow_roles``,
+which the two by-name paths pass (``gap_registry.py promote --keys K --allow-roles`` and the review app's ``apply``);
+the bulk path refuses it.  Its entry is an ``entity_type: "role"`` entry (``roles_pass.queue_entry_extras``): tags
+``kind:<kind>`` and ``human:<bool>``, the role generators' section, the role gloss as ``description_draft``, the
+kind call's record under ``gap_gen.role_kind``.  The collision checks are per entity type (§ 6.5): a stem that is a
+role file, a live role entry of the queue or a turned-down role entry is refused; a stem that is a **trait** file or a
+trait entry is allowed (Roger's decision 2 of 2026-10-22: the name collisions are allowed per case), with a loud NOTE
+(``PromoteReport.notes``) naming the trait and ``COLLISION_NAMES`` (``assistant_axis/tests/test_entity_id.py``), which
+``test_collision_regression.py`` checks against the corpus once the role file is written.
+
 Words already turned down (decision 8 of
 ``reports/trait_gap_generation/decisions_m1.md``): a stem or label whose
 queue entry is ``not_adopted`` or ``superseded`` is refused by default, and
@@ -115,6 +126,41 @@ class PromoteReport:
     refused: dict[str, str] = field(default_factory=dict)      # key -> reason
     entries: list[dict] = field(default_factory=list)          # queue entries built
     dry_run: bool = True
+    notes: dict[str, str] = field(default_factory=dict)        # key -> a loud note (a role named like a trait)
+
+
+#: The NOTE a promoted role whose stem is a corpus trait or a trait entry gets (Roger's decision 2 of 2026-10-22).
+COLLISION_NOTE = ("the role {stem} has the name of the {where}: allowed (Roger, 2026-10-22: per case), and the card "
+                  "showed the trait twin; once its role file is written, add {stem!r} to COLLISION_NAMES in "
+                  "assistant_axis/tests/test_entity_id.py (test_collision_regression.py compares the list with the "
+                  "corpus) and update the collision count in the entity-naming notes")
+
+
+def role_collisions(stem: str, label: str, queue: dict, data_dir: Path) -> tuple[Optional[str], Optional[str]]:
+    """``(refusal, note)`` for a role about to be promoted as ``stem`` (coding plan 16, § 6.5): refused when the stem
+    (or the label's stem) is a role file, a live role entry of the queue or a turned-down role entry; a note (not a
+    refusal) when it is a trait file or a trait entry."""
+    from data_analysis.seed_entities import corpus_stems
+    lab = normalize_to_file_name(label)
+    files = corpus_stems(data_dir)
+    names = {stem, lab}
+    if names & files["role"]:
+        return "stem exists in the role corpus", None
+    for e in queue.get("entries") or []:
+        if (e.get("entity_type") or "trait") != "role":
+            continue
+        en = {e.get("stem"), normalize_to_file_name(e["label"]) if e.get("label") else None}
+        if names & en:
+            if e.get("status") in TURNED_DOWN:
+                return turned_down_reason(e) + " (a role entry)", None
+            return "stem already a role entry of the seed queue", None
+    if names & files["trait"]:
+        return None, COLLISION_NOTE.format(stem=stem, where=f"corpus trait {sorted(names & files['trait'])[0]}")
+    for e in queue.get("entries") or []:
+        if (e.get("entity_type") or "trait") == "trait" and e.get("status") not in TURNED_DOWN and \
+                names & {e.get("stem"), normalize_to_file_name(e["label"]) if e.get("label") else None}:
+            return None, COLLISION_NOTE.format(stem=stem, where=f"seed-queue trait entry {e.get('stem')}")
+    return None, None
 
 
 def _generators(rec: dict) -> list[str]:
@@ -211,16 +257,18 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             dry_run: bool = True, section: str = DEFAULT_SECTION,
             min_local_novelty: Optional[float] = None, reopen_turned_down: bool = False,
             confirmed_state_names: Optional[dict[str, str]] = None,
-            allow_physical: bool = False, allow_released_states: bool = False) -> PromoteReport:
+            allow_physical: bool = False, allow_released_states: bool = False,
+            allow_roles: bool = False) -> PromoteReport:
     """Build queue entries for ``keys`` and (unless ``dry_run``) append them
     to ``queue["entries"]`` in place.  ``records`` is the folded registry.
     The caller saves the queue (``seed_entities.save_queue``) and records
     ``seed_queue_stem`` on the promoted rows.  ``allow_physical``: rows on the
     physical holding list may be promoted; ``allow_released_states``: rows the
-    states pass released may be (the caller names them; see the module
-    docstring)."""
+    states pass released may be; ``allow_roles``: role rows may be (the caller
+    names them; see the module docstring)."""
     from data_analysis.seed_entities import build_registry, corpus_stems
     from . import physical_pass as PP
+    from . import roles_pass as RP
     from . import states_pass as SP
 
     rep = PromoteReport(dry_run=dry_run)
@@ -237,8 +285,18 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
         via_states = None
         via_physical = False
         via_released = False
+        via_roles = False
         held_why = None
-        if rec.get("holding") == "states":
+        if RP.is_role_row(rec):
+            if not allow_roles:
+                where = "on the roles holding list" if rec.get("holding") == RP.HOLDING else "a role-aimed row"
+                held_why = (f"{where} (a role row, the roles pass): promoted only by name (gap_registry.py promote "
+                            "--keys K --allow-roles, or the review app's apply)")
+            elif RP.gloss_of(rec) is None:
+                held_why = "a role row with no role gloss yet (novelty_score.py score --holding roles runs the stage)"
+            else:
+                via_roles = True
+        elif rec.get("holding") == "states":
             eff, held_why = states_promotion(rec, (confirmed_state_names or {}).get(key))
             if eff is not None:
                 via_states = {**rec, "_suggested": eff.pop("_suggested")}
@@ -265,12 +323,31 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             held_why = f"on the {rec['holding']} holding list (never promoted)"
         stem = rec["stem"]
         old = turned_down.get(stem) or turned_down.get(normalize_to_file_name(rec["label"]))
+        role_refusal = role_note = None
+        if via_roles:
+            # the collision checks of a role are per entity type (§ 6.5): the trait checks below do not apply to it
+            role_refusal, role_note = role_collisions(stem, rec["label"], queue, data_dir)
+            old = None
         if not f:
             rep.refused[key] = "not filtered"
         elif held_why is not None:
             rep.refused[key] = held_why
         elif f.get("verdict") not in ("trait", "tagged"):
             rep.refused[key] = f"filter verdict {f.get('verdict')}"
+        elif role_refusal is not None:
+            rep.refused[key] = role_refusal
+        elif via_roles and rec.get("seed_queue_stem"):
+            rep.refused[key] = f"already promoted as {rec['seed_queue_stem']}"
+        elif via_roles and stem in {c["stem"] for c in chosen.values() if c.get("entity_type") == "role"}:
+            rep.refused[key] = "another sense of this stem is promoted in this batch"
+        elif via_roles:
+            entry = queue_entry_from_record(rec, section=section)
+            RP.queue_entry_extras(entry, rec, queue, section=None if section == DEFAULT_SECTION else section)
+            if role_note:
+                rep.notes[key] = role_note
+                entry["description_notes"] = " | ".join(x for x in (f"NOTE: {role_note}", entry.get("description_notes"))
+                                                        if x)
+            chosen[key] = entry
         elif stem in corpus:
             rep.refused[key] = "stem exists in the corpus"
         elif stem in taken or normalize_to_file_name(rec["label"]) in taken:

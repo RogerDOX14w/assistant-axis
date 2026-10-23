@@ -1444,7 +1444,7 @@ class TestPersonaBadge:
         assert cq["kind"] == "cover_questioned" and not cq["prominent"] and cq["cos_to_cover"] == 0.31
         nov = D.persona_card({"persona": {"nn": {"id": "hacker|R", "cos": 0.4}, "flag": "novel_like",
                                           "disagreement": "novel_vs_covered", "residual_pct": 0.97}}, lab)
-        assert nov["kind"] == "novel" and nov["near"]["label"] == "hacker" and nov["near"]["href"] is None
+        assert nov["kind"] == "novel" and nov["near"]["label"] == "hacker" and nov["near"]["href"] == "/files/roles/hacker.json"  # served since plan 16
         assert D.persona_card({"persona": {"flag": "ordinary", "disagreement": None}}) is None
         assert D.persona_card({}) is None
 

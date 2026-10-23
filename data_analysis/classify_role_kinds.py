@@ -13,6 +13,11 @@ Output, a side-car keyed by role stem (the role files are left untouched, so not
 stale): ``data/roles/role_kinds.json``.  Roles whose kind is on record with the same prompt and model are reused;
 ``--force`` reads them again.  Usage merges into ``data/roles/role_kinds_usage.json`` (cumulative).
 
+A roles pass (coding plan 16, ``assistant_axis/gapgen/roles_pass.py``) reads a candidate's kind with the same text, on
+its role gloss: ``--from-pass data/candidates/novelty/roles_<name>/role_pass.jsonl`` appends those kinds for the stems
+that now have role files (no call; ``"from": "roles_pass:<batch_id>"``, ``"input": "gloss"``), and
+``seed_entities.py write`` does the same for each role entry it writes (:func:`append_records`).
+
 Usage:
     uv run python data_analysis/classify_role_kinds.py --dry-run           # rendered prompt and estimate, no calls
     uv run python data_analysis/classify_role_kinds.py --names elf robot   # a few roles
@@ -70,15 +75,14 @@ KINDS: list[tuple[str, str, str]] = [
 ]
 KIND_KEYS = [k for k, _, _ in KINDS]
 
-SYSTEM = (
-    "You sort personas into kinds.  Each persona is a role that a language model can be asked to take on.  Choose "
-    "the one kind below that best says what the role is.  If a role could fit two kinds, choose the one that is "
-    "most central to it.  A non-human role is always \"non_human\", whatever it does.  \"other\" is for a role that "
-    "fits none of the kinds.\n\nThe kinds:\n"
-    + "\n".join(f"- \"{k}\" ({name}): {d}" for k, name, d in KINDS)
-    + "\n\nAnswer with one JSON object and nothing else.  Give the reason in one short sentence first, then the "
-      "kind: {\"reason\": \"<one short sentence>\", \"kind\": \"<one of the kind keys above>\"}"
-)
+#: The system prompt, from the pinned rubric file ``reports/trait_gap_generation/rubrics/role_kind.md`` (since
+#: 2026-10-22, coding plan 16 task 3: moved there byte for byte from the string this module built from :data:`KINDS`,
+#: so that the roles pass reads candidates' kinds with the same text; its sha is unchanged, ``11b559f0cff50189``).
+#: The list of kinds in it must stay :data:`KINDS`'s (``test_gapgen_role_kind_rubric.py`` checks); edit both together
+#: and pin the new text with ``rubric_pins.py bump role_kind``.
+from assistant_axis.gapgen import split_rubrics as _sr  # noqa: E402
+
+SYSTEM = _sr.load_prompt("role_kind")
 PROMPT_SHA = hashlib.sha256(SYSTEM.encode()).hexdigest()[:16]
 
 
@@ -154,6 +158,79 @@ async def classify(roles: list[dict], n_readings: int, usage: MultiModelUsage, c
     return dict(await asyncio.gather(*(one(r) for r in roles)))
 
 
+def record_from_pass(block: dict, batch_id: Optional[str] = None) -> dict:
+    """A side-car record from a roles pass's ``role_pass`` block (the kind call's readings on the role gloss)."""
+    readings = [r for r in block.get("kind_readings") or []]
+    parsed = [r for r in readings if r and r.get("kind")]
+    return {"kind": block.get("kind"), "split": bool(block.get("kind_split")), "n_parsed": len(parsed),
+            "unanimous": bool(block.get("kind_unanimous")),
+            "readings": [{"kind": r.get("kind"), "reason": r.get("reason")} for r in readings if r],
+            "from": f"roles_pass:{batch_id or block.get('batch_id')}", "input": "gloss"}
+
+
+def append_records(new: dict, *, out_path: Path = None, roles_dir: Path = None, prompt_sha: str = None,
+                   model: str = None) -> dict:
+    """Add ``new`` (``{stem: record}``, records of the same prompt and model) to the side-car, for the stems that have a
+    role file and no record yet (a record on file is kept: the corpus role was classified on its description).
+    ``{"appended": [...], "skipped": {stem: why}}``; the side-car's counts and ``missing`` are recomputed.  A record of
+    another prompt or model (``prompt_sha`` / ``model`` given and different) is refused whole."""
+    out_path = Path(out_path or OUT_PATH)
+    roles_dir = Path(roles_dir or ROLES_DIR)
+    existing = json.loads(out_path.read_text()) if out_path.exists() else {}
+    if (prompt_sha and prompt_sha != existing.get("prompt_sha256", PROMPT_SHA)) or \
+            (model and model != existing.get("model", MODEL)):
+        return {"appended": [], "skipped": {s: f"prompt {prompt_sha} / model {model} differ from the side-car's "
+                                               f"({existing.get('prompt_sha256')} / {existing.get('model')})"
+                                            for s in new}}
+    records = dict(existing.get("roles") or {})
+    current = {p.stem for p in roles_dir.glob("*.json")}
+    out: dict = {"appended": [], "skipped": {}}
+    for stem, rec in sorted(new.items()):
+        if stem not in current:
+            out["skipped"][stem] = "no role file yet"
+        elif stem in records:
+            out["skipped"][stem] = "a kind on record already"
+        elif rec.get("kind") not in KIND_KEYS:
+            out["skipped"][stem] = "no kind"
+        else:
+            records[stem] = rec
+            out["appended"].append(stem)
+    if out["appended"]:
+        records = {s: r for s, r in sorted(records.items()) if s in current}
+        doc = dict(existing) if existing else {"schema_version": 1, "model": MODEL, "prompt_sha256": PROMPT_SHA,
+                                               "readings": 3, "kinds": [{"key": k, "name": n, "definition": d}
+                                                                        for k, n, d in KINDS]}
+        doc.update(updated_at=datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+                   counts=summarize(records), n_split=sum(1 for r in records.values() if r.get("split")),
+                   n_roles=len(records), missing=sorted(current - set(records)), roles=records)
+        atomic_write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", out_path)
+    return out
+
+
+def from_pass(path: Path, *, dry_run: bool = False, out_path: Path = None, roles_dir: Path = None) -> dict:
+    """``--from-pass``: the kinds of a roles pass's ``role_pass.jsonl`` (one line per row the stage finished), for the
+    stems that now have role files.  A block of another prompt or model than the side-car's is skipped."""
+    from assistant_axis.gapgen.normalize import split_key
+    new, skipped = {}, {}
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        d = json.loads(line)
+        b = d.get("role_pass") or {}
+        stem = split_key(d["key"])[0]
+        sha = ((b.get("prompt_sha256") or {}).get("role_kind") or "")[:16]
+        if sha != PROMPT_SHA or b.get("model") != MODEL:
+            skipped[stem] = f"read with another prompt or model ({sha} / {b.get('model')})"
+            continue
+        if b.get("kind"):
+            new[stem] = record_from_pass(b)
+    if dry_run:
+        return {"would_append": sorted(new), "skipped": skipped}
+    res = append_records(new, out_path=out_path, roles_dir=roles_dir)
+    res["skipped"].update(skipped)
+    return res
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--names", nargs="+", help="only these role stems")
@@ -162,8 +239,15 @@ def main(argv=None) -> None:
     ap.add_argument("--dry-run", action="store_true", help="print a rendered prompt and the estimate; no calls")
     ap.add_argument("--budget-usd", type=float, default=3.0)
     ap.add_argument("--concurrency", type=int, default=8)
+    ap.add_argument("--from-pass", type=Path, default=None, metavar="ROLE_PASS_JSONL",
+                    help="append a roles pass's kinds (its role_pass.jsonl) for the stems that now have role files; "
+                         "no call")
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    if args.from_pass:
+        res = from_pass(args.from_pass, dry_run=args.dry_run)
+        print(json.dumps(res, indent=1))
+        return
 
     existing = json.loads(OUT_PATH.read_text()) if OUT_PATH.exists() else {}
     same = existing.get("prompt_sha256") == PROMPT_SHA and existing.get("model") == MODEL

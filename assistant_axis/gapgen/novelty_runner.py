@@ -192,26 +192,41 @@ def queue_search_block(info: Mapping) -> dict:
     return {k: info[k] for k in QUEUE_BLOCK_FIELDS if k in info}
 
 
+def _role_aimed(row: Mapping) -> bool:
+    from .filter import is_role_aimed
+    return is_role_aimed(row)
+
+
 def candidate_from_row(row: Mapping, *, holding: Optional[str] = None) -> tuple[Optional[M3Candidate], Optional[str]]:
     """``(candidate, None)`` for a registry row M3 can judge, else ``(None, why)``: not filtered, not a
     ``trait`` verdict, or no gloss.  ``holding="physical"`` (the physical pass, ``novelty_score.py score
     --holding physical``): a row on that holding list instead, its gloss and alignment score from the pass's gloss
     stage (:func:`assistant_axis.gapgen.physical_pass.candidate_from_row`); ``holding="states"`` (the states pass
     v4, ``--holding states``): a row the states pass released, its gloss and alignment score from its
-    ``states_pass`` block (:func:`assistant_axis.gapgen.states_pass.candidate_from_row`); without it, nothing
-    changes."""
+    ``states_pass`` block (:func:`assistant_axis.gapgen.states_pass.candidate_from_row`); ``holding="roles"`` (the
+    roles pass, coding plan 16): a role row (on the roles list, or role-aimed and routed to the role flow), its gloss
+    from its ``role_pass`` block, cut-off 3 (:func:`assistant_axis.gapgen.roles_pass.candidate_from_row`).  Without
+    it, a trait row as always; a role-aimed row (``entity_type: "role"``) is refused (``not_a_trait_row``): it is
+    judged against the role corpus in a roles run, never against the traits."""
     if holding is not None:
         from . import physical_pass as PP
+        from . import roles_pass as RP
         from . import states_pass as SP
         if holding == PP.HOLDING:
             return PP.candidate_from_row(row)
         if holding == SP.PASS_NAME:
             return SP.candidate_from_row(row)
-        raise ValueError(f"M3 reads the {PP.HOLDING!r} holding list and the {SP.PASS_NAME!r} pass's released rows "
-                         f"as passes of their own, not {holding!r}")
+        if holding == RP.HOLDING:
+            return RP.candidate_from_row(row)
+        raise ValueError(f"M3 reads the {PP.HOLDING!r} holding list, the {SP.PASS_NAME!r} pass's released rows and the "
+                         f"{RP.HOLDING!r} pass's role rows as passes of their own, not {holding!r}")
     f = row.get("filter") or {}
     if not f:
         return None, "not_filtered"
+    if row.get("entity_type") == "role" and (f.get("role_route") is not None or _role_aimed(row)):
+        # a role-aimed row stays out of the trait flow even unrouted (the single pipeline writes no route: review
+        # minor 6, 2026-10-23); a row M1 itself put on the roles list is not role-aimed and reads "not_a_trait"
+        return None, "not_a_trait_row"
     if f.get("verdict") != "trait":
         return None, "not_a_trait"
     g = row.get("gloss")
@@ -360,6 +375,7 @@ class CandState:
     usage: dict = field(default_factory=dict)     # charged model -> totals
     scan: dict = field(default_factory=dict)      # full scan: stem -> {"sonnet", "opus"}
     renamed: Optional[dict] = None                # decision 15: {"current", "old_stem"} of a renamed label
+    raw: Optional[np.ndarray] = None              # the raw query embedding (cross_type projects it into the other index)
 
 
 class NoveltyRunner:
@@ -397,8 +413,21 @@ class NoveltyRunner:
                  rules: Optional[NV.Rules] = None, relation_seed: Optional[str] = None,
                  replay_records: Sequence[Mapping] = (), extra_block: Optional[Mapping] = None,
                  relation_model: str = RELATION_MODEL, relation_only: bool = False,
-                 label_form: str = DEFAULT_LABEL_FORM, broader_model: str = BROADER_MODEL):
+                 label_form: str = DEFAULT_LABEL_FORM, broader_model: str = BROADER_MODEL,
+                 cross_index: Optional[NV.CorpusIndex] = None, cross_kind: Optional[str] = None,
+                 list_key: str = "traits"):
         self.label_form = check_label_form(label_form)
+        # coding plan 16: the other entity type's index, whose nearest entries every block shows as ``cross_type``
+        # (decision 5: information, never a verdict), and the key the relation call's list goes under ("roles" in a
+        # roles run, whose rubrics name it so)
+        if (cross_index is None) != (cross_kind is None):
+            raise ValueError("cross_index and cross_kind go together")
+        if cross_kind is not None and cross_kind not in ("traits", "roles"):
+            raise ValueError(f"cross_kind must be traits or roles, not {cross_kind!r}")
+        self.cross_index, self.cross_kind = cross_index, cross_kind
+        if list_key not in NV.RELATION_LIST_KEYS:
+            raise ValueError(f"list_key must be one of {NV.RELATION_LIST_KEYS}, not {list_key!r}")
+        self.list_key = list_key
         if mode not in ("shortlist", "full_scan"):
             raise ValueError(f"mode must be shortlist or full_scan, not {mode!r}")
         if relation_only and mode != "shortlist":
@@ -610,7 +639,8 @@ class NoveltyRunner:
     # -- calls ----------------------------------------------------------------------
     def _relation_call(self, st: CandState, stems: Sequence[str], *, step: str = "relation") -> Call:
         traits = [(self.traits[s].label, self.traits[s].description) for s in stems]
-        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits, label_form=self.label_form)
+        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits, label_form=self.label_form,
+                                       list_key=self.list_key)
         model = self.relation_model if step == "relation" else UNSURE_MODEL
         return Call(step=step, role=model_role(model), key=st.cand.key, model=model,
                     system=self.rubrics["relation"]["text"], user=user, max_tokens=RELATION_MAX_TOKENS,
@@ -677,6 +707,8 @@ class NoveltyRunner:
         live: list[CandState] = []
         for cand in cands:
             st = self.states[cand.key]
+            if cand.key in vectors:
+                st.raw = vectors[cand.key]
             m = NV.exact_label_match(cand.stem, self.label_sets, rules=self.rules) if self.mode == "shortlist" else None
             if m is not None:
                 self.stats["exact_label"] += 1
@@ -993,6 +1025,10 @@ class NoveltyRunner:
             # the index held seed-queue entries (2026-10-09): every block of the run says so, with what it held;
             # a block without the key was decided against the corpus alone
             b["queue_search"] = queue_search_block(self.index.queue_info)
+        if self.cross_index is not None and st.raw is not None:
+            # the nearest entries of the other entity type (coding plan 16, decision 5): shown on the card, never read
+            # by the decision; a block of a run without the other index has no key
+            b["cross_type"] = {self.cross_kind: NV.cross_type(self.cross_index, st.raw)}
         return b
 
     # -- parse rates -------------------------------------------------------------------------

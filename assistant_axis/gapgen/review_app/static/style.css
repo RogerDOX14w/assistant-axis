@@ -92,3 +92,7 @@ kbd { font-family: ui-monospace, Menlo, monospace; font-size: 12px; border: 1px 
 .queue-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .legend { margin: 0 0 6px; }
 .member.picked { border-color: var(--focus); }
+
+/* a role candidate's kind chip (coding plan 16): too high in the colour of covered rows, too low marked */
+.chip.kind-too_high { color: var(--done); font-style: italic; opacity: .8; }
+.chip.kind-too_low { color: var(--ok); border-color: var(--ok); }

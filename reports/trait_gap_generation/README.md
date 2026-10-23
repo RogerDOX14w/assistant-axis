@@ -193,6 +193,28 @@ which recovers the corpus's own size to about 10%) gives 1,900-2,700 from the ca
 
 ## Generators aimed at roles (Roger, 2026-10-10; unparked for planning 2026-10-16)
 
+**Built (2026-10-22): the shared role path and generator B** ([coding plan 16](./coding_plan_16_role_generators.md),
+build-order steps 1 and 2; branch `plan16-role-generators`).  Role-mode submission (`Candidate(entity_type="role")`,
+keys `stem|R#1`), M1 routing of role-aimed rows, the roles pass's stage (the role gloss call and three readings of
+the role kind call), M3 for roles (`novelty_score.py score --holding roles`, the role index, the role rubrics, a
+flat cut-off of 3), R1 and R2 for a roles batch (the `kinds` order and the kind readout), promotion by name
+(`gap_registry.py promote --keys ... --allow-roles`) and the kinds side-car (`classify_role_kinds.py --from-pass`);
+library [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py).  Generator B:
+[professions_generator.py](../../data_analysis/gap_generation/professions_generator.py) and the package
+[generators/professions/](../../assistant_axis/gapgen/generators/professions/__init__.py).  Rubrics pinned at version
+1: [role_gloss.md](./rubrics/role_gloss.md), [role_kind.md](./rubrics/role_kind.md) (the classifier's prompt, moved),
+[relation_roles.md](./rubrics/relation_roles.md), [overlap_concept_roles.md](./rubrics/overlap_concept_roles.md),
+[profession_lay.md](./rubrics/profession_lay.md).  Commands: [data_analysis/README.md](../../data_analysis/README.md),
+"The role path" and "Generator B".  **In order** (review of 2026-10-23, finding 1): the retrieval check (about
+$0.05-0.10; it needs nothing from Roger, and its role glosses are the texts the sheet must show); then the 40-pair
+sheet [role_rubric_pairs.md](./role_rubric_pairs.md) written again from those glosses (`rubric-check --make-sheet
+--glosses data/candidates/novelty/roles_retrieval_1/glosses.jsonl --overwrite`; until then the committed sheet shows
+corpus descriptions and is headed "Not for marking"); **then Roger's marks** (about twenty minutes); then the rubric
+check (about $0.50), the pilot on the held role rows, batched (`score --holding roles --batch-id roles_pilot_1
+--unscored --transport batches`, about $4), its review, and B's lay call and first wave, which wait on B's downloads
+and `uv add openpyxl` (Roger's go).  The readout will be
+[acceptance_16_role_path_and_professions.md](./acceptance_16_role_path_and_professions.md) (not there yet).
+
 **Unparked for planning** (Roger, 2026-10-16): the plan is
 [16_role_generators.md](./16_role_generators.md) (being written).  **The nine categories below are accepted as they
 stand, as one dimension** ("they already cover human-or-not, with borderline cases like elves").  The 340 roles are
@@ -380,7 +402,9 @@ Decided, not yet started; in order.
   *sample of Roger's* marks is the better shape than Opus marking the lot.  Related reading, printed in the readout
   since 2026-10-11: the above-floor share **split single word against phrase**, since 84% of labels are phrases,
   which a model can define almost regardless, so the floor discriminates mainly on the single words.
-- **Promotion tooling for role words** (QUESTIONS 1, 2026-10-09).  The filter's `roles` holding list is read by hand
+- **Promotion tooling for role words** (QUESTIONS 1, 2026-10-09).  **Built 2026-10-22** with the role path
+  ([coding plan 16](./coding_plan_16_role_generators.md) task 11; § "Generators aimed at roles" above); kept here as
+  the record of the design.  The filter's `roles` holding list is read by hand
   for now (pointer in [ROLES_TO_ADD.md](../../data/roles/instructions/ROLES_TO_ADD.md)).  Decide whether tooling is
   cost-effective once the list holds enough genuine role ideas that reading them by hand is slower than building it
   (a rough trigger: a few dozen real role ideas, or a generator aimed at roles such as an occupations list).  If it

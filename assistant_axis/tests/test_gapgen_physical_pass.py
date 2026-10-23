@@ -70,7 +70,8 @@ class TestCandidate:
         r["filter"] = None
         assert NR.candidate_from_row(r, holding="physical") == (None, "not_filtered")
         with pytest.raises(ValueError):
-            NR.candidate_from_row(physical_row(), holding="roles")
+            # "roles" was the unknown holding here until coding plan 16 made it the roles pass (2026-10-22)
+            NR.candidate_from_row(physical_row(), holding="nationalities")
 
     def test_the_trait_builder_is_unchanged_for_trait_rows(self):
         c, why = NR.candidate_from_row(trait_row())

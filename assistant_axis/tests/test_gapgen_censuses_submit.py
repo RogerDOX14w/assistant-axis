@@ -70,8 +70,10 @@ def test_submit_writes_run_files_and_registry(env):
     cands = lines(d / "candidates.jsonl")
     expected = [dataclasses.asdict(c) for c in S.to_candidates(S.select_stage(rows, "tda"), "r1")]
     assert cands == expected
+    # the three role-mode fields were added to every line by coding plan 16 (2026-10-22, § 8 test 2)
     assert list(cands[0]) == ["surface", "generator", "run_id", "rank", "score", "gloss_hint", "sense_id",
-                              "source_ref", "partner_hint"]
+                              "source_ref", "partner_hint", "entity_type", "kind_guess", "human"]
+    assert (cands[0]["entity_type"], cands[0]["kind_guess"], cands[0]["human"]) == ("trait", None, None)
     run = json.loads((d / "run.json").read_text())
     assert run["args"]["sources"] == MANIFEST and run["args"]["stage"] == "tda" and run["n_emitted"] == 5
     usage = json.loads((d / "usage.json").read_text())

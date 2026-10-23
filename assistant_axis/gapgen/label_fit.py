@@ -548,10 +548,12 @@ def corrected_candidates(cands: Sequence[Candidate], decisions: Sequence[Mapping
             n[{"fits": "kept_fits", "no_better_label": "kept_no_better_label"}.get(d["decision"], "kept_no_answer")] += 1
             continue
         for p in d["proposals"]:
+            # the role-mode fields travel with the relabelled candidate (coding plan 16: a role stays a role)
             out.append(Candidate(surface=p["label"], generator=c.generator, run_id=c.run_id, rank=c.rank,
                                  score=c.score, gloss_hint=c.gloss_hint, sense_id=c.sense_id,
                                  source_ref=tag_source_ref(c.source_ref, d["verdict"], c.surface),
-                                 partner_hint=c.partner_hint))
+                                 partner_hint=c.partner_hint, entity_type=c.entity_type, kind_guess=c.kind_guess,
+                                 human=c.human))
             n["relabelled_out"] += 1
         n["relabelled_in"] += 1
     return out, dict(sorted(n.items()))

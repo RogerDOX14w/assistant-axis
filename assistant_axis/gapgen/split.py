@@ -626,9 +626,45 @@ QUEUE_TAG = {"states": "state", "physical": "physical", "roles": "role_person"}
 NATIONALITY_KIND = "nationality_ethnicity_language"
 
 
-def verdict_tags_holding(outcome: str, *, cause: Optional[str] = None, membership_kind: Optional[str] = None
+#: A role-aimed row turned away from the role flow (coding plan 16, route ``turned_away``): the tag of its most likely
+#: reading's kind (as the trait flow's tags name those kinds), else the join's turned-away tag.
+ROUTE_TAG = {"state": "state", "physical": "physical", "action": "action", "evaluative": "evaluative_only",
+             "not_a_persona": "no_persona_reading"}
+
+
+def primary_kind(sense: Optional[Mapping]) -> Optional[str]:
+    """The kind call's answer for the word's most likely reading (the first primary reading the established check
+    did not find stretched, :func:`survivors`): what a role-aimed row is routed by (coding plan 16, decision 3).
+    None when there is no such reading (no reading, or every primary reading stretched)."""
+    if not sense:
+        return None
+    surv = survivors(sense)
+    if not surv:
+        return None
+    return _kind((sense.get("readings") or [])[surv[0]])
+
+
+def verdict_tags_holding(outcome: str, *, cause: Optional[str] = None, membership_kind: Optional[str] = None,
+                         route: Optional[str] = None, kind: Optional[str] = None
                          ) -> tuple[str, list[str], Optional[str], str]:
-    """``(verdict, tags, holding, entity_type)`` for a joined outcome (the table of section 6)."""
+    """``(verdict, tags, holding, entity_type)`` for a joined outcome (the table of section 6).
+
+    ``route`` (coding plan 16; a role-aimed row only, ``roles_pass.route_for``; None for every trait-aimed row, which
+    is unchanged): ``role`` and ``both`` keep the verdict and tags as judged, with no holding list and entity type
+    ``role`` (the row is in the role flow where it was aimed; for ``both`` its adjective sibling is in the trait
+    flow); ``membership`` is the trait flow's membership track (a membership is a trait: decisions_m1.md decision
+    3), as a trait-aimed row's; ``turned_away`` is verdict ``reject`` with the tag of the most likely reading's kind
+    (``kind``), entity type ``role``."""
+    if route is not None:
+        if route in ("role", "both"):
+            v, tags, _, _ = verdict_tags_holding(outcome, cause=cause, membership_kind=membership_kind)
+            return v, tags, None, "role"
+        if route == "membership":
+            return verdict_tags_holding(outcome, cause=cause, membership_kind=membership_kind)
+        if route == "turned_away":
+            tag = ROUTE_TAG.get(str(kind)) or REJECT_TAG.get(str(cause))
+            return "reject", [tag] if tag else [], None, "role"
+        raise ValueError(f"unknown route {route!r}")
     if outcome == "trait":
         if membership_kind:
             hold = "nationalities" if membership_kind == NATIONALITY_KIND else None
@@ -684,6 +720,7 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
                     descriptors: Optional[Mapping] = None, second_opinion: Optional[Mapping] = None,
                     gloss: Optional[str] = None, third_opinion: Optional[Mapping] = None,
                     decided_by: Optional[Mapping] = None, rerouted: Optional[Mapping] = None,
+                    route: Optional[str] = None,
                     ) -> tuple[dict, Optional[str], Optional[str], str]:
     """``(filter block, gloss, holding, entity_type)`` for a joined row.  The old keys stay, so the
     readers of the block (promote, gap_registry.py, the states pass) need no change:
@@ -693,10 +730,13 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
     ``decided_by`` (a phrase the second model decided, :func:`phrase_needs_second_model`): ``sense`` and
     ``j`` are then the second model's, and the record keeps the first model's outcome; ``rerouted`` (an
     alignment-sweep row taken off the roles list, :func:`reroute_roles`): ``j`` is the rerouted join.
-    Both null on any other row."""
+    Both null on any other row.  ``route`` (coding plan 16): a role-aimed row's route (``roles_pass.route_for``),
+    recorded as ``role_route`` with ``routes_version``, and the routing of :func:`verdict_tags_holding`; the join is
+    recorded as judged.  A trait-aimed row's block has neither key and is unchanged."""
     sense = sense or {}
     verdict, tags, holding, et = verdict_tags_holding(j["outcome"], cause=j.get("cause"),
-                                                      membership_kind=j.get("membership_kind"))
+                                                      membership_kind=j.get("membership_kind"), route=route,
+                                                      kind=primary_kind(sense))
     notes = list(j.get("notes") or [])
     acc = j.get("accepted_index")
     prim = primary_indices(sense)
@@ -736,6 +776,9 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
         "confidence": None, "tag_disagreement": False, "validator_repairs": [], "gloss_in_band": None,
         "prompt_sha256": dict(prompt_sha256), "at": now,
     }
+    if route is not None:
+        from .roles_pass import ROUTES_VERSION
+        block["role_route"], block["routes_version"] = route, ROUTES_VERSION
     return block, row_gloss, holding, et
 
 

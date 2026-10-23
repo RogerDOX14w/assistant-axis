@@ -166,12 +166,22 @@ def cmd_submit(args) -> int:
         d = json.loads(line)
         if "surface" not in d:
             raise SystemExit(f"{args.file}:{i}: row has no 'surface'")
+        role = getattr(args, "entity_type", "trait") == "role"
         cands.append(Candidate(surface=d["surface"], generator=args.generator, run_id=args.run_id,
                                rank=d.get("rank"), score=d.get("score"), gloss_hint=d.get("gloss_hint"),
                                sense_id=int(d.get("sense_id") or 1), source_ref=d.get("source_ref"),
-                               partner_hint=d.get("partner_hint")))
+                               partner_hint=d.get("partner_hint"), entity_type="role" if role else "trait",
+                               kind_guess=d.get("kind_guess") if role else None,
+                               human=d.get("human") if role else None))
+    from assistant_axis.gapgen.registry import _check_role_fields
+    bad = next((b for b in (_check_role_fields({"entity_type": c.entity_type, "kind_guess": c.kind_guess,
+                                                "human": c.human}) for c in cands) if b), None)
+    if bad:
+        print(f"REFUSED: {args.file}: {bad}", file=sys.stderr)
+        return 2
     if args.dry_run:
-        print(f"DRY-RUN: would submit {len(cands)} candidates from {args.file} as {args.generator}/{args.run_id}")
+        print(f"DRY-RUN: would submit {len(cands)} candidates from {args.file} as {args.generator}/{args.run_id}"
+              + (" in role mode" if any(c.entity_type == "role" for c in cands) else ""))
         return 0
     run = start_run(args.generator, args.run_id, args={"file": str(args.file), "via": "gap_registry.py submit"},
                     candidates_dir=args.registry.parent if args.registry != paths.REGISTRY_PATH else None)
@@ -338,8 +348,15 @@ def cmd_holding(args) -> int:
         f = r.get("filter") or {}
         gens = sorted({s.get("generator") for s in r.get("sources") or []})
         note = _states_pass_note(r) if args.list in ("states", "states_released") or r.get("states_pass") else ""
+        gloss = r.get("gloss") or ""
+        if args.list == "roles" and r.get("role_pass"):
+            # the roles pass's stage (coding plan 16): the role gloss and the kind call's kind, once the block exists
+            from assistant_axis.gapgen import roles_pass as RP
+            gloss = RP.gloss_of(r) or ""
+            b = RP.block_of(r)
+            note += f" [kind {RP.kind_of(r)}" + ("" if b.get("kind_unanimous") else ", not unanimous") + "]"
         print(f"- **{r['label']}**{relabel_arrow(r)} ({', '.join(f.get('tags') or [])}; from {', '.join(gens)}): "
-              f"{r.get('gloss') or ''}{note}")
+              f"{gloss}{note}")
     return 0
 
 
@@ -757,6 +774,10 @@ def cmd_promote(args) -> int:
     if args.keys:
         keys = args.keys
     else:
+        if getattr(args, "allow_roles", False):
+            print("REFUSED: --allow-roles is by name only (--keys): the bulk path never promotes a role row "
+                  "(coding plan 16)", file=sys.stderr)
+            return 2
         keys = [r["key"] for r in records_for_status(reg, review=args.status)]
     queue = se.load_queue(args.queue)
     confirmed = {}
@@ -770,13 +791,19 @@ def cmd_promote(args) -> int:
     rep = promote(rows, queue, keys, data_dir=args.data_dir, dry_run=args.dry_run, section=args.section,
                   min_local_novelty=args.min_local_novelty, reopen_turned_down=args.reopen_turned_down,
                   confirmed_state_names=confirmed, allow_physical=bool(args.keys),
-                  allow_released_states=bool(args.keys))
+                  allow_released_states=bool(args.keys),
+                  allow_roles=bool(args.keys) and bool(getattr(args, "allow_roles", False)))
     for k in rep.promoted:
         e = next(x for x in rep.entries if x["gap_gen"]["registry_key"] == k)
         print(f"{'WOULD PROMOTE' if args.dry_run else 'PROMOTED'} {k} -> {e['stem']} ({e['entity_type']}"
               f"{', partner ' + e['partner'] if e.get('partner') else ''})")
+    for k, note in rep.notes.items():
+        print(f"*** NOTE {k}: {note} ***")
     for k, why in rep.refused.items():
         print(f"REFUSED {k}: {why}")
+    n_roles = sum(1 for k, why in rep.refused.items() if "(a role row, the roles pass)" in why)
+    if n_roles and not args.keys:
+        print(f"({n_roles} role rows left out: a role is promoted by name, --keys K ... --allow-roles)")
     if args.dry_run or not rep.promoted:
         return 0
     se.save_queue(queue, args.queue)
@@ -804,6 +831,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--no-relabel", action="store_true",
                     help="submit the rows as given: no adjective sibling for a noun (the M1 validation set, a replay "
                          "that must be judged as given); default: the platform's relabel step (nouns.py)")
+    sp.add_argument("--entity-type", choices=("trait", "role"), default="trait",
+                    help="--file: submit the rows in role mode (coding plan 16): keyed stem|R#sense beside any trait "
+                         "row of the surface, each row's kind_guess and human carried on its source; --from reads each "
+                         "line's own entity_type")
     sp.set_defaults(func=cmd_submit)
     sp = sub.add_parser("import-rows",
                         help="rows of another checkout's registry log (with their filter and novelty blocks) into this "
@@ -909,6 +940,9 @@ def build_parser() -> argparse.ArgumentParser:
                          "without it such a row is refused")
     sp.add_argument("--section", default=DEFAULT_SECTION)
     sp.add_argument("--queue", type=Path, default=paths.SEED_QUEUE_PATH)
+    sp.add_argument("--allow-roles", action="store_true",
+                    help="with --keys only: promote role rows (the roles pass, coding plan 16) as entity_type role "
+                         "entries; a role named like a corpus trait is promoted with a loud NOTE (Roger, 2026-10-22)")
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(func=cmd_promote)
     return ap

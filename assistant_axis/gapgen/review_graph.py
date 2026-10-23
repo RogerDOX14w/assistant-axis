@@ -182,8 +182,20 @@ LEXICAL_NODE_FLAGS = {"lexical_cover": "lexical_proposed_merge", "lexical_name_o
 LEXICON_NAMES = {"oewn": "WordNet", "moby": "Moby thesaurus"}
 
 
-def corpus_key(stem: str) -> str:
-    return f"trait:{stem}"
+def corpus_key(stem: str, kind: str = "trait") -> str:
+    """A corpus node's key: ``trait:<stem>``, or ``role:<stem>`` for a role of a roles build (coding plan 16; a corpus
+    role and a corpus trait of one name are two nodes, never merged by bare name)."""
+    if kind not in ("trait", "role"):
+        raise ValueError(f"corpus kind must be trait or role, not {kind!r}")
+    return f"{kind}:{stem}"
+
+
+def role_key(stem: str) -> str:
+    return corpus_key(stem, "role")
+
+
+#: The prefixes of corpus node keys (a key without one of these, or ``queue:``, is a candidate's registry key).
+CORPUS_PREFIXES: tuple[str, ...] = ("trait:", "role:")
 
 
 def queue_key(stem: str) -> str:
@@ -203,11 +215,16 @@ class OverlapGateRefused(RuntimeError):
 # --------------------------------------------------------------------------- nodes, edges, the graph
 
 _ALWAYS = {"key", "kind", "label", "gloss", "a", "b", "cosine", "relation", "source", "strict"}
+#: Optional fields whose ``False`` means something (a role node's ``human``, its kind readings' agreement: coding plan
+#: 16), so it is kept; ``None`` is still left out, so a trait node, which has neither, is written as before.
+_KEEP_FALSE = {"human", "role_kind_unanimous"}
 
 
 def _compact(d: dict) -> dict:
-    """``d`` without its empty optional fields (``None``, ``[]``, ``{}``, ``False``)."""
-    return {k: v for k, v in d.items() if k in _ALWAYS or not (v is None or v is False or v == [] or v == {})}
+    """``d`` without its empty optional fields (``None``, ``[]``, ``{}``, ``False``; a field of :data:`_KEEP_FALSE`
+    keeps its ``False``)."""
+    return {k: v for k, v in d.items() if k in _ALWAYS or (k in _KEEP_FALSE and v is False)
+            or not (v is None or v is False or v == [] or v == {})}
 
 
 def _from(cls, d: Mapping):
@@ -244,6 +261,13 @@ class Node:
     review_batch: Optional[str] = None          # the review batch and its group that decided it
     review_group: Optional[str] = None
     seed_queue_stem: Optional[str] = None       # a promoted row: its seed-queue entry
+    # a role candidate of a roles build (coding plan 16); none of these on a trait node, so a trait graph is unchanged
+    role_kind: Optional[str] = None             # the role kind call's majority kind (roles_pass)
+    role_kind_unanimous: Optional[bool] = None
+    human: Optional[bool] = None                # derived from the kind (non_human: False)
+    kind_guess: Optional[str] = None            # the generator's guess (provenance; the pipeline acts on role_kind)
+    provenance: list = field(default_factory=list)      # [{"generator", "source_ref"}]: the card's provenance line
+    nearest_traits: list = field(default_factory=list)  # [{"stem", "cosine"}]: M3's cross_type (information)
 
     def to_dict(self) -> dict:
         return _compact({f.name: getattr(self, f.name) for f in fields(self)})
@@ -555,19 +579,28 @@ class PairCandidate(NR.M3Candidate):
 
 def _gloss(row: Mapping) -> Optional[str]:
     from . import physical_pass as PP
+    from . import roles_pass as RP
     from . import states_pass as SP
     g = (row.get("gloss") or (row.get("filter") or {}).get("gloss") or (row.get(PP.BLOCK) or {}).get("gloss")
-         or SP.gloss_of(row))
+         or SP.gloss_of(row) or RP.gloss_of(row))
     return g.strip() if isinstance(g, str) and g.strip() else None
 
 
 def _holding_of(row: Mapping) -> Optional[str]:
     """The holding list a row was judged from: ``physical`` for a row whose M3 block came from the physical pass,
-    ``states`` for one from the states pass (``novelty.pass``), else None (a trait row, read as before)."""
+    ``states`` for one from the states pass, ``roles`` for one from the roles pass (``novelty.pass``), else None (a
+    trait row, read as before)."""
     from . import physical_pass as PP
+    from . import roles_pass as RP
     from . import states_pass as SP
     p = (row.get("novelty") or {}).get("pass")
-    return PP.HOLDING if p == PP.PASS_NAME else SP.PASS_NAME if p == SP.PASS_NAME else None
+    return {PP.PASS_NAME: PP.HOLDING, SP.PASS_NAME: SP.PASS_NAME, RP.PASS_NAME: RP.HOLDING}.get(p)
+
+
+def is_roles_row(row: Mapping) -> bool:
+    """A row decided by the roles pass (``novelty.pass == "roles"``)."""
+    from . import roles_pass as RP
+    return (row.get("novelty") or {}).get("pass") == RP.PASS_NAME
 
 
 def pair_candidate(row: Mapping) -> tuple[Optional[PairCandidate], Optional[str]]:
@@ -832,7 +865,8 @@ class ReviewRunner(NR.NoveltyRunner):
         # the parent's call, with the listed names looked up in the corpus map (corpus traits and candidates); the
         # labels as stored, shown in the runner's label form (the judge display form for a new build)
         traits = [(self.corpus[s]["label"], self.corpus[s]["description"]) for s in stems]
-        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits, label_form=self.label_form)
+        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits, label_form=self.label_form,
+                                       list_key=self.list_key)
         model = self.relation_model if step == "relation" else NR.UNSURE_MODEL
         return NR.Call(step=step, role=NR.model_role(model), key=st.cand.key, model=model,
                        system=self.rubrics["relation"]["text"], user=user, max_tokens=NR.RELATION_MAX_TOKENS,
@@ -974,6 +1008,20 @@ def build_graph(plan: GraphPlan, *, runner: ReviewRunner, corpus: Mapping[str, A
 def _candidate_node(row: Mapping) -> Node:
     nv, f = row.get("novelty") or {}, row.get("filter") or {}
     gens = list(dict.fromkeys(s.get("generator") for s in row.get("sources") or [] if s.get("generator")))
+    if is_roles_row(row):
+        # a roles build (coding plan 16): the outcome says role, the card's role fields ride on the node, and a role
+        # has no alignment score or region
+        from . import roles_pass as RP
+        return Node(key=row["key"], kind="candidate", label=row.get("label") or row["key"], gloss=_gloss(row),
+                    stem=row.get("stem"), generator=gens[0] if gens else None, generators=gens,
+                    verdict=f.get("verdict"), decision=nv.get("decision"),
+                    flags=list(nv.get("review") or []) + lexical_flags(row), m3_run=nv.get("run_id"), outcome="role",
+                    role_kind=RP.kind_of(row), role_kind_unanimous=RP.block_of(row).get("kind_unanimous"),
+                    human=RP.human_of(row), kind_guess=RP.kind_guess_of(row),
+                    provenance=[{"generator": s.get("generator"), "source_ref": s.get("source_ref")}
+                                for s in row.get("sources") or [] if s.get("generator")],
+                    nearest_traits=[dict(x) for x in ((nv.get("cross_type") or {}).get("traits") or [])],
+                    **review_fields(row))
     a = nv.get("alignment_score", f.get("alignment"))
     return Node(key=row["key"], kind="candidate", label=row.get("label") or row["key"], gloss=_gloss(row),
                 stem=row.get("stem"), generator=gens[0] if gens else None, generators=gens, verdict=f.get("verdict"),
@@ -1042,10 +1090,10 @@ def _covering(nv: Mapping) -> Optional[tuple[str, str]]:
     return "corpus", stem
 
 
-def _m3_target(stem: str, x: Mapping) -> tuple[str, str]:
+def _m3_target(stem: str, x: Mapping, ckey=corpus_key) -> tuple[str, str]:
     """``(kind, node key)`` of a trait an M3 block lists or reads: a seed-queue entry (its ``queue_status``, from
-    2026-10-09, when M3 searched the queue) or a corpus trait."""
-    return ("queue", queue_key(stem)) if x.get("queue_status") else ("corpus", corpus_key(stem))
+    2026-10-09, when M3 searched the queue) or a corpus trait (``ckey``: :func:`role_key` in a roles build)."""
+    return ("queue", queue_key(stem)) if x.get("queue_status") else ("corpus", ckey(stem))
 
 
 def _value(x: Any) -> Any:
@@ -1065,11 +1113,15 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
     rd_of = lambda r: reading_of(r, proposed_cut_off=proposed_cut_off)  # noqa: E731
     corpus_stems: set[str] = set()
     queue_stems: set[str] = set()
+    # a roles build (coding plan 16): the corpus nodes are roles (``role:<stem>``); a trait build is unchanged
+    roles = any(is_roles_row(r) for r in list(plan.rows.values()) + list(plan.covered.values()))
+    ckey = role_key if roles else corpus_key
+
     def mark_covered(n: Node, nv: Mapping) -> None:
         cov = _covering(nv)
         if cov:
             (queue_stems if cov[0] == "queue" else corpus_stems).add(cov[1])
-            n.covered_by = (queue_key if cov[0] == "queue" else corpus_key)(cov[1])
+            n.covered_by = (queue_key if cov[0] == "queue" else ckey)(cov[1])
         d = nv.get("deciding_reading")
         if d:
             n.covered_reading = {"stem": d.get("stem"), "cosine": d.get("cosine"), "sonnet": _value(d.get("sonnet")),
@@ -1086,7 +1138,7 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
         cov = _covering(nv)
         if cov:
             (queue_stems if cov[0] == "queue" else corpus_stems).add(cov[1])
-            n.covered_by = (queue_key if cov[0] == "queue" else corpus_key)(cov[1])
+            n.covered_by = (queue_key if cov[0] == "queue" else ckey)(cov[1])
         d = nv.get("deciding_reading")
         if d:
             n.covered_reading = {"stem": d.get("stem"), "cosine": d.get("cosine"), "sonnet": _value(d.get("sonnet")),
@@ -1139,7 +1191,7 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
         for x in nv.get("listed") or []:
             stem = x["stem"]
             seen.add(stem)
-            kind, b = _m3_target(stem, x)
+            kind, b = _m3_target(stem, x, ckey)
             (queue_stems if kind == "queue" else corpus_stems).add(stem)
             rd = {"ab": rd_of(judged[stem]) | {"outcome": judged[stem].get("outcome")}} if stem in judged else {}
             edges.append(Edge(a=key_, b=b, cosine=x.get("cosine"), relation=x.get("relation") or "unknown",
@@ -1147,7 +1199,7 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
         for stem, r in judged.items():          # judged but not listed: an opposite's partner, a renamed_from match
             if stem in seen:
                 continue
-            kind, b = _m3_target(stem, r)
+            kind, b = _m3_target(stem, r, ckey)
             (queue_stems if kind == "queue" else corpus_stems).add(stem)
             edges.append(Edge(a=key_, b=b, cosine=r.get("cosine"), relation=r.get("relation") or "unknown",
                               source="m3", readings={"ab": rd_of(r) | {"outcome": r.get("outcome")}},
@@ -1161,9 +1213,9 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
 
     for stem in sorted(corpus_stems):
         t = corpus.get(stem)
-        nodes.append(Node(key=corpus_key(stem), kind="corpus", label=t.label, gloss=t.description, stem=stem)
+        nodes.append(Node(key=ckey(stem), kind="corpus", label=t.label, gloss=t.description, stem=stem)
                      if t is not None else
-                     Node(key=corpus_key(stem), kind="corpus", label=stem.replace("_", " "), stem=stem, missing=True))
+                     Node(key=ckey(stem), kind="corpus", label=stem.replace("_", " "), stem=stem, missing=True))
     q_by = {}
     for e in (queue or {}).get("entries") or []:
         if e.get("stem"):

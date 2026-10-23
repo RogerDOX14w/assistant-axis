@@ -51,7 +51,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Iterator, Optional, Sequence
 
-from .normalize import make_key, normalize_candidate
+from .normalize import is_role_key, make_key, normalize_candidate
 from .paths import REGISTRY_PATH, REGISTRY_SNAPSHOT_GZ_NAME, REGISTRY_SNAPSHOT_NAME
 
 logger = logging.getLogger(__name__)
@@ -198,6 +198,13 @@ class Candidate:
     row with two ``sources[]`` entries (interface resolution 4).
     ``gloss_hint`` is shown to the filter as the intended sense;
     ``partner_hint`` (an antonym surface) lets ``promote`` set ``partner``.
+
+    Role mode (coding plan 16, 2026-10-22; the role generators' frozen interface): ``entity_type="role"`` aims the
+    candidate at the role corpus.  Its row is keyed ``stem|R#sense`` (``normalize.make_key``) unless a role row
+    already holds ``stem#sense`` (a row M1 put on the roles list), so it never merges into a trait row of the same
+    surface.  ``kind_guess`` (one of the nine role kinds, ``roles_pass.KIND_KEYS``) and ``human`` are the
+    generator's guesses, carried on the row's source and shown on the review card as provenance; the kind the
+    pipeline acts on is the role kind call's (``roles_pass``).
     """
     surface: str
     generator: str
@@ -208,12 +215,34 @@ class Candidate:
     sense_id: int = 1
     source_ref: Optional[str] = None
     partner_hint: Optional[str] = None
+    entity_type: str = "trait"
+    kind_guess: Optional[str] = None
+    human: Optional[bool] = None
 
 
-#: ``candidates.jsonl``'s fields: exactly :class:`Candidate`'s, as ``dataclasses.asdict`` writes them.
+#: ``candidates.jsonl``'s fields: exactly :class:`Candidate`'s, as ``dataclasses.asdict`` writes them.  The last
+#: three since 2026-10-22 (coding plan 16); a line without them reads as a trait candidate.
 CANDIDATE_FIELDS: tuple[str, ...] = ("surface", "generator", "run_id", "rank", "score", "gloss_hint", "sense_id",
-                                     "source_ref", "partner_hint")
+                                     "source_ref", "partner_hint", "entity_type", "kind_guess", "human")
 _REQUIRED_CANDIDATE_FIELDS = ("surface", "generator", "run_id")
+
+
+def _check_role_fields(d: dict) -> Optional[str]:
+    """Why a candidate's role-mode fields are invalid, or None: ``entity_type`` one of ``normalize.ENTITY_TYPES``,
+    ``kind_guess`` None or one of the nine role kinds, ``human`` None or a boolean."""
+    from .normalize import ENTITY_TYPES
+    et = d.get("entity_type")
+    if et is not None and et not in ENTITY_TYPES:
+        return f"entity_type {et!r} is not one of {ENTITY_TYPES}"
+    kg = d.get("kind_guess")
+    if kg is not None:
+        from .roles_pass import KIND_KEYS
+        if kg not in KIND_KEYS:
+            return f"kind_guess {kg!r} is not one of the role kinds {KIND_KEYS}"
+    h = d.get("human")
+    if h is not None and not isinstance(h, bool):
+        return f"human {h!r} is not a boolean"
+    return None
 
 
 def read_candidates(path: Path | str) -> list[Candidate]:
@@ -247,8 +276,13 @@ def read_candidates(path: Path | str) -> list[Candidate]:
             check_id(d["run_id"], "run_id")
         except ValueError as exc:
             raise ValueError(f"{p}:{i}: {exc}") from None
+        bad = _check_role_fields(d)
+        if bad:
+            raise ValueError(f"{p}:{i}: {bad}")
         if d.get("sense_id") is None:
             d.pop("sense_id", None)
+        if d.get("entity_type") is None:
+            d.pop("entity_type", None)
         out.append(Candidate(**d))
     return out
 
@@ -271,9 +305,14 @@ class SubmitReport:
 
 
 def source_entry(c: Candidate) -> dict:
-    return {"generator": c.generator, "run_id": c.run_id, "rank": c.rank, "score": c.score,
-            "source_ref": c.source_ref, "gloss_hint": c.gloss_hint, "partner_hint": c.partner_hint,
-            "surface": c.surface}
+    """A row's ``sources[]`` entry for ``c``.  A role-aimed candidate's (coding plan 16) also carries the generator's
+    ``kind_guess`` and ``human``; a trait candidate's has the fields it always had."""
+    out = {"generator": c.generator, "run_id": c.run_id, "rank": c.rank, "score": c.score,
+           "source_ref": c.source_ref, "gloss_hint": c.gloss_hint, "partner_hint": c.partner_hint,
+           "surface": c.surface}
+    if c.entity_type == "role" or c.kind_guess is not None or c.human is not None:
+        out.update(kind_guess=c.kind_guess, human=c.human)
+    return out
 
 
 def _source_identity(s: dict) -> tuple:
@@ -282,14 +321,15 @@ def _source_identity(s: dict) -> tuple:
 
 
 def new_record(surface: str, *, sense_id: int = 1, sources: Sequence[dict] = (),
-               now: Optional[str] = None) -> dict:
-    """A fresh registry row (rev 0; :meth:`Registry.write` sets rev 1)."""
+               now: Optional[str] = None, entity_type: str = "trait") -> dict:
+    """A fresh registry row (rev 0; :meth:`Registry.write` sets rev 1).  ``entity_type="role"`` (coding plan 16): a
+    role-aimed row, keyed ``stem|R#sense`` (``normalize.make_key``), ``entity_type: "role"`` from submission."""
     n = normalize_candidate(surface)
     now = now or utc_now()
     rec = {k: None for k in ROW_FIELDS}
     rec.update({
-        "schema_version": SCHEMA_VERSION, "key": make_key(n.stem, sense_id), "stem": n.stem,
-        "sense_id": int(sense_id), "surface": surface, "label": n.label, "entity_type": "trait",
+        "schema_version": SCHEMA_VERSION, "key": make_key(n.stem, sense_id, entity_type), "stem": n.stem,
+        "sense_id": int(sense_id), "surface": surface, "label": n.label, "entity_type": entity_type,
         "sources": [dict(s) for s in sources],
         "review": {"status": "unreviewed", "by": None, "at": None, "note": None},
         "rev": 0, "created_at": now, "updated_at": now,
@@ -635,7 +675,12 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
     derived = []
     if lookups is not None:
         from . import nouns
-        derived = nouns.relabel_candidates(cands, lookups=lookups,
+        from . import roles_pass
+        # a role-aimed noun gets its adjective sibling too (coding plan 16, decision 3's other half), unless the
+        # switch is off; the sibling is a trait candidate (nouns.derived_candidate)
+        to_relabel = cands if roles_pass.RELABEL_ROLE_AIMED is not None else \
+            [c for c in cands if c.entity_type != "role"]
+        derived = nouns.relabel_candidates(to_relabel, lookups=lookups,
                                            corpus_stems=nouns.corpus_stem_map() if corpus_stems is None
                                            else corpus_stems)
     all_cands = cands + [d.adjective for d in derived if d.adjective is not None]
@@ -644,6 +689,7 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
     seen_keys: set[str] = set()
     invalid: list[str] = []
     n_new = n_merged = n_unchanged = 0
+    key_of: dict[tuple, str] = {}           # (surface, sense_id, entity_type) -> the key it went to
     with reg.locked():
         now = utc_now()                     # under the lock: ``created_at`` / ``updated_at`` follow the log's order
         cur = reg._fold_unlocked()
@@ -654,7 +700,8 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
             except ValueError:
                 invalid.append(c.surface)
                 continue
-            key = make_key(n.stem, c.sense_id)
+            key = candidate_key(n.stem, c.sense_id, c.entity_type, rows=(changed, cur))
+            key_of[(c.surface, c.sense_id, c.entity_type)] = key
             if key not in seen_keys:
                 seen_keys.add(key)
                 keys.append(key)
@@ -664,7 +711,8 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
             elif key in cur:
                 rec = copy.deepcopy(cur[key])
             else:
-                rec = new_record(c.surface, sense_id=c.sense_id, sources=[src], now=now)
+                rec = new_record(c.surface, sense_id=c.sense_id, sources=[src], now=now,
+                                 entity_type="role" if is_role_key(key) else "trait")
                 changed[key] = rec
                 n_new += 1
                 continue
@@ -675,7 +723,7 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
             rec.setdefault("sources", []).append(src)
             changed[key] = rec
             n_merged += 1
-        relabels = _link_relabels(derived, cur, changed, now) if derived else []
+        relabels = _link_relabels(derived, cur, changed, now, key_of=key_of) if derived else []
         out = [reg._stamp(r, cur.get(k), now) for k, r in changed.items()]
         reg._append(out)
     if invalid:
@@ -685,11 +733,33 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
                         n_unchanged=n_unchanged, invalid=invalid, n_relabelled=len(relabels), relabels=relabels)
 
 
-def _link_relabels(derived, cur: dict, changed: dict, now: str) -> list[tuple]:
+def candidate_key(stem: str, sense_id: int, entity_type: str = "trait", *, rows: Sequence[dict] = ()) -> str:
+    """The key a candidate of ``stem`` goes to (coding plan 16, § 6.1).  A trait-aimed candidate: ``stem#sense``,
+    as always (it merges into whatever row is there, a held role row included).  A role-aimed one: the row at
+    ``stem|R#sense`` when one exists in ``rows`` (dicts of rows by key, searched in order); else the row at
+    ``stem#sense`` when that row's ``entity_type`` is ``role`` (a row M1 put on the roles list); else a new
+    ``stem|R#sense`` row.  A role candidate therefore never merges into a trait row of the same surface."""
+    if entity_type != "role":
+        return make_key(stem, sense_id)
+    rkey, plain = make_key(stem, sense_id, "role"), make_key(stem, sense_id)
+
+    def find(k):
+        return next((d[k] for d in rows if k in d), None)
+    if find(rkey) is not None:
+        return rkey
+    p = find(plain)
+    if p is not None and p.get("entity_type") == "role":
+        return plain
+    return rkey
+
+
+def _link_relabels(derived, cur: dict, changed: dict, now: str, *, key_of: Optional[dict] = None) -> list[tuple]:
     """Write the ``relabel`` blocks of ``derived`` (``nouns.Derived``) into ``changed`` (rows touched by this
     submission; a row only read so far is copied from ``cur``), as :func:`nouns.link_wanted` allows: a block equal
     but for its time stamp is left alone, so a resubmission writes nothing, and the first noun to link an adjective
-    stays its ``from_key``.  Returns ``[(noun_key, adj_key | None, corpus_stem | None)]``."""
+    stays its ``from_key``.  ``key_of``: ``(surface, sense_id, entity_type) -> key`` as the main loop placed each
+    candidate (a role-aimed noun's row may be ``stem|R#sense``).  Returns ``[(noun_key, adj_key | None,
+    corpus_stem | None)]``."""
     from . import nouns
     out = []
 
@@ -706,7 +776,8 @@ def _link_relabels(derived, cur: dict, changed: dict, now: str) -> list[tuple]:
 
     for d in derived:
         try:
-            noun_key = make_key(normalize_candidate(d.noun.surface).stem, d.noun.sense_id)
+            noun_key = (key_of or {}).get((d.noun.surface, d.noun.sense_id, d.noun.entity_type)) or \
+                make_key(normalize_candidate(d.noun.surface).stem, d.noun.sense_id)
         except ValueError:
             continue
         try:

@@ -153,3 +153,11 @@ class MetricConfig:
     @property
     def canary(self) -> dict:
         return dict(self.extra.get("canary") or {})
+
+    @property
+    def roles(self) -> Optional[dict]:
+        """The role index's settings (coding plan 16, decision 11): absent (None) means M2's trait settings with the
+        role query form; written by ``novelty_score.py retrieval-check`` only when the check fell below 95% and an arm
+        (``query_form`` ``role_gloss_w20``, ``variant`` ``raw``) did better, with the check's recall table."""
+        r = self.extra.get("roles")
+        return dict(r) if r else None

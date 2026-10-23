@@ -129,7 +129,7 @@ Roger's OK; never read `.env` or print a key.
 
 - [physical_pass.py](../../assistant_axis/gapgen/physical_pass.py): the shape of a pass (`HOLDING`, `BLOCK`,
   `candidate_from_row`, `provisional_candidate`, `request`, `pins`, `estimate`, `render`, `gloss_rows`,
-  `queue_entry_extras`, `section_for`); [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py) (not there yet) copies its structure.
+  `queue_entry_extras`, `section_for`); [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py) copies its structure.
 - [split_runner.py](../../assistant_axis/gapgen/split_runner.py) and [split.py](../../assistant_axis/gapgen/split.py):
   M1's calls, `payload(step, ...)` (one JSON object with `"id": 1`), `verdict_tags_holding` (lines 629-642),
   `reroute_roles` (507-517, the precedent for a per-row reroute), `to_filter_block`; the kind call's parser.
@@ -186,7 +186,7 @@ Roger's OK; never read `.env` or print a key.
 
 ### 5a. The shared role path
 
-New module [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py) (not there yet), the role counterpart of
+New module [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py), the role counterpart of
 [physical_pass.py](../../assistant_axis/gapgen/physical_pass.py):
 
 ```python
@@ -224,7 +224,7 @@ def kind_status(kind, *, current, n_now) -> str    # too_low | about_right | too
 def corpus_kind_counts(data_dir, queue, *, review_state=None) -> tuple[dict, int]   # files + live queue role entries + this review's promoted nominees
 ```
 
-Changes in existing modules (each a task in § 9; the new module is [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py), not there yet):
+Changes in existing modules (each a task in § 9; the new module is [roles_pass.py](../../assistant_axis/gapgen/roles_pass.py)):
 
 - [registry.py](../../assistant_axis/gapgen/registry.py): `Candidate` gains `entity_type: str = "trait"`,
   `kind_guess: Optional[str] = None`, `human: Optional[bool] = None` (appended to `CANDIDATE_FIELDS`;
@@ -269,7 +269,7 @@ Changes in existing modules (each a task in § 9; the new module is [roles_pass.
   `promote --allow-roles` (by name only), `holding --list roles` prints the gloss and kind once the block exists,
   `submit --entity-type role`.
 - [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py): `SYSTEM` loaded from
-  [rubrics/role_kind.md](./rubrics/role_kind.md) (not there yet) through `split_rubrics.load_prompt`, byte for
+  [rubrics/role_kind.md](./rubrics/role_kind.md) through `split_rubrics.load_prompt`, byte for
   byte (its recorded `prompt_sha256` `11b559f0cff50189` must not change); `--from-pass BLOCKS` appends a pass's
   kinds (task 13).
 - [seed_entities.py](../../data_analysis/seed_entities.py): `write` of a role entry with `gap_gen.role_kind`
@@ -278,7 +278,7 @@ Changes in existing modules (each a task in § 9; the new module is [roles_pass.
 
 ### 5b. Generator B: `professions`
 
-New package [generators/professions/](../../assistant_axis/gapgen/generators/professions/) (not there yet):
+New package [generators/professions/](../../assistant_axis/gapgen/generators/professions/):
 
 ```python
 # sources.py: what is downloaded, with sizes, licences, attribution (the base_model/sources.py pattern)
@@ -317,7 +317,7 @@ def recovery_by_string(lay_roles, *, occupation_stems) -> dict     # the 162 hid
 def report_markdown(run_dir) -> str
 ```
 
-CLI [professions_generator.py](../../data_analysis/gap_generation/professions_generator.py) (not there yet),
+CLI [professions_generator.py](../../data_analysis/gap_generation/professions_generator.py),
 run directories `data/candidates/runs/professions/<run_id>/` with `table.jsonl`, `lay_responses.jsonl`,
 `lay.jsonl`, `ranking.jsonl`, `candidates.jsonl`, `ATTRIBUTION.md`, `report.md`, `run.json`, `usage.json`.
 
@@ -364,7 +364,7 @@ resubmission of `baker` merges into it (the row is already a role row), adding t
 ```json
 {"key": "cardiologist#1", "label": "cardiologist", "gloss": "A cardiologist is a doctor who ...", "generator": "censuses",
  "role_kind": "occupation", "role_kind_unanimous": true, "human": true, "kind_guess": null,
- "kind_readout": {"status": "too_high", "count": 171, "held": 161.6, "margin": 16.2, "text": "occupation: too high (171 of 162 held at 339 + 12 accepted)"},
+ "kind_readout": {"kind": "occupation", "status": "too_high", "count": 198, "held": 179.2, "margin": 17.9, "text": "occupation: too high (198 against 179.2 held at 375, margin 17.9)"},
  "nearest_roles": [{"stem": "doctor", "cosine": 0.71, "relation": "similar", "reading": 3}, {"stem": "paramedic", "cosine": 0.52, "relation": "unrelated"}],
  "nearest_traits": [{"stem": "clinical", "cosine": 0.44}],
  "covered_by": null, "provenance": [{"generator": "censuses", "source_ref": "tda:cardiologist"}],
@@ -376,11 +376,18 @@ A covered sub-role shows `covered_by: "doctor"` with the reading (decision 4), g
 ### 6.4 The kind readout (`balance`)
 
 ```json
-{"n_now": 351, "reference_total": 339, "margin": 0.1,
- "kinds": {"occupation": {"reference": 162, "share": 0.478, "count": 171, "held": 167.7, "status": "too_high", "room": -3.3},
-           "pastime": {"reference": 8, "share": 0.0236, "count": 8, "held": 8.3, "status": "about_right", "room": 0.3}, "...": "..."},
- "order": ["pastime", "status", "other", "relationship", "circumstance", "temperament", "stance", "non_human", "occupation"]}
+{"n_now": 375, "reference_total": 339, "margin": 0.1,
+ "kinds": {"occupation": {"reference": 162, "share": 0.4779, "count": 198, "held": 179.2, "status": "too_high", "room": -18.8},
+           "pastime": {"reference": 8, "share": 0.0236, "count": 8, "held": 8.8, "status": "about_right", "room": 0.8}, "...": "..."},
+ "order": ["stance", "non_human", "circumstance", "temperament", "relationship", "status", "pastime", "other", "occupation"]}
 ```
+
+(The corpus of 2026-10-16 after 36 accepted occupations and nothing else: `balance(REFERENCE_KINDS_2026_10_16 with
+occupation 198, 375)`, as the code computes it; stance, non-human, circumstance, temperament and relationship are
+then too low, being held at a larger corpus.  These examples replace the drafted ones, which did not follow the
+formula below: corrected 2026-10-23 after the review's minor 4.)  The margin is 10% of the held count, so the chip
+moves slowly on the big kinds and fast on the small ones: occupation-only accepts tip occupation to too high after
+35 (`162 + a > 1.1 x 0.478 x (339 + a)`), while pastime (8) tips on one.
 
 `held = share × n_now`; `too_low` when `count < (1 − margin) × held`, `too_high` when `count > (1 + margin) × held`;
 `n_now` counts the role files (less `default.json`), the live role entries of the queue whose stem has no file,
@@ -419,6 +426,16 @@ refuses; a stem that is a trait file or trait entry is allowed with the NOTE of 
 `ranking.jsonl`: `{"role": "cardiologist", "stem": "cardiologist", "group": "29-1210", "zipf": 3.4, "employment": 782430, "nearest_role": "doctor", "cosine": 0.71, "score": 1.12, "rank": 37, "net_new": false, "registered_as": "cardiologist#1"}`.
 [DOWNLOAD_MANIFEST.json](../../data/external/onet/DOWNLOAD_MANIFEST.json) rows as the O*NET one on disk (a [DOWNLOAD_MANIFEST.json](../../data/external/bls/DOWNLOAD_MANIFEST.json) beside the BLS files, not there yet), plus `"downloaded_by": "hand"` when BLS refused the fetch.
 
+**As built (2026-10-22).**  Group ids are prefixed by kind (`broad:29-1210`, `job_title:33-9032.00:bouncer`,
+`esco:5414`) in `lay.jsonl` and `ranking.jsonl`; a candidate's `source_ref` is `soc:29-1210`,
+`onet_title:33-9032.00:bouncer` or `esco:5414` (§ 6.2), and a promoted entry's `source` is the attribution line
+`professions.source_line` makes of it ("O*NET 31.0 job title under 33-9032.00 (CC BY 4.0, USDOL/ETA)"; the
+occupation's title is not in the ref, so it is not in the line); a job-title row also carries
+`label`, `stem`, `employment_source`, `also_under` and `short_title`; `ranking.jsonl` has one row per stem (a role
+named by two groups is ranked once, with both as sources).  ESCO's occupations are kept as JSONL
+(`data/external/esco/occupations_en.jsonl`, not there yet) from its API; the API's response shape is taken from its
+documentation and not yet checked against a live answer (`sources.ESCO_UNVERIFIED`).
+
 ## 7. CLI
 
 All through `uv run python`; every paid command prints its estimate, takes `--budget-usd` (hard cap), needs
@@ -435,7 +452,7 @@ All through `uv run python`; every paid command prints its estimate, takes `--bu
   as sent (used for the rendered samples before pinning, task 4).
 - `novelty_score.py retrieval-check --batch-id roles_retrieval_1 --budget-usd 1 [--forms role_gloss_w14,label_gloss,role_gloss_w20] [--space centred,raw]`:
   § 7b; writes [glosses.jsonl](../../data/candidates/novelty/roles_retrieval_1/glosses.jsonl), [recall.json](../../data/candidates/novelty/roles_retrieval_1/recall.json), [recall.md](../../data/candidates/novelty/roles_retrieval_1/recall.md) and [usage.json](../../data/candidates/novelty/roles_retrieval_1/usage.json) under `data/candidates/novelty/roles_retrieval_1/` (not there yet).
-- `novelty_score.py rubric-check --pairs reports/trait_gap_generation/role_rubric_pairs.md --batch-id roles_rubric_1 --budget-usd 2` (the marked sheet, [role_rubric_pairs.md](./role_rubric_pairs.md), not there yet; the command parses its mark column):
+- `novelty_score.py rubric-check --pairs reports/trait_gap_generation/role_rubric_pairs.md --batch-id roles_rubric_1 --budget-usd 2` (the marked sheet, [role_rubric_pairs.md](./role_rubric_pairs.md), written first by `rubric-check --make-sheet --glosses data/candidates/novelty/roles_retrieval_1/glosses.jsonl --overwrite` from the retrieval check's role glosses, refused without them; the command parses its mark column and refuses marks made on a sheet without the glosses):
   § 8 test 7; writes [readings.jsonl](../../data/candidates/novelty/roles_rubric_1/readings.jsonl), [kappa.json](../../data/candidates/novelty/roles_rubric_1/kappa.json) and [readout.md](../../data/candidates/novelty/roles_rubric_1/readout.md) under `data/candidates/novelty/roles_rubric_1/` (not there yet).
 - `review_graph.py build --batch-id review_roles_<name> --from-batches roles_<name> --budget-usd C`: unchanged
   flags; a roles build is detected from the batches' `pass` and uses the role rubrics and corpus targets.
@@ -470,7 +487,7 @@ as version 1 with [rubric_pins.py](../../data_analysis/gap_generation/rubric_pin
 renders each from the real code (`render`) before the pin and puts the rendering in the rubric file, as
 [relation.md](./rubrics/relation.md) does.  Labels in the samples are in the judge display form.
 
-#### 7a.1 [role_gloss.md](./rubrics/role_gloss.md) (not there yet): the role gloss call
+#### 7a.1 [role_gloss.md](./rubrics/role_gloss.md): the role gloss call
 
 Haiku 5.5, one item per call, M1's request settings (`split_runner.MAX_TOKENS_THINKING`, no temperature), the
 system prompt cached.  Adapted from [gloss.md](./rubrics/gloss.md) draft 4 to the role corpus's form (the
@@ -495,22 +512,20 @@ Respond with one JSON object and nothing else:
 Return one row per id, in the order given.
 ````
 
-Rendered user turns (`split.payload("gloss", ...)`'s shape, one object with `"id": 1`):
+Rendered user turns (`roles_pass.request("role_gloss", ...)`, one object with `"id": 1`; the readings are M1's, from real rows of the tracked registry snapshot). *Replaced 2026-10-22 (Opus, the build) by the code's own rendering, as the rubric file has it; the drafter's expected answers are left out, the model's own come with the pilot.*
 
 ```
---- variant 1: a held row, M1's accepted reading (stand-in reading; Opus renders a real one) ---
-{"id": 1, "label": "bouncer", "reading": "doorman at a bar or nightclub who keeps order and turns people away"}
-expected: {"results": [{"id": 1, "gloss": "A bouncer is someone who works the door of a bar or club, checking IDs, turning away the drunk and the underage, and throwing out anyone who starts trouble."}]}
+--- variant 1: a held row (bouncer#1, on the roles list), M1's accepted reading ---
+{"id": 1, "label": "bouncer", "reading": "works as a club or bar doorman who checks entry and removes troublemakers"}
 
---- variant 2: a non-human role (a generator's submission, M1's reading) ---
-{"id": 1, "label": "golem", "reading": "a creature of clay animated by a word written on its forehead, made to serve"}
-expected: {"results": [{"id": 1, "gloss": "A golem is a being of clay brought to life by a word on its forehead, made to guard and serve its maker and doing exactly what it is told."}]}
+--- variant 2: a non-human role (bot#1, on the roles list), M1's accepted reading ---
+{"id": 1, "label": "bot", "reading": "act as an automated program or chatbot"}
 
---- variant 3: the retrieval check, a corpus role with no reading ---
+--- variant 3: the retrieval check, a corpus role glossed with no reading ---
 {"id": 1, "label": "operator", "reading": null}
 ```
 
-#### 7a.2 [role_kind.md](./rubrics/role_kind.md) (not there yet): the role kind call
+#### 7a.2 [role_kind.md](./rubrics/role_kind.md): the role kind call
 
 The `SYSTEM` string of [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py), moved into a rubric
 file **byte for byte** (two spaces after each period as in the source; the file's block must hash to the sha the
@@ -534,15 +549,19 @@ The kinds:
 Answer with one JSON object and nothing else.  Give the reason in one short sentence first, then the kind: {"reason": "<one short sentence>", "kind": "<one of the kind keys above>"}
 ````
 
-Rendered user turn (a candidate; a corpus role sends its description in place of the gloss):
+Rendered user turns (`classify_role_kinds.user_message(label, text)`, which both readers build). *Replaced 2026-10-22 (Opus, the build) by the code's own rendering, as the rubric file has it; the drafter's expected answers are left out, the model's own come with the pilot.*
 
 ```
+--- a corpus role (classify_role_kinds.py; the description is the role file's) ---
+Role: operator
+Description: An operator is someone who runs a boiler, a crane, a press, or a refinery unit from a panel or a cab: watching gauges and alarms through a twelve-hour shift, following the checklist, and calling maintenance when the readings drift.
+
+--- a candidate (the roles pass's stage; the description is the candidate's role gloss, written by the call before) ---
 Role: bouncer
-Description: A bouncer is someone who works the door of a bar or club, checking IDs, turning away the drunk and the underage, and throwing out anyone who starts trouble.
-expected: {"reason": "A bouncer is defined by the job of keeping order at a venue's door.", "kind": "occupation"}
+Description: <the role gloss the role gloss call wrote for bouncer#1>
 ```
 
-#### 7a.3 [relation_roles.md](./rubrics/relation_roles.md) (not there yet): the relation call for roles
+#### 7a.3 [relation_roles.md](./rubrics/relation_roles.md): the relation call for roles
 
 Haiku 5.5, one call per candidate, every listed role in a seeded shuffle, uncached, `max_tokens` 4096; `unsure`
 answers re-asked of Sonnet 5.5, as [relation.md](./rubrics/relation.md).  The three answers kept; the examples
@@ -566,35 +585,34 @@ Respond with one JSON object and nothing else, reason first:
 Return one row per listed role, in the order given.
 ````
 
-Rendered user turn, candidate `cop` (gloss a stand-in), the 10 nearest corpus roles plus `destroyer` (guardian's
-pair partner), shuffled by run and candidate, no cosines or ranks; descriptions are the corpus files' own:
+Rendered user turn, from the code: `novelty_score.py render --pass roles --stand-in detective` (the corpus role detective standing in for a candidate, itself hidden: its description stands in for a role gloss and its cached corpus embedding for the query, so the listed roles are the role corpus's real nearest under M2's settings; five corpus roles not yet in the embedding cache were left out of this rendering's index). Shuffled by run and candidate, no cosines or ranks; descriptions are the corpus files' own. *Replaced 2026-10-22 (Opus, the build) by the code's own rendering, as the rubric file has it; the drafter's expected answers are left out, the model's own come with the pilot.* The plan's stand-in was the candidate `cop` with the ten nearest by hand.
 
 ```
-{"candidate": {"label": "cop", "description": "A cop is someone who patrols a beat in uniform, answers calls, makes arrests, writes reports and testifies in court, backed by a badge and a department."},
+{"candidate": {"label": "detective", "description": "A detective is a professional investigator who systematically analyzes evidence, examines clues, and uses deductive reasoning to solve mysteries and uncover the truth."},
  "roles": [
-  {"id": 1, "label": "detective", "description": "A detective is a professional investigator who systematically analyzes evidence, examines clues, and uses deductive reasoning to solve mysteries and uncover the truth."},
-  {"id": 2, "label": "bureaucrat", "description": "A bureaucrat is someone who works in a government office and goes by the book: processing forms, applications, and permits, citing the regulation for every refusal, and sending people to the next window."},
-  {"id": 3, "label": "vigilante", "description": "A vigilante is someone who takes law enforcement into their own hands, operating outside official legal channels to pursue what they believe is justice, often when they perceive the formal justice system as inadequate or failing."},
-  {"id": 4, "label": "destroyer", "description": "A destroyer is someone who tears things down: smashing structures, wrecking systems, and razing what others have built, whether out of rage, for the joy of ruin, on someone's orders, or to clear the ground, with little interest in what comes after."},
-  {"id": 5, "label": "soldier", "description": "This involves being a disciplined military professional with combat training and tactical knowledge, following orders and military protocols with unwavering loyalty while understanding the harsh realities and moral complexities of warfare and conflict."},
-  {"id": 6, "label": "criminal", "description": "A criminal is someone who makes a living by breaking the law: stealing, dealing, running scams, or doing violence for pay, moving in a world of accomplices, fences, and people not to cross, and always watching for the police."},
-  {"id": 7, "label": "judge", "description": "A judge is someone who carefully weighs evidence, listens to different perspectives, and makes impartial decisions based on facts and reasoning rather than emotion or bias."},
-  {"id": 8, "label": "guardian", "description": "A guardian is someone who takes on the responsibility of protecting others from harm, danger, or injustice, acting as a shield or barrier between threats and those who are vulnerable or unable to defend themselves."},
-  {"id": 9, "label": "spy", "description": "A spy is a covert intelligence operative who works in secrecy to collect sensitive information through surveillance, infiltration, and deception."},
-  {"id": 10, "label": "peacekeeper", "description": "A peacekeeper is someone who actively works to prevent conflicts from escalating, seeks to find common ground between opposing parties, and promotes harmony by mediating disputes and defusing tensions before they become serious problems."},
-  {"id": 11, "label": "lawyer", "description": "A lawyer is a legal professional who provides advice on laws and regulations, interprets legal statutes, analyzes legal matters, and guides clients through legal processes and compliance issues."}
+  {"id": 1, "label": "designer", "description": "A designer is a creative professional who develops visual and functional solutions, combining aesthetic sensibilities with practical problem-solving skills to create compelling and effective designs across various media and contexts."},
+  {"id": 2, "label": "veterinarian", "description": "A veterinarian is a medical professional who specializes in the diagnosis, treatment, and prevention of diseases and injuries in animals, providing healthcare services for pets, livestock, and other non-human patients."},
+  {"id": 3, "label": "fixer", "description": "A fixer is a shadowy problem-solver who specializes in making inconvenient situations disappear through any means necessary, often operating outside legal boundaries and using questionable methods."},
+  {"id": 4, "label": "mechanic", "description": "A mechanic is a hands-on problem solver who fixes and maintains machines and systems, drawing from practical experience with tools, parts, and troubleshooting methods."},
+  {"id": 5, "label": "debugger", "description": "A debugger is a technical troubleshooter who systematically identifies, analyzes, and resolves problems in various systems, using methodical approaches and diagnostic techniques to trace issues to their root causes."},
+  {"id": 6, "label": "researcher", "description": "A researcher is someone who systematically gathers, analyzes, and synthesizes information on specific topics, often employing rigorous methodologies and evidence-based approaches to investigate questions and draw conclusions."},
+  {"id": 7, "label": "spy", "description": "A spy is a covert intelligence operative who works in secrecy to collect sensitive information through surveillance, infiltration, and deception."},
+  {"id": 8, "label": "doctor", "description": "A doctor is a physician who examines patients, works out what is wrong with them, and treats it: ordering tests, making diagnoses, prescribing medication, carrying out procedures, referring on to specialists, and talking to patients."},
+  {"id": 9, "label": "scientist", "description": "A scientist is someone who systematically applies scientific methods, evidence-based reasoning, and empirical investigation to understand and explain natural phenomena and solve problems."},
+  {"id": 10, "label": "analyst", "description": "An analyst is someone who systematically examines data, information, and situations to identify patterns, draw insights, and provide evidence-based conclusions and recommendations."}
  ]}
 ```
 
-Read for fit: "one JSON object", "the candidate", "a numbered list of other persona roles", ids numbering the
-listed roles in the order given, the candidate's description its role gloss: all as sent.  The expected answers
-include detective similar (share a core), criminal opposed (the other side of the relation), lawyer and judge
-unrelated or similar by the model's reading (the overlap call settles it), destroyer unrelated.
+Read for fit: "one JSON object", "the candidate", "a numbered list of other persona roles (\"roles\")" and "the listed
+role's id" all match what is sent (one candidate a call, the list under `"roles"`, ids numbering the listed roles in
+the order given); the candidate's description is a one-sentence description in the corpus form, as its role gloss will
+be.  The neighbours of this stand-in (debugger, scientist, analyst, spy) show the case the overlap call's line 1
+(neighbours) and line 0 cover; none is the same role.  No mechanical fault; the text was pinned as drafted.
 
-#### 7a.4 [overlap_concept_roles.md](./rubrics/overlap_concept_roles.md) (not there yet): the overlap call for roles
+#### 7a.4 [overlap_concept_roles.md](./rubrics/overlap_concept_roles.md): the overlap call for roles
 
-Sonnet 5.5 first, Opus 5.5 where `sonnet_action` sends the pair (at the cut-off, one below it, or unsure), one
-pair per call, the system prompt cached.  Rubric A's scale with the hierarchy made explicit (§ 3 step 4), and
+Sonnet 5.5 first, Opus 5.5 where `sonnet_action` sends the pair (at the cut-off, one below it, or unsure: M3's rule
+at cut-off 3), one pair per call, the system prompt cached.  **As built (2026-10-22):** R1 reads candidate against candidate with it in a roles batch under R1's own tiers, unchanged from the trait build (as built, 2026-10-22): a merge needs R1's cut-off 4 and 3s make at most a proposed group (decision 12 of the review plan), so a sub-role beside its parent, both candidates, is at most a proposal for Roger, not a merge; and R1's Opus rule is at its cut-off 4 (a Sonnet 4, 3 or "unsure"), so a Sonnet 2 between two candidates is not read by Opus as M3 would read it (review of 2026-10-23, minor 5; whether a 3 should merge is Roger's question).  Rubric A's scale with the hierarchy made explicit (§ 3 step 4), and
 **line 3 made directional**: a candidate that is a kind of a corpus role is covered (decision 4), a candidate
 that is the wider role is not (a worker is not a union member), so the wider case reads 2.  No broader check for
 roles: the direction is in the rubric.
@@ -619,7 +637,7 @@ Respond with one JSON object and nothing else, reason first:
 {"reason": "<one short sentence>", "similarity": 0|1|2|3|4|"opposite"|"unsure"}
 ````
 
-Rendered user turns (the target's description its role gloss, the other's the corpus description):
+Rendered user turns (`overlap_test.render_single`, the form M3's walk and R1 send; the target's description its role gloss, a stand-in until the stage has written one; the other's the corpus file's). *Replaced 2026-10-22 (Opus, the build) by the code's own rendering, as the rubric file has it; the drafter's expected answers are left out, the model's own come with the pilot.*
 
 ```
 --- variant 1: a sub-role against its parent (expected 3: covered, the card names doctor) ---
@@ -631,48 +649,65 @@ Rendered user turns (the target's description its role gloss, the other's the co
  "other": {"label": "union member", "description": "A union member is someone who carries a union card: paying dues, working under the contract the union bargained, taking grievances to the steward, walking a picket line when the vote says strike, and never crossing one."}}
 
 --- variant 3: R1, candidate against candidate (both descriptions role glosses) ---
-{"target": {"label": "cop", "description": "A cop is someone who patrols a beat in uniform, ..."}, "other": {"label": "police officer", "description": "A police officer is someone who ..."}}
+{"target": {"label": "cop", "description": "A cop is someone who patrols a beat in uniform, answers calls, makes arrests, writes reports and testifies in court, backed by a badge and a department."},
+ "other": {"label": "police officer", "description": "A police officer is someone who patrols in uniform, responds to calls, arrests suspects and gives evidence in court on behalf of a police force."}}
 ```
 
-#### 7a.5 [profession_lay.md](./rubrics/profession_lay.md) (not there yet): B's lay-role call
+#### 7a.5 [profession_lay.md](./rubrics/profession_lay.md): B's lay-role call
 
 Haiku 5.5, one call per SOC broad group (its detailed O*NET occupations with descriptions) and one per selected
 job title, three readings (a generating call: the union of roles with support, `distinct_persona` by majority,
 the gloss from the first reading that names the role), `max_tokens` 3000, the system prompt cached.
 
 ````text
-You are given one JSON object: a group of occupations from an official classification ("group"), with the group's title and code, and its occupations ("occupations"), each with a title and a short description. Say what the people in this group call themselves: the plain word or short phrase a person says when asked what they are ("I'm a nurse", "I'm a cardiologist", "I'm an executive"), not the classification's title and not a job advertisement's. "Chief Sustainability Officers" are executives; "Nursing Assistants" are nurse's aides.
+You are given one JSON object: a group of occupations from an official classification. "group" gives the group's code and title; "occupations" lists its occupations, each with an "id" (the occupations are numbered 1, 2, 3 ... in the order listed), a title and a description. Say what the people in this group call themselves: the plain word or short phrase a person says when asked what they are ("I'm a nurse", "I'm a cardiologist", "I'm an executive"), not the classification's title and not a job advertisement's. "Chief Sustainability Officers" are executives; "Nursing Assistants" are nurse's aides.
 
 Give one to three lay roles for the group, each one to three words, lower case, singular, US spelling, no "the". Give one when the occupations are one role under several titles, more when the group holds roles that are different personas: people who would describe their days, their tools, their customers or their worries differently. A specialty whose holder talks about its own subject all day is a persona of its own (a cardiologist talks about hearts); a title that only names a level, a sector or a reporting line is not (a chief sustainability officer is an executive).
 
-When the group carries an "alternate_title", it is a lay title from the classification's own list. Say whether it names a persona of its own (a bouncer) or is only another name for the group's role (a security officer is a security guard), and give it as a role only when it does.
+When "group" carries an "alternate_title", the call is about that title alone. It is a lay title from the classification's own list for the occupation shown. Say whether it names a persona of its own (a bouncer, beside a security guard) or is only another name for the occupation's role (a security officer is a security guard). Give it, in its lay form, as the one role when it names a persona of its own; when it does not, give no roles ("roles": []).
 
-For each lay role, say which of the listed occupations it covers (by id), whether it is a persona distinct from the group's most general role ("distinct_persona"), and write a one-sentence description in the form "A <role> is someone who ...": what the persona does, where, with what and with whom, in its own words, about 20 to 35 words, no hedging, US spelling.
+For each lay role, say which of the listed occupations it covers (their ids), whether it is a persona distinct from the group's most general role ("distinct_persona"), and write a one-sentence description in the form "A <role> is someone who ..." (write "An" before a vowel sound): what the persona does, where, with what and with whom, in the words the persona would use of itself, not the classification's, about 20 to 35 words, no hedging, US spelling.
 
 Give a reason in one short sentence first, then the roles.
 
 Respond with one JSON object and nothing else, reason first:
-{"reason": "<one short sentence>", "roles": [{"role": "<one to three words>", "covers": [<ids>], "distinct_persona": true|false, "gloss": "<one sentence>"}]}
+{"reason": "<one short sentence>", "roles": [{"role": "<one to three words>", "covers": [<ids of the listed occupations>], "distinct_persona": true|false, "gloss": "<one sentence>"}]}
 ````
 
-Rendered user turns (O*NET 31.0 text, verbatim from [occupation_data.csv](../../data/external/onet/occupation_data.csv);
-the group's employment is not shown, so the model's answer is independent of the ranking):
+The text above is the pinned version 1 ([profession_lay.md](./rubrics/profession_lay.md), 2026-10-22), with four changes from this plan's draft made while writing the code against the real O*NET data: the occupations' ids are named in the first paragraph; the alternate-title paragraph says the call is about that title alone and asks for `"roles": []` when the title is only another name (the draft's "one to three roles" contradicted "only when it does"); "in its own words" became "in the words the persona would use of itself, not the classification's"; and "write "An" before a vowel sound" was added, as in [role_gloss.md](./rubrics/role_gloss.md).
+
+Rendered user turns (`lay.build_user`; O*NET 31.0 text, verbatim from [occupation_data.csv](../../data/external/onet/occupation_data.csv); the group's employment is not shown, so the model's answer is independent of the ranking).  The broad group's title "Physicians" and the job-title row "Bouncer" were supplied by hand, since the OEWS file and [job_titles.csv](../../data/external/onet/job_titles.csv) (not there yet) are not downloaded.  Physicians holds **19 O*NET occupations**, not 8: SOC 2018's Physicians run from 29-1211 to 29-1229 (`soc.BROAD_SPILLOVER`), and the six `29-1229.0x` specialties are O*NET's own. *Replaced 2026-10-22 (Opus, the build) by the code's own rendering, as the rubric file has it; the drafter's expected answers are left out, the model's own come with the pilot.*
 
 ```
---- variant 1: a SOC broad group (29-1210 Physicians; 8 detailed, 4 shown here) ---
+--- variant 1: a SOC broad group (29-1210 Physicians; 19 O*NET occupations) ---
 {"group": {"code": "29-1210", "title": "Physicians"},
  "occupations": [
   {"id": 1, "title": "Anesthesiologists", "description": "Administer anesthetics and analgesics for pain management prior to, during, or after surgery."},
   {"id": 2, "title": "Cardiologists", "description": "Diagnose, treat, manage, and prevent diseases or conditions of the cardiovascular system. May further subspecialize in interventional procedures (e.g., balloon angioplasty and stent placement), echocardiography, or electrophysiology."},
-  {"id": 3, "title": "Emergency Medicine Physicians", "description": "Make immediate medical decisions and act to prevent death or further disability. Provide immediate recognition, evaluation, care, stabilization, and disposition of patients. May direct emergency medical staff in an emergency department."},
-  {"id": 4, "title": "Family Medicine Physicians", "description": "Diagnose, treat, and provide preventive care to individuals and families across the lifespan. May refer patients to specialists when needed for further diagnosis or treatment."}
+  {"id": 3, "title": "Dermatologists", "description": "Diagnose and treat diseases relating to the skin, hair, and nails. May perform both medical and dermatological surgery functions."},
+  {"id": 4, "title": "Emergency Medicine Physicians", "description": "Make immediate medical decisions and act to prevent death or further disability. Provide immediate recognition, evaluation, care, stabilization, and disposition of patients. May direct emergency medical staff in an emergency department."},
+  {"id": 5, "title": "Family Medicine Physicians", "description": "Diagnose, treat, and provide preventive care to individuals and families across the lifespan. May refer patients to specialists when needed for further diagnosis or treatment."},
+  {"id": 6, "title": "General Internal Medicine Physicians", "description": "Diagnose and provide nonsurgical treatment for a wide range of diseases and injuries of internal organ systems. Provide care mainly for adults and adolescents, and are based primarily in an outpatient care setting."},
+  {"id": 7, "title": "Neurologists", "description": "Diagnose, manage, and treat disorders and diseases of the brain, spinal cord, and peripheral nerves, with a primarily nonsurgical focus."},
+  {"id": 8, "title": "Obstetricians and Gynecologists", "description": "Provide medical care related to pregnancy or childbirth. Diagnose, treat, and help prevent diseases of women, particularly those affecting the reproductive system. May also provide general care to women. May perform both medical and gynecological surgery functions."},
+  {"id": 9, "title": "Pediatricians, General", "description": "Diagnose, treat, and help prevent diseases and injuries in children. May refer patients to specialists for further diagnosis or treatment, as needed."},
+  {"id": 10, "title": "Physicians, Pathologists", "description": "Diagnose diseases and conduct lab tests using organs, body tissues, and fluids. Includes medical examiners."},
+  {"id": 11, "title": "Psychiatrists", "description": "Diagnose, treat, and help prevent mental disorders."},
+  {"id": 12, "title": "Radiologists", "description": "Diagnose and treat diseases and injuries using medical imaging techniques, such as x rays, magnetic resonance imaging (MRI), nuclear medicine, and ultrasounds. May perform minimally invasive medical procedures and tests."},
+  {"id": 13, "title": "Physicians, All Other", "description": "All physicians not listed separately."},
+  {"id": 14, "title": "Allergists and Immunologists", "description": "Diagnose, treat, and help prevent allergic diseases and disease processes affecting the immune system."},
+  {"id": 15, "title": "Hospitalists", "description": "Provide inpatient care predominantly in settings such as medical wards, acute care units, intensive care units, rehabilitation centers, or emergency rooms. Manage and coordinate patient care throughout treatment."},
+  {"id": 16, "title": "Urologists", "description": "Diagnose, treat, and help prevent benign and malignant medical and surgical disorders of the genitourinary system and the renal glands."},
+  {"id": 17, "title": "Physical Medicine and Rehabilitation Physicians", "description": "Diagnose and treat disorders requiring physiotherapy to provide physical, mental, and occupational rehabilitation."},
+  {"id": 18, "title": "Preventive Medicine Physicians", "description": "Apply knowledge of general preventive medicine and public health issues to promote health care to groups or individuals, and aid in the prevention or reduction of risk of disease, injury, disability, or death. May practice population-based medicine or diagnose and treat patients in the context of clinical health promotion and disease prevention."},
+  {"id": 19, "title": "Sports Medicine Physicians", "description": "Diagnose, treat, and help prevent injuries that occur during sporting events, athletic training, and physical activities."}
  ]}
-expected (one reading): {"reason": "All are doctors, and three specialties are personas of their own.", "roles": [{"role": "doctor", "covers": [1, 2, 3, 4], "distinct_persona": false, "gloss": "A doctor is someone who ..."}, {"role": "cardiologist", "covers": [2], "distinct_persona": true, "gloss": "A cardiologist is someone who ..."}, {"role": "anesthesiologist", "covers": [1], "distinct_persona": true, "gloss": "..."}]}
 
 --- variant 2: a job title under its occupation ---
 {"group": {"code": "33-9032.00", "title": "Security Guards", "alternate_title": "Bouncer"},
- "occupations": [{"id": 1, "title": "Security Guards", "description": "Guard, patrol, or monitor premises to prevent theft, violence, or infractions of rules. May operate x-ray and metal detector equipment."}]}
-expected: {"reason": "A bouncer works a club door and is a persona of its own beside the guard.", "roles": [{"role": "bouncer", "covers": [1], "distinct_persona": true, "gloss": "A bouncer is someone who ..."}]}
+ "occupations": [
+  {"id": 1, "title": "Security Guards", "description": "Guard, patrol, or monitor premises to prevent theft, violence, or infractions of rules. May operate x-ray and metal detector equipment."}
+ ]}
 ```
 
 ### 7b. The role index and the retrieval check (decision 11)
@@ -776,9 +811,19 @@ estimate).  `--all` submits the whole ranking (refused without `--confirm-expens
 estimate passes $20).  The run's readout shows the occupation share before and after at the held share
 (`balance` over the corpus plus the submitted rows by `kind_guess`).
 
+**As built (2026-10-22).**  SOC 2018's Physicians broad group 29-1210 takes the detailed codes 29-1211 to 29-1229
+(there is no broad group 29-1220; `soc.BROAD_SPILLOVER`), so O*NET 31.0's detailed codes fold onto the 459 broad
+groups (460 without it) and Physicians holds 19 O*NET occupations.  The job-title cut has one more step than above:
+a title that is its occupation's own title made singular (Security Guard under Security Guards) is dropped
+(`occupation_title`).  A lay role already registered, held or decided, is resubmitted so that its SOC provenance
+merges, and counts toward neither the meter nor the estimate.  The downstream estimate that `submit` prints
+assumes 85% of the wave passes M1 (`submit.M1_PASS_RATE`, to be replaced by the pilot's figure).  `ATTRIBUTION.md`
+carries, after O*NET's paragraph, a statement of the changes (lay roles and glosses derived by a language model,
+occupations grouped by SOC broad code, not approved by USDOL/ETA: `sources.ONET_CHANGES`), as CC BY 4.0 asks.
+
 ## 8. Acceptance tests, written first
 
-Test files under [assistant_axis/tests/](../../assistant_axis/tests/) (none of the sixteen exists yet, nor the two fakes), fakes beside them in
+Test files under [assistant_axis/tests/](../../assistant_axis/tests/) (all sixteen and the two fakes written 2026-10-22), fakes beside them in
 [professions_fakes.py](../../assistant_axis/tests/professions_fakes.py) and [roles_fakes.py](../../assistant_axis/tests/roles_fakes.py) (a fake Anthropic client answering from canned JSON, a `HashEmbedder`
 index over a ten-role fixture corpus, a scratch registry under `tmp_path`); no network, no key.
 
@@ -851,8 +896,10 @@ index over a ten-role fixture corpus, a scratch registry under `tmp_path`); no n
 **The paid checks before the pilot** (not tests; recorded runs): the retrieval check (§ 7b, about $0.10) and
 the rubric check (§ 10 of the idea plan): Roger marks 40 role pairs (the six recorded pairs, ten parent /
 sub-role pairs such as doctor / cardiologist, ten same-role pairs such as cop / police officer, the rest
-unrelated; the sheet [role_rubric_pairs.md](./role_rubric_pairs.md), not there yet: mark column second, the
-glosses labelled as the role gloss call's) in about twenty minutes; `rubric-check` runs both role rubrics on
+unrelated; the sheet [role_rubric_pairs.md](./role_rubric_pairs.md): mark column second, each target's role gloss
+from the retrieval check, labelled as the role gloss call's, against the other's corpus description; written after
+the retrieval check, so that check comes first; the description-only sheet of 2026-10-22 is headed "Not for
+marking") in about twenty minutes; `rubric-check` runs both role rubrics on
 Sonnet 5.5 in both orders and prints weighted kappa against his marks and the straight-minus-swapped gap
 (about $0.50); below kappa 0.6 the rubric is redrafted before the pilot's first overlap call.
 
@@ -865,13 +912,13 @@ Opus works in a worktree; platform tasks get a Fable diff review before the pilo
    `new_record`, `submit_candidates`'s merge rule, `source_entry`, `gap_registry.py submit --entity-type` (tests 1-2).
 2. M1 routing: `roles_pass.ROLE_ROUTES` / `route_for`, `items_from_records` meta, `holding_for`,
    `verdict_tags_holding`, the join and waves in `split_runner`, the write-back (test 3).
-3. The two rubric files [role_gloss.md](./rubrics/role_gloss.md) and [role_kind.md](./rubrics/role_kind.md) (neither there yet; the latter moved byte for byte, [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py)
+3. The two rubric files [role_gloss.md](./rubrics/role_gloss.md) and [role_kind.md](./rubrics/role_kind.md) (the latter moved byte for byte, [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py)
    reading it), `ROLE_FILES` in `split_rubrics`, pins at version 1 (test 5; `rubric_pins.py check` green).
 4. `roles_pass.py`: the stage (`request`, `stage_rows`, blocks, `render`, `estimate`, `pins`), `RoleCandidate`,
    `candidate_from_row`; `novelty_runner.candidate_from_row`'s roles branch (test 4).
 5. The role index and query form: `load_role_corpus`, `role_gloss_w14`, queue role entries in the search, the
    `cross_type` fields both ways (test 6).
-6. [relation_roles.md](./rubrics/relation_roles.md) and [overlap_concept_roles.md](./rubrics/overlap_concept_roles.md) (neither there yet), pinned at version 1, rendered with `render --stand-in
+6. [relation_roles.md](./rubrics/relation_roles.md) and [overlap_concept_roles.md](./rubrics/overlap_concept_roles.md), pinned at version 1, rendered with `render --stand-in
    cardiologist --pass roles` and `render --key <a held row>` and the renderings put in the files (test 7's
    digests).
 7. `novelty_score.py score --holding roles`: `PASS_LISTS`, the stage call, the role index and rubrics, `pass`
@@ -883,18 +930,18 @@ Opus works in a worktree; platform tasks get a Fable diff review before the pilo
     [server.py](../../assistant_axis/gapgen/review_app/server.py) route and `Literal`, [app.js](../../assistant_axis/gapgen/review_app/static/app.js) chip, readout and balance line, `apply` with `allow_roles` (test 9).
 11. Promotion: `promote(..., allow_roles)`, the roles branch, per-type collision checks, `queue_entry_extras`,
     `gap_registry.py promote --allow-roles`, `holding --list roles` with gloss and kind (test 10).
-12. The rubric check: the 40-pair sheet for Roger, `rubric-check` (kappa, swap-averaging), run after his marks
-    (about $0.50).
+12. The rubric check: the 40-pair sheet for Roger, written from the retrieval check's glosses (task 8 first),
+    `rubric-check` (kappa, swap-averaging), run after his marks (about $0.50).
 13. The kinds side-car: [classify_role_kinds.py](../../data_analysis/classify_role_kinds.py) `--from-pass`, [seed_entities.py](../../data_analysis/seed_entities.py) `write` appending (test 5);
     [README.md](./rubrics/README.md) of the rubrics directory and [coding_plan_review.md](./coding_plan_review.md) get a "Role pass"
     section pointer; the pilot (§ 10).
-14. [professions/sources.py](../../assistant_axis/gapgen/generators/professions/sources.py) (not there yet) and `fetch` with the manifest and `ATTRIBUTION.md`; ask Roger for the downloads
+14. [professions/sources.py](../../assistant_axis/gapgen/generators/professions/sources.py) and `fetch` with the manifest and `ATTRIBUTION.md`; ask Roger for the downloads
     (and `openpyxl`) with the sizes of § 7d (test 11).
-15. [soc.py](../../assistant_axis/gapgen/generators/professions/soc.py) and [onet.py](../../assistant_axis/gapgen/generators/professions/onet.py) (not there yet): the table, the job-title cut, `build` and its recovery by string (test 12).
-16. [profession_lay.md](./rubrics/profession_lay.md) (not there yet) pinned at version 1, [lay.py](../../assistant_axis/gapgen/generators/professions/lay.py) (not there yet) with three readings and the union, `lay --dry-run`
+15. [soc.py](../../assistant_axis/gapgen/generators/professions/soc.py) and [onet.py](../../assistant_axis/gapgen/generators/professions/onet.py): the table, the job-title cut, `build` and its recovery by string (test 12).
+16. [profession_lay.md](./rubrics/profession_lay.md) pinned at version 1, [lay.py](../../assistant_axis/gapgen/generators/professions/lay.py) with three readings and the union, `lay --dry-run`
     rendering both variants into the rubric file (test 13).
-17. [rank.py](../../assistant_axis/gapgen/generators/professions/rank.py) (not there yet), `rank` (test 14); `label-fit` wiring ([label_fit.py](../../assistant_axis/gapgen/label_fit.py)).
-18. [submit.py](../../assistant_axis/gapgen/generators/professions/submit.py) (not there yet), `submit`, `report` (tests 15-16).
+17. [rank.py](../../assistant_axis/gapgen/generators/professions/rank.py), `rank` (test 14); `label-fit` wiring ([label_fit.py](../../assistant_axis/gapgen/label_fit.py)).
+18. [submit.py](../../assistant_axis/gapgen/generators/professions/submit.py), `submit`, `report` (tests 15-16).
 19. `lay` and `rank` live on the full table (about $1), the recovery by string and the top 40 to Roger with the
     readout; then `submit` at the pilot's kept share, M1, M3 (`--holding roles --run professions/R`), R1, R2.
 20. The § 11 report, and the frozen interface below copied into [coding_plan_platform.md](./coding_plan_platform.md)'s
@@ -916,8 +963,11 @@ blasting): M3 does not remove it, and the review does; the readout counts how mu
 
 1. `novelty_score.py retrieval-check --batch-id roles_retrieval_1 --budget-usd 1` (task 8): recall at 10 against
    0.95; the arms if below.
-2. Roger's 40-pair marks, `rubric-check` (task 12): kappa at or above 0.6 for both role rubrics.
-3. `novelty_score.py score --holding roles --batch-id roles_pilot_1 --unscored --transport live --budget-usd 8`:
+2. `novelty_score.py rubric-check --make-sheet --glosses data/candidates/novelty/roles_retrieval_1/glosses.jsonl
+   --overwrite` (no call): the 40-pair sheet from step 1's role glosses (review of 2026-10-23, finding 1); then
+   Roger's marks; then `rubric-check` (task 12): kappa at or above 0.6 for both role rubrics.
+3. `novelty_score.py score --holding roles --batch-id roles_pilot_1 --unscored --transport batches --budget-usd 8`
+   (batched: Roger's decision 4, 2026-10-22):
    the stage (382 gloss calls, 1,146 kind readings, about $0.20), then M3 on the 325 rows not covered at stage 0
    (about $0.011 a row live: about $3.6; batched about $2).
 4. `review_graph.py build --batch-id review_roles_pilot_1 --from-batches roles_pilot_1 --budget-usd 4`
@@ -976,7 +1026,7 @@ on every arm (assumption: take the best arm, report, and flag for the post-extra
 | B wave 1 downstream | M1 on 300-400 net-new at $0.0072; M3 on about 85% at $0.011; R1 | $6.50 | $3.30 |
 | **total** | | **about $14** | about $8 |
 
-Every run is under $20, so each runs live unless Roger says otherwise (Decisions for Roger 4); the cumulative
+Every run is under $20, so each runs live unless Roger says otherwise; he said so for the pilot, which runs batched (Decisions for Roger 4); the cumulative
 spend is tracked in the acceptance report.  Promoted roles' instruction files (about $0.02 each, Sonnet 4.6) and
 their extraction are outside this plan.  Roger's time: about 3.5 hours (the pilot 2 h, the marks 20 min, B's
 wave about 1 h).

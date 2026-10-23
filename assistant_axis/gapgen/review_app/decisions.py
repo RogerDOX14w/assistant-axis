@@ -120,7 +120,7 @@ REVIEW_STATUS = {"promote": "accepted", "merge_into": "merged_into", "park": "pa
 UNREVIEWED = {"status": "unreviewed", "by": None, "at": None, "note": None}
 #: The registry review statuses that settle a term: another batch's term in one is handled here from the start.
 HANDLED_ELSEWHERE = ("accepted", "rejected", "merged_into")
-ORDERS = ("cliques", "generator", "region", "sample")
+ORDERS = ("cliques", "generator", "region", "sample", "kinds")
 #: The ``sample`` order (Roger, 2026-10-16: "have a good sample order"): a seeded random order without replacement
 #: (weighted by stratum when the weights differ), so that the first N items a session reaches are a probability
 #: sample of the queue.  An item's stratum is its strongest member's best M3 overlap reading against any corpus or
@@ -420,37 +420,77 @@ def other_names_card(key: str, row: Optional[Mapping], siblings: Mapping[str, li
 
 
 def target_path(key: str) -> tuple[Optional[str], Optional[str]]:
-    """``(path relative to the repository, href on the app)`` of a corpus trait or queue entry key."""
+    """``(path relative to the repository, href on the app)`` of a corpus trait, corpus role (a roles build, coding
+    plan 16) or queue entry key."""
     kind, _, stem = key.partition(":")
     if kind == "trait":
         return f"data/traits/instructions/{stem}.json", f"/files/traits/{stem}.json"
+    if kind == "role":
+        return f"data/roles/instructions/{stem}.json", f"/files/roles/{stem}.json"
     if kind == "queue":
         return "data/seed_queue.json", f"/files/queue/{stem}"
     return None, None
 
 
-def corpus_targets(data_dir: Optional[Path], queue_path: Optional[Path] = None) -> tuple[set, dict]:
+def corpus_targets(data_dir: Optional[Path], queue_path: Optional[Path] = None, *,
+                   entity_type: str = "trait") -> tuple[set, dict]:
     """``(merge targets, labels)``: every corpus trait (``trait:<stem>``) in ``data_dir/traits/instructions`` and every
-    seed-queue entry not turned down (``queue:<stem>``), with their labels."""
+    seed-queue entry not turned down (``queue:<stem>``), with their labels.  ``entity_type="role"`` (a roles build,
+    coding plan 16): the role files (``role:<stem>``, ``default.json`` left out, labels their display form) and the
+    queue's role entries instead."""
     targets: set = set()
     labels: dict = {}
     if data_dir is None:
         return targets, labels
-    d = Path(data_dir) / "traits" / "instructions"
-    for p in sorted(d.glob("*.json")) if d.exists() else []:
-        key = f"trait:{p.stem}"
-        targets.add(key)
-        try:
-            labels[key] = json.loads(p.read_text(encoding="utf-8")).get("positive_label") or p.stem
-        except (OSError, json.JSONDecodeError):
-            labels[key] = p.stem
+    if entity_type == "role":
+        from assistant_axis.entity_id import corpus_display_name
+        d = Path(data_dir) / "roles" / "instructions"
+        for p in sorted(d.glob("*.json")) if d.exists() else []:
+            if p.stem == "default":
+                continue
+            key = f"role:{p.stem}"
+            targets.add(key)
+            try:
+                labels[key] = corpus_display_name(p.stem, "roles")
+            except Exception:  # noqa: BLE001 - a display table that does not know the stem: the mechanical form
+                labels[key] = p.stem.replace("_", " ")
+    else:
+        d = Path(data_dir) / "traits" / "instructions"
+        for p in sorted(d.glob("*.json")) if d.exists() else []:
+            key = f"trait:{p.stem}"
+            targets.add(key)
+            try:
+                labels[key] = json.loads(p.read_text(encoding="utf-8")).get("positive_label") or p.stem
+            except (OSError, json.JSONDecodeError):
+                labels[key] = p.stem
     qp = Path(queue_path) if queue_path else Path(data_dir) / "seed_queue.json"
     if qp.exists():
         for e in json.loads(qp.read_text(encoding="utf-8")).get("entries") or []:
-            if e.get("stem") and e.get("status") not in _TURNED_DOWN and (e.get("entity_type") or "trait") == "trait":
+            if e.get("stem") and e.get("status") not in _TURNED_DOWN and (e.get("entity_type") or "trait") == entity_type:
                 targets.add(f"queue:{e['stem']}")
                 labels.setdefault(f"queue:{e['stem']}", e.get("label") or e["stem"])
     return targets, labels
+
+
+def is_roles_graph(graph: RG.Graph) -> bool:
+    """A graph R1 built from roles batches (coding plan 16): its config says ``pass: roles``, or a candidate node says
+    ``outcome: role``."""
+    return (graph.config or {}).get("pass") == "roles" or any(
+        n.kind == "candidate" and n.outcome == "role" for n in graph.nodes)
+
+
+def role_context(data_dir: Optional[Path], queue_path: Optional[Path] = None) -> dict:
+    """The kind readout's base (decision 2 of plan 16): the role corpus's kind counts and size without this review's
+    nominees (``roles_pass.corpus_kind_counts``: the role files and the queue's live role entries).  ``basis`` (the
+    ``kinds`` order's statuses) is fixed once, when the log opens (:meth:`DecisionLog.open`)."""
+    from assistant_axis.gapgen import roles_pass as RP
+    import data_analysis.seed_entities as se
+    if data_dir is None:
+        return {"counts": {}, "n": 0, "basis": None, "fixed_at": None}
+    qp = Path(queue_path) if queue_path else Path(data_dir) / "seed_queue.json"
+    queue = se.load_queue(qp) if qp.exists() else {"entries": []}
+    counts, n = RP.corpus_kind_counts(Path(data_dir), queue)
+    return {"counts": counts, "n": n, "basis": None, "fixed_at": None}
 
 
 # --------------------------------------------------------------------------- the state
@@ -501,8 +541,10 @@ class ReviewState:
 
     def __init__(self, graph: RG.Graph, *, rows: Optional[Mapping[str, Mapping]] = None,
                  targets: Optional[Iterable[str]] = None, labels: Optional[Mapping[str, str]] = None,
-                 batch_id: Optional[str] = None):
+                 batch_id: Optional[str] = None, roles: Optional[dict] = None):
         self.graph = graph
+        #: a roles build's readout context (:func:`role_context`; coding plan 16, decision 2), None for a trait graph
+        self.roles = roles
         self.nodes = graph.node_map()
         self.kept = graph.candidate_keys()
         self.kept_set = set(self.kept)
@@ -573,7 +615,7 @@ class ReviewState:
         if status == "accepted" and sqs:
             target = f"queue:{sqs}"
         elif status == "merged_into" and into:
-            if into.startswith(("trait:", "queue:")):
+            if into.startswith(RG.CORPUS_PREFIXES + ("queue:",)):
                 target = into
             else:                                   # merged into another batch's nominee: its queue entry, if promoted
                 nom = self.rows[into].get("seed_queue_stem") if into in self.rows else \
@@ -1028,12 +1070,47 @@ class ReviewState:
         status = "done" if handled == len(members) else ("open" if live else "todo")
         nodes = [self.nodes[m] for m in members]
         best = max((best_m3_reading(self.m3.get(m, [])) for m in members), default=-1)
-        return {"id": s["id"], "tier": s["tier"], "source": s["source"], "members": list(members),
-                "labels": [n.label for n in nodes], "size": len(members), "handled": handled,
-                "remaining": len(members) - handled, "status": status, "group": live[-1].id if live else None,
-                "generator": _mode(n.generator for n in nodes) or "", "region": _mode(n.region for n in nodes) or "",
-                "flags": sorted({f for n in nodes for f in n.flags}),
-                "best_reading": best, "stratum": sample_stratum(best)}
+        out = {"id": s["id"], "tier": s["tier"], "source": s["source"], "members": list(members),
+               "labels": [n.label for n in nodes], "size": len(members), "handled": handled,
+               "remaining": len(members) - handled, "status": status, "group": live[-1].id if live else None,
+               "generator": _mode(n.generator for n in nodes) or "", "region": _mode(n.region for n in nodes) or "",
+               "flags": sorted({f for n in nodes for f in n.flags}),
+               "best_reading": best, "stratum": sample_stratum(best)}
+        if self.roles is not None:
+            # a roles build: the group's kind is its members' commonest (the ``kinds`` order sorts by it)
+            out["kind"] = _mode(n.role_kind for n in nodes) or ""
+        return out
+
+    # -- the kind readout (coding plan 16, decision 2) ------------------------------------------
+    def role_nominees(self) -> list[str]:
+        """The nominees of this review's resolved promote groups (they join the corpus the readout counts)."""
+        return [g.nominated for g in self.groups.values() if g.status == "resolved" and g.kind == "promote"
+                and g.nominated]
+
+    def role_balance(self) -> Optional[dict]:
+        """``roles_pass.balance`` of the role corpus as it will be once this review is applied: the base counts
+        (:func:`role_context`) plus this review's nominees by their kind call's kind.  None for a trait graph."""
+        if self.roles is None:
+            return None
+        from assistant_axis.gapgen import roles_pass as RP
+        counts = dict(self.roles.get("counts") or {})
+        n = int(self.roles.get("n") or 0)
+        for key in self.role_nominees():
+            node = self.nodes.get(key)
+            kind = node.role_kind if node is not None else None
+            counts[kind or "unknown"] = counts.get(kind or "unknown", 0) + 1
+            n += 1
+        return RP.balance(counts, n)
+
+    def fix_kind_basis(self, at: Optional[str] = None) -> dict:
+        """The ``kinds`` order's statuses, fixed once (so the queue does not reshuffle under the page's position as
+        accepts turn the chips): ``{kind: [status rank, -room]}``, stored in the shared role context."""
+        from assistant_axis.gapgen import roles_pass as RP
+        if self.roles.get("basis") is None:
+            bal = self.role_balance()
+            self.roles["basis"] = {k: [RP.STATUSES.index(v["status"]), -v["room"]] for k, v in bal["kinds"].items()}
+            self.roles["fixed_at"] = at or utc_now()
+        return self.roles["basis"]
 
     def queue(self, order: str = "cliques") -> list[dict]:
         """Every merged group, proposed group and singleton as a queue item, in ``order``: ``cliques`` (groups
@@ -1042,17 +1119,30 @@ class ReviewState:
         ``sample`` (a seeded weighted random order: :data:`SAMPLE_WEIGHTS`)."""
         if order not in ORDERS:
             raise ActionError(f"order must be one of {', '.join(ORDERS)}")
+        if order == "kinds" and self.roles is None:
+            raise ActionError("the kinds order is for a roles build (its graph says pass: roles)")
         items = [self._item(s) for s in self.seeds()]
         tier_rank = {t: i for i, t in enumerate(TIERS)}
         idx = {it["id"]: s["index"] for it, s in zip(items, self.seeds())}
+
+        def cliques_key(it):
+            if it["tier"] == "single":
+                return (1, 0, 0, it["generator"], it["region"], it["labels"][0])
+            return (0, -it["size"], tier_rank[it["tier"]], "", "", f"{idx[it['id']]:06d}")
+        if order == "kinds":
+            # coding plan 16, § 7c: the too-low kinds first, then about right, then too high, each by its room, the
+            # statuses fixed when the log opened; within a kind as the cliques order
+            basis = self.fix_kind_basis()
+
+            def key(it):
+                st, room = basis.get(it.get("kind") or "", [len(basis) + 9, 0])
+                return (st, room, it.get("kind") or "~", *cliques_key(it))
+            return sorted(items, key=key)
         if order == "sample":
             def key(it):
                 return (sample_key(it["id"], SAMPLE_WEIGHTS[it["stratum"]]), it["id"])
         elif order == "cliques":
-            def key(it):
-                if it["tier"] == "single":
-                    return (1, 0, 0, it["generator"], it["region"], it["labels"][0])
-                return (0, -it["size"], tier_rank[it["tier"]], "", "", f"{idx[it['id']]:06d}")
+            key = cliques_key
         else:
             def key(it):
                 return (it[order], tier_rank[it["tier"]], -it["size"], it["labels"][0], it["id"])
@@ -1108,6 +1198,13 @@ class ReviewState:
         out["terms"] = {"total": len(self.kept), "handled": n_handled, "remaining": len(self.kept) - n_handled}
         st = Counter(g.status for g in self.groups.values())
         out["groups_resolved"], out["groups_open"], out["groups_proposed_open"] = st["resolved"], st["open"], st["proposed"]
+        if self.roles is not None:
+            # the kind readout (decision 2 of plan 16), recomputed on every action: one line per kind in the header
+            from assistant_axis.gapgen import roles_pass as RP
+            bal = self.role_balance()
+            out["balance"] = bal
+            out["balance_lines"] = RP.balance_lines(bal)
+            out["kinds_fixed_at"] = self.roles.get("fixed_at")
         return out
 
     # -- cards ------------------------------------------------------------------------
@@ -1154,14 +1251,34 @@ class ReviewState:
                   for e in self.m3.get(key, []) if e.source == "lexical" and (e.lexical or {}).get("at_cut_off")]
         if merges:
             out["lexical_merges"] = merges
+        if n.outcome == "role":
+            out.update(self.role_card(key))
         return out
+
+    def role_card(self, key: str) -> dict:
+        """A role candidate's card fields (coding plan 16, § 6.3): the kind call's kind and agreement, human or not,
+        the generator's guess, the kind readout (decision 2), the nearest roles M3 listed (cosine, relation, the
+        final reading where it read one), the nearest traits (cross_type, decision 5: information) and the
+        generators' provenance."""
+        from assistant_axis.gapgen import roles_pass as RP
+        n = self.nodes[key]
+        bal = self.role_balance()
+        roles = []
+        for e in sorted((e for e in self.m3.get(key, []) if e.source == "m3"), key=lambda e: -(e.cosine or 0.0)):
+            kind, _, stem = e.b.partition(":")
+            roles.append({"stem": stem, "key": e.b, "queue": kind == "queue", "label": self.label(e.b),
+                          "cosine": e.cosine, "relation": e.relation, "reading": _final(e.readings.get("ab"))})
+        return {"role_kind": n.role_kind, "role_kind_unanimous": n.role_kind_unanimous, "human": n.human,
+                "kind_guess": n.kind_guess, "kind_readout": RP.kind_readout(n.role_kind, bal) if bal else None,
+                "nearest_roles": roles[:10], "nearest_traits": list(n.nearest_traits or []),
+                "provenance": list(n.provenance or [])}
 
     def _target_entry(self, key: str) -> dict:
         n = self.nodes.get(key)
         path, href = target_path(key)
         if n is not None and n.missing:
             path = href = None
-        return {"key": key, "kind": n.kind if n is not None else ("corpus" if key.startswith("trait:") else "queue"),
+        return {"key": key, "kind": n.kind if n is not None else ("corpus" if key.startswith(RG.CORPUS_PREFIXES) else "queue"),
                 "label": self.label(key), "gloss": n.gloss if n is not None else None, "path": path, "href": href}
 
     def _term_entry(self, key: str) -> dict:
@@ -1382,7 +1499,7 @@ class ReviewState:
             elif n.kind in ("corpus", "queue"):
                 pool[n.key] = (n.label, n.kind)
         for key in self.targets:
-            pool.setdefault(key, (self.label(key), "corpus" if key.startswith("trait:") else "queue"))
+            pool.setdefault(key, (self.label(key), "corpus" if key.startswith(RG.CORPUS_PREFIXES) else "queue"))
         hits = [(0 if lb.lower().startswith(q) else 1, lb.lower(), key, lb, kind)
                 for key, (lb, kind) in pool.items() if q in lb.lower()]
         out = []
@@ -1440,11 +1557,12 @@ class ReviewState:
 
 
 def replay(graph: RG.Graph, events: Sequence[Mapping], *, rows=None, targets=None, labels=None,
-           batch_id: Optional[str] = None) -> ReviewState:
+           batch_id: Optional[str] = None, roles: Optional[dict] = None) -> ReviewState:
     """The state the events give: undo events and the events they undo left out, the rest applied in order; an
     event that no longer applies (the graph was rebuilt) is skipped and listed in ``skipped``.  The terms another
-    review batch settled are handled from the start, and do not change what an event does (module docstring)."""
-    st = ReviewState(graph, rows=rows, targets=targets, labels=labels, batch_id=batch_id)
+    review batch settled are handled from the start, and do not change what an event does (module docstring).
+    ``roles``: a roles build's readout context (:func:`role_context`), shared by every replay of one log."""
+    st = ReviewState(graph, rows=rows, targets=targets, labels=labels, batch_id=batch_id, roles=roles)
     undone = {e.get("undoes") for e in events if e.get("action") == "undo"}
     for e in events:
         st.note_ids(e)
@@ -1484,9 +1602,10 @@ class DecisionLog:
 
     def __init__(self, path: Path, graph: RG.Graph, *, graph_sha256: str, by: str = "roger",
                  clock: Optional[Callable[[], str]] = None, rows=None, targets=None, labels=None,
-                 batch_id: Optional[str] = None):
+                 batch_id: Optional[str] = None, roles: Optional[dict] = None):
         self.path = Path(path)
         self.graph = graph
+        self.roles = roles
         self.graph_sha256 = graph_sha256
         self.by = by
         self.clock = clock or utc_now
@@ -1507,13 +1626,18 @@ class DecisionLog:
         raw = RF.read_bytes(gp)  # the graph's content, packed or not (its sha256 is the same either way)
         graph = RG.Graph.from_json(json.loads(raw))
         rows = Registry(registry_path).fold() if registry_path and Path(registry_path).exists() else {}
-        targets, labels = corpus_targets(data_dir, queue_path)
-        return cls(review_dir / LOG_NAME, graph, graph_sha256=hashlib.sha256(raw).hexdigest(), by=by, clock=clock,
-                   rows=rows, targets=targets, labels=labels, batch_id=review_dir.name)
+        roles = is_roles_graph(graph)
+        targets, labels = corpus_targets(data_dir, queue_path, entity_type="role" if roles else "trait")
+        log = cls(review_dir / LOG_NAME, graph, graph_sha256=hashlib.sha256(raw).hexdigest(), by=by, clock=clock,
+                  rows=rows, targets=targets, labels=labels, batch_id=review_dir.name,
+                  roles=role_context(data_dir, queue_path) if roles else None)
+        if log.roles is not None:
+            log.state.fix_kind_basis(at=log.clock())     # the kinds order's statuses: fixed when the log opens
+        return log
 
     def _replay(self) -> ReviewState:
         return replay(self.graph, self.events, rows=self.rows, targets=self.targets, labels=self.labels,
-                      batch_id=self.batch_id)
+                      batch_id=self.batch_id, roles=self.roles)
 
     def graph_versions(self) -> dict:
         return dict(Counter(e.get("graph_sha256") for e in self.events))
@@ -1621,7 +1745,7 @@ def rename_worklist(state: ReviewState, *, rows: Optional[Mapping[str, Mapping]]
         stem = None
         if key:
             stem = stems.get(key) or (rows.get(key) or {}).get("seed_queue_stem")
-            if stem is None and key.startswith(("trait:", "queue:")):
+            if stem is None and key.startswith(RG.CORPUS_PREFIXES + ("queue:",)):
                 stem = key.split(":", 1)[1]
         out.append({"group": g.id, "resolution": g.resolution, "key": key,
                     "label": state.label(key) if key else None, "stem": stem, "note": g.note})
@@ -1698,7 +1822,8 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
       ``accepted`` (re-resolved after an undo, or another member nominated);
     * each promoted group's nominee goes through :func:`promote.promote` (the path of ``gap_registry.py promote``,
       by name, so ``allow_physical``: a physical pass's nominee joins the physical track, tagged ``physical``; and
-      ``allow_released_states``: a row the states pass released is tagged ``states_pass`` and its route),
+      ``allow_released_states``: a row the states pass released is tagged ``states_pass`` and its route; and
+      ``allow_roles``: a roles pass's nominee becomes a role entry of the seed queue, coding plan 16),
       once per group, unless it already has a ``seed_queue_stem``; its new seed-queue entry gets ``also_proposed``
       (the other resolved members' labels, the only addition to the queue format); the queue is saved once and the
       rows get ``seed_queue_stem``, as ``gap_registry.py promote`` does;
@@ -1746,7 +1871,7 @@ def apply_decisions(state: ReviewState, *, batch_id: str, registry: Registry, qu
         # the nominee is named here, so a physical one is promoted into the physical track (physical_pass.py), and a
         # row the states pass released is promoted as such (states_pass.py)
         pr = promote_mod.promote(rows, work, [nom], data_dir=data_dir, dry_run=False, allow_physical=True,
-                                 allow_released_states=True)
+                                 allow_released_states=True, allow_roles=True)
         if nom not in pr.promoted:
             rep.refused[nom] = pr.refused.get(nom, "refused")
             continue
