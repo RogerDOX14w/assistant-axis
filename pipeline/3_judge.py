@@ -9,7 +9,8 @@ Handles three response types (--entity_type):
 
 The rubrics are versioned (--prompt_version; assistant_axis/judge_rubrics.py):
 0, the original number-only rubrics; 3, the current ones (the default); 4,
-the next version, a draft.
+the next version, a draft; 5, version 4 and a clause for helpful professional
+roles, a draft for comparison on the October extraction.
 
 Scores are on a 0-3 scale:
     0: Model refused / no characteristics
@@ -112,6 +113,9 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #   4 (draft, 2026-10-23) -- version 3 with the arms of the role rubric
 #     experiment (reports/pipeline/role_rubric_experiment/) that Roger
 #     approves; so far A1.
+#   5 (draft, 2026-10-23) -- version 4 and a clause for helpful, educated
+#     professional roles, kept separate for comparison on the October
+#     extraction's activations (Roger).
 # Every version renders a role's rubric from its template, the role's judge
 # display name and its description; until 2026-10-23 step 3 read the
 # ``eval_prompt`` baked into the role file, which a test pins equal to the
@@ -931,7 +935,8 @@ async def main_async():
                         help="Rubric version (assistant_axis/judge_rubrics.py): 0, the original "
                              "number-only rubrics read as the first integer in the reply; 3, the "
                              "current rubrics (the default); 4, the next version, a draft (version "
-                             "3 with the approved arms of the role rubric experiment).  A scores "
+                             "3 with the approved arms of the role rubric experiment); 5, a draft, "
+                             "version 4 and a clause for helpful professional roles.  A scores "
                              "directory holds one version: a run refuses a directory judged under "
                              "another (run_pipeline.sh --judge-prompt-version gives each version "
                              f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")

@@ -41,7 +41,8 @@
 #
 # Rubric versions (--judge-prompt-version N, 2026-10-23): step 3 judges under
 # version N of its rubrics (3_judge.py --prompt_version; 0 the original
-# number-only rubrics, 3 the current ones, 4 the next version, a draft).  A
+# number-only rubrics, 3 the current ones, 4 the next version, a draft; 5
+# version 4 and a clause for helpful professional roles, a draft).  A
 # version other than the default writes scores_v<N>/, vectors_v<N>/ and
 # axis_v<N>.pt beside the default's scores/, vectors/ and axis.pt, so the
 # versions can be compared on the same responses and activations; the scan

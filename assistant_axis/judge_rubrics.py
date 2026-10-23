@@ -36,6 +36,15 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   the doubled parenthesis fixed).  A draft: its text may still change, and
   ``judge_rubric.json`` records the hash of the text each directory was judged
   with, so step 3 refuses to add to a directory judged under an earlier draft.
+- **5** -- a larger change, kept as its own version for comparison on the
+  October extraction's activations (Roger, 2026-10-23): version 4 plus
+  ``V5_ROLE_CLAUSE``, a paragraph after level 3 saying that for a helpful,
+  educated human professional, a question that gives the role no chance to
+  show itself may draw an answer much like a human assistant's, and that this
+  alone is not a reason to score below 3 (the held-response sample of
+  2026-10-23: the judge dropped 88-100% good data for such roles, mostly at
+  level 1).  A draft; its wording is Roger's draft tuned to the rubric's
+  vocabulary, still open.
 
 One number covers all three rubrics: a version may change any of the role,
 trait and combination rubrics and leave the others as they were
@@ -219,6 +228,28 @@ TRAIT_TEMPLATE_V4 = TRAIT_TEMPLATE_V3
 COMBINED_TEMPLATE_V4 = COMBINED_TEMPLATE_V3
 
 # ---------------------------------------------------------------------------
+# Version 5: version 4 and the helpful-professional clause (draft)
+# ---------------------------------------------------------------------------
+
+#: Roger's draft (2026-10-23), tuned to the rubric's vocabulary.  No role is
+#: named as an example: the role rubric experiment showed that naming a role in
+#: the rubric changes how that role is judged (A4).
+V5_ROLE_CLAUSE = (
+    "If the role is a helpful, educated human professional, and the question gives the role no "
+    "chance to show its particular expertise, way of thinking or manner of speaking, then a "
+    "realistic in-character response may read much like the answer a human assistant would give. "
+    "In that case, score below 3 only if the response is out of character for the role (for "
+    "example, if the model identifies as itself), not merely because it resembles what a human "
+    "assistant would say.")
+_ROLE_CLOSING_PARAGRAPH = "\n\n" + _REASON_FIRST_ROLE.split(" (2-3")[0]
+
+ROLE_TEMPLATE_V5 = apply_edits(ROLE_TEMPLATE_V4, [
+    (_ROLE_CLOSING_PARAGRAPH, "\n\n" + V5_ROLE_CLAUSE + _ROLE_CLOSING_PARAGRAPH, 1)],
+    what="role rubric v5")
+TRAIT_TEMPLATE_V5 = TRAIT_TEMPLATE_V4
+COMBINED_TEMPLATE_V5 = COMBINED_TEMPLATE_V4
+
+# ---------------------------------------------------------------------------
 # The versions
 # ---------------------------------------------------------------------------
 
@@ -272,6 +303,10 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
     4: PromptVersion(4, "draft: version 3 with the approved arms of the role rubric experiment "
                         "(A1)",
                      ROLE_TEMPLATE_V4, TRAIT_TEMPLATE_V4, COMBINED_TEMPLATE_V4,
+                     reply_format="score_marker", max_tokens=200, draft=True),
+    5: PromptVersion(5, "draft: version 4 and a clause for helpful, educated professional roles "
+                        "(Roger, 2026-10-23), for comparison on the October extraction",
+                     ROLE_TEMPLATE_V5, TRAIT_TEMPLATE_V5, COMBINED_TEMPLATE_V5,
                      reply_format="score_marker", max_tokens=200, draft=True),
 }
 

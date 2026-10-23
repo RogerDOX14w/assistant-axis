@@ -147,3 +147,20 @@ def test_apply_edits_refuses_a_passage_it_cannot_find():
     with pytest.raises(ValueError, match="occurs 0 times, expected 1"):
         jr.apply_edits("abc", [("x", "y", 1)], what="t")
     assert jr.apply_edits("a a", [("a", "b", 2)], what="t") == "b b"
+
+
+def test_version_5_is_version_4_with_the_clause_only():
+    """Version 5 (draft, 2026-10-23): version 4's role rubric with one paragraph
+    added after level 3, before the closing line; traits and combinations as
+    version 4.  It follows version 4, so a later edit to the draft v4 carries over."""
+    v4, v5 = jr.PROMPT_VERSIONS[4], jr.PROMPT_VERSIONS[5]
+    assert v5.draft and v5.differs_from(v4) == ("role",)
+    assert v5.role.replace("\n\n" + jr.V5_ROLE_CLAUSE, "", 1) == v4.role
+    paragraphs = v5.role.split("\n\n")
+    assert paragraphs[-2] == jr.V5_ROLE_CLAUSE and paragraphs[-1].startswith("First, briefly reason")
+    assert paragraphs[-3].split("\n")[-1].startswith("- 3 if")
+    # no corpus role named in the clause (naming a role changes how it is judged: A4),
+    # except "assistant", which every version's levels already use ("an AI assistant")
+    roles = {p.stem.replace("_", " ") for p in (REPO / "data" / "roles" / "instructions").glob("*.json")}
+    assert [r for r in roles if f" {r} " in f" {jr.V5_ROLE_CLAUSE.lower()} "] == ["assistant"]
+    assert "an AI assistant" in v4.role
