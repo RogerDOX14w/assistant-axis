@@ -197,7 +197,8 @@ def _rest(text: str) -> list:
 
 
 EXPECTED_LEVELS = {"A0b": set(), "A1": {0, 1, 2}, "A2": {0, 1, 2}, "A3": {2}, "A4": {2},
-                   "A5": {0, 1, 2}, "A6": {0, 3}, "A7": {0, 1, 2}, "A8": {0, 1, 2}, "A9": {0, 1, 2}}
+                   "A5": {0, 1, 2}, "A6": {0, 3}, "A7": {0, 1, 2}, "A8": {0, 1, 2}, "A9": {0, 1, 2},
+                   "A10": {0, 1, 2}, "A11": {0, 1, 2}}
 
 
 class TestArms:
@@ -232,7 +233,7 @@ class TestArms:
         t = {arm: exp.arm_template(arm, baked) for arm in exp.ARM_IDS}
         name = exp.role_name_in(baked)
         assert baked.count("Gemma") == 3 and exp.TYPO in baked
-        fixed = ("A1", "A2", "A5", "A8", "A9")              # the typo: fixed in these only
+        fixed = ("A1", "A2", "A5", "A8", "A9", "A10", "A11")  # the typo: fixed in these only
         for arm in exp.ARM_IDS:
             assert (exp.TYPO in t[arm]) == (arm not in fixed), arm
             assert "((" not in t[arm] or arm not in fixed
@@ -251,6 +252,10 @@ class TestArms:
             assert t[arm].count("Gemma") == 3, arm
         # A8 and A9 are A1 with the level-2 example swapped for a non-corpus role, or removed
         assert t["A8"] == t["A1"].replace(exp.LEVEL2_EXAMPLE, exp.A8_EXAMPLE)
+        assert t["A10"] == t["A1"].replace(exp.LEVEL2_EXAMPLE, exp.A10_EXAMPLE)
+        assert t["A11"] == t["A1"].replace(exp.LEVEL2_EXAMPLE, exp.A11_EXAMPLE)
+        for word in ("humanitarian", "philanthropist", "beekeeper"):
+            assert not (ROLES / f"{word}.json").exists(), word
         assert t["A9"] == t["A1"].replace(" " + exp.LEVEL2_EXAMPLE, "")
         assert "but has some attributes of the role.\n" in t["A9"]
         assert not (ROLES / "beekeeper.json").exists()
@@ -276,7 +281,7 @@ class TestArms:
             exp.arm_template("A3", baked.replace(exp.LEVEL2_EXAMPLE, ""))
         with pytest.raises(exp.ArmError):
             exp.arm_template("A6", baked.replace(exp.LEVEL0_REFUSAL_CLAUSE, ""))
-        for arm in ("A8", "A9"):
+        for arm in ("A8", "A9", "A10", "A11"):
             with pytest.raises(exp.ArmError, match="level-2 example"):
                 exp.arm_template(arm, baked.replace(exp.LEVEL2_EXAMPLE, ""))
         with pytest.raises(ValueError, match="unknown arm"):

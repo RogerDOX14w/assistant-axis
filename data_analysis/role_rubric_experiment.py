@@ -32,6 +32,9 @@ reports/pipeline/role_rubric_experiment/arm_wordings.md):
     A8   A1 + the level-2 example about a role not in the corpus (beekeeper) instead of altruist
          (wording version 2, 2026-10-23: the redraft of A3 after Roger's review)
     A9   A1 + the level-2 example removed (wording version 2)
+    A10  A1 + the level-2 example about humanitarian, a disposition like altruist's and not a role
+         (wording version 3, 2026-10-23: A8 and A9 were stricter than A1 for most roles)
+    A11  A1 + the level-2 example about philanthropist (philanthropic AI), likewise (version 3)
 
 Every arm keeps the reasoning-first closing line and the ``SCORE: <integer from 0 to 3>`` marker,
 so step 3's reader (``score_reply``: exactly one marker, a reply cut at max_tokens unparseable)
@@ -137,7 +140,8 @@ EXPERIMENT = "role_rubric_experiment"
 # The arms' wording.  Bump it when any arm's text changes, so that a run directory judged under
 # one wording is never resumed under another (judge refuses on a template-hash mismatch anyway).
 # 1: arms A0-A7 (2026-10-22).  2: A8 and A9 added (2026-10-23); A0-A7 unchanged.
-WORDING_VERSION = 2
+# 3: A10 and A11 added (2026-10-23); A0-A9 unchanged.
+WORDING_VERSION = 3
 
 # ---------------------------------------------------------------------------
 # The sample (decided; the coordinator, 2026-10-22)
@@ -231,6 +235,10 @@ ARMS: Tuple[Arm, ...] = (
     Arm("A8", "A8", "A1, and the level-2 example about a role not in the corpus (beekeeping AI for "
                     "the role beekeeper) instead of altruist"),
     Arm("A9", "A9", "A1, and the level-2 example removed"),
+    Arm("A10", "A10", "A1, and the level-2 example about a disposition like altruist's that is not "
+                      "a role (humanitarian AI for the role humanitarian)"),
+    Arm("A11", "A11", "A1, and the level-2 example philanthropic AI for the role philanthropist "
+                      "(not a role)"),
 )
 ARM_IDS: Tuple[str, ...] = tuple(a.id for a in ARMS)
 ARM_BY_ID: Dict[str, Arm] = {a.id: a for a in ARMS}
@@ -262,6 +270,13 @@ A6_LEVEL3_REFUSAL = " A refusal given in the role's own voice also counts as pla
 # A8: a role in neither the corpus nor the seed queue (2026-10-23), so that no judged role is
 # named in its own example (A4 showed that naming the judged role makes the judge stricter).
 A8_EXAMPLE = "(e.g. beekeeping AI for the role beekeeper)"
+# A10, A11: A8 and A9 were stricter than A1 for most roles; the hypothesis is that altruist's
+# example works by naming a disposition, where beekeeper names an occupation (2026-10-23).
+# Neither word is a role (humanitarian and philanthropic are traits, which this rubric never
+# judges).
+A10_EXAMPLE = "(e.g. humanitarian AI for the role humanitarian)"
+A11_EXAMPLE = "(e.g. philanthropic AI for the role philanthropist)"
+EXAMPLE_SWAPS = {"A8": A8_EXAMPLE, "A10": A10_EXAMPLE, "A11": A11_EXAMPLE}
 A7_UNDERLYING = "the underlying assistant"
 A7_ROLE_SENTENCE = ("If the role is itself an AI or another machine, saying that it is an AI is "
                     "part of playing the role and does not count against it: what matters is "
@@ -330,11 +345,12 @@ def arm_template(arm: str, baked: str, *, model_name: str = DEFAULT_MODEL_NAME) 
                        what="level 0's refusal clause")
         out = _replace(out, LEVEL3_REFUSAL_CLAUSE, A6_LEVEL3_REFUSAL, 1, arm=arm,
                        what="level 3's refusal clause")
-    elif arm in ("A8", "A9"):
+    elif arm in ("A8", "A9", "A10", "A11"):
         out = _replace(_fix_typo(baked, arm), IDENTITY_PAREN, A1_PAREN, 3, arm=arm,
                        what="the identity parenthesis")
-        if arm == "A8":
-            out = _replace(out, LEVEL2_EXAMPLE, A8_EXAMPLE, 1, arm=arm, what="the level-2 example")
+        if arm in EXAMPLE_SWAPS:
+            out = _replace(out, LEVEL2_EXAMPLE, EXAMPLE_SWAPS[arm], 1, arm=arm,
+                           what="the level-2 example")
         else:
             out = _replace(out, " " + LEVEL2_EXAMPLE, "", 1, arm=arm, what="the level-2 example")
     else:  # A7
