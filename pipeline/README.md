@@ -49,8 +49,9 @@ cd pipeline
     --roles_dir ../data/traits/instructions
 ```
 
-- **Flags**: `--mode` (`roger`), `--output_dir` (`/workspace/outputs/qwen-3-32b`), `--model` (`Qwen/Qwen3-32B`), `--roles_dir` (christina mode), `--tensor_parallel_size` (1), `--types` (any of `combinations`, `r_combinations`, `t_combinations`, `roles`, `traits`; roger mode only), `--steps23serial`, `--judge-realtime` (step 3 with `--no_batch`), `--no-scan`, `--skip-gpu-check`, `--gpu-busy-threshold-mib` (2048), `--no-tmpfs`, `--tmpfs-dir` (`/dev/shm/hf-cache`), `--tmpfs-method` (`auto`; see "Model mirror in tmpfs"), `--tmpdir` (`/dev/shm`).  The goal and non-goal counts (30), `REDUCE_QUESTIONS` (3) and the `--min_count` given to step 4 and the scan (`MIN_COUNT` 30 in roger mode, `CHRISTINA_MIN_COUNT` 50 in christina mode) are set at the top of the script.
-- **Layout (roger mode)**: each type gets `<output_dir>/<type>/{responses,activations,scores,vectors}/` and `<type>/axis.pt`; `r_combinations` and `t_combinations` write into `combinations/`.  The default entity is generated, extracted and averaged once under `default/` and symlinked into each type's `responses/`, `activations/` and `vectors/`.
+- **Flags**: `--mode` (`roger`), `--output_dir` (`/workspace/outputs/qwen-3-32b`), `--model` (`Qwen/Qwen3-32B`), `--roles_dir` (christina mode), `--tensor_parallel_size` (1), `--types` (any of `combinations`, `r_combinations`, `t_combinations`, `roles`, `traits`; roger mode only), `--steps23serial`, `--judge-realtime` (step 3 with `--no_batch`), `--no-scan`, `--skip-gpu-check`, `--gpu-busy-threshold-mib` (2048), `--no-tmpfs`, `--tmpfs-dir` (`/dev/shm/hf-cache`), `--tmpfs-method` (`auto`; see "Model mirror in tmpfs"), `--tmpdir` (`/dev/shm`), `--judge-prompt-version` (step 3's default, 3; see "Prompt versions" under step 3), `--from-step` (1; or 3, 4, 5).  The goal and non-goal counts (30), `REDUCE_QUESTIONS` (3) and the `--min_count` given to step 4 and the scan (`MIN_COUNT` 30 in roger mode, `CHRISTINA_MIN_COUNT` 50 in christina mode) are set at the top of the script.
+- **Layout (roger mode)**: each type gets `<output_dir>/<type>/{responses,activations,scores,vectors}/` and `<type>/axis.pt`; `r_combinations` and `t_combinations` write into `combinations/`.  The default entity is generated, extracted and averaged once under `default/` and symlinked into each type's `responses/`, `activations/` and `vectors/`.  A `--judge-prompt-version` other than the default adds `scores_v<N>/`, `vectors_v<N>/` and `axis_v<N>.pt` beside them (christina mode: the same names under `<output_dir>`).
+- **Rerunning from a later step** (`--from-step 3`, `4` or `5`, 2026-10-23): runs that step and the ones after it on the outputs already there, and skips the GPU check, the model mirror and steps 0 to 2 (from step 3 on nothing loads the model); the default entity's vector must exist (roger mode: `default/vectors/default.pt`, else exit 1).  The use it was made for: `./run_pipeline.sh --types roles --from-step 3 --judge-prompt-version 4` judges the existing responses again under rubric 4 and builds that version's vectors and axis beside the default's, on a pod with the activations (step 4 reads them), with no GPU needed.
 - **A failing step stops the pipeline**: step 1; step 2 or step 3 (before step 4, whether they ran in parallel or serially); step 4 (before step 5).  Running the same command again skips what is finished.
 - **Every extraction runs into a fresh `--output_dir`** (rule since 2026-10-12, review P1 D2 / walk-through P2).  Every skip test of the pipeline is file-existence only: a response, activation or vector file that exists is never redone, whatever instructions, settings or questions it was made from, so a new extraction into an old tree keeps the old tree's files as "already exists" (reusing the May 8slot tree would have kept 580 entities' May responses).  Step 1 enforces it with the `generation_config.json` side-car (below): it refuses a responses directory that holds responses and no side-car, or whose last recorded run used other generation settings, unless `--allow_mixed_settings`.  Reruns of the same extraction (after a crash, to fill gaps) are what the skip tests are for.
 - **Scan before step 5** (on unless `--no-scan`): after step 4, [`scan_missing_vectors.py`](./scan_missing_vectors.py) with `--deep_load` (see "Auditing missing or corrupt vectors").  Exit 3 (re-run candidates or `missing_activation`) **stops the pipeline before step 5**, naming the rerun lists, so no axis is built from a partial set (Roger, 2026-10-12: a stop, since a warning is easy to miss); any other non-zero scanner exit stops it too.  Fix the candidates (`4_vectors.py --overwrite <rerun list>`, step 2 first for `missing_activation`) and run the same command again.
@@ -237,17 +238,29 @@ uv run 3_judge.py \
 
 | `--entity_type` | Filename | Eval prompt source |
 |-----------------|----------|--------------------|
-| `role` | `<role>` | `eval_prompt` from the role JSON (0-3) |
+| `role` | `<role>` | Built from the role's name and description (0-3); version 3 is the `eval_prompt` baked into the role JSON, which step 3 read until 2026-10-23 |
 | `trait` | `<trait>` | Built from the trait's label and description (0-3) |
 | `combination` | `r_<role>__<trait>`, `t_<role>__<trait>` | Compound prompt from both descriptions (0-3) |
 | any | `default` | Skipped (step 4 uses all its activations) |
 
 For combinations, the prompt variants that [`data/combination_scores.json`](../data/combination_scores.json) scores 3 (incongruous; 3 of the 9,000 on 2026-10-10) are not judged, so step 4 leaves their activations out.  Since 2026-10-12 (walk-through P4) a combination run first recomputes each combination's `pairs_sha256` from the instruction files as they are now (the role's and the trait's judge labels and the index-matched `pos` pairs, as [`score_combinations.py`](../data_analysis/score_combinations.py) records it) and **stops before any request** when a recorded hash differs (scores made for texts since regenerated would exclude the wrong variants): rerun `score_combinations.py`, which rescores only what changed, or pass `--no_incongruity_filtering`.  A combination with no entry is judged in full, with a warning.  On 2026-10-12 all 1,800 recorded hashes matched the corpus.
 
-**How a reply is read (`JUDGE_RUBRIC_VERSION` 3, since 2026-10-12, walk-through P4 / D5).**  Exactly one `SCORE: <int>` line in 0-3 is the answer (`judge.parse_judge_score(require_marker=True)`).  A reply with no marker or several, or cut at `--max_tokens` (`finish_reason` `length`, in batch and in real time), is unparseable: never a digit of its reasoning, which used to read "... lists 3 examples" as a 3.  The run's summary counts the unparseable replies by reason (no marker, several markers, out of range, truncated, no reply); they count against the parse rate.  The prompts are unchanged from version 2.
+**Prompt versions (`--prompt_version`, 2026-10-23).**  The rubrics are versioned in [`assistant_axis/judge_rubrics.py`](../assistant_axis/judge_rubrics.py), so that steps 3 to 5 can be rerun on the same responses and activations under another rubric and the vectors compared (`run_pipeline.sh --from-step 3 --judge-prompt-version N`).  The numbers continue the rubric versions `judge_rubric.json` records:
+
+| version | rubrics | reply read as | default `--max_tokens` |
+|---|---|---|---|
+| 0 | the original number-only rubrics: Christina's role rubric at the fork (949c35f3), the trait and combination rubrics as first written (cac76b65, 2026-04-06); the May 2026 trees' role scores were judged with it | the first integer in the reply, 0-3 (the fork's parser); a cut reply is read like any other | 10 (the fork's) |
+| 1, 2 | not runnable: version 3's text with the retired forgiving parser (1 also showed stored names) | | |
+| 3 | the current rubrics (the default) | exactly one `SCORE: <int>` (below) | 200 |
+| 4 | **draft**: version 3 with the approved arms of the [role rubric experiment](../reports/pipeline/role_rubric_experiment/) (so far A1: "Gemma, an LLM" made "a language model", level 1's doubled parenthesis fixed); traits and combinations as version 3 | as version 3 | 200 |
+
+Every version renders a role's rubric from its template, the role's judge display name and its description (step 3 read the role file's baked `eval_prompt` until 2026-10-23; a test pins that field equal to the version 3 rendering for every role, so version 3 sends what it sent before).  Names are not versioned: every version shows the judge display form.  One number covers the role, trait and combination rubrics: a version may change any of them and leave the others as they were (`PromptVersion.differs_from`; version 4 so far changes the role rubric only), and since each entity type has its own scores directory, types can be run under different versions side by side (`--types roles --judge-prompt-version 4`, `--types traits --judge-prompt-version 5`).  **One version per scores directory**: `judge_rubric.json` records each run's version and a hash of the rubric that directory's entity type was judged with (`prompt_sha256`), and a run stops before any request when the directory was judged under another version, or under an earlier text of a draft, except that versions 1-3, which send the same text, may still mix with a warning.  A batch run records its version as soon as it has written batches, so a rerun under another version cannot collect them.  A settled version is never edited (its hash is pinned in [`test_judge_rubrics.py`](../assistant_axis/tests/test_judge_rubrics.py)); a change goes into the draft, or a new version.
+
+**How a reply is read (`JUDGE_RUBRIC_VERSION` 3, since 2026-10-12, walk-through P4 / D5; versions 3 and 4).**  Exactly one `SCORE: <int>` line in 0-3 is the answer (`judge.parse_judge_score(require_marker=True)`).  A reply with no marker or several, or cut at `--max_tokens` (`finish_reason` `length`, in batch and in real time), is unparseable: never a digit of its reasoning, which used to read "... lists 3 examples" as a 3.  The run's summary counts the unparseable replies by reason (no marker, several markers, out of range, truncated, no reply; under version 0: no integer, out of range, no reply); they count against the parse rate.  The prompts are unchanged from version 2.
 
 **Options:**
 - `--entity_type`: `role`, `trait` or `combination` (required)
+- `--prompt_version`: the rubric version (above; default 3); `--max_tokens` defaults to the version's
 - `--roles_dir`, `--traits_dir`: default the repository's [`data/roles/instructions`](../data/roles/instructions/) and [`data/traits/instructions`](../data/traits/instructions/), wherever the script is run from
 - `--combination_scores`: default the repository's `data/combination_scores.json`; `--no_incongruity_filtering` judges every variant
 - `--roles`: specific entity names
@@ -355,8 +368,9 @@ prompt's content stays per item, an unparseable reply).  The score files
 written are kept, and a rerun judges only what is missing.
 
 **Side-cars** beside the score files: `usage.json` (cumulative token usage and
-cost), `judge_rubric.json` (the rubric version and judge models the directory
-was scored with), `batch_state.json` and `_batches/`.
+cost), `judge_rubric.json` (the rubric versions, the hash of each version's
+text, the reply format and the judge models the directory was scored with),
+`batch_state.json` and `_batches/`.
 
 **Size of a full run.**  For the October 2026 corpus a roger-mode run of all
 three types is about 1.5 million judge calls: 466,000 trait, 169,500 role and
@@ -506,6 +520,11 @@ candidates come from two upstream failure modes:
 - In comprehensive mode, `vectors_unfiltered/` (or any `vectors*`
   variant ending in `_unfiltered`) is auto-detected as unfiltered mode
   regardless of whether `scores/` exists.
+- In comprehensive mode a `vectors<S>/` whose `scores<S>/` exists is
+  checked against it (2026-10-23): a prompt version's `vectors_v4/`
+  against `scores_v4/`, not against the default's `scores/`, whose
+  scores hash would call every vector stale.  Any other `vectors*`
+  variant is checked against `scores/` as before.
 
 ### Robust file IO (NFS / MooseFS)
 

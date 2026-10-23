@@ -145,7 +145,11 @@ class TestSettings:
     def test_the_judge_request_is_step_3s(self):
         src = (REPO / "pipeline" / "3_judge.py").read_text()
         assert re.search(r'"--judge_model", type=str, default="([^"]+)"', src).group(1) == exp.JUDGE_MODEL
-        assert int(re.search(r'"--max_tokens", type=int, default=(\d+)', src).group(1)) == exp.MAX_TOKENS
+        # Step 3's --max_tokens defaults to its prompt version's since 2026-10-23;
+        # the experiment's arms are edits of version 3, the default.
+        from assistant_axis.judge_rubrics import DEFAULT_PROMPT_VERSION, PROMPT_VERSIONS
+        assert DEFAULT_PROMPT_VERSION == 3
+        assert PROMPT_VERSIONS[DEFAULT_PROMPT_VERSION].max_tokens == exp.MAX_TOKENS
         body = exp.request_body("hello")
         assert body == {"model": "gpt-4.1-mini", "messages": [{"role": "user", "content": "hello"}],
                         "max_completion_tokens": 200}            # no temperature: the default

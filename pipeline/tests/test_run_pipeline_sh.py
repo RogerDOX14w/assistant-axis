@@ -338,3 +338,103 @@ def test_judge_batch_requests_reaches_step_3(tmp_path):
     assert proc.returncode == 0, proc.stdout + proc.stderr
     judge = [c for c in calls if "3_judge.py" in c]
     assert judge and all(c.endswith("--batch_requests 3000") for c in judge)
+
+
+# ---------------------------------------------------------------------------
+# Rubric versions and --from-step (2026-10-23)
+# ---------------------------------------------------------------------------
+
+def _default_vector(tmp_path: Path) -> Path:
+    d = tmp_path / "out" / "default" / "vectors"
+    d.mkdir(parents=True)
+    (d / "default.pt").write_text("v")
+    return d / "default.pt"
+
+
+def test_the_drivers_default_version_is_step_3s():
+    from assistant_axis.judge_rubrics import DEFAULT_PROMPT_VERSION
+    assert f"JUDGE_PROMPT_VERSION_DEFAULT={DEFAULT_PROMPT_VERSION}\n" in SCRIPT.read_text()
+
+
+def test_a_prompt_version_from_step_3_reruns_steps_3_to_5_into_its_own_dirs(tmp_path):
+    _default_vector(tmp_path)
+    proc, calls = _run_full(tmp_path, None, "--from-step", "3", "--judge-prompt-version", "4", scan=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    out = tmp_path / "out" / "traits"
+    assert not any(s in c for c in calls for s in ("1_generate.py", "2_activations.py", "tmpfs.py"))
+    [judge] = [c for c in calls if "3_judge.py" in c]
+    assert f"--output_dir {out / 'scores_v4'}" in judge and judge.endswith("--prompt_version 4")
+    [step4] = [c for c in calls if "4_vectors.py" in c]
+    assert f"--scores_dir {out / 'scores_v4'}" in step4 and f"--output_dir {out / 'vectors_v4'}" in step4
+    [step5] = [c for c in calls if "5_axis.py" in c]
+    assert f"--vectors_dir {out / 'vectors_v4'} --output {out / 'axis_v4.pt'}" in step5
+    assert any("scan_missing_vectors.py" in c for c in calls)
+    link = out / "vectors_v4" / "default.pt"
+    assert link.is_symlink() and os.readlink(link) == "../../default/vectors/default.pt"
+    assert "prompt version 4 (into scores_v4/, vectors_v4/, axis_v4.pt)" in proc.stdout
+
+
+def test_the_default_version_keeps_the_usual_dirs(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--judge-prompt-version", "3")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    out = tmp_path / "out" / "traits"
+    [judge] = [c for c in calls if "3_judge.py" in c]
+    assert f"--output_dir {out / 'scores'} " in judge and judge.endswith("--prompt_version 3")
+    assert any(f"--output {out / 'axis.pt'}" in c for c in calls if "5_axis.py" in c)
+    # no flag: step 3 is not told a version, and takes its own default
+    proc, calls = _run_full(tmp_path / "again", None)
+    assert proc.returncode == 0 and not any("--prompt_version" in c for c in calls)
+
+
+def test_from_step_3_needs_the_default_vector(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--from-step", "3")
+    assert proc.returncode == 1
+    assert "--from-step 3 needs the default vector" in proc.stderr
+    assert not any("3_judge.py" in c for c in calls)
+
+
+@pytest.mark.parametrize("step,runs", [("4", ["4_vectors.py", "5_axis.py"]), ("5", ["5_axis.py"])])
+def test_from_step_4_or_5(tmp_path, step, runs):
+    _default_vector(tmp_path)
+    proc, calls = _run_full(tmp_path, None, "--from-step", step)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    ran = [s for s in STEP_SCRIPTS if any(s in c for c in calls)]
+    assert ran == runs
+
+
+def test_a_failed_step_3_from_step_3_stops_before_step_4(tmp_path):
+    _default_vector(tmp_path)
+    proc, calls = _run_full(tmp_path, "3_judge.py", "--from-step", "3")
+    assert proc.returncode == 1
+    assert "Pipeline aborted: Step 3 failed" in proc.stdout
+    assert not any("4_vectors.py" in c for c in calls)
+
+
+@pytest.mark.parametrize("args,message", [
+    (("--from-step", "2"), "Invalid --from-step"),
+    (("--judge-prompt-version", "v4"), "Invalid --judge-prompt-version"),
+])
+def test_bad_values_are_refused_before_any_step(tmp_path, args, message):
+    proc, calls = _run_full(tmp_path, None, *args)
+    assert proc.returncode == 1 and message in proc.stderr and calls == []
+
+
+def test_christina_mode_from_step_3_with_a_version(tmp_path):
+    out = tmp_path / "out"
+    for sub, ext in (("responses", "jsonl"), ("activations", "pt"), ("vectors", "pt")):
+        d = out / "default" / sub
+        d.mkdir(parents=True)
+        (d / f"default.{ext}").write_text(sub)
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina",
+                            "--roles_dir", "../data/traits/instructions", "--from-step", "3",
+                            "--judge-prompt-version", "0", scan=True,
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert not any(s in c for c in calls for s in ("1_generate.py", "2_activations.py"))
+    [judge] = [c for c in calls if "3_judge.py" in c]
+    assert f"--output_dir {out / 'scores_v0'}" in judge and judge.endswith("--prompt_version 0")
+    [scan] = [c for c in calls if "scan_missing_vectors.py" in c]
+    assert f"--vectors_dir {out / 'vectors_v0'}" in scan and f"--scores_dir {out / 'scores_v0'}" in scan
+    assert any(f"--vectors_dir {out / 'vectors_v0'} --output {out / 'axis_v0.pt'}" in c
+               for c in calls if "5_axis.py" in c)
+    assert os.readlink(out / "vectors_v0" / "default.pt") == "../default/vectors/default.pt"

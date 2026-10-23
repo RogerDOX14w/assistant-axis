@@ -36,6 +36,18 @@
 #   ./run_pipeline.sh --types roles --judge-batch-requests 3000   # one of several pods
 #   ./run_pipeline.sh --tmpfs-method cp               # model mirror: auto (default),
 #                                                     # rsync or cp (assistant_axis/tmpfs.py)
+#   ./run_pipeline.sh --types roles --from-step 3 --judge-prompt-version 4
+#                                                     # steps 3-5 again under rubric 4
+#
+# Rubric versions (--judge-prompt-version N, 2026-10-23): step 3 judges under
+# version N of its rubrics (3_judge.py --prompt_version; 0 the original
+# number-only rubrics, 3 the current ones, 4 the next version, a draft).  A
+# version other than the default writes scores_v<N>/, vectors_v<N>/ and
+# axis_v<N>.pt beside the default's scores/, vectors/ and axis.pt, so the
+# versions can be compared on the same responses and activations; the scan
+# checks vectors_v<N>/ against scores_v<N>/.  --from-step 3 (or 4, 5) starts
+# there: no GPU check, no model mirror, no steps 0 to 2.  Step 3 refuses a
+# scores directory judged under another version.
 #
 # A failing step stops the pipeline: steps 1 to 3 as before, and step 4 since
 # 2026-10-12 (4_vectors.py exits 1 when an activation, scores or vector file
@@ -153,6 +165,21 @@ GPU_BUSY_THRESHOLD_MIB=2048
 STEPS23_PARALLEL=true
 JUDGE_ARGS=()                   # --judge-realtime adds --no_batch for step 3
 
+# Step 3's rubric version (3_judge.py --prompt_version; versions in
+# assistant_axis/judge_rubrics.py).  Any version other than the default
+# writes its own scores_v<N>/, vectors_v<N>/ and axis_v<N>.pt beside the
+# default's scores/, vectors/ and axis.pt, so that steps 3 to 5 can be rerun
+# under another rubric on the same responses and activations (Roger,
+# 2026-10-23; with --from-step 3).  The default is step 3's
+# DEFAULT_PROMPT_VERSION (a test pins the two together).
+JUDGE_PROMPT_VERSION_DEFAULT=3
+JUDGE_PROMPT_VERSION=""
+# First step to run: 1 (everything, the default), or 3, 4 or 5 to rerun from
+# that step on outputs already there.  From step 3 on no step uses the GPU or
+# the model, so the GPU check and the model mirror are skipped too, and the
+# default entity's vector must already exist.
+FROM_STEP=1
+
 # Run pipeline/scan_missing_vectors.py between step 4 and step 5 to verify
 # every activation produced a healthy vector; re-run candidates stop the run.  Cheap when nothing went wrong
 # (cache hits dominate -- a re-scan after a clean run is typically a few
@@ -197,6 +224,10 @@ while [[ $# -gt 0 ]]; do
             # step 3's --batch_requests, sized from the organisation's queue
             # limit when several pods share one API key (pipeline/README.md)
             JUDGE_ARGS+=(--batch_requests "$2"); shift 2 ;;
+        --judge-prompt-version)
+            JUDGE_PROMPT_VERSION="$2"; shift 2 ;;
+        --from-step)
+            FROM_STEP="$2"; shift 2 ;;
         --no-scan)
             RUN_SCAN=false; shift ;;
         --types)
@@ -226,6 +257,25 @@ case "$TMPFS_METHOD" in
     auto|rsync|cp) ;;
     *) echo "Invalid --tmpfs-method: $TMPFS_METHOD (must be auto, rsync or cp)" >&2; exit 1 ;;
 esac
+case "$FROM_STEP" in
+    1|3|4|5) ;;
+    *) echo "Invalid --from-step: $FROM_STEP (must be 1, 3, 4 or 5)" >&2; exit 1 ;;
+esac
+# Directory names of the scores, vectors and axis for the prompt version.
+VERSION_SUFFIX=""
+if [ -n "$JUDGE_PROMPT_VERSION" ]; then
+    if ! [[ "$JUDGE_PROMPT_VERSION" =~ ^[0-9]+$ ]]; then
+        echo "Invalid --judge-prompt-version: $JUDGE_PROMPT_VERSION (a version number)" >&2
+        exit 1
+    fi
+    JUDGE_ARGS+=(--prompt_version "$JUDGE_PROMPT_VERSION")
+    if [ "$JUDGE_PROMPT_VERSION" != "$JUDGE_PROMPT_VERSION_DEFAULT" ]; then
+        VERSION_SUFFIX="_v$JUDGE_PROMPT_VERSION"
+    fi
+fi
+SCORES_SUB="scores$VERSION_SUFFIX"
+VECTORS_SUB="vectors$VERSION_SUFFIX"
+AXIS_NAME="axis$VERSION_SUFFIX.pt"
 
 # Validate types (roger mode only).  r_combinations / t_combinations are
 # subsets that share the combinations/ output directory.
@@ -262,6 +312,10 @@ echo "TP size:$TENSOR_PARALLEL_SIZE"
 echo "Tmpfs:  $USE_TMPFS"
 echo "Steps 2+3: $([ "$STEPS23_PARALLEL" = "true" ] && echo "parallel (GPU+judge concurrent)" || echo "serial (--steps23serial)")"
 echo "Scan:   $([ "$RUN_SCAN" = "true" ] && echo "yes (before step 5; re-run candidates stop the run; --no-scan to skip)" || echo "no (--no-scan)")"
+echo "Judge:  prompt version ${JUDGE_PROMPT_VERSION:-$JUDGE_PROMPT_VERSION_DEFAULT} (into $SCORES_SUB/, $VECTORS_SUB/, $AXIS_NAME)"
+if [ "$FROM_STEP" -gt 1 ]; then
+    echo "From:   step $FROM_STEP (earlier steps not run)"
+fi
 if [ "$MODE" = "christina" ]; then
     echo "Roles:  $ROLES_DIR"
 else
@@ -284,6 +338,10 @@ echo ""
 gpu_preflight_check() {
     if [ "$SKIP_GPU_CHECK" = "true" ]; then
         echo "[gpu-check] skipped (--skip-gpu-check)"
+        return
+    fi
+    if [ "$FROM_STEP" -ge 3 ]; then
+        echo "[gpu-check] skipped (--from-step $FROM_STEP: no step uses the GPU)"
         return
     fi
     if ! command -v nvidia-smi >/dev/null 2>&1; then
@@ -422,6 +480,10 @@ setup_tmpfs() {
     # function's cp -r before 2026-10-12 has no marker: rsync tops it up;
     # cp refuses to trust or delete it (delete it by hand first).
     local source_hf="${HF_HOME:-$HOME/.cache/huggingface}"
+    if [ "$FROM_STEP" -ge 3 ]; then
+        echo "[tmpfs] no model mirror (--from-step $FROM_STEP: no step loads the model)"
+        return
+    fi
     if [ ! -d "$(dirname "$TMPFS_HF_HOME")" ]; then
         echo "[tmpfs] $(dirname "$TMPFS_HF_HOME") not present; no model mirror (HF_HOME=$source_hf)"
         return
@@ -495,11 +557,11 @@ scan_before_axis() {
             # directly under $OUTPUT_DIR, no entity-type subdir layer.
             uv run scan_missing_vectors.py \
                 --activations_dir "$OUTPUT_DIR/activations" \
-                --vectors_dir     "$OUTPUT_DIR/vectors" \
-                --scores_dir      "$OUTPUT_DIR/scores" \
+                --vectors_dir     "$OUTPUT_DIR/$VECTORS_SUB" \
+                --scores_dir      "$OUTPUT_DIR/$SCORES_SUB" \
                 --min_count       "$CHRISTINA_MIN_COUNT" \
                 --deep_load \
-                --rerun_list      "$OUTPUT_DIR/vectors/missing_vectors_rerun.txt" \
+                --rerun_list      "$OUTPUT_DIR/$VECTORS_SUB/missing_vectors_rerun.txt" \
                 || rc=$?
             ;;
     esac
@@ -516,17 +578,18 @@ scan_before_axis() {
 }
 
 # ---- Helper: symlink default files into a type's subdir -------------------
-# Usage: symlink_default <subdir_name> <file_extension>
+# Usage: symlink_default <subdir_name> <file_extension> [<destination subdir>]
 # e.g.  symlink_default responses jsonl
+#       symlink_default vectors pt vectors_v4   (a prompt version's vectors)
 symlink_default() {
     local subdir="$1" ext="$2"
     local src="$OUTPUT_DIR/default/$subdir/default.$ext"
-    local dst_dir="$OUTPUT_DIR/$type/$subdir"
+    local dst_dir="$OUTPUT_DIR/$type/${3:-$subdir}"
     local rel="../../default/$subdir/default.$ext"
     mkdir -p "$dst_dir"
     if [ -f "$src" ] && [ ! -e "$dst_dir/default.$ext" ]; then
         ln -s "$rel" "$dst_dir/default.$ext"
-        echo "  Symlinked default.$ext -> $type/$subdir/"
+        echo "  Symlinked default.$ext -> $type/${3:-$subdir}/"
     fi
 }
 
@@ -595,27 +658,33 @@ if [ "$MODE" = "christina" ]; then
             echo "ERROR: $ROLES_DIR has no default.json and neither has $DEFAULT_ROLE_DIR; step 5 needs a default" >&2
             exit 1
         fi
-        run_step0_default --mode christina --roles_dir "$DEFAULT_ROLE_DIR"
-        for sub_ext in "responses jsonl" "activations pt" "vectors pt"; do
+        if [ "$FROM_STEP" -lt 3 ]; then
+            run_step0_default --mode christina --roles_dir "$DEFAULT_ROLE_DIR"
+        fi
+        # (the last entry: a prompt version's own vectors directory)
+        for sub_ext in "responses jsonl" "activations pt" "vectors pt" "vectors pt $VECTORS_SUB"; do
             set -- $sub_ext
-            mkdir -p "$OUTPUT_DIR/$1"
-            if [ -f "$OUTPUT_DIR/default/$1/default.$2" ] && [ ! -e "$OUTPUT_DIR/$1/default.$2" ]; then
-                ln -s "../default/$1/default.$2" "$OUTPUT_DIR/$1/default.$2"
-                echo "  Symlinked default.$2 -> $1/"
+            dst_sub="${3:-$1}"
+            mkdir -p "$OUTPUT_DIR/$dst_sub"
+            if [ -f "$OUTPUT_DIR/default/$1/default.$2" ] && [ ! -e "$OUTPUT_DIR/$dst_sub/default.$2" ]; then
+                ln -s "../default/$1/default.$2" "$OUTPUT_DIR/$dst_sub/default.$2"
+                echo "  Symlinked default.$2 -> $dst_sub/"
             fi
         done
         echo ""
     fi
 
-    echo "=== Step 1: Generating responses ==="
-    uv run 1_generate.py \
-        --mode "$MODE" \
-        --model "$MODEL" \
-        --roles_dir "$ROLES_DIR" \
-        --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-        --output_dir "$OUTPUT_DIR/responses"
+    if [ "$FROM_STEP" -lt 3 ]; then
+        echo "=== Step 1: Generating responses ==="
+        uv run 1_generate.py \
+            --mode "$MODE" \
+            --model "$MODEL" \
+            --roles_dir "$ROLES_DIR" \
+            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+            --output_dir "$OUTPUT_DIR/responses"
 
-    echo ""
+        echo ""
+    fi
 
     # Infer entity_type for step 3 from ROLES_DIR so the 11 collision names
     # (ascetic, contrarian, ... stoic) are scored against the right prompt.
@@ -645,11 +714,15 @@ if [ "$MODE" = "christina" ]; then
         uv run 3_judge.py \
             --entity_type "$CHR_ENT_TYPE" \
             --responses_dir "$OUTPUT_DIR/responses" \
-            --output_dir "$OUTPUT_DIR/scores" \
+            --output_dir "$OUTPUT_DIR/$SCORES_SUB" \
             "${JUDGE_ARGS[@]}"
     }
 
-    if [ "$STEPS23_PARALLEL" = "true" ]; then
+    if [ "$FROM_STEP" -eq 3 ]; then
+        christina_step3 || step_failed "Step 3" "3_judge.py exited non-zero (see above)"
+    elif [ "$FROM_STEP" -ge 4 ]; then
+        :   # steps 2 and 3 not run
+    elif [ "$STEPS23_PARALLEL" = "true" ]; then
         echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
         echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
         echo ""
@@ -674,92 +747,100 @@ if [ "$MODE" = "christina" ]; then
     fi
     echo ""
 
-    echo "=== Step 4: Computing vectors ==="
-    # --min_count passed explicitly (it was the script default, 50, while the
-    # scan below was given MIN_COUNT=30, so entities with 30-49 score=3
-    # samples were reported as re-run candidates that step 4 would skip
-    # again).
-    uv run 4_vectors.py \
-        --activations_dir "$OUTPUT_DIR/activations" \
-        --scores_dir "$OUTPUT_DIR/scores" \
-        --output_dir "$OUTPUT_DIR/vectors" \
-        --min_count "$CHRISTINA_MIN_COUNT" \
-        || step_failed "Step 4" "4_vectors.py exited non-zero; see its [ERROR] lines above"
+    if [ "$FROM_STEP" -le 4 ]; then
+        echo "=== Step 4: Computing vectors ==="
+        # --min_count passed explicitly (it was the script default, 50, while the
+        # scan below was given MIN_COUNT=30, so entities with 30-49 score=3
+        # samples were reported as re-run candidates that step 4 would skip
+        # again).
+        uv run 4_vectors.py \
+            --activations_dir "$OUTPUT_DIR/activations" \
+            --scores_dir "$OUTPUT_DIR/$SCORES_SUB" \
+            --output_dir "$OUTPUT_DIR/$VECTORS_SUB" \
+            --min_count "$CHRISTINA_MIN_COUNT" \
+            || step_failed "Step 4" "4_vectors.py exited non-zero; see its [ERROR] lines above"
+    fi
 
     scan_before_axis
 
     echo ""
     echo "=== Step 5: Computing axis ==="
     uv run 5_axis.py \
-        --vectors_dir "$OUTPUT_DIR/vectors" \
-        --output "$OUTPUT_DIR/axis.pt" \
+        --vectors_dir "$OUTPUT_DIR/$VECTORS_SUB" \
+        --output "$OUTPUT_DIR/$AXIS_NAME" \
         || step_failed "Step 5" "5_axis.py exited non-zero (see above)"
 
     echo ""
     echo "=== Pipeline complete ==="
-    echo "Axis saved to: $OUTPUT_DIR/axis.pt"
+    echo "Axis saved to: $OUTPUT_DIR/$AXIS_NAME"
 
 # ---- Roger mode (types-aware) ---------------------------------------------
 else
 
-    # -- Step 0: Generate, extract, and vectorize default (once) ---------------
-    run_step0_default --mode roger --roles_only --roles_dir "$DEFAULT_ROLE_DIR" \
-        --reduce_questions "$REDUCE_QUESTIONS"
+    if [ "$FROM_STEP" -lt 3 ]; then
+        # -- Step 0: Generate, extract, and vectorize default (once) ---------------
+        run_step0_default --mode roger --roles_only --roles_dir "$DEFAULT_ROLE_DIR" \
+            --reduce_questions "$REDUCE_QUESTIONS"
 
-    # -- Step 1: Generate responses ------------------------------------------
-    echo "=== Step 1: Generating responses ==="
-    for type in $TYPES; do
-        echo "--- Step 1 [$type] ---"
-        type_dir_name=$(type_subdir "$type")
-        TYPE_DIR="$OUTPUT_DIR/$type_dir_name"
-        # symlink_default reads the local variable $type, but uses it only as
-        # the destination prefix; for the combo subsets we want the symlink
-        # placed under combinations/ so override $type for the helper call.
-        type_for_symlink="$type"; type="$type_dir_name"
-        symlink_default responses jsonl
-        type="$type_for_symlink"
+        # -- Step 1: Generate responses ------------------------------------------
+        echo "=== Step 1: Generating responses ==="
+        for type in $TYPES; do
+            echo "--- Step 1 [$type] ---"
+            type_dir_name=$(type_subdir "$type")
+            TYPE_DIR="$OUTPUT_DIR/$type_dir_name"
+            # symlink_default reads the local variable $type, but uses it only as
+            # the destination prefix; for the combo subsets we want the symlink
+            # placed under combinations/ so override $type for the helper call.
+            type_for_symlink="$type"; type="$type_dir_name"
+            symlink_default responses jsonl
+            type="$type_for_symlink"
 
-        case "$type" in
-            combinations|r_combinations|t_combinations)
-                # Subset flag (empty for full combinations; --combos_only_r /
-                # --combos_only_t for the half-grid subsets).  Skip already-
-                # generated halves are a no-op thanks to per-file skip logic.
-                subset_flag=""
-                case "$type" in
-                    r_combinations) subset_flag="--combos_only_r" ;;
-                    t_combinations) subset_flag="--combos_only_t" ;;
-                esac
-                uv run 1_generate.py \
-                    --mode roger \
-                    --model "$MODEL" \
-                    --goal_count "$GOAL_COUNT" \
-                    --non_goal_count "$NON_GOAL_COUNT" \
-                    --reduce_questions "$REDUCE_QUESTIONS" \
-                    --no_traits $subset_flag \
-                    --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-                    --output_dir "$TYPE_DIR/responses"
-                ;;
-            roles)
-                uv run 1_generate.py \
-                    --mode roger \
-                    --model "$MODEL" \
-                    --reduce_questions "$REDUCE_QUESTIONS" \
-                    --roles_only \
-                    --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-                    --output_dir "$TYPE_DIR/responses"
-                ;;
-            traits)
-                uv run 1_generate.py \
-                    --mode roger \
-                    --model "$MODEL" \
-                    --reduce_questions "$REDUCE_QUESTIONS" \
-                    --traits_only \
-                    --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-                    --output_dir "$TYPE_DIR/responses"
-                ;;
-        esac
-    done
-    echo ""
+            case "$type" in
+                combinations|r_combinations|t_combinations)
+                    # Subset flag (empty for full combinations; --combos_only_r /
+                    # --combos_only_t for the half-grid subsets).  Skip already-
+                    # generated halves are a no-op thanks to per-file skip logic.
+                    subset_flag=""
+                    case "$type" in
+                        r_combinations) subset_flag="--combos_only_r" ;;
+                        t_combinations) subset_flag="--combos_only_t" ;;
+                    esac
+                    uv run 1_generate.py \
+                        --mode roger \
+                        --model "$MODEL" \
+                        --goal_count "$GOAL_COUNT" \
+                        --non_goal_count "$NON_GOAL_COUNT" \
+                        --reduce_questions "$REDUCE_QUESTIONS" \
+                        --no_traits $subset_flag \
+                        --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+                        --output_dir "$TYPE_DIR/responses"
+                    ;;
+                roles)
+                    uv run 1_generate.py \
+                        --mode roger \
+                        --model "$MODEL" \
+                        --reduce_questions "$REDUCE_QUESTIONS" \
+                        --roles_only \
+                        --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+                        --output_dir "$TYPE_DIR/responses"
+                    ;;
+                traits)
+                    uv run 1_generate.py \
+                        --mode roger \
+                        --model "$MODEL" \
+                        --reduce_questions "$REDUCE_QUESTIONS" \
+                        --traits_only \
+                        --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+                        --output_dir "$TYPE_DIR/responses"
+                    ;;
+            esac
+        done
+        echo ""
+    elif [ ! -f "$OUTPUT_DIR/default/vectors/default.pt" ]; then
+        # --from-step 3 or later: step 0 is not run, and step 5 needs its vector
+        echo "ERROR: --from-step $FROM_STEP needs the default vector, $OUTPUT_DIR/default/vectors/default.pt" >&2
+        exit 1
+    fi
 
     # Step 2 honours the r_/t_ subset distinction so disk-limited runs can
     # extract only one half of the combination grid at a time (each .pt is
@@ -832,12 +913,16 @@ else
             uv run 3_judge.py \
                 --entity_type "$ENT_TYPE" \
                 --responses_dir "$TYPE_DIR/responses" \
-                --output_dir "$TYPE_DIR/scores" \
+                --output_dir "$TYPE_DIR/$SCORES_SUB" \
                 "${JUDGE_ARGS[@]}"
         done
     }
 
-    if [ "$STEPS23_PARALLEL" = "true" ]; then
+    if [ "$FROM_STEP" -eq 3 ]; then
+        run_step3_loop || step_failed "Step 3" "3_judge.py exited non-zero (see above)"
+    elif [ "$FROM_STEP" -ge 4 ]; then
+        :   # steps 2 and 3 not run
+    elif [ "$STEPS23_PARALLEL" = "true" ]; then
         echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
         echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
         echo ""
@@ -861,20 +946,22 @@ else
     echo ""
 
     # -- Step 4: Compute vectors ----------------------------------------------
-    echo "=== Step 4: Computing vectors ==="
-    for type in $DEDUP_TYPES; do
-        echo "--- Step 4 [$type] ---"
-        TYPE_DIR="$OUTPUT_DIR/$type"
-        symlink_default vectors pt
+    if [ "$FROM_STEP" -le 4 ]; then
+        echo "=== Step 4: Computing vectors ==="
+        for type in $DEDUP_TYPES; do
+            echo "--- Step 4 [$type] ---"
+            TYPE_DIR="$OUTPUT_DIR/$type"
+            symlink_default vectors pt "$VECTORS_SUB"
 
-        uv run 4_vectors.py \
-            --activations_dir "$TYPE_DIR/activations" \
-            --scores_dir "$TYPE_DIR/scores" \
-            --output_dir "$TYPE_DIR/vectors" \
-            --min_count "$MIN_COUNT" \
-            || step_failed "Step 4 [$type]" "4_vectors.py exited non-zero; see its [ERROR] lines above"
-    done
-    echo ""
+            uv run 4_vectors.py \
+                --activations_dir "$TYPE_DIR/activations" \
+                --scores_dir "$TYPE_DIR/$SCORES_SUB" \
+                --output_dir "$TYPE_DIR/$VECTORS_SUB" \
+                --min_count "$MIN_COUNT" \
+                || step_failed "Step 4 [$type]" "4_vectors.py exited non-zero; see its [ERROR] lines above"
+        done
+        echo ""
+    fi
 
     scan_before_axis
 
@@ -885,15 +972,15 @@ else
         TYPE_DIR="$OUTPUT_DIR/$type"
 
         uv run 5_axis.py \
-            --vectors_dir "$TYPE_DIR/vectors" \
-            --output "$TYPE_DIR/axis.pt" \
+            --vectors_dir "$TYPE_DIR/$VECTORS_SUB" \
+            --output "$TYPE_DIR/$AXIS_NAME" \
             || step_failed "Step 5 [$type]" "5_axis.py exited non-zero (see above)"
     done
     echo ""
 
     echo "=== Pipeline complete ==="
     for type in $DEDUP_TYPES; do
-        echo "  $type axis: $OUTPUT_DIR/$type/axis.pt"
+        echo "  $type axis: $OUTPUT_DIR/$type/$AXIS_NAME"
     done
 
 fi

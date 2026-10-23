@@ -1097,7 +1097,7 @@ The pipeline (`pipeline/1_generate.py`) supports two modes:
 
 **Step 3 eval_prompt routing**: The judge (`3_judge.py`) requires an explicit `--entity_type {role,trait,combination}` flag to select the eval_prompt:
 
-- `role` — look up stem in `data/roles/instructions/`, use its `eval_prompt` field.
+- `role` — look up stem in `data/roles/instructions/`, build the 0-3 rubric of `--prompt_version` from the role's name and description (until 2026-10-23 its `eval_prompt` field, which equals version 3's rendering).
 - `trait` — look up stem in `data/traits/instructions/`, build a pipeline-specific 0-3 eval_prompt from the description. (The 0-100 `eval_prompt` in trait JSONs is NOT used by the pipeline, since `parse_judge_score()` rejects scores > 3.)
 - `combination` — parse an `r_<role>__<trait>` or `t_<role>__<trait>` filename, build a compound 0-3 eval_prompt from both descriptions.
 

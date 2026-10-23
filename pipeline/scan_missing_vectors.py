@@ -894,13 +894,22 @@ def discover_scan_targets(
             #   vectors_unfiltered/  <->  scores_unfiltered/  (mode=unfiltered)
             #   vectors/             <->  scores/             (mode=filtered)
             #   vectors_*_unfiltered <->  scores_unfiltered/  (mode=unfiltered)
+            #   vectors<S>           <->  scores<S>/          (mode=filtered), when
+            #                             that directory exists: a prompt
+            #                             version's vectors_v4/ and scores_v4/
+            #                             (run_pipeline.sh --judge-prompt-version,
+            #                             2026-10-23)
             #   vectors_*            <->  scores/             (mode=filtered)
             # When the matching scores dir is absent, fall back to the
             # other one if available, otherwise leave None (the scanner
             # will then return missing_scores for non-default roles).
+            same_suffix_scores = entity_dir / ("scores" + vec_dir.name[len("vectors"):])
             if vec_dir.name.endswith("_unfiltered"):
                 mode = "unfiltered"
                 target_scores = unfiltered_scores or filtered_scores
+            elif vec_dir.name != "vectors" and same_suffix_scores.is_dir():
+                mode = "filtered"
+                target_scores = same_suffix_scores
             else:
                 mode = "filtered" if filtered_scores is not None else "unfiltered"
                 target_scores = filtered_scores or unfiltered_scores

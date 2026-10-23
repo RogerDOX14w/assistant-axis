@@ -105,6 +105,23 @@ axis_judge_correlation `RUBRIC_VERSION` v4 → v5 (2026-10-12, D5): `parse_signe
 record for traceability; old records remain valid but are now
 distinguishable from records produced under the new rubric.
 
+**Pipeline step 3's rubrics are versioned (Roger, 2026-10-23)** in
+[`assistant_axis/judge_rubrics.py`](assistant_axis/judge_rubrics.py):
+`3_judge.py --prompt_version N` (0 the original number-only rubrics read
+as the first integer, 3 the current ones and the default, 4 the draft
+being decided from the role rubric experiment, so far A1), and
+`run_pipeline.sh --from-step 3 --judge-prompt-version N` reruns steps 3 to
+5 into `scores_v<N>/`, `vectors_v<N>/`, `axis_v<N>.pt` to compare a
+rubric's vectors on the same activations.  A change to a step-3 rubric
+goes into the draft version (4) or a new one, **never into a settled
+version** (their hashes are pinned in
+`assistant_axis/tests/test_judge_rubrics.py`); step 3 renders role
+rubrics from these templates and no longer reads a role file's
+`eval_prompt` (pinned equal to version 3 for every role).  A scores
+directory holds one version: step 3 refuses one judged under another, or
+under an earlier text of the draft (`judge_rubric.json`'s `prompt_sha256`).
+Details: [`pipeline/README.md`](pipeline/README.md), "Prompt versions".
+
 **Per-entity drift-on-resume check (May 2026)**.  Both static-mode
 ([`score_static_mode`](results_analysis/axis_judge_correlation.py))
 and response-mode
@@ -327,7 +344,7 @@ prompts of the entities concerned: a rubric change for them.
 | site | version | notes |
 | --- | --- | --- |
 | [`axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py) `build_static_prompt`, `build_response_batch_prompt` | `RUBRIC_VERSION` v3 → v4 | scored entity, examples and header; the pair-axis header is composed from the two pole labels (`careless (from HEXACO) (+) vs conscientious (from HEXACO) (-) [traits]`, nested parentheses accepted); a free-text axis name keeps the mechanical form.  Two scoped v3 → v4 edges in `rubric_equivalences.yaml`, no global edge |
-| [`pipeline/3_judge.py`](pipeline/3_judge.py) trait and combination prompts | `JUDGE_RUBRIC_VERSION` 2 (new), stamped in `judge_rubric.json` beside the scores; **3** since 2026-10-12 (walk-through P4 / D5: a reply is read by `parse_judge_score(require_marker=True)`, exactly one `SCORE:` marker, and a reply with none or several, or cut at `max_tokens`, is unparseable; prompts unchanged) | the combination prompt showed raw stems (`devils_advocate`) before; role prompts are each file's baked `eval_prompt` (their artefacts, "Gemma, an LLM" and the rest, stay until the pod experiment of [`plan_role_rubric_experiment.md`](reports/pipeline/plan_role_rubric_experiment.md) shows a change helps; Roger, 2026-10-13) |
+| [`pipeline/3_judge.py`](pipeline/3_judge.py) trait and combination prompts | `JUDGE_RUBRIC_VERSION` 2 (new), stamped in `judge_rubric.json` beside the scores; **3** since 2026-10-12 (walk-through P4 / D5: a reply is read by `parse_judge_score(require_marker=True)`, exactly one `SCORE:` marker, and a reply with none or several, or cut at `max_tokens`, is unparseable; prompts unchanged) | the combination prompt showed raw stems (`devils_advocate`) before; role prompts were each file's baked `eval_prompt` until 2026-10-23, and are now rendered from the versioned templates (version 3 is that text; their artefacts, "Gemma, an LLM" and the rest, stay in version 3, and the edits the pod experiment of [`plan_role_rubric_experiment.md`](reports/pipeline/plan_role_rubric_experiment.md) shows help go into version 4; Roger, 2026-10-13 and 2026-10-23) |
 | [`score_combinations.py`](data_analysis/score_combinations.py) | `RUBRIC_VERSION` 2 (new), in the output's metadata | |
 | [`steering_judges.py`](assistant_axis/steering_judges.py) via the spec builders in [`post_judge.py`](steering/post_judge.py) and [`run_sweep.py`](steering/run_sweep.py) | coherence 5 → 6, RP 4 → 5, effect 7 → 8 | config stems become labels after the descriptions are read by stem; a derived axis name is `<neg label>-<pos label>` |
 | [`generate_antonyms.py`](data_analysis/generate_antonyms.py) (trait and role checks) | results carry `prompt_form` and `prompt_label` | the trait check showed the stem before; `seed_entities.check_history_record` keeps the two fields |

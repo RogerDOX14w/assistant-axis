@@ -1002,3 +1002,201 @@ def test_a_stale_combination_score_stops_the_run(judge, monkeypatch, tmp_path, c
     assert e.value.code == 1 and client.batches_created == []
     assert "r_chef__patient" in caplog.text and "pairs_sha256" in caplog.text
     assert "r_chef__stoic" in caplog.text                     # unlisted: a warning
+
+
+# ---------------------------------------------------------------------------
+# Prompt versions (--prompt_version, 2026-10-23)
+# ---------------------------------------------------------------------------
+
+def _load_module(name: str, rel: str):
+    spec = importlib.util.spec_from_file_location(name, REPO / rel)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _role_stems():
+    return [p.stem for p in sorted(ROLES.glob("*.json")) if p.stem != "default"]
+
+
+def test_version_3_sends_every_role_files_baked_eval_prompt(judge):
+    """Until 2026-10-23 step 3 sent the eval_prompt baked into the role file;
+    it now renders the template, and version 3's rendering must be that text
+    for every role (the generator bakes the same template, so a role whose
+    description is edited without rebuilding its eval_prompt fails here)."""
+    differ = [s for s in _role_stems()
+              if judge.resolve_eval_prompt(s, ROLES, TRAITS, "role", prompt_version=3)
+              != json.loads((ROLES / f"{s}.json").read_text())["eval_prompt"]]
+    assert differ == []
+
+
+def test_version_4_role_prompt_is_the_experiments_a1_arm(judge):
+    """Version 4 so far is arm A1 of the role rubric experiment, which Roger
+    approved on the prompts that experiment judged."""
+    rre = _load_module("_role_rubric_experiment_under_test", "data_analysis/role_rubric_experiment.py")
+    differ = []
+    for s in _role_stems():
+        baked = json.loads((ROLES / f"{s}.json").read_text())["eval_prompt"]
+        if judge.resolve_eval_prompt(s, ROLES, TRAITS, "role", prompt_version=4) != rre.arm_template("A1", baked):
+            differ.append(s)
+    assert differ == []
+
+
+def test_version_0_prompts_ask_for_the_number_alone(judge):
+    role = judge.resolve_eval_prompt("altruist", ROLES, TRAITS, "role", prompt_version=0)
+    assert role.endswith("Don't say anything else, just the number. "
+                         "Don't say anything else, just the number.")
+    trait = judge.resolve_eval_prompt("patient", ROLES, TRAITS, "trait", prompt_version=0)
+    assert trait.endswith("Respond with a number between 0 and 3. Don't say anything else, just the number.")
+    combo = judge.resolve_eval_prompt("r_devils_advocate__systems_thinker", ROLES, TRAITS,
+                                      "combination", prompt_version=0)
+    assert "**devil's advocate**" in combo and combo.endswith("just the number.")
+
+
+@pytest.mark.parametrize("text,finish,score,problem", [
+    ("2", None, 2, None),
+    ("3", "length", 3, None),                 # version 0 reads a cut reply like any other
+    ("Score: 1", None, 1, None),
+    ("4", None, None, "out_of_range"),
+    ("I cannot rate this.", None, None, "no_integer"),
+    ("", None, None, "no_reply"),
+])
+def test_version_0_reading(judge, text, finish, score, problem):
+    judge.REPLY_PROBLEMS.clear()
+    assert judge.score_reply(text, finish, reply_format="first_integer") == score
+    assert dict(judge.REPLY_PROBLEMS) == ({problem: 1} if problem else {})
+
+
+def test_version_3_reading_is_unchanged(judge):
+    judge.REPLY_PROBLEMS.clear()
+    assert judge.score_reply("Reason.\nSCORE: 2") == 2
+    assert judge.score_reply("Reason.\nSCORE: 2", "length") is None
+    assert judge.score_reply("2") is None
+    assert dict(judge.REPLY_PROBLEMS) == {"truncated": 1, "no_marker": 1}
+
+
+def test_a_version_0_run_sends_the_original_request_and_stamps_it(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 3)
+    client = _client(text="2")
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--prompt_version", "0")
+    assert json.loads((output_dir / "patient.json").read_text()) == {f"pos_p0_q{q}": 2 for q in range(3)}
+    kwargs = client.chat.completions.create.call_args.kwargs
+    assert kwargs["max_completion_tokens"] == 10                        # the fork's default
+    assert kwargs["messages"][0]["content"].endswith("just the number.")
+    stamp = json.loads((output_dir / "judge_rubric.json").read_text())
+    assert stamp["rubric_version"] == 0 and stamp["rubric_versions"] == [0]
+    assert stamp["prompt_sha256"] == {"0": judge.PROMPT_VERSIONS[0].sha256("trait")}
+    assert stamp["reply_format"] == "first_integer"
+
+
+def test_max_tokens_given_overrides_the_versions_default(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 1)
+    client = _client(text="2")
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--prompt_version", "0",
+         "--max_tokens", "50")
+    assert client.chat.completions.create.call_args.kwargs["max_completion_tokens"] == 50
+
+
+def test_a_version_4_batch_run_records_its_hash(judge, monkeypatch, tmp_path):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores_v4"
+    _write_responses(responses_dir, "patient", 2)
+    client = FakeBatchClient()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--prompt_version", "4", batch=True)
+    assert len(json.loads((output_dir / "patient.json").read_text())) == 2
+    stamp = json.loads((output_dir / "judge_rubric.json").read_text())
+    assert stamp["rubric_versions"] == [4]
+    assert stamp["prompt_sha256"] == {"4": judge.PROMPT_VERSIONS[4].sha256("trait")}
+
+
+def test_a_directory_of_another_version_is_refused(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    _run(judge, monkeypatch, responses_dir, output_dir, _client(text="2"), "--prompt_version", "0")
+    _write_responses(responses_dir, "patient", 4)                    # two more to judge
+    client = _client()
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, responses_dir, output_dir, client)  # the default, version 3
+    assert e.value.code == 1 and client.chat.completions.create.call_count == 0
+    assert "judged under prompt version(s) 0, not 3" in caplog.text
+
+
+def test_a_changed_draft_is_refused(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores_v4"
+    _write_responses(responses_dir, "patient", 2)
+    output_dir.mkdir()
+    (output_dir / "judge_rubric.json").write_text(json.dumps(
+        {"rubric_version": 4, "rubric_versions": [4], "prompt_sha256": {"4": "0123456789abcdef"}}))
+    client = _client()
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, responses_dir, output_dir, client, "--prompt_version", "4")
+    assert e.value.code == 1 and client.chat.completions.create.call_count == 0
+    assert "another text of prompt version 4" in caplog.text
+
+
+def test_old_versions_1_to_3_may_still_mix(judge, tmp_path):
+    """Versions 1-3 send the same text and differ in how a reply was read:
+    a directory of unstamped (version 1) scores takes version 3 with the old
+    warning, as before 2026-10-23, but not version 0 or 4."""
+    (tmp_path / "patient.json").write_text(json.dumps({"pos_p0_q0": 3}))
+    assert judge.prompt_version_conflict(tmp_path, 3, "trait") is None
+    assert "version(s) 1, not 4" in judge.prompt_version_conflict(tmp_path, 4, "trait")
+    assert "version(s) 1, not 0" in judge.prompt_version_conflict(tmp_path, 0, "trait")
+    (tmp_path / "judge_rubric.json").write_text(json.dumps({"rubric_versions": [2, 3]}))
+    assert judge.prompt_version_conflict(tmp_path, 3, "trait") is None   # no hash recorded: accepted
+    assert judge.prompt_version_conflict(tmp_path / "empty", 0, "trait") is None
+
+
+def test_the_hash_checked_is_the_judged_types_own(judge, tmp_path):
+    """A roles directory judged under the draft records the draft's role
+    rubric hash: an edit to the draft's trait rubric must not stop it, and an
+    edit to its role rubric must."""
+    v4 = judge.PROMPT_VERSIONS[4]
+    stamp = judge.stamp_rubric(tmp_path, entity_type="role", judge_model="gpt-4.1-mini", prompt_version=4)
+    assert stamp["prompt_sha256"] == {"4": v4.sha256("role")} and v4.sha256("role") != v4.sha256("trait")
+    assert judge.prompt_version_conflict(tmp_path, 4, "role") is None
+    (tmp_path / "judge_rubric.json").write_text(json.dumps({**stamp, "prompt_sha256": {"4": "0" * 16}}))
+    assert "another text of prompt version 4" in judge.prompt_version_conflict(tmp_path, 4, "role")
+
+
+def test_a_batch_run_stamps_its_version_before_collecting(judge, monkeypatch, tmp_path):
+    """A run stopped after submitting has recorded the version its batches
+    were requested under, so a rerun under another version is refused rather
+    than reading their replies by its own rule."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+
+    async def stop(self, *a, **k):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(judge.OpenAIBatchRunner, "run", stop)
+    with pytest.raises(KeyboardInterrupt):
+        _run(judge, monkeypatch, responses_dir, output_dir, FakeBatchClient(), "--prompt_version", "0",
+             batch=True)
+    assert json.loads((output_dir / "judge_rubric.json").read_text())["rubric_versions"] == [0]
+    assert "version(s) 0, not 3" in judge.prompt_version_conflict(output_dir, 3, "trait")
+
+
+@pytest.mark.parametrize("value,message", [("1", "not runnable"), ("9", "no prompt version 9")])
+def test_unrunnable_versions_are_refused_at_the_command_line(judge, monkeypatch, tmp_path, capsys,
+                                                             value, message):
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, tmp_path, tmp_path / "scores", _client(), "--prompt_version", value)
+    assert e.value.code == 2 and message in capsys.readouterr().err
+
+
+def test_dry_run_names_the_version_and_a_conflict(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    output_dir.mkdir()
+    (output_dir / "judge_rubric.json").write_text(json.dumps({"rubric_versions": [0]}))
+    monkeypatch.setattr(sys, "argv", [
+        "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
+        "--traits_dir", str(TRAITS), "--entity_type", "trait", "--no_incongruity_filtering",
+        "--dry_run", "--prompt_version", "4"])
+    caplog.set_level("INFO")
+    asyncio.run(judge.main_async())
+    assert "Prompt version 4 (draft)" in caplog.text and "--max_tokens 200" in caplog.text
+    assert "A live run would stop" in caplog.text

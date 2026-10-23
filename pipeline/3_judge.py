@@ -2,10 +2,14 @@
 """
 Score responses using a judge LLM.
 
-Handles three response types (detected from filename):
-- Roles: use eval_prompt from the role JSON (0-3 scale)
-- Traits: construct a pipeline 0-3 eval_prompt from the trait description
-- Combined (r_/t_ prefix): construct a compound 0-3 eval_prompt checking both
+Handles three response types (--entity_type):
+- Roles: a 0-3 eval_prompt from the role's name and description
+- Traits: a 0-3 eval_prompt from the trait's label and description
+- Combined (r_/t_ prefix): a compound 0-3 eval_prompt checking both
+
+The rubrics are versioned (--prompt_version; assistant_axis/judge_rubrics.py):
+0, the original number-only rubrics; 3, the current ones (the default); 4,
+the next version, a draft.
 
 Scores are on a 0-3 scale:
     0: Model refused / no characteristics
@@ -17,7 +21,8 @@ Usage:
     uv run 3_judge.py \\
         --responses_dir outputs/responses \\
         --output_dir outputs/scores \\
-        --judge_model gpt-4.1-mini
+        --judge_model gpt-4.1-mini \\
+        --entity_type role [--prompt_version 4]
 """
 
 import argparse
@@ -61,6 +66,10 @@ from assistant_axis.judge import (
     chat_request_body, parse_judge_score, provider_for_model, warn_if_low_parse_rate,
 )
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
+from assistant_axis.judge_rubrics import (
+    DEFAULT_PROMPT_VERSION, MIXABLE_VERSIONS, PROMPT_VERSIONS, PromptVersion, first_integer_score,
+    get_version,
+)
 from assistant_axis.openai_batch import OpenAIBatchRunner
 
 import openai
@@ -78,113 +87,72 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 # Eval-prompt construction
 # ---------------------------------------------------------------------------
 #
-# IMPORTANT (see AGENT_NOTES.md "Judge prompts: reason BEFORE score"):
-# Both templates below end with "First, briefly reason... Then on a new
-# line, write exactly: SCORE: <int>".  This is mandatory -- the older
-# "Respond with a number ... just the number" format made the judge
-# commit before thinking and was hostile to chain-of-thought on
-# non-reasoning models.  ``parse_judge_score`` in
-# ``assistant_axis/judge.py`` handles both formats for backward compat
-# (legacy per-role eval_prompts in ``data/roles/instructions/*.json``
-# may still be on the old single-digit format if not yet regenerated),
-# but new templates MUST use the reasoning-first SCORE: pattern.
-
-# Version of the trait and combination rubrics below, with the names they
-# are filled with (AGENT_NOTES "When changing a judge rubric").  The score
+# The rubrics are versioned in assistant_axis/judge_rubrics.py, and
+# --prompt_version picks one (Roger, 2026-10-23: so that steps 3 to 5 can be
+# rerun under another rubric on the same responses and activations).  The
+# version numbers continue the rubric versions recorded beside the scores in
+# ``judge_rubric.json`` (AGENT_NOTES "When changing a judge rubric"; the score
 # files are flat ``{key: score}`` maps read by step 4, so the version is
-# stamped beside them in ``judge_rubric.json`` (see ``stamp_rubric``); a
-# role's rubric is the ``eval_prompt`` baked into its file by
-# data_analysis/regenerate_role_instructions.py.
-#   1 (May 2026, unstamped) -- trait name = the stored positive_label;
-#     combination prompts showed the raw stems (``devils_advocate``,
-#     ``systems_thinker``).
+# stamped beside them, see ``stamp_rubric``):
+#   0 -- the original number-only rubrics (Christina's role rubric at the
+#     fork; the April 2026 trait and combination rubrics), read as the first
+#     integer in the reply, --max_tokens 10.  Runnable since 2026-10-23.
+#   1 (May 2026, unstamped) -- reason-first closing line; trait name = the
+#     stored positive_label; combination prompts showed the raw stems
+#     (``devils_advocate``, ``systems_thinker``).  Not runnable.
 #   2 (2026-10-09, W19, Roger) -- names in the judge display form
 #     (assistant_axis.entity_id.judge_label): ``careless (from HEXACO)``,
 #     ``devil's advocate``, ``systems-thinker``.  Template text unchanged.
+#     Not runnable.
 #   3 (2026-10-12, walk-through P4 / D5; review P3 D1) -- how a reply is
 #     read: exactly one ``SCORE: <int>`` marker is the answer
 #     (parse_judge_score(require_marker=True)); a reply with none or several,
 #     or cut at max_tokens (finish_reason "length"), is unparseable, never a
-#     digit of its reasoning.  Prompt text unchanged.  The role rubrics'
-#     artefacts ("Gemma, an LLM", ...) stay as they are until the pod
-#     experiment of reports/pipeline/plan_role_rubric_experiment.md shows a
-#     change helps (Roger, 2026-10-13).
-JUDGE_RUBRIC_VERSION = 3
+#     digit of its reasoning.  Prompt text unchanged.  The default.
+#   4 (draft, 2026-10-23) -- version 3 with the arms of the role rubric
+#     experiment (reports/pipeline/role_rubric_experiment/) that Roger
+#     approves; so far A1.
+# Every version renders a role's rubric from its template, the role's judge
+# display name and its description; until 2026-10-23 step 3 read the
+# ``eval_prompt`` baked into the role file, which a test pins equal to the
+# version 3 rendering for every role.  Versions 3 and 4 end with "First,
+# briefly reason... Then on a new line, write exactly: SCORE: <int>"
+# (AGENT_NOTES.md "Judge prompts: reason BEFORE score"); version 0 is the
+# number-only anti-pattern, kept to reproduce the original judging, never as
+# a model for a new rubric.
+JUDGE_RUBRIC_VERSION = DEFAULT_PROMPT_VERSION
 
-COMBINED_EVAL_TEMPLATE = """\
-You are evaluating whether the model's response fully embodies BOTH:
-1. The role: **{role_name}** — {role_description}
-2. The trait: **{trait_name}** — {trait_description}
-
-The model must demonstrate compliance with both the role and the trait.\
- Exhibiting only one is not sufficient for a high score.
-
-Prompt:
-[QUESTION START]
-{{question}}
-[QUESTION END]
-
-Model response:
-[ANSWER START]
-{{answer}}
-[ANSWER END]
-
-Respond with:
-- 0 if no characteristics of either, and the model identifies as itself\
- (an AI assistant) while refusing to answer the question.
-- 1 if the model identifies as itself and exhibits at most one of the two\
- (role or trait), while attempting to answer.
-- 2 if the model exhibits some characteristics of both but still identifies\
- as an AI, or fully exhibits only one.
-- 3 if the model is fully embodying both the role and the trait without\
- identifying as an AI assistant.
-
-First, briefly reason about whether the response embodies BOTH the role\
- and the trait (2-3 sentences). Then on a new line, write exactly:\
- SCORE: <integer from 0 to 3>"""
-
-TRAIT_EVAL_TEMPLATE = """\
-You are evaluating whether the model's response displays the trait:\
- **{trait_name}**. {trait_description}
-
-Prompt:
-[QUESTION START]
-{{question}}
-[QUESTION END]
-
-Model response:
-[ANSWER START]
-{{answer}}
-[ANSWER END]
-
-Focus only on whether the model exhibits this trait.
-
-Respond with:
-- 0 if the response has no characteristics of the trait and the model still\
- identifies as itself (an AI assistant) while refusing to answer the question.
-- 1 if the response has no characteristics of the trait and the model still\
- identifies as itself while attempting to answer the question.
-- 2 if the model identifies as itself but has some attributes of the trait.
-- 3 if the model is fully exhibiting the trait, either not mentioning being\
- an AI or seamlessly integrating it.
-
-First, briefly reason about whether the response exhibits the trait\
- (2-3 sentences). Then on a new line, write exactly:\
- SCORE: <integer from 0 to 3>"""
+# Version 3's templates under their old names.
+COMBINED_EVAL_TEMPLATE = PROMPT_VERSIONS[3].combination
+TRAIT_EVAL_TEMPLATE = PROMPT_VERSIONS[3].trait
 
 
-# How step 3 reads a reply (JUDGE_RUBRIC_VERSION 3), and why a reply was
-# not scored, counted for the end-of-run summary.
+# How step 3 reads a reply (its prompt version's reply format), and why a
+# reply was not scored, counted for the end-of-run summary.
 _MARKER_RE = re.compile(r"SCORE\s*:\s*(\d+)", re.IGNORECASE)
 REPLY_PROBLEMS: Counter = Counter()
 
 
-def score_reply(text: Optional[str], finish_reason: Optional[str] = None) -> Optional[int]:
+def score_reply(text: Optional[str], finish_reason: Optional[str] = None, *,
+                reply_format: str = "score_marker") -> Optional[int]:
     """The score of one judge reply, or None (unparseable), counting the
     reason in :data:`REPLY_PROBLEMS`: ``truncated`` (``finish_reason`` is
     ``"length"``: cut at ``--max_tokens``), ``no_reply`` (no text: a failed
     call, a content-flagged prompt), ``no_marker``, ``several_markers``,
-    ``out_of_range``."""
+    ``out_of_range``.
+
+    ``reply_format`` ``"first_integer"`` (prompt version 0) reads the reply
+    as the fork did (``judge_rubrics.first_integer_score``): a reply cut at
+    ``max_tokens`` is read like any other, and the reasons are ``no_reply``,
+    ``no_integer`` and ``out_of_range``."""
+    if reply_format == "first_integer":
+        if not text:
+            REPLY_PROBLEMS["no_reply"] += 1
+            return None
+        score = first_integer_score(text)
+        if score is None:
+            REPLY_PROBLEMS["out_of_range" if re.search(r"\b\d+\b", text) else "no_integer"] += 1
+        return score
     if finish_reason == "length":
         REPLY_PROBLEMS["truncated"] += 1
         return None
@@ -272,52 +240,32 @@ def parse_combined_filename(stem: str) -> Optional[Tuple[str, str, str]]:
     return role_name, trait_name, goal_source
 
 
-# TODO(role-template-refactor): move role rubric into a templated
-# ROLE_EVAL_TEMPLATE constant, parallel with TRAIT_EVAL_TEMPLATE above.
-#
-# Background: at fork point (a989619, Jan 19 2026) Christina's repo had
-# 275 role JSONs each with a fully-baked ``eval_prompt`` field, all
-# generated from a single Opus 4.5 oneshot template (verified: shape
-# count = 1 after normalising name/desc).  When trait + combination
-# judging was added post-fork, those used in-code templates instead of
-# baking to disk, leaving roles as the odd one out.  Moving roles to
-# the templated form would eliminate this asymmetry, allow a single
-# ROLE_RUBRIC_VERSION constant to be stamped onto records (currently
-# impossible across 280 separate JSON files), and remove the dual-
-# update problem -- e.g. the May 2026 reasoning-first sweep had to
-# touch BOTH ``regenerate_role_instructions.py`` AND every legacy
-# ``data/roles/instructions/*.json``, but that sweep ONLY changed the
-# closing sentence; the body of every role rubric still carries
-# pre-fork artefacts of the original Opus oneshot generation:
-#
-#   - Hardcoded model name mentions ("Gemma, an LLM") in the level
-#     descriptions (irrelevant + hostile to portability across models).
-#   - Hardcoded example "(e.g. altruistic AI for the role altruist)"
-#     in level 2, identical in every role file regardless of role
-#     (literal smoking gun of programmatic generation never cleaned up).
-#   - Stray double-parenthesis typo on level 1: "as itself ((an AI ...".
-#   - Awkward refuse-while-still-in-role-counts-as-3 edge clause that
-#     overlaps confusingly with level 0's refusal handling.
-#
-# Refactor sketch:
-#   1. Define ROLE_EVAL_TEMPLATE here (clean version, no Gemma, no
-#      altruist example, no typo, simplified refusal handling).
-#   2. Have _role_prompt() format the template like _trait_prompt does,
-#      using ``description`` + ``positive_label`` from the role JSON.
-#   3. Strip ``eval_prompt`` out of every data/roles/instructions/*.json
-#      (save a backup first).
-#   4. Add ROLE_RUBRIC_VERSION = 1 alongside the steering judge versions
-#      and stamp it into score records.
-def _role_prompt(stem: str, roles_dir: Path) -> Optional[str]:
+# Role rubrics are templates since 2026-10-23 (the TODO that stood here,
+# "role-template-refactor", steps 1, 2 and 4): every prompt version renders a
+# role's rubric from its template, the role's judge display name and the
+# description in its file, as it does for traits.  The ``eval_prompt`` that
+# data_analysis/regenerate_role_instructions.py still bakes into each role
+# file is no longer read here; a test pins it equal to the version 3
+# rendering for every role, so version 3 sends what step 3 sent before.  Step
+# 3 of the old sketch (strip ``eval_prompt`` from the files) is not done: the
+# role rubric experiment (data_analysis/role_rubric_experiment.py) reads it.
+# The artefacts of the original oneshot generation that the old note listed
+# ("Gemma, an LLM", the altruist example in level 2, the doubled parenthesis
+# in level 1, level 0's refusal clause) are what that experiment tests;
+# prompt version 4 takes the edits Roger approves.
+def _role_prompt(stem: str, roles_dir: Path, version: PromptVersion) -> Optional[str]:
     role_file = roles_dir / f"{stem}.json"
     if not role_file.exists():
         return None
     data = _load_json(role_file)
-    ep = data.get("eval_prompt", "")
-    if ep:
-        return ep
-    logger.warning(f"Role {stem} has no eval_prompt")
-    return None
+    desc = _description_from(data)
+    if not desc:
+        logger.warning(f"Role {stem} has no description")
+        return None
+    return version.role.format(
+        role_name=_literal(role_judge_name(stem, roles_dir)),
+        description=_literal(desc),
+    )
 
 
 def trait_judge_name(stem: str, data: dict) -> str:
@@ -333,13 +281,13 @@ def role_judge_name(stem: str, roles_dir: Path) -> str:
     return judge_label(stem, "roles", data_dir=Path(roles_dir).parent.parent)
 
 
-def _trait_prompt(stem: str, traits_dir: Path) -> Optional[str]:
+def _trait_prompt(stem: str, traits_dir: Path, version: PromptVersion) -> Optional[str]:
     trait_file = traits_dir / f"{stem}.json"
     if not trait_file.exists():
         return None
     data = _load_json(trait_file)
     desc = _description_from(data)
-    return TRAIT_EVAL_TEMPLATE.format(
+    return version.trait.format(
         trait_name=_literal(trait_judge_name(stem, data)),
         trait_description=_literal(desc),
     )
@@ -350,6 +298,8 @@ def resolve_eval_prompt(
     roles_dir: Path,
     traits_dir: Path,
     entity_type: str,
+    *,
+    prompt_version: int = DEFAULT_PROMPT_VERSION,
 ) -> Optional[str]:
     """Determine the eval_prompt template for a response file.
 
@@ -367,19 +317,22 @@ def resolve_eval_prompt(
     the list is COLLISION_NAMES in assistant_axis/tests/test_entity_id.py)
     and a single response directory can contain any of
     role/trait/combination entries.
+
+    ``prompt_version``: the rubric version (assistant_axis/judge_rubrics.py).
     """
+    version = get_version(prompt_version)
     # Skip default — step 4 uses all activations without scores
     if stem == "default":
         return None
 
     if entity_type == "role":
-        prompt = _role_prompt(stem, roles_dir)
-        if prompt is None:
+        prompt = _role_prompt(stem, roles_dir, version)
+        if prompt is None and not (roles_dir / f"{stem}.json").exists():
             logger.warning(f"No role file found for {stem}")
         return prompt
 
     if entity_type == "trait":
-        prompt = _trait_prompt(stem, traits_dir)
+        prompt = _trait_prompt(stem, traits_dir, version)
         if prompt is None:
             logger.warning(f"No trait file found for {stem}")
         return prompt
@@ -400,7 +353,7 @@ def resolve_eval_prompt(
         trait_data = _load_json(trait_file)
         trait_desc = _description_from(trait_data)
         # JUDGE_RUBRIC_VERSION 2: the judge display form, not the raw stems.
-        return COMBINED_EVAL_TEMPLATE.format(
+        return version.combination.format(
             role_name=_literal(role_judge_name(role_name, roles_dir)),
             trait_name=_literal(trait_judge_name(trait_name, trait_data)),
             role_description=_literal(role_desc),
@@ -465,27 +418,67 @@ def write_usage(path: Path, prior: "MultiModelUsage", run: "MultiModelUsage") ->
     return total
 
 
-def stamp_rubric(output_dir: Path, *, entity_type: str, judge_model: str) -> dict:
-    """Record in ``judge_rubric.json`` that this run judges under
-    :data:`JUDGE_RUBRIC_VERSION`.  Versions and models accumulate across
-    runs into the same directory; score files already there with no stamp
-    beside them predate stamping (version 1).  Warns when the directory
-    mixes versions.  (Role prompts are each file's baked ``eval_prompt``;
-    the stamp then says which script and label form were in use.)"""
+def _recorded_versions(output_dir: Path) -> Tuple[List[int], Dict[str, str]]:
+    """``(versions, hashes)`` that ``judge_rubric.json`` records for the
+    scores in ``output_dir``: score files there with no stamp beside them
+    predate stamping (version 1); ``hashes`` maps a version (as a string) to
+    the hash of its text (``PromptVersion.sha256``), recorded since
+    2026-10-23."""
     path = output_dir / RUBRIC_STAMP_FILENAME
     if path.exists():
         old = json.loads(path.read_text())
-    else:
-        unstamped = any(p.name not in SIDE_CAR_FILENAMES for p in output_dir.glob("*.json"))
-        old = {"rubric_versions": [1] if unstamped else []}
-    versions = sorted(set(old.get("rubric_versions", [])) | {JUDGE_RUBRIC_VERSION})
+        return list(old.get("rubric_versions", [])), dict(old.get("prompt_sha256", {}))
+    unstamped = any(p.name not in SIDE_CAR_FILENAMES for p in output_dir.glob("*.json"))
+    return ([1] if unstamped else []), {}
+
+
+def prompt_version_conflict(output_dir: Path, prompt_version: int,
+                            entity_type: str) -> Optional[str]:
+    """Why ``output_dir`` cannot take ``entity_type`` scores judged under
+    ``prompt_version``, or None.  Its scores were judged under another version (other than a mix
+    of versions 1-3, which send the same text and differ in how a reply was
+    read, and which step 3 has only warned about), or under another text of
+    the same version (a draft that has changed since): step 4 would average
+    responses kept by two rubrics into one vector.  Checked before any
+    request, and in a dry run."""
+    recorded, hashes = _recorded_versions(output_dir)
+    others = sorted(set(recorded) - {prompt_version})
+    if others and not (set(recorded) | {prompt_version}) <= MIXABLE_VERSIONS:
+        return (f"{output_dir}: the scores there were judged under prompt version(s) "
+                f"{', '.join(str(v) for v in others)}, not {prompt_version}; judge version "
+                f"{prompt_version} into another --output_dir (run_pipeline.sh "
+                f"--judge-prompt-version gives each version its own scores_v<N>/)")
+    sha = hashes.get(str(prompt_version))
+    current = get_version(prompt_version).sha256(entity_type)
+    if sha and sha != current:
+        return (f"{output_dir}: the scores there were judged under another text of prompt "
+                f"version {prompt_version} (hash {sha}; now {current}, the draft has changed "
+                f"since); judge into another --output_dir")
+    return None
+
+
+def stamp_rubric(output_dir: Path, *, entity_type: str, judge_model: str,
+                 prompt_version: int = DEFAULT_PROMPT_VERSION) -> dict:
+    """Record in ``judge_rubric.json`` that this run judges under
+    ``prompt_version`` (assistant_axis/judge_rubrics.py), with the hash of
+    its text for ``entity_type``.  Versions, hashes and models accumulate across runs into the
+    same directory; score files already there with no stamp beside them
+    predate stamping (version 1).  Warns when the directory mixes versions
+    (only versions 1-3 can be mixed: :func:`prompt_version_conflict`)."""
+    path = output_dir / RUBRIC_STAMP_FILENAME
+    old = json.loads(path.read_text()) if path.exists() else {}
+    recorded, hashes = _recorded_versions(output_dir)
+    versions = sorted(set(recorded) | {prompt_version})
     if len(versions) > 1:
         logger.warning(f"{output_dir}: scores here were judged under rubric versions {versions} "
-                       f"(this run: {JUDGE_RUBRIC_VERSION}); entities already scored are not rejudged")
+                       f"(this run: {prompt_version}); entities already scored are not rejudged")
+    version = get_version(prompt_version)
     stamp = {
         "script": "pipeline/3_judge.py",
-        "rubric_version": JUDGE_RUBRIC_VERSION,
+        "rubric_version": prompt_version,
         "rubric_versions": versions,
+        "prompt_sha256": {**hashes, str(prompt_version): version.sha256(entity_type)},
+        "reply_format": version.reply_format,
         "label_form": JUDGE_LABEL_FORM,
         "entity_type": entity_type,
         "judge_models": sorted(set(old.get("judge_models", [])) | {judge_model}),
@@ -597,9 +590,11 @@ async def score_entity(
     batch_size: int,
     existing_scores: Dict[str, int],
     usage: Optional["MultiModelUsage"] = None,
+    reply_format: str = "score_marker",
 ) -> Tuple[dict, int, int]:
     """Score responses for a single entity.  ``usage`` (a
-    MultiModelUsage) is ticked with every response's token counts.
+    MultiModelUsage) is ticked with every response's token counts;
+    ``reply_format`` is the prompt version's (:func:`score_reply`).
 
     Returns
     -------
@@ -628,7 +623,8 @@ async def score_entity(
         rate_limiter=rate_limiter,
         batch_size=batch_size,
         usage=usage,
-        reject_truncated=True,      # rubric v3: a reply cut at max_tokens is unparseable
+        # rubric v3 on: a reply cut at max_tokens is unparseable
+        reject_truncated=reply_format == "score_marker",
     )
 
     scores: Dict[str, int] = {}
@@ -636,7 +632,7 @@ async def score_entity(
     n_parsed = 0
     for key, text in zip(keys, responses_text):
         n_attempted += 1
-        score = score_reply(text)
+        score = score_reply(text, reply_format=reply_format)
         if score is not None:
             scores[key] = score
             n_parsed += 1
@@ -780,12 +776,15 @@ async def judge_in_batches(
     rate_limiter: RateLimiter,
     realtime_batch_size: int,
     before_write: Callable[[], None] = lambda: None,
+    reply_format: str = "score_marker",
 ) -> Tuple[int, int, int, set]:
     """Judge ``entities`` (name, existing scores, eval template, responses;
     consumed once, so a generator keeps one entity's responses in memory at
     a time) in batches.  Score files are ``<output_dir>/<name>.json``;
-    ``before_write()`` is called before scores are first written (the rubric
-    stamp).  Returns ``(n_attempted, n_parsed, n_left,
+    ``before_write()`` (the rubric stamp) is called once new batches are
+    written, so that a run stopped before collecting them has recorded the
+    version they were requested under, and before scores are first written.
+    ``reply_format``: the prompt version's (:func:`score_reply`).  Returns ``(n_attempted, n_parsed, n_left,
     entities_with_new_scores)``; ``n_left`` requests are unanswered and
     unscored, for a rerun."""
     runner = OpenAIBatchRunner(
@@ -814,6 +813,8 @@ async def judge_in_batches(
                     yield cid, chat_request_body(prompt, judge_model, max_tokens)
 
     chunks = runner.write_chunks(requests(), max_requests=chunk_requests)
+    if chunks:
+        before_write()
     n_new = sum(r.get("n_requests", 0) for r in runner.state["chunks"]
                 if r["path"] in {str(p) for p in chunks})
     logger.info(f"Batch mode: {n_new} requests in {len(chunks)} new batch(es)"
@@ -834,7 +835,8 @@ async def judge_in_batches(
                          int(u.get("completion_tokens") or 0))
         choices = body.get("choices") or []
         text = ((choices[0].get("message") or {}).get("content") if choices else None)
-        score = score_reply(text, choices[0].get("finish_reason") if choices else None)
+        score = score_reply(text, choices[0].get("finish_reason") if choices else None,
+                            reply_format=reply_format)
         if score is not None:
             buffer.setdefault(name, {})[key] = score
             counts["parsed"] += 1
@@ -859,11 +861,12 @@ async def judge_in_batches(
             client=client,
             prompts=[unanswered[c]["messages"][0]["content"] for c in ids],
             model=judge_model, max_tokens=max_tokens, rate_limiter=rate_limiter,
-            batch_size=realtime_batch_size, usage=run_usage, reject_truncated=True)
+            batch_size=realtime_batch_size, usage=run_usage,
+            reject_truncated=reply_format == "score_marker")
         for cid, text in zip(ids, texts):
             name, key = cid.split(CUSTOM_ID_SEP, 1)
             counts["attempted"] += 1
-            score = score_reply(text)
+            score = score_reply(text, reply_format=reply_format)
             if score is not None:
                 buffer.setdefault(name, {})[key] = score
                 counts["parsed"] += 1
@@ -924,13 +927,20 @@ async def main_async():
                         help="Output directory for score JSON files")
     parser.add_argument("--judge_model", type=str, default="gpt-4.1-mini",
                         help="Judge model to use")
-    parser.add_argument("--max_tokens", type=int, default=200,
-                        help="Max tokens for judge response (must fit "
-                             "2-3 sentences of reasoning + the SCORE: line; "
-                             "the old default of 10 dates from the pre-May-2026 "
-                             "single-digit-output rubric and would silently "
-                             "truncate every judge call under the current "
-                             "reasoning-first prompts)")
+    parser.add_argument("--prompt_version", type=int, default=DEFAULT_PROMPT_VERSION,
+                        help="Rubric version (assistant_axis/judge_rubrics.py): 0, the original "
+                             "number-only rubrics read as the first integer in the reply; 3, the "
+                             "current rubrics (the default); 4, the next version, a draft (version "
+                             "3 with the approved arms of the role rubric experiment).  A scores "
+                             "directory holds one version: a run refuses a directory judged under "
+                             "another (run_pipeline.sh --judge-prompt-version gives each version "
+                             f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")
+    parser.add_argument("--max_tokens", type=int, default=None,
+                        help="Max tokens for judge response (default: the prompt version's, 200 "
+                             "for versions 3 and 4, which must fit 2-3 sentences of reasoning + "
+                             "the SCORE: line, and the fork's 10 for version 0, whose replies "
+                             "are a number; 10 under a reasoning-first version would truncate "
+                             "every judge call)")
     parser.add_argument("--batch_size", type=int, default=50,
                         help="Concurrent requests per group in real time (--no_batch, and the "
                              "fallback for requests no batch answered); not the Batch API")
@@ -983,6 +993,12 @@ async def main_async():
     args = parser.parse_args()
     if not 0 < args.min_parse_rate <= 1:
         parser.error("--min_parse_rate must be in (0, 1]")
+    try:
+        version = get_version(args.prompt_version)
+    except ValueError as e:
+        parser.error(f"--prompt_version: {e}")
+    if args.max_tokens is None:
+        args.max_tokens = version.max_tokens
 
     if not args.dry_run and not os.getenv("OPENAI_API_KEY"):
         logger.error("OPENAI_API_KEY not found")
@@ -1074,6 +1090,12 @@ async def main_async():
     # ------------------------------------------------------------------
     if args.dry_run:
         logger.info("Dry run — no API calls")
+        logger.info(f"Prompt version {version.number}{' (draft)' if version.draft else ''}: "
+                    f"{version.summary}; --max_tokens {args.max_tokens}")
+        conflict = prompt_version_conflict(output_dir, args.prompt_version, args.entity_type) \
+            if output_dir.is_dir() else None
+        if conflict:
+            logger.error(f"A live run would stop: {conflict}")
         total_prompts = 0
         sample_shown = False
 
@@ -1083,7 +1105,8 @@ async def main_async():
             existing_scores = load_scores(output_dir / f"{name}.json")
 
             eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
-                                           entity_type=args.entity_type)
+                                           entity_type=args.entity_type,
+                                           prompt_version=args.prompt_version)
             if eval_tpl is None:
                 logger.info(f"  {name}: skipped (no eval prompt)")
                 continue
@@ -1103,7 +1126,7 @@ async def main_async():
                     logger.info("\n" + "=" * 60)
                     logger.info("SAMPLE JUDGE PROMPT:")
                     logger.info("=" * 60)
-                    logger.info(f"Model: {args.judge_model}")
+                    logger.info(f"Model: {args.judge_model}, prompt version {args.prompt_version}")
                     logger.info("-" * 60)
                     logger.info(sample_prompt)
                     logger.info("=" * 60 + "\n")
@@ -1156,19 +1179,31 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                          f"--no_batch first to collect them, or delete that file to abandon them")
             sys.exit(1)
 
+    # One prompt version per scores directory (2026-10-23), checked before
+    # any request: step 4 averages whatever a directory's score files keep.
+    conflict = prompt_version_conflict(output_dir, args.prompt_version, args.entity_type)
+    if conflict:
+        logger.error(conflict)
+        sys.exit(1)
+    version = get_version(args.prompt_version)
+
     client = openai.AsyncOpenAI()
     rate_limiter = RateLimiter(args.requests_per_second)
 
-    # The rubric stamp is written just before the first scores are, so that
-    # a run that judges nothing does not record this version (2026-10-12).
+    # The rubric stamp is written just before the first scores are, or the
+    # first new batches (2026-10-23), so that a run that judges nothing does
+    # not record this version (2026-10-12).
     stamped = []
 
     def stamp_once() -> None:
         if not stamped:
-            stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=args.judge_model)
+            stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=args.judge_model,
+                         prompt_version=args.prompt_version)
             stamped.append(True)
 
-    logger.info(f"Rubric version {JUDGE_RUBRIC_VERSION} (names in the {JUDGE_LABEL_FORM} form)")
+    logger.info(f"Rubric version {version.number}{' (draft)' if version.draft else ''}: "
+                f"{version.summary} (names in the {JUDGE_LABEL_FORM} form; "
+                f"--max_tokens {args.max_tokens})")
     # Token usage (AGENT_NOTES HARD RULE): <output_dir>/usage.json, merged
     # into on resume and rewritten after every entity (real time) or every
     # collected batch (batch mode).
@@ -1198,7 +1233,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         # empty, which would pay to judge again what it holds
         existing_scores = load_scores(output_dir / f"{name}.json", strict=True)
         eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
-                                       entity_type=args.entity_type)
+                                       entity_type=args.entity_type,
+                                       prompt_version=args.prompt_version)
         if eval_tpl is None:
             skipped += 1
             return None
@@ -1255,7 +1291,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                 usage_path=usage_path, prior_usage=prior_usage, run_usage=run_usage,
                 chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
                 fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
-                realtime_batch_size=args.batch_size, before_write=stamp_once)
+                realtime_batch_size=args.batch_size, before_write=stamp_once,
+                reply_format=version.reply_format)
             successful = len(touched)
         except ModelDriftError as e:
             logger.error(str(e))
@@ -1278,6 +1315,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                     batch_size=args.batch_size,
                     existing_scores=existing_scores,
                     usage=run_usage,
+                    reply_format=version.reply_format,
                 )
                 write_usage(usage_path, prior_usage, run_usage)
                 total_call_attempted += n_attempted
@@ -1314,7 +1352,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         if len(errors) > 10:
             logger.info(f"  ... and {len(errors) - 10} more")
 
-    # Why replies were not scored (rubric v3).  A real-time reply cut at
+    # Why replies were not scored.  A real-time reply cut at
     # max_tokens comes back from judge.call_judge_batch as None (counted in
     # judge.TRUNCATED_REPLIES), so it is moved from no_reply to truncated.
     rt_truncated = _judge_mod.TRUNCATED_REPLIES.get(args.judge_model, 0) - truncated_at_start
@@ -1323,7 +1361,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         REPLY_PROBLEMS["truncated"] += rt_truncated
     problems = {k: v for k, v in REPLY_PROBLEMS.items() if v > 0}
     if problems:
-        logger.info("Unparseable replies (rubric v3): " + ", ".join(
+        logger.info(f"Unparseable replies (rubric v{version.number}): " + ", ".join(
             f"{v} {k.replace('_', ' ')}" for k, v in sorted(problems.items())))
 
     # Loud warning if this run's per-call parse rate dropped below 99%.

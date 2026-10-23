@@ -316,3 +316,21 @@ def test_a_tree_without_activations_is_still_checked_against_its_responses(scan,
     assert status == {"kept": "vector_only", "lost": "missing_activation",
                       "corrupt": "corrupt_vector", "few": "below_min_count"}
     assert [r["role"] for r in sr.suspects()] == ["corrupt"]
+
+
+def test_a_prompt_versions_vectors_pair_with_its_own_scores(scan, tree):
+    """run_pipeline.sh --judge-prompt-version 4 writes scores_v4/ and
+    vectors_v4/ (2026-10-23): the scan checks vectors_v4/ against scores_v4/,
+    not against the default's scores/; another vectors_* variant with no
+    scores of its own still pairs with scores/, and _unfiltered as before."""
+    t = tree
+    entity = t["root"] / "traits"
+    for sub in ("scores_v4", "vectors_v4", "vectors_4slots", "vectors_unfiltered", "scores_unfiltered"):
+        (entity / sub).mkdir()
+    for sub in ("vectors", "vectors_v4", "vectors_4slots", "vectors_unfiltered"):
+        _vector(entity / sub / "ok.pt")
+    _acts(t["act"] / "ok.pt", 4)
+    got = {tg.vectors_variant: (tg.scores_dir.name, tg.mode) for tg in scan.discover_scan_targets(t["root"])}
+    assert got == {"vectors": ("scores", "filtered"), "vectors_v4": ("scores_v4", "filtered"),
+                   "vectors_4slots": ("scores", "filtered"),
+                   "vectors_unfiltered": ("scores_unfiltered", "unfiltered")}
