@@ -663,7 +663,7 @@ mark: X
 
 ### 16
 
-mark: Y
+mark: Y (oddly passive voice, but from a paperclip maximizer, somehow that doesn't feel that odd)
 
 **X: 2 · Y: 3**
 
@@ -1153,7 +1153,7 @@ mark: Y
 
 ### 28
 
-mark: Y
+mark: ? (I think this is a 2 or a 3, it's not a 1)
 
 **X: 1 · Y: 3**
 
@@ -1494,7 +1494,7 @@ mark: Y
 
 ### 36
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1518,7 +1518,7 @@ mark:
 
 ### 37
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1557,7 +1557,7 @@ mark:
 
 ### 38
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1579,7 +1579,7 @@ mark:
 
 ### 39
 
-mark: 
+mark:  Y
 
 **X: 3 · Y: 2**
 
@@ -1618,7 +1618,7 @@ mark:
 
 ### 40
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1644,7 +1644,7 @@ mark:
 
 ### 41
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1682,7 +1682,7 @@ mark:
 
 ### 42
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1706,7 +1706,7 @@ mark:
 
 ### 43
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1762,7 +1762,7 @@ mark:
 
 ### 44
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1828,7 +1828,7 @@ mark:
 
 ### 45
 
-mark: 
+mark: X
 
 **X: 3 · Y: 1**
 
@@ -1850,7 +1850,7 @@ mark:
 
 ### 46
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1918,7 +1918,7 @@ mark:
 
 ### 47
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
@@ -1940,7 +1940,7 @@ mark:
 
 ### 48
 
-mark: 
+mark: Y
 
 **X: 3 · Y: 2**
 
@@ -1956,7 +1956,7 @@ mark:
 
 ### 49
 
-mark: 
+mark: Y
 
 **X: 2 · Y: 3**
 
@@ -1982,7 +1982,7 @@ mark:
 
 ### 50
 
-mark: 
+mark: X
 
 **X: 3 · Y: 2**
 
