@@ -39,7 +39,7 @@ rows: 5,795 kept awaiting review, 211 reviewed.
 | — | antonym-check seeds | **8** | 139 / 1 | nothing |
 | — | states and physical passes | **8** | 159 / 8 | nothing |
 | — | noun relabel | **8** | 90 / 5 | nothing |
-| 16 | [Role generators](./16_role_generators.md) | **5** (the [coding plan](./coding_plan_16_role_generators.md) for steps 1-2 decided 2026-10-22; Opus building, then a Fable review) | | the build; then Roger: the 40 role pairs to mark, the downloads and `openpyxl` |
+| 16 | [Role generators](./16_role_generators.md) | **6** (steps 1-2 built, reviewed ([review_role_path.md](./review_role_path.md)) and merged 2026-10-23: the shared role path and generator B; no paid step run yet) | | Roger: the reviewer's five questions, the downloads and `openpyxl`; then the retrieval check ($0.05), the 40-pair sheet to mark, the rubric check ($0.50), the pilot on the held role rows ($2-4 batched), B's lay call |
 
 ## Platform: filters, scorers, review
 
