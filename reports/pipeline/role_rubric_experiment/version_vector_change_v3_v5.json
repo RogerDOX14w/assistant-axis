@@ -1,0 +1,2717 @@
+{
+ "result": {
+  "layer": 25,
+  "soft_shear_L": 3,
+  "roles": [
+   "alien",
+   "altruist",
+   "assistant",
+   "biologist",
+   "contrarian",
+   "cyborg",
+   "emissary",
+   "familiar",
+   "ghost",
+   "guru",
+   "historian",
+   "instrumentally_aligned_ai",
+   "interpreter",
+   "merchant",
+   "minimalist",
+   "oracle",
+   "organizer",
+   "pacifist",
+   "paperclip_maximizer",
+   "peacekeeper",
+   "perfectionist",
+   "pirate",
+   "psychologist",
+   "realist",
+   "robot",
+   "soldier",
+   "spirit",
+   "tree",
+   "validator",
+   "visionary"
+  ],
+  "slots": [
+   {
+    "slot": 0,
+    "summary": {
+     "median_1_minus_cos": 0.0009848633535916584,
+     "mean_1_minus_cos": 0.0037905731297936543,
+     "median_1_minus_cos_raw": 0.0006556248734716497,
+     "spearman_delta_kept": [
+      0.7857465896416891,
+      2.6859085779603175e-07
+     ],
+     "spearman_abs_delta_kept": [
+      0.7857465896416891,
+      2.6859085779603175e-07
+     ],
+     "axis_cos": 0.9993354655520318,
+     "axis_cos_raw": 0.9997698343504324,
+     "median_1_minus_cos_rerun": 0.0006825966943642681,
+     "axis_cos_rerun": 0.9997602697850045,
+     "median_ratio_to_rerun": 1.1504537042116683
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999886616775406,
+      "cos_raw": 0.9999954310784069,
+      "cos_rerun": 0.9999886616775406,
+      "cos_rerun_raw": 0.9999954310784069
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9925356062135023,
+      "cos_raw": 0.9931906663668466,
+      "cos_rerun": 0.9965120602997933,
+      "cos_rerun_raw": 0.9973258990014453
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.9990605724982937,
+      "cos_raw": 0.9990351439859071,
+      "cos_rerun": 0.9991412302606614,
+      "cos_rerun_raw": 0.9991230356569082
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.9995488254554693,
+      "cos_raw": 0.9995831227398645,
+      "cos_rerun": 0.9995431514110159,
+      "cos_rerun_raw": 0.9996168361179154
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.9982721299862544,
+      "cos_raw": 0.9988755126398777,
+      "cos_rerun": 0.9983950658984094,
+      "cos_rerun_raw": 0.9988950835789392
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9998524400368569,
+      "cos_raw": 0.9999366928542626,
+      "cos_rerun": 0.9998869505622204,
+      "cos_rerun_raw": 0.9999535224780328
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.998958671999601,
+      "cos_raw": 0.9992891756129583,
+      "cos_rerun": 0.9991026489976617,
+      "cos_rerun_raw": 0.9993997001624153
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.9993297952922198,
+      "cos_raw": 0.9998530211246891,
+      "cos_rerun": 0.9995622678553232,
+      "cos_rerun_raw": 0.9999136164277174
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.9999636473476274,
+      "cos_raw": 0.9999923045723946,
+      "cos_rerun": 0.9999629969096258,
+      "cos_rerun_raw": 0.9999923714320325
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.9998625177781314,
+      "cos_raw": 0.9999578965829412,
+      "cos_rerun": 0.9998206389111576,
+      "cos_rerun_raw": 0.999946442879461
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.999632605800093,
+      "cos_raw": 0.9997008701708767,
+      "cos_rerun": 0.9996739667330508,
+      "cos_rerun_raw": 0.9997131371277398
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.9894742506154515,
+      "cos_raw": 0.9857222514059025,
+      "cos_rerun": 0.9911542508253851,
+      "cos_rerun_raw": 0.9875725989802336
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9798016604710352,
+      "cos_raw": 0.9844311803079985,
+      "cos_rerun": 0.9820508604555526,
+      "cos_rerun_raw": 0.986228044478301
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9990257884851048,
+      "cos_raw": 0.9995670282957627,
+      "cos_rerun": 0.9997171388582379,
+      "cos_rerun_raw": 0.9998651801232817
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.9977580829521805,
+      "cos_raw": 0.9985306688998542,
+      "cos_rerun": 0.997390047150794,
+      "cos_rerun_raw": 0.9985896159046507
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.9996895750881731,
+      "cos_raw": 0.9999382952706141,
+      "cos_rerun": 0.9998636424234236,
+      "cos_rerun_raw": 0.9999717536170583
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.9970416816367818,
+      "cos_raw": 0.9975518680032209,
+      "cos_rerun": 0.9974060322154598,
+      "cos_rerun_raw": 0.9977864036602865
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9974339041850614,
+      "cos_raw": 0.997101679919028,
+      "cos_rerun": 0.9982120047867841,
+      "cos_rerun_raw": 0.9981073121096117
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.9999601527136027,
+      "cos_raw": 0.9999689862056526,
+      "cos_rerun": 0.9999370145889569,
+      "cos_rerun_raw": 0.9999488429179267
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.9925221783110363,
+      "cos_raw": 0.9945346714956098,
+      "cos_rerun": 0.9940962974102577,
+      "cos_rerun_raw": 0.995762221349185
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.9887978150171608,
+      "cos_raw": 0.9929462246697341,
+      "cos_rerun": 0.989973423908256,
+      "cos_rerun_raw": 0.994162019431389
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.9999889003573779,
+      "cos_raw": 0.9999964479473566,
+      "cos_rerun": 0.9999924432554481,
+      "cos_rerun_raw": 0.9999976420309187
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.9995126789244859,
+      "cos_raw": 0.9993995746400984,
+      "cos_rerun": 0.9994096718342352,
+      "cos_rerun_raw": 0.999357094624975
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.995813410589529,
+      "cos_raw": 0.9965204113959619,
+      "cos_rerun": 0.9944961021414516,
+      "cos_rerun_raw": 0.9955718131400881
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.9805685185481213,
+      "cos_raw": 0.9846501407383728,
+      "cos_rerun": 0.9923410598905965,
+      "cos_rerun_raw": 0.9960609265928287
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.9990044848077119,
+      "cos_raw": 0.9994324458020847,
+      "cos_rerun": 0.9996197238219319,
+      "cos_rerun_raw": 0.9997975571550466
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999196412805621,
+      "cos_raw": 0.9999835713076612,
+      "cos_rerun": 0.9999308558901389,
+      "cos_rerun_raw": 0.9999857476596532
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.9997776604593478,
+      "cos_raw": 0.9999175481173219,
+      "cos_rerun": 0.999864557250872,
+      "cos_rerun_raw": 0.9999437064013151
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.9846143865692524,
+      "cos_raw": 0.9926487398704373,
+      "cos_rerun": 0.9855445586550993,
+      "cos_rerun_raw": 0.9929588303359452
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9985725610086241,
+      "cos_raw": 0.9988184483628888,
+      "cos_rerun": 0.9992251347770362,
+      "cos_rerun_raw": 0.9994092331769969
+     }
+    }
+   },
+   {
+    "slot": 1,
+    "summary": {
+     "median_1_minus_cos": 0.00019243456480178,
+     "mean_1_minus_cos": 0.00042115617980309126,
+     "median_1_minus_cos_raw": 0.00015360402702874199,
+     "spearman_delta_kept": [
+      0.8826286096230198,
+      1.10984688771251e-10
+     ],
+     "spearman_abs_delta_kept": [
+      0.8826286096230198,
+      1.10984688771251e-10
+     ],
+     "axis_cos": 0.9999521130008429,
+     "axis_cos_raw": 0.999962616571962,
+     "median_1_minus_cos_rerun": 0.00011266814610766396,
+     "axis_cos_rerun": 0.9999867709149285,
+     "median_ratio_to_rerun": 1.2506489565501866
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999985581932185,
+      "cos_raw": 0.9999989295496416,
+      "cos_rerun": 0.9999985581932185,
+      "cos_rerun_raw": 0.9999989295496416
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9988070522146222,
+      "cos_raw": 0.9991982466914396,
+      "cos_rerun": 0.9991225415896388,
+      "cos_rerun_raw": 0.9993921395353814
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.9999913949802323,
+      "cos_raw": 0.9999916636721136,
+      "cos_rerun": 0.9999885140301424,
+      "cos_rerun_raw": 0.99998875188457
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.9998907776471881,
+      "cos_raw": 0.9999100600021673,
+      "cos_rerun": 0.9999085935005676,
+      "cos_rerun_raw": 0.9999250793201537
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.9998336882118954,
+      "cos_raw": 0.999862847110172,
+      "cos_rerun": 0.9998260217313782,
+      "cos_rerun_raw": 0.9998530084496009
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9999736057518118,
+      "cos_raw": 0.9999815443568657,
+      "cos_rerun": 0.9999818792477865,
+      "cos_rerun_raw": 0.9999871785423775
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.999781442658501,
+      "cos_raw": 0.9998257067815578,
+      "cos_rerun": 0.9997547532314262,
+      "cos_rerun_raw": 0.9998049517177969
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.9998875381979125,
+      "cos_raw": 0.9999225711151737,
+      "cos_rerun": 0.999933867757168,
+      "cos_rerun_raw": 0.9999549970481145
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.9999919939378547,
+      "cos_raw": 0.9999943382435259,
+      "cos_rerun": 0.9999921910809322,
+      "cos_rerun_raw": 0.99999450704187
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.999972923518276,
+      "cos_raw": 0.9999770073938881,
+      "cos_rerun": 0.9999779940635418,
+      "cos_rerun_raw": 0.9999823752432685
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.9999318242026716,
+      "cos_raw": 0.9999382392822233,
+      "cos_rerun": 0.999936906683706,
+      "cos_rerun_raw": 0.9999429329434342
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.9995497230371373,
+      "cos_raw": 0.9996293674483322,
+      "cos_rerun": 0.9993911693830104,
+      "cos_rerun_raw": 0.9994826305921158
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9996138667564733,
+      "cos_raw": 0.9996198950011739,
+      "cos_rerun": 0.9995803488101624,
+      "cos_rerun_raw": 0.9995995979011211
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9996394026881076,
+      "cos_raw": 0.999726966543866,
+      "cos_rerun": 0.999941093641196,
+      "cos_rerun_raw": 0.9999571234578967
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.999603342653041,
+      "cos_raw": 0.9997208950203966,
+      "cos_rerun": 0.9993816544134311,
+      "cos_rerun_raw": 0.9995702350878798
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.9999439730102119,
+      "cos_raw": 0.9999516006509739,
+      "cos_rerun": 0.9999763713540367,
+      "cos_rerun_raw": 0.9999814630927675
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.9998429665951841,
+      "cos_raw": 0.9998601404426747,
+      "cos_rerun": 0.999876437341756,
+      "cos_rerun_raw": 0.9998917083384861
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9995416476992465,
+      "cos_raw": 0.9996957376487992,
+      "cos_rerun": 0.9996793120517242,
+      "cos_rerun_raw": 0.9997978065027572
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.9999828341358297,
+      "cos_raw": 0.9999868145116547,
+      "cos_rerun": 0.9999688027633796,
+      "cos_rerun_raw": 0.9999757117960993
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.998429400222922,
+      "cos_raw": 0.9988144318576982,
+      "cos_rerun": 0.9991461308587849,
+      "cos_rerun_raw": 0.9993502047058974
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.997509025657311,
+      "cos_raw": 0.9980305001556349,
+      "cos_rerun": 0.9988749999020734,
+      "cos_rerun_raw": 0.9991686001574263
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.9999971945460394,
+      "cos_raw": 0.9999980647406587,
+      "cos_rerun": 0.9999979314408284,
+      "cos_rerun_raw": 0.9999986021998151
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.9998913069095373,
+      "cos_raw": 0.9998997807752976,
+      "cos_rerun": 0.9998907071341973,
+      "cos_rerun_raw": 0.9998931348310879
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.9997318126153589,
+      "cos_raw": 0.9997683493103635,
+      "cos_rerun": 0.9997506022353153,
+      "cos_rerun_raw": 0.9997963329332538
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.9978315959945975,
+      "cos_raw": 0.9979724281583839,
+      "cos_rerun": 0.9991748363095586,
+      "cos_rerun_raw": 0.9992492427237423
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.999515769324693,
+      "cos_raw": 0.9996508809502024,
+      "cos_rerun": 0.9998839565735874,
+      "cos_rerun_raw": 0.9999208293782497
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999796630013348,
+      "cos_raw": 0.9999856467207211,
+      "cos_rerun": 0.9999892593606624,
+      "cos_rerun_raw": 0.9999923961573042
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.9997768256566654,
+      "cos_raw": 0.9998326515032678,
+      "cos_rerun": 0.9999392603984091,
+      "cos_rerun_raw": 0.9999568901000426
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.9992922296614564,
+      "cos_raw": 0.9993012704813824,
+      "cos_rerun": 0.9988366513289095,
+      "cos_rerun_raw": 0.9988999851028256
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9996319349265761,
+      "cos_raw": 0.9996839575684049,
+      "cos_rerun": 0.9997794218111367,
+      "cos_rerun_raw": 0.9998192014094226
+     }
+    }
+   },
+   {
+    "slot": 2,
+    "summary": {
+     "median_1_minus_cos": 0.00014079932351585,
+     "mean_1_minus_cos": 0.0003159677714135648,
+     "median_1_minus_cos_raw": 0.0001323919837487586,
+     "spearman_delta_kept": [
+      0.8846330652088403,
+      8.832754844945391e-11
+     ],
+     "spearman_abs_delta_kept": [
+      0.8846330652088403,
+      8.832754844945391e-11
+     ],
+     "axis_cos": 0.9999563675710181,
+     "axis_cos_raw": 0.9999610451099187,
+     "median_1_minus_cos_rerun": 8.532792435378411e-05,
+     "axis_cos_rerun": 0.9999884195300022,
+     "median_ratio_to_rerun": 1.2285381833927502
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999990075206212,
+      "cos_raw": 0.9999992141117979,
+      "cos_rerun": 0.9999990075206212,
+      "cos_rerun_raw": 0.9999992141117979
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9990330204853216,
+      "cos_raw": 0.9992201213201767,
+      "cos_rerun": 0.9993883534133287,
+      "cos_rerun_raw": 0.999495699654872
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.9999940903997107,
+      "cos_raw": 0.9999941165169437,
+      "cos_rerun": 0.9999902421570048,
+      "cos_rerun_raw": 0.9999899806023893
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.9999259958823341,
+      "cos_raw": 0.9999302649811451,
+      "cos_rerun": 0.9999308438221051,
+      "cos_rerun_raw": 0.9999333289059432
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.9998936178758687,
+      "cos_raw": 0.9999034607422684,
+      "cos_rerun": 0.9998367131326814,
+      "cos_rerun_raw": 0.9998462373895017
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9999824809709378,
+      "cos_raw": 0.9999859000836958,
+      "cos_rerun": 0.9999861447413705,
+      "cos_rerun_raw": 0.9999889572450914
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.9998448593605901,
+      "cos_raw": 0.9998470032898985,
+      "cos_rerun": 0.9998531384064083,
+      "cos_rerun_raw": 0.999863539538633
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.9999251559497601,
+      "cos_raw": 0.9999419751743205,
+      "cos_rerun": 0.9999639432299838,
+      "cos_rerun_raw": 0.9999715724623742
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.9999938130626248,
+      "cos_raw": 0.9999953081054868,
+      "cos_rerun": 0.9999937826324649,
+      "cos_rerun_raw": 0.9999952452442653
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.999980886668786,
+      "cos_raw": 0.9999815962336526,
+      "cos_rerun": 0.9999806423840539,
+      "cos_rerun_raw": 0.999983161386119
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.9999491757170126,
+      "cos_raw": 0.9999517827433685,
+      "cos_rerun": 0.9999573852237934,
+      "cos_rerun_raw": 0.9999582319018461
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.9997160119590737,
+      "cos_raw": 0.9997424950112556,
+      "cos_rerun": 0.9996552011012485,
+      "cos_rerun_raw": 0.9996793936381819
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9997103414098373,
+      "cos_raw": 0.9997017293471497,
+      "cos_rerun": 0.9996689441019858,
+      "cos_rerun_raw": 0.9996690541328012
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9997940296603925,
+      "cos_raw": 0.9998137623903885,
+      "cos_rerun": 0.9999619340620742,
+      "cos_rerun_raw": 0.9999664284425895
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.9997076637962987,
+      "cos_raw": 0.9997515017147248,
+      "cos_rerun": 0.9995404843908366,
+      "cos_rerun_raw": 0.9996095589122447
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.9999521952177136,
+      "cos_raw": 0.9999548476346873,
+      "cos_rerun": 0.9999831374852203,
+      "cos_rerun_raw": 0.9999857306251698
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.9998702014063837,
+      "cos_raw": 0.9998755558041327,
+      "cos_rerun": 0.9999093658905174,
+      "cos_rerun_raw": 0.9999141290502064
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9995531650096935,
+      "cos_raw": 0.9996298454195,
+      "cos_rerun": 0.9997656561813273,
+      "cos_rerun_raw": 0.9998045711363751
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.9999872815876122,
+      "cos_raw": 0.9999883661209507,
+      "cos_rerun": 0.9999760672652174,
+      "cos_rerun_raw": 0.9999779528065967
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.9987383581189203,
+      "cos_raw": 0.9989002697730045,
+      "cos_rerun": 0.9994236598904843,
+      "cos_rerun_raw": 0.9995106287238829
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.9984444154944411,
+      "cos_raw": 0.9986816704289064,
+      "cos_rerun": 0.9990894528086962,
+      "cos_rerun_raw": 0.9992177291720987
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.9999975553418676,
+      "cos_raw": 0.9999980265646945,
+      "cos_rerun": 0.99999831997713,
+      "cos_rerun_raw": 0.9999987465962915
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.9999071448470233,
+      "cos_raw": 0.9999090548193443,
+      "cos_rerun": 0.9999033635892574,
+      "cos_rerun_raw": 0.9999057127924627
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.9997676025140338,
+      "cos_raw": 0.9997876065274073,
+      "cos_rerun": 0.9997618242687579,
+      "cos_rerun_raw": 0.9997885422765302
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.9982153000221006,
+      "cos_raw": 0.9983083460025942,
+      "cos_rerun": 0.9994507196995731,
+      "cos_rerun_raw": 0.9995012896975745
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.9996963669760024,
+      "cos_raw": 0.9997396734812736,
+      "cos_rerun": 0.999919978260775,
+      "cos_rerun_raw": 0.99993462923293
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999852289953717,
+      "cos_raw": 0.9999891658612755,
+      "cos_rerun": 0.9999917906582764,
+      "cos_rerun_raw": 0.9999940056542456
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.9998481999465846,
+      "cos_raw": 0.9998596602283698,
+      "cos_rerun": 0.9999591917067303,
+      "cos_rerun_raw": 0.9999654544685738
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.9995256906719113,
+      "cos_raw": 0.9994996532842628,
+      "cos_rerun": 0.9990357171874433,
+      "cos_rerun_raw": 0.9989963971072369
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9995821099887635,
+      "cos_raw": 0.9996432915538526,
+      "cos_rerun": 0.9997298301675901,
+      "cos_rerun_raw": 0.9997684131981516
+     }
+    }
+   },
+   {
+    "slot": 3,
+    "summary": {
+     "median_1_minus_cos": 0.0001909893901536619,
+     "mean_1_minus_cos": 0.0003921831942534186,
+     "median_1_minus_cos_raw": 0.00017432178147669397,
+     "spearman_delta_kept": [
+      0.8861920862200342,
+      7.373895555879852e-11
+     ],
+     "spearman_abs_delta_kept": [
+      0.8861920862200342,
+      7.373895555879852e-11
+     ],
+     "axis_cos": 0.9999355141929918,
+     "axis_cos_raw": 0.9999434123630541,
+     "median_1_minus_cos_rerun": 0.000103455241070749,
+     "axis_cos_rerun": 0.9999844627808738,
+     "median_ratio_to_rerun": 1.3851607806496011
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999988671904245,
+      "cos_raw": 0.9999992051932429,
+      "cos_rerun": 0.9999988671904245,
+      "cos_rerun_raw": 0.9999992051932429
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9986516157906158,
+      "cos_raw": 0.9988219800767536,
+      "cos_rerun": 0.9993908883207547,
+      "cos_rerun_raw": 0.9994820371964086
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.9999922387216229,
+      "cos_raw": 0.9999923359870372,
+      "cos_rerun": 0.9999877547791429,
+      "cos_rerun_raw": 0.999988242361342
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.9999006879114146,
+      "cos_raw": 0.9999046876075751,
+      "cos_rerun": 0.9999120517320136,
+      "cos_rerun_raw": 0.9999131992204241
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.9998783839046496,
+      "cos_raw": 0.9998815440360601,
+      "cos_rerun": 0.9998349727566641,
+      "cos_rerun_raw": 0.9998370514462477
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9999741184734817,
+      "cos_raw": 0.9999793276508818,
+      "cos_rerun": 0.9999823544573567,
+      "cos_rerun_raw": 0.9999861388700348
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.9997824366265764,
+      "cos_raw": 0.999813045976787,
+      "cos_rerun": 0.9997932733824412,
+      "cos_rerun_raw": 0.9998245221880703
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.9998982755770093,
+      "cos_raw": 0.999927610419139,
+      "cos_rerun": 0.9999514247278467,
+      "cos_rerun_raw": 0.9999655914987592
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.9999913317374588,
+      "cos_raw": 0.9999937879608282,
+      "cos_rerun": 0.9999916741821555,
+      "cos_rerun_raw": 0.9999940573170569
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.9999709102544823,
+      "cos_raw": 0.9999742788970682,
+      "cos_rerun": 0.9999776846520223,
+      "cos_rerun_raw": 0.9999800815035079
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.9999332420497191,
+      "cos_raw": 0.9999338690819257,
+      "cos_rerun": 0.9999418797576051,
+      "cos_rerun_raw": 0.9999426008930272
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.9995838313842491,
+      "cos_raw": 0.9996449767084049,
+      "cos_rerun": 0.9995305412649659,
+      "cos_rerun_raw": 0.9995938020552079
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9996487557634279,
+      "cos_raw": 0.9996491244427959,
+      "cos_rerun": 0.9995857975579053,
+      "cos_rerun_raw": 0.9995980290399676
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9997125076500573,
+      "cos_raw": 0.99971552271309,
+      "cos_rerun": 0.9999482619395237,
+      "cos_rerun_raw": 0.9999511958665868
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.999692127692462,
+      "cos_raw": 0.9997149687134728,
+      "cos_rerun": 0.9995372892210144,
+      "cos_rerun_raw": 0.9995725171902023
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.999923129142571,
+      "cos_raw": 0.9999326126498475,
+      "cos_rerun": 0.999978774390213,
+      "cos_rerun_raw": 0.9999834676117815
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.9998355845931163,
+      "cos_raw": 0.9998383104602596,
+      "cos_rerun": 0.9998936774700745,
+      "cos_rerun_raw": 0.999894259547831
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9994421576098942,
+      "cos_raw": 0.9995259175676622,
+      "cos_rerun": 0.9997088592748804,
+      "cos_rerun_raw": 0.9997575442519407
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.999987241209077,
+      "cos_raw": 0.9999893613086422,
+      "cos_rerun": 0.9999758398052788,
+      "cos_rerun_raw": 0.9999799772098611
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.9984333765935482,
+      "cos_raw": 0.9986312759668323,
+      "cos_rerun": 0.9993067123951487,
+      "cos_rerun_raw": 0.9993961812226435
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.998154737840795,
+      "cos_raw": 0.9983158014480424,
+      "cos_rerun": 0.9991102672228438,
+      "cos_rerun_raw": 0.9991695309592169
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.9999973751511269,
+      "cos_raw": 0.999998013885457,
+      "cos_rerun": 0.9999982634698882,
+      "cos_rerun_raw": 0.9999986876574775
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.9998646426400697,
+      "cos_raw": 0.9998709700885398,
+      "cos_rerun": 0.9998745329217605,
+      "cos_rerun_raw": 0.999866420555446
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.9997371051333168,
+      "cos_raw": 0.9997511606334344,
+      "cos_rerun": 0.9997299245924695,
+      "cos_rerun_raw": 0.9997449164744715
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.9979999264558035,
+      "cos_raw": 0.9982155886508615,
+      "cos_rerun": 0.9993874892398167,
+      "cos_rerun_raw": 0.9994710128451133
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.9995586685752931,
+      "cos_raw": 0.9996289222171597,
+      "cos_rerun": 0.999899412047784,
+      "cos_rerun_raw": 0.9999185917884437
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999804705096758,
+      "cos_raw": 0.9999868644692508,
+      "cos_rerun": 0.9999881966565208,
+      "cos_rerun_raw": 0.9999921223208574
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.9997277723972411,
+      "cos_raw": 0.9997798642139627,
+      "cos_rerun": 0.9999464317536453,
+      "cos_rerun_raw": 0.9999599291799878
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.9994028670461433,
+      "cos_raw": 0.9993780878460031,
+      "cos_rerun": 0.998859890720806,
+      "cos_rerun_raw": 0.998829801486696
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9995801185470744,
+      "cos_raw": 0.9995685839607427,
+      "cos_rerun": 0.9997197780870473,
+      "cos_rerun_raw": 0.9997170026760207
+     }
+    }
+   },
+   {
+    "slot": 4,
+    "summary": {
+     "median_1_minus_cos": 0.00010081328848693394,
+     "mean_1_minus_cos": 0.00024749253504480206,
+     "median_1_minus_cos_raw": 9.439000109234819e-05,
+     "spearman_delta_kept": [
+      0.8282855915185492,
+      1.606238686584381e-08
+     ],
+     "spearman_abs_delta_kept": [
+      0.8282855915185492,
+      1.606238686584381e-08
+     ],
+     "axis_cos": 0.9999806472847481,
+     "axis_cos_raw": 0.9999822002481263,
+     "median_1_minus_cos_rerun": 7.252599871099275e-05,
+     "axis_cos_rerun": 0.999991051902959,
+     "median_ratio_to_rerun": 1.2142461365033586
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999985957725469,
+      "cos_raw": 0.9999988132427367,
+      "cos_rerun": 0.9999985957725469,
+      "cos_rerun_raw": 0.9999988132427367
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9994973567792933,
+      "cos_raw": 0.9995301366326083,
+      "cos_rerun": 0.9996006598525063,
+      "cos_rerun_raw": 0.9996326732177837
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.9999854294171928,
+      "cos_raw": 0.9999872476834639,
+      "cos_rerun": 0.9999904251951531,
+      "cos_rerun_raw": 0.9999914334603494
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.9999426780687024,
+      "cos_raw": 0.9999437822916608,
+      "cos_rerun": 0.9999387567193695,
+      "cos_rerun_raw": 0.9999368028455834
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.9999051526017614,
+      "cos_raw": 0.9999116774859063,
+      "cos_rerun": 0.9998718069517952,
+      "cos_rerun_raw": 0.9998757136080617
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9999875883123004,
+      "cos_raw": 0.9999884569815987,
+      "cos_rerun": 0.9999914208081997,
+      "cos_rerun_raw": 0.999992508280448
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.999864837050976,
+      "cos_raw": 0.9998725509715394,
+      "cos_rerun": 0.9998863102935215,
+      "cos_rerun_raw": 0.9998956139053298
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.9999550426539582,
+      "cos_raw": 0.9999616733469366,
+      "cos_rerun": 0.9999691711646834,
+      "cos_rerun_raw": 0.9999725447502565
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.9999954250223961,
+      "cos_raw": 0.9999960641906488,
+      "cos_rerun": 0.9999958281969606,
+      "cos_rerun_raw": 0.9999964219294883
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.999985040188547,
+      "cos_raw": 0.999986439779481,
+      "cos_rerun": 0.9999840038933607,
+      "cos_rerun_raw": 0.9999857313329557
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.9999530599001883,
+      "cos_raw": 0.9999538292995191,
+      "cos_rerun": 0.9999592250363752,
+      "cos_rerun_raw": 0.9999599630235635
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.9997353832287068,
+      "cos_raw": 0.9997635824907685,
+      "cos_rerun": 0.9996160483839615,
+      "cos_rerun_raw": 0.9996492968658562
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9996220867920887,
+      "cos_raw": 0.999687129730575,
+      "cos_rerun": 0.9996019646642085,
+      "cos_rerun_raw": 0.9996542964099391
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9998808450937017,
+      "cos_raw": 0.9998826584717688,
+      "cos_rerun": 0.9999582106442074,
+      "cos_rerun_raw": 0.9999593594315104
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.9996965231609295,
+      "cos_raw": 0.9997214004202567,
+      "cos_rerun": 0.9996524546463158,
+      "cos_rerun_raw": 0.9996812093984324
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.9999670000229526,
+      "cos_raw": 0.9999707510805566,
+      "cos_rerun": 0.9999844114275483,
+      "cos_rerun_raw": 0.9999872062567033
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.9999166324133293,
+      "cos_raw": 0.9999188510088702,
+      "cos_rerun": 0.9999230985274766,
+      "cos_rerun_raw": 0.9999244960088297
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9997307822216469,
+      "cos_raw": 0.9997463336882012,
+      "cos_rerun": 0.9998351499786936,
+      "cos_rerun_raw": 0.9998424942066586
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.9999908823268711,
+      "cos_raw": 0.9999913301430278,
+      "cos_rerun": 0.9999803871421635,
+      "cos_rerun_raw": 0.9999814133396642
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.999202774094405,
+      "cos_raw": 0.9992803512746655,
+      "cos_rerun": 0.9995832216879239,
+      "cos_rerun_raw": 0.9996333749233877
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.9987720286744511,
+      "cos_raw": 0.9988756614816479,
+      "cos_rerun": 0.9990555039740799,
+      "cos_rerun_raw": 0.9991410053695117
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.999998058743517,
+      "cos_raw": 0.999998285288414,
+      "cos_rerun": 0.9999982758173901,
+      "cos_rerun_raw": 0.999998527803614
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.999937547024702,
+      "cos_raw": 0.9999410489285296,
+      "cos_rerun": 0.9999208838436104,
+      "cos_rerun_raw": 0.999918244326085
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.9997183856474755,
+      "cos_raw": 0.9997216790400143,
+      "cos_rerun": 0.9998064003985289,
+      "cos_rerun_raw": 0.9998228200506766
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.998465466328981,
+      "cos_raw": 0.9986500600158302,
+      "cos_rerun": 0.9993055397119128,
+      "cos_rerun_raw": 0.9993825289881905
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.9997837522819314,
+      "cos_raw": 0.9997973473520418,
+      "cos_rerun": 0.9999318494751014,
+      "cos_rerun_raw": 0.9999364020763686
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999905509762744,
+      "cos_raw": 0.9999923130922711,
+      "cos_rerun": 0.9999923774615079,
+      "cos_rerun_raw": 0.9999937335088144
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.9998932208212647,
+      "cos_raw": 0.999899542511909,
+      "cos_rerun": 0.9999718945981638,
+      "cos_rerun_raw": 0.9999745268797533
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.9994643988413808,
+      "cos_raw": 0.9994865972274245,
+      "cos_rerun": 0.9991389502365607,
+      "cos_rerun_raw": 0.9991697592474539
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9997386994861835,
+      "cos_raw": 0.9997481526661831,
+      "cos_rerun": 0.9998298830432413,
+      "cos_rerun_raw": 0.9998413559239441
+     }
+    }
+   },
+   {
+    "slot": 5,
+    "summary": {
+     "median_1_minus_cos": 0.00012652625908571302,
+     "mean_1_minus_cos": 0.00028721915946438393,
+     "median_1_minus_cos_raw": 0.00011773317148117135,
+     "spearman_delta_kept": [
+      0.8917600184028693,
+      3.785581808018322e-11
+     ],
+     "spearman_abs_delta_kept": [
+      0.8917600184028693,
+      3.785581808018322e-11
+     ],
+     "axis_cos": 0.9999668703254093,
+     "axis_cos_raw": 0.999970077768092,
+     "median_1_minus_cos_rerun": 7.493520072254789e-05,
+     "axis_cos_rerun": 0.99998971366571,
+     "median_ratio_to_rerun": 1.3863766762210266
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999993166217772,
+      "cos_raw": 0.9999995270313546,
+      "cos_rerun": 0.9999993166217772,
+      "cos_rerun_raw": 0.9999995270313546
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9991238279129407,
+      "cos_raw": 0.9991830033915144,
+      "cos_rerun": 0.9995782847774438,
+      "cos_rerun_raw": 0.9996173483069097
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.9999939461598584,
+      "cos_raw": 0.9999938259028011,
+      "cos_rerun": 0.9999922914123585,
+      "cos_rerun_raw": 0.9999921180265751
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.9999331284379447,
+      "cos_raw": 0.9999338078474592,
+      "cos_rerun": 0.9999320339363781,
+      "cos_rerun_raw": 0.9999310007841076
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.9999095626489638,
+      "cos_raw": 0.9999139662715837,
+      "cos_rerun": 0.9998808399630768,
+      "cos_rerun_raw": 0.9998864981751321
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9999842971505082,
+      "cos_raw": 0.9999889095735657,
+      "cos_rerun": 0.9999899971710114,
+      "cos_rerun_raw": 0.9999929869799283
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.9998658706000707,
+      "cos_raw": 0.9998864688225406,
+      "cos_rerun": 0.9998845614380814,
+      "cos_rerun_raw": 0.999903153563377
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.9999323552113256,
+      "cos_raw": 0.999950701985462,
+      "cos_rerun": 0.9999646354036268,
+      "cos_rerun_raw": 0.9999752256165612
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.9999950139601634,
+      "cos_raw": 0.9999967794975264,
+      "cos_rerun": 0.9999952305369766,
+      "cos_rerun_raw": 0.9999969511028957
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.999983762454802,
+      "cos_raw": 0.9999846233327011,
+      "cos_rerun": 0.9999859814543735,
+      "cos_rerun_raw": 0.9999869398716892
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.9999465350470853,
+      "cos_raw": 0.999944467703576,
+      "cos_rerun": 0.9999665811204314,
+      "cos_rerun_raw": 0.9999666774495783
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.999759195373002,
+      "cos_raw": 0.9997763592242569,
+      "cos_rerun": 0.9997186022527726,
+      "cos_rerun_raw": 0.9997390313966049
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9997693242905171,
+      "cos_raw": 0.9997651639000444,
+      "cos_rerun": 0.9997606508409569,
+      "cos_rerun_raw": 0.9997621816323372
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9997818000523635,
+      "cos_raw": 0.9997727148972869,
+      "cos_rerun": 0.9999666654590773,
+      "cos_rerun_raw": 0.9999677373936978
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.9997533832788391,
+      "cos_raw": 0.9997484245982785,
+      "cos_rerun": 0.9996334015825683,
+      "cos_rerun_raw": 0.9996450403763607
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.9999438062994678,
+      "cos_raw": 0.9999498540324361,
+      "cos_rerun": 0.9999864277713658,
+      "cos_rerun_raw": 0.9999892412455326
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.9998810768817579,
+      "cos_raw": 0.999878064834497,
+      "cos_rerun": 0.9999180956621768,
+      "cos_rerun_raw": 0.9999153386622976
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9995670871952407,
+      "cos_raw": 0.9996282512227501,
+      "cos_rerun": 0.999817124606022,
+      "cos_rerun_raw": 0.9998433461495404
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.999991272878151,
+      "cos_raw": 0.9999931566764345,
+      "cos_rerun": 0.9999822339693509,
+      "cos_rerun_raw": 0.9999861355296469
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.9990044487476374,
+      "cos_raw": 0.999088049081054,
+      "cos_rerun": 0.9995393274611727,
+      "cos_rerun_raw": 0.9995811929099517
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.9984504539144422,
+      "cos_raw": 0.9987429461174218,
+      "cos_rerun": 0.9992914271192893,
+      "cos_rerun_raw": 0.9993834576102663
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.9999982295493978,
+      "cos_raw": 0.9999987923105647,
+      "cos_rerun": 0.9999986595391264,
+      "cos_rerun_raw": 0.9999991200426126
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.9999025522869887,
+      "cos_raw": 0.9999080855215225,
+      "cos_rerun": 0.9999109278961649,
+      "cos_rerun_raw": 0.999900352914897
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.9998134235761461,
+      "cos_raw": 0.9998200020767779,
+      "cos_rerun": 0.9998113298780494,
+      "cos_rerun_raw": 0.9998125384575931
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.9984290749193578,
+      "cos_raw": 0.9984249281473665,
+      "cos_rerun": 0.9994697432914839,
+      "cos_rerun_raw": 0.9994967990485535
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.9997749574339342,
+      "cos_raw": 0.9998105013014635,
+      "cos_rerun": 0.9999455524635859,
+      "cos_rerun_raw": 0.9999556255356519
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999888053430107,
+      "cos_raw": 0.9999925238753246,
+      "cos_rerun": 0.9999934220521336,
+      "cos_rerun_raw": 0.9999956128055928
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.9998374023172639,
+      "cos_raw": 0.9998746549042258,
+      "cos_rerun": 0.9999668129270203,
+      "cos_rerun_raw": 0.9999742805572126
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.9994425663886853,
+      "cos_raw": 0.9994008848861838,
+      "cos_rerun": 0.9990281083334787,
+      "cos_rerun_raw": 0.9989728054323411
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9996269482844252,
+      "cos_raw": 0.9996220022889319,
+      "cos_rerun": 0.9997894329027119,
+      "cos_rerun_raw": 0.9997899472135652
+     }
+    }
+   },
+   {
+    "slot": 6,
+    "summary": {
+     "median_1_minus_cos": 0.00040383779532315867,
+     "mean_1_minus_cos": 0.0007164892746492236,
+     "median_1_minus_cos_raw": 0.00035326276935154777,
+     "spearman_delta_kept": [
+      0.8777288293021249,
+      1.906786287377874e-10
+     ],
+     "spearman_abs_delta_kept": [
+      0.8777288293021249,
+      1.906786287377874e-10
+     ],
+     "axis_cos": 0.9999067874680004,
+     "axis_cos_raw": 0.9999187227257734,
+     "median_1_minus_cos_rerun": 0.00020670522845100958,
+     "axis_cos_rerun": 0.9999705823529591,
+     "median_ratio_to_rerun": 1.274894795947381
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999974487507397,
+      "cos_raw": 0.9999981967187014,
+      "cos_rerun": 0.9999974487507397,
+      "cos_rerun_raw": 0.9999981967187014
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9980155100501924,
+      "cos_raw": 0.9980277726564762,
+      "cos_rerun": 0.9987267994910577,
+      "cos_rerun_raw": 0.9987230804776169
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.9999578224657011,
+      "cos_raw": 0.999959478380074,
+      "cos_rerun": 0.9999495554331499,
+      "cos_rerun_raw": 0.9999507695169074
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.9998449329765458,
+      "cos_raw": 0.9998539446798027,
+      "cos_rerun": 0.9998609595469404,
+      "cos_rerun_raw": 0.9998667204130448
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.9996138652690398,
+      "cos_raw": 0.9996423781581728,
+      "cos_rerun": 0.9995883975783523,
+      "cos_rerun_raw": 0.9996261109598933
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9999581488721533,
+      "cos_raw": 0.9999685581785527,
+      "cos_rerun": 0.9999732302602884,
+      "cos_rerun_raw": 0.9999786618037906
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.9995784591403138,
+      "cos_raw": 0.9996510963031241,
+      "cos_rerun": 0.999612844246881,
+      "cos_rerun_raw": 0.9996748449297885
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.9997707759485776,
+      "cos_raw": 0.9998363944706914,
+      "cos_rerun": 0.9998806697752074,
+      "cos_rerun_raw": 0.99991625971947
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.999986177086223,
+      "cos_raw": 0.9999895025289818,
+      "cos_rerun": 0.9999864309724925,
+      "cos_rerun_raw": 0.9999896803031796
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.9999502627197716,
+      "cos_raw": 0.9999549089894469,
+      "cos_rerun": 0.9999560160234369,
+      "cos_rerun_raw": 0.9999608824252285
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.9998832086473666,
+      "cos_raw": 0.9998824013366343,
+      "cos_rerun": 0.9998813719381391,
+      "cos_rerun_raw": 0.999883020663823
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.9991570161985849,
+      "cos_raw": 0.9992439179336934,
+      "cos_rerun": 0.99918869474162,
+      "cos_rerun_raw": 0.9992744620499706
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9990099123132515,
+      "cos_raw": 0.9990847344679892,
+      "cos_rerun": 0.9988268746771028,
+      "cos_rerun_raw": 0.9988954586797253
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9994591564711665,
+      "cos_raw": 0.9994964494170822,
+      "cos_rerun": 0.9998355812562234,
+      "cos_rerun_raw": 0.9998416024423548
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.9993429224143978,
+      "cos_raw": 0.9993172784717334,
+      "cos_rerun": 0.9990285554654522,
+      "cos_rerun_raw": 0.998984691546492
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.9999157310686655,
+      "cos_raw": 0.99993282393714,
+      "cos_rerun": 0.9999641380581094,
+      "cos_rerun_raw": 0.99997340052436
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.999480484017003,
+      "cos_raw": 0.999479161989248,
+      "cos_rerun": 0.9996762802886681,
+      "cos_rerun_raw": 0.9996772777598909
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9991564045633224,
+      "cos_raw": 0.9991954041360277,
+      "cos_rerun": 0.9994477793753885,
+      "cos_rerun_raw": 0.9994771800118699
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.9999774468452411,
+      "cos_raw": 0.9999816050168763,
+      "cos_rerun": 0.9999511423682833,
+      "cos_rerun_raw": 0.999960187778006
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.9976225215243127,
+      "cos_raw": 0.9976344391640644,
+      "cos_rerun": 0.9986139590270929,
+      "cos_rerun_raw": 0.9986719177391571
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.9964958157817972,
+      "cos_raw": 0.9964679194402002,
+      "cos_rerun": 0.9978675055101576,
+      "cos_rerun_raw": 0.9978900401298217
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.999993743460962,
+      "cos_raw": 0.999994757204572,
+      "cos_rerun": 0.999995653176197,
+      "cos_rerun_raw": 0.9999964600873444
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.9998414550893454,
+      "cos_raw": 0.9998439249326776,
+      "cos_rerun": 0.9998108182295351,
+      "cos_rerun_raw": 0.99981098476269
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.9993785042386105,
+      "cos_raw": 0.9994062683763127,
+      "cos_rerun": 0.9993870995548217,
+      "cos_rerun_raw": 0.9994221647702917
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.9964986540571759,
+      "cos_raw": 0.9973039074851159,
+      "cos_rerun": 0.9984573334096728,
+      "cos_rerun_raw": 0.9988223909997638
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.999210364037074,
+      "cos_raw": 0.9992696199526162,
+      "cos_rerun": 0.9997757713135629,
+      "cos_rerun_raw": 0.9997939912564621
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999637575652767,
+      "cos_raw": 0.9999751413927838,
+      "cos_rerun": 0.9999780073561053,
+      "cos_rerun_raw": 0.9999848432139192
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.999771508836402,
+      "cos_raw": 0.9998133783089754,
+      "cos_rerun": 0.9999229535312573,
+      "cos_rerun_raw": 0.9999372538265777
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.9983526489271561,
+      "cos_raw": 0.998350751053002,
+      "cos_rerun": 0.9979573486647038,
+      "cos_rerun_raw": 0.9980298174082654
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9993206624241534,
+      "cos_raw": 0.9993017943211199,
+      "cos_rerun": 0.9995212510708013,
+      "cos_rerun_raw": 0.9995251941861069
+     }
+    }
+   },
+   {
+    "slot": 7,
+    "summary": {
+     "median_1_minus_cos": 0.00016717181723074903,
+     "mean_1_minus_cos": 0.00033987192272860733,
+     "median_1_minus_cos_raw": 0.00014680275066580872,
+     "spearman_delta_kept": [
+      0.8748335045670507,
+      2.597357943491624e-10
+     ],
+     "spearman_abs_delta_kept": [
+      0.8748335045670507,
+      2.597357943491624e-10
+     ],
+     "axis_cos": 0.9999528248140692,
+     "axis_cos_raw": 0.9999581008895407,
+     "median_1_minus_cos_rerun": 9.549476503761811e-05,
+     "axis_cos_rerun": 0.9999864801671856,
+     "median_ratio_to_rerun": 1.3933851084487985
+    },
+    "roles": {
+     "alien": {
+      "kept_base": 499,
+      "kept_other": 499,
+      "delta_kept": 0,
+      "cos": 0.9999991910904794,
+      "cos_raw": 0.9999994961267987,
+      "cos_rerun": 0.9999991910904794,
+      "cos_rerun_raw": 0.9999994961267987
+     },
+     "altruist": {
+      "kept_base": 236,
+      "kept_other": 345,
+      "delta_kept": 109,
+      "cos": 0.9988931340552986,
+      "cos_raw": 0.9989239659631796,
+      "cos_rerun": 0.9994218884952257,
+      "cos_rerun_raw": 0.9994454433149116
+     },
+     "assistant": {
+      "kept_base": 452,
+      "kept_other": 453,
+      "delta_kept": 1,
+      "cos": 0.999990931663038,
+      "cos_raw": 0.9999908791853068,
+      "cos_rerun": 0.9999853386623413,
+      "cos_rerun_raw": 0.9999851819309808
+     },
+     "biologist": {
+      "kept_base": 434,
+      "kept_other": 451,
+      "delta_kept": 17,
+      "cos": 0.999928251581252,
+      "cos_raw": 0.9999286563185461,
+      "cos_rerun": 0.9999133245201713,
+      "cos_rerun_raw": 0.9999138942297457
+     },
+     "contrarian": {
+      "kept_base": 366,
+      "kept_other": 420,
+      "delta_kept": 54,
+      "cos": 0.999878984806934,
+      "cos_raw": 0.9998843899826148,
+      "cos_rerun": 0.9998472246232772,
+      "cos_rerun_raw": 0.9998533638494311
+     },
+     "cyborg": {
+      "kept_base": 474,
+      "kept_other": 486,
+      "delta_kept": 12,
+      "cos": 0.9999837489874421,
+      "cos_raw": 0.9999891966690165,
+      "cos_rerun": 0.9999898930422304,
+      "cos_rerun_raw": 0.9999933671999119
+     },
+     "emissary": {
+      "kept_base": 227,
+      "kept_other": 246,
+      "delta_kept": 19,
+      "cos": 0.9998136040308532,
+      "cos_raw": 0.9998359334717069,
+      "cos_rerun": 0.9998343637683008,
+      "cos_rerun_raw": 0.9998592710905517
+     },
+     "familiar": {
+      "kept_base": 436,
+      "kept_other": 454,
+      "delta_kept": 18,
+      "cos": 0.999903148897334,
+      "cos_raw": 0.9999396102416562,
+      "cos_rerun": 0.9999532109534421,
+      "cos_rerun_raw": 0.9999709688739542
+     },
+     "ghost": {
+      "kept_base": 485,
+      "kept_other": 487,
+      "delta_kept": 2,
+      "cos": 0.9999944028389129,
+      "cos_raw": 0.999996551974088,
+      "cos_rerun": 0.9999948511268608,
+      "cos_rerun_raw": 0.9999968560218737
+     },
+     "guru": {
+      "kept_base": 482,
+      "kept_other": 493,
+      "delta_kept": 11,
+      "cos": 0.9999800170013649,
+      "cos_raw": 0.9999827379494823,
+      "cos_rerun": 0.9999844243845563,
+      "cos_rerun_raw": 0.9999864224706343
+     },
+     "historian": {
+      "kept_base": 434,
+      "kept_other": 445,
+      "delta_kept": 11,
+      "cos": 0.9999440218808665,
+      "cos_raw": 0.9999429826341663,
+      "cos_rerun": 0.9999567153829191,
+      "cos_rerun_raw": 0.9999570709901572
+     },
+     "instrumentally_aligned_ai": {
+      "kept_base": 251,
+      "kept_other": 340,
+      "delta_kept": 89,
+      "cos": 0.999684478003899,
+      "cos_raw": 0.9997292519366892,
+      "cos_rerun": 0.9996192050177733,
+      "cos_rerun_raw": 0.999674578380283
+     },
+     "interpreter": {
+      "kept_base": 259,
+      "kept_other": 287,
+      "delta_kept": 28,
+      "cos": 0.9996791406574841,
+      "cos_raw": 0.9996884144048251,
+      "cos_rerun": 0.9997072496546139,
+      "cos_rerun_raw": 0.9997207072509061
+     },
+     "merchant": {
+      "kept_base": 333,
+      "kept_other": 365,
+      "delta_kept": 32,
+      "cos": 0.9997468869946853,
+      "cos_raw": 0.9997567370422669,
+      "cos_rerun": 0.9999608104703498,
+      "cos_rerun_raw": 0.9999636616305746
+     },
+     "minimalist": {
+      "kept_base": 268,
+      "kept_other": 323,
+      "delta_kept": 55,
+      "cos": 0.9997491337832872,
+      "cos_raw": 0.9997518804364173,
+      "cos_rerun": 0.999502181122162,
+      "cos_rerun_raw": 0.9995125428339512
+     },
+     "oracle": {
+      "kept_base": 479,
+      "kept_other": 490,
+      "delta_kept": 11,
+      "cos": 0.9999238731763079,
+      "cos_raw": 0.9999445638710884,
+      "cos_rerun": 0.9999814330070665,
+      "cos_rerun_raw": 0.9999875448345666
+     },
+     "organizer": {
+      "kept_base": 431,
+      "kept_other": 463,
+      "delta_kept": 32,
+      "cos": 0.9998435348111199,
+      "cos_raw": 0.999846409119456,
+      "cos_rerun": 0.9998956859497534,
+      "cos_rerun_raw": 0.9998952128469982
+     },
+     "pacifist": {
+      "kept_base": 311,
+      "kept_other": 372,
+      "delta_kept": 61,
+      "cos": 0.9995882419391636,
+      "cos_raw": 0.9996276322306288,
+      "cos_rerun": 0.9998203434651355,
+      "cos_rerun_raw": 0.9998315431948104
+     },
+     "paperclip_maximizer": {
+      "kept_base": 432,
+      "kept_other": 434,
+      "delta_kept": 2,
+      "cos": 0.9999893451993936,
+      "cos_raw": 0.9999922058025716,
+      "cos_rerun": 0.9999782166505673,
+      "cos_rerun_raw": 0.9999840510123938
+     },
+     "peacekeeper": {
+      "kept_base": 214,
+      "kept_other": 274,
+      "delta_kept": 60,
+      "cos": 0.998733805899241,
+      "cos_raw": 0.9988454441162435,
+      "cos_rerun": 0.9994529572240372,
+      "cos_rerun_raw": 0.999508388916095
+     },
+     "perfectionist": {
+      "kept_base": 127,
+      "kept_other": 185,
+      "delta_kept": 58,
+      "cos": 0.9983428188011635,
+      "cos_raw": 0.9985520546407585,
+      "cos_rerun": 0.9990959374704801,
+      "cos_rerun_raw": 0.9991880744869118
+     },
+     "pirate": {
+      "kept_base": 498,
+      "kept_other": 500,
+      "delta_kept": 2,
+      "cos": 0.9999981329436146,
+      "cos_raw": 0.9999986931708984,
+      "cos_rerun": 0.9999987498899012,
+      "cos_rerun_raw": 0.9999991471605604
+     },
+     "psychologist": {
+      "kept_base": 437,
+      "kept_other": 463,
+      "delta_kept": 26,
+      "cos": 0.999901641121465,
+      "cos_raw": 0.9998991367437908,
+      "cos_rerun": 0.9998807185639048,
+      "cos_rerun_raw": 0.9998703799196338
+     },
+     "realist": {
+      "kept_base": 357,
+      "kept_other": 369,
+      "delta_kept": 12,
+      "cos": 0.9997350424416928,
+      "cos_raw": 0.9997476406095195,
+      "cos_rerun": 0.9997516915025779,
+      "cos_rerun_raw": 0.999754371534877
+     },
+     "robot": {
+      "kept_base": 233,
+      "kept_other": 283,
+      "delta_kept": 50,
+      "cos": 0.998144701944417,
+      "cos_raw": 0.9983249138034089,
+      "cos_rerun": 0.9994790064802432,
+      "cos_rerun_raw": 0.9995618168999163
+     },
+     "soldier": {
+      "kept_base": 393,
+      "kept_other": 437,
+      "delta_kept": 44,
+      "cos": 0.999728949308469,
+      "cos_raw": 0.9997563707223608,
+      "cos_rerun": 0.9999324288119653,
+      "cos_rerun_raw": 0.9999395908904782
+     },
+     "spirit": {
+      "kept_base": 491,
+      "kept_other": 498,
+      "delta_kept": 7,
+      "cos": 0.9999854834038459,
+      "cos_raw": 0.999991797850153,
+      "cos_rerun": 0.9999926793213222,
+      "cos_rerun_raw": 0.9999959440963516
+     },
+     "tree": {
+      "kept_base": 401,
+      "kept_other": 416,
+      "delta_kept": 15,
+      "cos": 0.9998221215544186,
+      "cos_raw": 0.9998599853792124,
+      "cos_rerun": 0.9999661078502167,
+      "cos_rerun_raw": 0.9999752638398915
+     },
+     "validator": {
+      "kept_base": 232,
+      "kept_other": 262,
+      "delta_kept": 30,
+      "cos": 0.999345127157782,
+      "cos_raw": 0.9993132635883444,
+      "cos_rerun": 0.9988823501660667,
+      "cos_rerun_raw": 0.9988349204320424
+     },
+     "visionary": {
+      "kept_base": 352,
+      "kept_other": 417,
+      "delta_kept": 65,
+      "cos": 0.9995519463429162,
+      "cos_raw": 0.9995593367135688,
+      "cos_rerun": 0.9997832468769817,
+      "cos_rerun_raw": 0.999798384348876
+     }
+    }
+   }
+  ]
+ },
+ "_provenance": {
+  "schema_version": "1.0",
+  "produced_by": {
+   "cmd": "uv run python results_analysis/rubric_version_vector_change.py --base runpod_workspace/rubric_exp/versions/v3 --other runpod_workspace/rubric_exp/versions/v5 --other-label v5 --rerun runpod_workspace/rubric_exp/versions/v3_rerun --default-vector runpod_workspace/rubric_exp/arm_vectors/default.pt --out-dir reports/pipeline/role_rubric_experiment --prefix version_vector_change_v3_v5",
+   "git_sha": "a19992e3+dirty",
+   "author": "Roger Dearnaley",
+   "title": "Role vectors under the v3 and v5 judge rubrics"
+  },
+  "produced_at": "2026-10-24T04:32:19+00:00",
+  "inputs": [
+   {
+    "dep_key": "producer_script",
+    "path": "results_analysis/rubric_version_vector_change.py",
+    "fingerprint": "v1:2026-10-24T04:32:14+00:00@15413",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-24T04:32:14+00:00",
+    "extras": {
+     "layer": "25",
+     "L": "3",
+     "base": "v3",
+     "other": "v5"
+    }
+   },
+   {
+    "dep_key": "default_vector",
+    "path": "runpod_workspace/rubric_exp/arm_vectors/default.pt",
+    "fingerprint": "v1:2026-10-22T22:58:54+00:00@10487853",
+    "kind": "file",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-22T22:58:54+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "base_vectors",
+    "path": "runpod_workspace/rubric_exp/arm_vectors",
+    "fingerprint": "v1:multi:5d0497a5b277",
+    "kind": "multi",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-22T22:58:54+00:00",
+    "extras": {},
+    "member_paths": [
+     "runpod_workspace/rubric_exp/arm_vectors/A0/alien.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/altruist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/assistant.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/biologist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/contrarian.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/cyborg.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/emissary.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/familiar.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/ghost.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/guru.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/historian.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/instrumentally_aligned_ai.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/interpreter.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/merchant.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/minimalist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/oracle.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/organizer.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/pacifist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/paperclip_maximizer.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/peacekeeper.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/perfectionist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/pirate.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/psychologist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/realist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/robot.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/soldier.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/spirit.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/tree.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/validator.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0/visionary.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/default.pt"
+    ]
+   },
+   {
+    "dep_key": "base_scores",
+    "path": "runpod_workspace/rubric_exp/judged/A0",
+    "fingerprint": "v1:multi:b0ffe9c32a4f",
+    "kind": "multi",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-22T20:36:09+00:00",
+    "extras": {},
+    "member_paths": [
+     "runpod_workspace/rubric_exp/judged/A0/alien.json",
+     "runpod_workspace/rubric_exp/judged/A0/altruist.json",
+     "runpod_workspace/rubric_exp/judged/A0/assistant.json",
+     "runpod_workspace/rubric_exp/judged/A0/biologist.json",
+     "runpod_workspace/rubric_exp/judged/A0/contrarian.json",
+     "runpod_workspace/rubric_exp/judged/A0/cyborg.json",
+     "runpod_workspace/rubric_exp/judged/A0/emissary.json",
+     "runpod_workspace/rubric_exp/judged/A0/familiar.json",
+     "runpod_workspace/rubric_exp/judged/A0/ghost.json",
+     "runpod_workspace/rubric_exp/judged/A0/guru.json",
+     "runpod_workspace/rubric_exp/judged/A0/historian.json",
+     "runpod_workspace/rubric_exp/judged/A0/instrumentally_aligned_ai.json",
+     "runpod_workspace/rubric_exp/judged/A0/interpreter.json",
+     "runpod_workspace/rubric_exp/judged/A0/merchant.json",
+     "runpod_workspace/rubric_exp/judged/A0/minimalist.json",
+     "runpod_workspace/rubric_exp/judged/A0/oracle.json",
+     "runpod_workspace/rubric_exp/judged/A0/organizer.json",
+     "runpod_workspace/rubric_exp/judged/A0/pacifist.json",
+     "runpod_workspace/rubric_exp/judged/A0/paperclip_maximizer.json",
+     "runpod_workspace/rubric_exp/judged/A0/peacekeeper.json",
+     "runpod_workspace/rubric_exp/judged/A0/perfectionist.json",
+     "runpod_workspace/rubric_exp/judged/A0/pirate.json",
+     "runpod_workspace/rubric_exp/judged/A0/psychologist.json",
+     "runpod_workspace/rubric_exp/judged/A0/realist.json",
+     "runpod_workspace/rubric_exp/judged/A0/robot.json",
+     "runpod_workspace/rubric_exp/judged/A0/soldier.json",
+     "runpod_workspace/rubric_exp/judged/A0/spirit.json",
+     "runpod_workspace/rubric_exp/judged/A0/tree.json",
+     "runpod_workspace/rubric_exp/judged/A0/validator.json",
+     "runpod_workspace/rubric_exp/judged/A0/visionary.json"
+    ]
+   },
+   {
+    "dep_key": "other_vectors",
+    "path": "runpod_workspace/rubric_exp",
+    "fingerprint": "v1:multi:073fbe9292d3",
+    "kind": "multi",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-24T04:18:37+00:00",
+    "extras": {},
+    "member_paths": [
+     "runpod_workspace/rubric_exp/arm_vectors/default.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/alien.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/altruist.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/assistant.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/biologist.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/contrarian.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/cyborg.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/emissary.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/familiar.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/ghost.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/guru.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/historian.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/instrumentally_aligned_ai.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/interpreter.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/merchant.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/minimalist.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/oracle.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/organizer.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/pacifist.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/paperclip_maximizer.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/peacekeeper.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/perfectionist.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/pirate.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/psychologist.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/realist.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/robot.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/soldier.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/spirit.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/tree.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/validator.pt",
+     "runpod_workspace/rubric_exp/versions/v5/vectors/visionary.pt"
+    ]
+   },
+   {
+    "dep_key": "other_scores",
+    "path": "runpod_workspace/rubric_exp/versions/v5/scores",
+    "fingerprint": "v1:multi:9ddf3e89a54a",
+    "kind": "multi",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-24T01:39:48+00:00",
+    "extras": {},
+    "member_paths": [
+     "runpod_workspace/rubric_exp/versions/v5/scores/alien.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/altruist.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/assistant.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/batch_state.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/biologist.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/contrarian.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/cyborg.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/emissary.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/familiar.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/ghost.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/guru.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/historian.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/instrumentally_aligned_ai.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/interpreter.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/judge_rubric.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/merchant.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/minimalist.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/oracle.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/organizer.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/pacifist.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/paperclip_maximizer.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/peacekeeper.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/perfectionist.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/pirate.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/psychologist.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/realist.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/robot.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/soldier.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/spirit.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/tree.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/usage.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/validator.json",
+     "runpod_workspace/rubric_exp/versions/v5/scores/visionary.json"
+    ]
+   },
+   {
+    "dep_key": "rerun_vectors",
+    "path": "runpod_workspace/rubric_exp/arm_vectors",
+    "fingerprint": "v1:multi:813fb045ad80",
+    "kind": "multi",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-22T22:58:54+00:00",
+    "extras": {},
+    "member_paths": [
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/alien.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/altruist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/assistant.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/biologist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/contrarian.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/cyborg.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/emissary.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/familiar.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/ghost.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/guru.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/historian.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/instrumentally_aligned_ai.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/interpreter.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/merchant.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/minimalist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/oracle.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/organizer.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/pacifist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/paperclip_maximizer.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/peacekeeper.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/perfectionist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/pirate.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/psychologist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/realist.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/robot.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/soldier.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/spirit.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/tree.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/validator.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/A0b/visionary.pt",
+     "runpod_workspace/rubric_exp/arm_vectors/default.pt"
+    ]
+   },
+   {
+    "dep_key": "rerun_scores",
+    "path": "runpod_workspace/rubric_exp/judged/A0b",
+    "fingerprint": "v1:multi:3488057f617b",
+    "kind": "multi",
+    "dataset_id": null,
+    "last_modified_at": "2026-10-22T20:36:09+00:00",
+    "extras": {},
+    "member_paths": [
+     "runpod_workspace/rubric_exp/judged/A0b/alien.json",
+     "runpod_workspace/rubric_exp/judged/A0b/altruist.json",
+     "runpod_workspace/rubric_exp/judged/A0b/assistant.json",
+     "runpod_workspace/rubric_exp/judged/A0b/biologist.json",
+     "runpod_workspace/rubric_exp/judged/A0b/contrarian.json",
+     "runpod_workspace/rubric_exp/judged/A0b/cyborg.json",
+     "runpod_workspace/rubric_exp/judged/A0b/emissary.json",
+     "runpod_workspace/rubric_exp/judged/A0b/familiar.json",
+     "runpod_workspace/rubric_exp/judged/A0b/ghost.json",
+     "runpod_workspace/rubric_exp/judged/A0b/guru.json",
+     "runpod_workspace/rubric_exp/judged/A0b/historian.json",
+     "runpod_workspace/rubric_exp/judged/A0b/instrumentally_aligned_ai.json",
+     "runpod_workspace/rubric_exp/judged/A0b/interpreter.json",
+     "runpod_workspace/rubric_exp/judged/A0b/merchant.json",
+     "runpod_workspace/rubric_exp/judged/A0b/minimalist.json",
+     "runpod_workspace/rubric_exp/judged/A0b/oracle.json",
+     "runpod_workspace/rubric_exp/judged/A0b/organizer.json",
+     "runpod_workspace/rubric_exp/judged/A0b/pacifist.json",
+     "runpod_workspace/rubric_exp/judged/A0b/paperclip_maximizer.json",
+     "runpod_workspace/rubric_exp/judged/A0b/peacekeeper.json",
+     "runpod_workspace/rubric_exp/judged/A0b/perfectionist.json",
+     "runpod_workspace/rubric_exp/judged/A0b/pirate.json",
+     "runpod_workspace/rubric_exp/judged/A0b/psychologist.json",
+     "runpod_workspace/rubric_exp/judged/A0b/realist.json",
+     "runpod_workspace/rubric_exp/judged/A0b/robot.json",
+     "runpod_workspace/rubric_exp/judged/A0b/soldier.json",
+     "runpod_workspace/rubric_exp/judged/A0b/spirit.json",
+     "runpod_workspace/rubric_exp/judged/A0b/tree.json",
+     "runpod_workspace/rubric_exp/judged/A0b/validator.json",
+     "runpod_workspace/rubric_exp/judged/A0b/visionary.json"
+    ]
+   },
+   {
+    "dep_key": "shear_r_goal",
+    "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/r_goal",
+    "fingerprint": "v1:qwen-3-32b Roger 8slot@a58f2a581190",
+    "kind": "subtree",
+    "dataset_id": "qwen-3-32b Roger 8slot",
+    "last_modified_at": "2026-05-06T12:27:16+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "shear_r_nogoal",
+    "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/r_nogoal",
+    "fingerprint": "v1:qwen-3-32b Roger 8slot@6901f9f79e8a",
+    "kind": "subtree",
+    "dataset_id": "qwen-3-32b Roger 8slot",
+    "last_modified_at": "2026-05-06T12:27:18+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "shear_t_goal",
+    "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/t_goal",
+    "fingerprint": "v1:qwen-3-32b Roger 8slot@bae58a175ec7",
+    "kind": "subtree",
+    "dataset_id": "qwen-3-32b Roger 8slot",
+    "last_modified_at": "2026-05-06T12:27:22+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "shear_t_nogoal",
+    "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/marginals/t_nogoal",
+    "fingerprint": "v1:qwen-3-32b Roger 8slot@178ae209dd0b",
+    "kind": "subtree",
+    "dataset_id": "qwen-3-32b Roger 8slot",
+    "last_modified_at": "2026-05-06T12:27:24+00:00",
+    "extras": {}
+   },
+   {
+    "dep_key": "shear_axis",
+    "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors/derived/axis",
+    "fingerprint": "v1:qwen-3-32b Roger 8slot@cace745b1a71",
+    "kind": "subtree",
+    "dataset_id": "qwen-3-32b Roger 8slot",
+    "last_modified_at": "2026-05-06T12:27:49+00:00",
+    "extras": {}
+   }
+  ],
+  "inputs_sha256": "7cebcf5104a41ee5c7e60ddc50fe507e21961eaa84664da7b20fc43da947b50a"
+ }
+}

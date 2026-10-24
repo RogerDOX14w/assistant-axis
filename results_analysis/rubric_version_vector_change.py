@@ -48,6 +48,9 @@ from results_analysis.canonical_angles.data import build_goal_nogoal_subspaces  
 from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_SHEAR_L, fit_shear  # noqa: E402
 
 DEFAULT_DATA_DIR = REPO / "runpod_workspace" / "qwen" / "qwen-3-32b Roger 8slot"
+#: Plotted values below this are drawn at it: a role whose two kept sets are the same
+#: has identical vectors and 1 - cos at float precision (~1e-16).
+PLOT_FLOOR = 1e-7
 SHEAR_SUBTREES = ("combinations/vectors/derived/marginals/r_goal",
                   "combinations/vectors/derived/marginals/r_nogoal",
                   "combinations/vectors/derived/marginals/t_goal",
@@ -121,8 +124,8 @@ def compare(base: Path, other: Path, rerun: Path | None, default_vec: np.ndarray
     return {"layer": layer, "soft_shear_L": L, "roles": roles, "slots": slots}
 
 
-def _label(ax, x, y, role, *, ha="left", dx=4):
-    ax.annotate(corpus_display_name(role, "roles"), (x, y), xytext=(dx if ha == "left" else -dx, 0),
+def _label(ax, x, y, role, *, ha="left", dx=4, dy=0):
+    ax.annotate(corpus_display_name(role, "roles"), (x, y), xytext=(dx if ha == "left" else -dx, dy),
                 textcoords="offset points", ha=ha, va="center", fontsize=7.5,
                 color=kind_text_color("role"), style="italic")
 
@@ -136,7 +139,7 @@ def plot_by_slot(res: dict, out: Path, title: str, spec: str, inputs, labels: tu
     has_rerun = "cos_rerun" in next(iter(res["slots"][0]["roles"].values()))
     for sl in res["slots"]:
         s, rows = sl["slot"], sl["roles"]
-        y = np.array([1 - r["cos"] for r in rows.values()])
+        y = np.maximum([1 - r["cos"] for r in rows.values()], PLOT_FLOOR)
         x = s - (0.15 if has_rerun else 0) + rng.uniform(-0.07, 0.07, len(y))
         ax.scatter(x, y, s=22, marker=kind_marker("role"), facecolor=kind_color("role"),
                    edgecolor=kind_text_color("role"), linewidth=0.6, zorder=3,
@@ -144,14 +147,14 @@ def plot_by_slot(res: dict, out: Path, title: str, spec: str, inputs, labels: tu
         ax.hlines(np.median(y), s - 0.3 if has_rerun else s - 0.2, s, color=kind_text_color("role"),
                   linewidth=2, zorder=4)
         if has_rerun:
-            yr = np.array([1 - r["cos_rerun"] for r in rows.values()])
+            yr = np.maximum([1 - r["cos_rerun"] for r in rows.values()], PLOT_FLOOR)
             ax.scatter(s + 0.15 + rng.uniform(-0.07, 0.07, len(yr)), yr, s=18, marker="o",
                        facecolor="lightgrey", edgecolor="dimgrey", linewidth=0.6, zorder=2,
                        label=f"{labels[0]} judged twice (judge noise)" if s == 0 else None)
             ax.hlines(np.median(yr), s, s + 0.3, color="dimgrey", linewidth=2, zorder=4)
         # most-changed role in each slot
         top = max(rows, key=lambda r: 1 - rows[r]["cos"])
-        _label(ax, s - (0.15 if has_rerun else 0) + 0.08, 1 - rows[top]["cos"], top)
+        _label(ax, s - (0.15 if has_rerun else 0) + 0.08, max(1 - rows[top]["cos"], PLOT_FLOOR), top)
     ax.set_yscale("log")
     ax.set_xticks(range(len(res["slots"])))
     ax.set_xticklabels([f"slot {sl['slot']}" for sl in res["slots"]])
@@ -177,21 +180,21 @@ def plot_vs_kept(res: dict, out: Path, title: str, spec: str, inputs, labels: tu
     fig, axes = plt.subplots(nrow, ncol, figsize=(17, 4.1 * nrow + 1.2), sharex=True, sharey=True,
                              constrained_layout=True)
     axes = np.atleast_2d(axes)
-    all_y = [1 - r["cos"] for sl in slots for r in sl["roles"].values()]
+    all_y = [max(1 - r["cos"], PLOT_FLOOR) for sl in slots for r in sl["roles"].values()]
     for i, sl in enumerate(slots):
         ax = axes[i // ncol, i % ncol]
         rows = sl["roles"]
         names = list(rows)
         x = np.array([rows[r]["delta_kept"] for r in names])
-        y = np.array([1 - rows[r]["cos"] for r in names])
+        y = np.maximum([1 - rows[r]["cos"] for r in names], PLOT_FLOOR)
         ax.scatter(x, y, s=24, marker=kind_marker("role"), facecolor=kind_color("role"),
                    edgecolor=kind_text_color("role"), linewidth=0.6, zorder=3)
         if "median_1_minus_cos_rerun" in sl["summary"]:
             ax.axhline(sl["summary"]["median_1_minus_cos_rerun"], color="dimgrey", linewidth=1,
                        linestyle="--", zorder=1)
         order = np.argsort(y)
-        for j in list(order[-2:]) + list(order[:1]):
-            _label(ax, x[j], y[j], names[j], ha="right" if x[j] > 0 else "left")
+        for j, dy in zip(list(order[-2:]) + list(order[:1]), (-5, 5, 0)):
+            _label(ax, x[j], y[j], names[j], ha="right" if x[j] > 0 else "left", dy=dy)
         rho, p = sl["summary"]["spearman_delta_kept"]
         rho_a, p_a = sl["summary"]["spearman_abs_delta_kept"]
         ax.set_title(f"slot {sl['slot']}\nρ(Δ kept) {rho:+.2f}, p={p:.2g};   ρ(|Δ kept|) {rho_a:+.2f}, "
@@ -256,7 +259,8 @@ def main() -> None:
     out_json = args.out_dir / f"{args.prefix}.json"
     out_json.write_text(json.dumps(json_metadata(res, inputs=inputs, title=title), indent=1) + "\n")
     spec = (f"{len(roles)} roles, same activations; each vector minus the default vector, layer "
-            f"{args.layer}, soft-shear L={args.L} fitted on the May tree; 1 − cos between the two versions")
+            f"{args.layer}, soft-shear L={args.L} fitted on the May tree; 1 − cos between the two versions "
+            f"(floored at {PLOT_FLOOR:g}: identical kept sets)")
     plot_by_slot(res, args.out_dir / f"{args.prefix}_by_slot.png",
                  f"{title}: change per slot", spec, inputs, labels)
     plot_vs_kept(res, args.out_dir / f"{args.prefix}_vs_kept.png",

@@ -2385,19 +2385,19 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python results_analysis/rubric_version_vector_change.py --base runpod_workspace/rubric_exp/versions/v3 --other runpod_workspace/rubric_exp/versions/v4 --rerun runpod_workspace/rubric_exp/versions/v3_rerun --default-vector runpod_workspace/rubric_exp/arm_vectors/default.pt --out-dir reports/pipeline/role_rubric_experiment",
-   "git_sha": "5ae90d0f+dirty",
+   "git_sha": "a19992e3+dirty",
    "author": "Roger Dearnaley",
    "title": "Role vectors under the v3 and v4 judge rubrics"
   },
-  "produced_at": "2026-10-24T00:29:24+00:00",
+  "produced_at": "2026-10-24T04:32:16+00:00",
   "inputs": [
    {
     "dep_key": "producer_script",
     "path": "results_analysis/rubric_version_vector_change.py",
-    "fingerprint": "v1:2026-10-24T00:29:22+00:00@15067",
+    "fingerprint": "v1:2026-10-24T04:32:14+00:00@15413",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-24T00:29:22+00:00",
+    "last_modified_at": "2026-10-24T04:32:14+00:00",
     "extras": {
      "layer": "25",
      "L": "3",
@@ -2709,6 +2709,6 @@
     "extras": {}
    }
   ],
-  "inputs_sha256": "960691db187acf7a1d19aca99bd43c19b5f0c0b81e7a5e4a0e9a0fe582bd66e4"
+  "inputs_sha256": "7d894ea514aac7771cb066347faffa6b48e46445f2541a64634341e5918f9dca"
  }
 }
