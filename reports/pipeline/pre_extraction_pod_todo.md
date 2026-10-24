@@ -112,6 +112,23 @@ parameters at launch.
    [rsync_completed_axes.sh](../../scripts/rsync_completed_axes.sh) and
    [rsync_pod_sweeps.sh](../../scripts/rsync_pod_sweeps.sh) hard-code a pod IP and port that will be
    stale: update them to the October pods, and change `StrictHostKeyChecking=no` to `accept-new`.
+14. **Activation read and write speed on the volume** (Roger, 2026-10-24: "test it, next time we bring a pod
+    up").  On `roger-aa-4` (2026-10-23, a fresh host in US-KS-2) step 4 read cold activation files at about
+    9 MB/s, about 5 minutes per 2.6-GB file, and four step-4 processes at once were no faster in total;
+    `roger-aa-2` read files it had written two hours earlier in 50-70 s each (page cache), and the cold
+    rsync of the model ran at about 90 MB/s.  At 9 MB/s step 4 of the extraction would take about a day
+    per pod.  Every file already on the volume is cold on a new pod; use each file for one measurement only.
+    Measure: (a) `dd if=<file> of=/dev/null bs=16M` on one file against `torch.load` of another; (b) 1, 2, 4
+    and 8 `dd` streams on different files at once, to see whether the total scales (it decides whether
+    read-ahead helpers help, or whether the bandwidth is capped); (c) 8 threads reading ranges of one file;
+    (d) one step-2 save timed phase by phase (staging, copy to the volume, SHA-256 of the copy, load check).
+    Fixes to build off-pod first and time in the same session: step 4 reads each file into RAM in large
+    reads (sequential or parallel ranges, whichever (b) and (c) favour) and loads it from memory, reading the
+    next file ahead in a thread; step 2 runs its load check on the staged RAM copy once the SHA-256 of the
+    volume copy matches.  Storage, checked 2026-10-24: high-performance network volumes ($0.14/GB-month
+    against $0.07) exist in AP-IN-1, CA-MTL-1, CA-MTL-4, EU-FR-1, EUR-NO-2 and US-CA-2, not in US-KS-2,
+    and the console offers new volumes there as high-performance only; the container disk (local, $0.10
+    /GB-month, cleared on stop) is fast scratch space in any data center.
 
 ## The test backlog: what only a pod can confirm (Roger, 2026-10-13)
 

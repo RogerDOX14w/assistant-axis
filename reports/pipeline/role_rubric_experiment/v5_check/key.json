@@ -1,0 +1,2040 @@
+{
+ "built": "2026-10-24",
+ "seed": 20261024,
+ "n_up": 30,
+ "n_down": 10,
+ "categories": {
+  "A helpful professionals": [
+   "secretary",
+   "scheduler",
+   "screener",
+   "translator",
+   "proofreader",
+   "debugger",
+   "moderator",
+   "emissary",
+   "organizer",
+   "interpreter",
+   "validator",
+   "psychologist",
+   "biologist",
+   "historian"
+  ],
+  "B other occupations and characters": [
+   "soldier",
+   "merchant",
+   "pirate"
+  ],
+  "C stances and dispositions": [
+   "altruist",
+   "contrarian",
+   "minimalist",
+   "pacifist",
+   "peacekeeper",
+   "perfectionist",
+   "realist",
+   "visionary"
+  ],
+  "D AI and machine roles": [
+   "assistant",
+   "instrumentally_aligned_ai",
+   "robot",
+   "cyborg",
+   "paperclip_maximizer"
+  ],
+  "E harmful roles": [
+   "hacker",
+   "virus"
+  ],
+  "F non-human and mythic": [
+   "alien",
+   "ghost",
+   "spirit",
+   "oracle",
+   "familiar",
+   "tree",
+   "guru"
+  ]
+ },
+ "flip_counts": {
+  "A helpful professionals": {
+   "up": {
+    "oct/emissary": 16,
+    "oct/organizer": 32,
+    "oct/interpreter": 77,
+    "oct/validator": 73,
+    "oct/psychologist": 47,
+    "oct/biologist": 22,
+    "oct/historian": 31,
+    "may/secretary": 51,
+    "may/scheduler": 50,
+    "may/screener": 24,
+    "may/translator": 22,
+    "may/proofreader": 59,
+    "may/debugger": 57,
+    "may/moderator": 62,
+    "may/emissary": 36
+   },
+   "down": {
+    "oct/emissary": 5,
+    "oct/organizer": 15,
+    "oct/interpreter": 46,
+    "oct/validator": 51,
+    "oct/psychologist": 9,
+    "oct/biologist": 3,
+    "oct/historian": 9,
+    "may/secretary": 10,
+    "may/scheduler": 3,
+    "may/screener": 7,
+    "may/translator": 17,
+    "may/proofreader": 33,
+    "may/debugger": 17,
+    "may/moderator": 34,
+    "may/emissary": 4
+   }
+  },
+  "B other occupations and characters": {
+   "up": {
+    "oct/soldier": 33,
+    "oct/merchant": 33,
+    "oct/pirate": 4
+   },
+   "down": {
+    "oct/soldier": 8,
+    "oct/merchant": 2
+   }
+  },
+  "C stances and dispositions": {
+   "up": {
+    "oct/altruist": 97,
+    "oct/contrarian": 81,
+    "oct/minimalist": 76,
+    "oct/pacifist": 59,
+    "oct/peacekeeper": 84,
+    "oct/perfectionist": 65,
+    "oct/realist": 78,
+    "oct/visionary": 58
+   },
+   "down": {
+    "oct/altruist": 28,
+    "oct/contrarian": 27,
+    "oct/minimalist": 16,
+    "oct/pacifist": 19,
+    "oct/peacekeeper": 44,
+    "oct/perfectionist": 20,
+    "oct/realist": 46,
+    "oct/visionary": 6
+   }
+  },
+  "D AI and machine roles": {
+   "up": {
+    "oct/assistant": 6,
+    "oct/instrumentally_aligned_ai": 111,
+    "oct/robot": 80,
+    "oct/cyborg": 10,
+    "oct/paperclip_maximizer": 8,
+    "may/instrumentally_aligned_ai": 110
+   },
+   "down": {
+    "oct/assistant": 5,
+    "oct/instrumentally_aligned_ai": 34,
+    "oct/robot": 37,
+    "oct/paperclip_maximizer": 2,
+    "may/instrumentally_aligned_ai": 34
+   }
+  },
+  "E harmful roles": {
+   "up": {
+    "may/hacker": 17,
+    "may/virus": 10
+   },
+   "down": {
+    "may/hacker": 1,
+    "may/virus": 5
+   }
+  },
+  "F non-human and mythic": {
+   "up": {
+    "oct/ghost": 5,
+    "oct/spirit": 3,
+    "oct/oracle": 14,
+    "oct/familiar": 23,
+    "oct/tree": 17,
+    "oct/guru": 10
+   },
+   "down": {
+    "oct/ghost": 1,
+    "oct/oracle": 2,
+    "oct/familiar": 9,
+    "oct/tree": 3
+   }
+  }
+ },
+ "note": "G = good data (deserves 3). Up-flip (v4 < 3, v5 = 3) marked G: v5 right; down-flip marked G: v4 right.",
+ "items": {
+  "1": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "pacifist",
+   "key": "pos_p1_q71",
+   "sheet": 1
+  },
+  "2": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p1_q41",
+   "sheet": 1
+  },
+  "3": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p2_q14",
+   "sheet": 1
+  },
+  "4": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "minimalist",
+   "key": "pos_p0_q36",
+   "sheet": 1
+  },
+  "5": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "robot",
+   "key": "pos_p0_q89",
+   "sheet": 1
+  },
+  "6": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "paperclip_maximizer",
+   "key": "pos_p3_q18",
+   "sheet": 1
+  },
+  "7": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "contrarian",
+   "key": "pos_p1_q67",
+   "sheet": 1
+  },
+  "8": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "peacekeeper",
+   "key": "pos_p1_q53",
+   "sheet": 1
+  },
+  "9": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "robot",
+   "key": "pos_p1_q60",
+   "sheet": 1
+  },
+  "10": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p4_q92",
+   "sheet": 1
+  },
+  "11": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "ghost",
+   "key": "pos_p1_q30",
+   "sheet": 1
+  },
+  "12": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p1_q72",
+   "sheet": 1
+  },
+  "13": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "organizer",
+   "key": "pos_p2_q35",
+   "sheet": 1
+  },
+  "14": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "oracle",
+   "key": "pos_p1_q22",
+   "sheet": 1
+  },
+  "15": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q70",
+   "sheet": 1
+  },
+  "16": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "proofreader",
+   "key": "pos_p1_q99",
+   "sheet": 1
+  },
+  "17": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p3_q1",
+   "sheet": 1
+  },
+  "18": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p2_q10",
+   "sheet": 1
+  },
+  "19": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "pacifist",
+   "key": "pos_p0_q52",
+   "sheet": 1
+  },
+  "20": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "altruist",
+   "key": "pos_p0_q45",
+   "sheet": 1
+  },
+  "21": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p2_q27",
+   "sheet": 1
+  },
+  "22": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p0_q23",
+   "sheet": 1
+  },
+  "23": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "spirit",
+   "key": "pos_p3_q9",
+   "sheet": 1
+  },
+  "24": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p3_q92",
+   "sheet": 1
+  },
+  "25": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "oracle",
+   "key": "pos_p1_q65",
+   "sheet": 1
+  },
+  "26": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "oracle",
+   "key": "pos_p1_q15",
+   "sheet": 1
+  },
+  "27": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p2_q7",
+   "sheet": 1
+  },
+  "28": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p4_q94",
+   "sheet": 1
+  },
+  "29": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "psychologist",
+   "key": "pos_p3_q99",
+   "sheet": 1
+  },
+  "30": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "guru",
+   "key": "pos_p1_q64",
+   "sheet": 1
+  },
+  "31": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "realist",
+   "key": "pos_p1_q96",
+   "sheet": 1
+  },
+  "32": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p1_q83",
+   "sheet": 1
+  },
+  "33": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "screener",
+   "key": "pos_p3_q40",
+   "sheet": 1
+  },
+  "34": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "robot",
+   "key": "pos_p4_q58",
+   "sheet": 1
+  },
+  "35": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "psychologist",
+   "key": "pos_p4_q59",
+   "sheet": 1
+  },
+  "36": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "may",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p2_q70",
+   "sheet": 1
+  },
+  "37": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "realist",
+   "key": "pos_p1_q74",
+   "sheet": 1
+  },
+  "38": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "moderator",
+   "key": "pos_p4_q45",
+   "sheet": 1
+  },
+  "39": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p1_q70",
+   "sheet": 1
+  },
+  "40": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "cyborg",
+   "key": "pos_p4_q39",
+   "sheet": 1
+  },
+  "41": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "ghost",
+   "key": "pos_p4_q9",
+   "sheet": 1
+  },
+  "42": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p4_q47",
+   "sheet": 1
+  },
+  "43": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p3_q83",
+   "sheet": 1
+  },
+  "44": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p3_q79",
+   "sheet": 1
+  },
+  "45": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "paperclip_maximizer",
+   "key": "pos_p3_q58",
+   "sheet": 1
+  },
+  "46": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q12",
+   "sheet": 1
+  },
+  "47": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p3_q92",
+   "sheet": 1
+  },
+  "48": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "emissary",
+   "key": "pos_p1_q7",
+   "sheet": 1
+  },
+  "49": {
+   "category": "E harmful roles",
+   "direction": "down",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p0_q30",
+   "sheet": 1
+  },
+  "50": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "may",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p0_q23",
+   "sheet": 1
+  },
+  "51": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p1_q37",
+   "sheet": 1
+  },
+  "52": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "emissary",
+   "key": "pos_p2_q72",
+   "sheet": 1
+  },
+  "53": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "oct",
+   "role": "biologist",
+   "key": "pos_p3_q4",
+   "sheet": 1
+  },
+  "54": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "contrarian",
+   "key": "pos_p4_q0",
+   "sheet": 1
+  },
+  "55": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p1_q59",
+   "sheet": 1
+  },
+  "56": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "paperclip_maximizer",
+   "key": "pos_p4_q45",
+   "sheet": 1
+  },
+  "57": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "moderator",
+   "key": "pos_p2_q42",
+   "sheet": 1
+  },
+  "58": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "screener",
+   "key": "pos_p3_q78",
+   "sheet": 1
+  },
+  "59": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "proofreader",
+   "key": "pos_p4_q98",
+   "sheet": 1
+  },
+  "60": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p3_q12",
+   "sheet": 2
+  },
+  "61": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p2_q22",
+   "sheet": 2
+  },
+  "62": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p2_q66",
+   "sheet": 2
+  },
+  "63": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q20",
+   "sheet": 2
+  },
+  "64": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "pacifist",
+   "key": "pos_p1_q66",
+   "sheet": 2
+  },
+  "65": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "altruist",
+   "key": "pos_p2_q97",
+   "sheet": 2
+  },
+  "66": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "peacekeeper",
+   "key": "pos_p0_q4",
+   "sheet": 2
+  },
+  "67": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q23",
+   "sheet": 2
+  },
+  "68": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "minimalist",
+   "key": "pos_p0_q61",
+   "sheet": 2
+  },
+  "69": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q8",
+   "sheet": 2
+  },
+  "70": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "oracle",
+   "key": "pos_p1_q91",
+   "sheet": 2
+  },
+  "71": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p0_q41",
+   "sheet": 2
+  },
+  "72": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p1_q99",
+   "sheet": 2
+  },
+  "73": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p3_q18",
+   "sheet": 2
+  },
+  "74": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p1_q50",
+   "sheet": 2
+  },
+  "75": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "altruist",
+   "key": "pos_p2_q51",
+   "sheet": 2
+  },
+  "76": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "guru",
+   "key": "pos_p3_q14",
+   "sheet": 2
+  },
+  "77": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "visionary",
+   "key": "pos_p3_q69",
+   "sheet": 2
+  },
+  "78": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "pacifist",
+   "key": "pos_p0_q73",
+   "sheet": 2
+  },
+  "79": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "altruist",
+   "key": "pos_p2_q73",
+   "sheet": 2
+  },
+  "80": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "oracle",
+   "key": "pos_p1_q14",
+   "sheet": 2
+  },
+  "81": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "interpreter",
+   "key": "pos_p2_q85",
+   "sheet": 2
+  },
+  "82": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "may",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p3_q10",
+   "sheet": 2
+  },
+  "83": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p4_q73",
+   "sheet": 2
+  },
+  "84": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "assistant",
+   "key": "pos_p0_q49",
+   "sheet": 2
+  },
+  "85": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p2_q32",
+   "sheet": 2
+  },
+  "86": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "peacekeeper",
+   "key": "pos_p0_q17",
+   "sheet": 2
+  },
+  "87": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "moderator",
+   "key": "pos_p1_q94",
+   "sheet": 2
+  },
+  "88": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "emissary",
+   "key": "pos_p2_q95",
+   "sheet": 2
+  },
+  "89": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "visionary",
+   "key": "pos_p3_q92",
+   "sheet": 2
+  },
+  "90": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "translator",
+   "key": "pos_p2_q72",
+   "sheet": 2
+  },
+  "91": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p1_q28",
+   "sheet": 2
+  },
+  "92": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p0_q60",
+   "sheet": 2
+  },
+  "93": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p1_q57",
+   "sheet": 2
+  },
+  "94": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "visionary",
+   "key": "pos_p3_q53",
+   "sheet": 2
+  },
+  "95": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "realist",
+   "key": "pos_p2_q57",
+   "sheet": 2
+  },
+  "96": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p1_q56",
+   "sheet": 2
+  },
+  "97": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "debugger",
+   "key": "pos_p2_q20",
+   "sheet": 2
+  },
+  "98": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "secretary",
+   "key": "pos_p1_q55",
+   "sheet": 2
+  },
+  "99": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p3_q71",
+   "sheet": 2
+  },
+  "100": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "proofreader",
+   "key": "pos_p0_q86",
+   "sheet": 2
+  },
+  "101": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p3_q18",
+   "sheet": 2
+  },
+  "102": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "translator",
+   "key": "pos_p3_q79",
+   "sheet": 2
+  },
+  "103": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p0_q18",
+   "sheet": 2
+  },
+  "104": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "assistant",
+   "key": "pos_p4_q84",
+   "sheet": 2
+  },
+  "105": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "debugger",
+   "key": "pos_p4_q41",
+   "sheet": 2
+  },
+  "106": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "robot",
+   "key": "pos_p1_q67",
+   "sheet": 2
+  },
+  "107": {
+   "category": "E harmful roles",
+   "direction": "down",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p2_q36",
+   "sheet": 2
+  },
+  "108": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "robot",
+   "key": "pos_p3_q37",
+   "sheet": 2
+  },
+  "109": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "ghost",
+   "key": "pos_p2_q39",
+   "sheet": 2
+  },
+  "110": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "scheduler",
+   "key": "pos_p1_q80",
+   "sheet": 2
+  },
+  "111": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p0_q53",
+   "sheet": 2
+  },
+  "112": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p0_q53",
+   "sheet": 2
+  },
+  "113": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "pirate",
+   "key": "pos_p4_q70",
+   "sheet": 2
+  },
+  "114": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "cyborg",
+   "key": "pos_p3_q20",
+   "sheet": 2
+  },
+  "115": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "biologist",
+   "key": "pos_p1_q61",
+   "sheet": 2
+  },
+  "116": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p4_q74",
+   "sheet": 2
+  },
+  "117": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "cyborg",
+   "key": "pos_p1_q65",
+   "sheet": 2
+  },
+  "118": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p0_q46",
+   "sheet": 2
+  },
+  "119": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "assistant",
+   "key": "pos_p3_q76",
+   "sheet": 3
+  },
+  "120": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "peacekeeper",
+   "key": "pos_p1_q2",
+   "sheet": 3
+  },
+  "121": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p2_q54",
+   "sheet": 3
+  },
+  "122": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p4_q10",
+   "sheet": 3
+  },
+  "123": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p2_q88",
+   "sheet": 3
+  },
+  "124": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "minimalist",
+   "key": "pos_p0_q98",
+   "sheet": 3
+  },
+  "125": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p2_q58",
+   "sheet": 3
+  },
+  "126": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "assistant",
+   "key": "pos_p2_q81",
+   "sheet": 3
+  },
+  "127": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p2_q39",
+   "sheet": 3
+  },
+  "128": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p1_q15",
+   "sheet": 3
+  },
+  "129": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "ghost",
+   "key": "pos_p2_q77",
+   "sheet": 3
+  },
+  "130": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "paperclip_maximizer",
+   "key": "pos_p3_q75",
+   "sheet": 3
+  },
+  "131": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "translator",
+   "key": "pos_p4_q31",
+   "sheet": 3
+  },
+  "132": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "cyborg",
+   "key": "pos_p2_q30",
+   "sheet": 3
+  },
+  "133": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "guru",
+   "key": "pos_p0_q90",
+   "sheet": 3
+  },
+  "134": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "perfectionist",
+   "key": "pos_p0_q99",
+   "sheet": 3
+  },
+  "135": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "assistant",
+   "key": "pos_p4_q51",
+   "sheet": 3
+  },
+  "136": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "robot",
+   "key": "pos_p2_q14",
+   "sheet": 3
+  },
+  "137": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "paperclip_maximizer",
+   "key": "pos_p4_q16",
+   "sheet": 3
+  },
+  "138": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p1_q17",
+   "sheet": 3
+  },
+  "139": {
+   "category": "E harmful roles",
+   "direction": "down",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p0_q90",
+   "sheet": 3
+  },
+  "140": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p0_q16",
+   "sheet": 3
+  },
+  "141": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "organizer",
+   "key": "pos_p3_q48",
+   "sheet": 3
+  },
+  "142": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "robot",
+   "key": "pos_p0_q0",
+   "sheet": 3
+  },
+  "143": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p0_q12",
+   "sheet": 3
+  },
+  "144": {
+   "category": "E harmful roles",
+   "direction": "down",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p1_q66",
+   "sheet": 3
+  },
+  "145": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "paperclip_maximizer",
+   "key": "pos_p0_q79",
+   "sheet": 3
+  },
+  "146": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p4_q48",
+   "sheet": 3
+  },
+  "147": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p1_q26",
+   "sheet": 3
+  },
+  "148": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "pirate",
+   "key": "pos_p0_q92",
+   "sheet": 3
+  },
+  "149": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "pacifist",
+   "key": "pos_p0_q47",
+   "sheet": 3
+  },
+  "150": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p3_q37",
+   "sheet": 3
+  },
+  "151": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "may",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p2_q74",
+   "sheet": 3
+  },
+  "152": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p2_q84",
+   "sheet": 3
+  },
+  "153": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p1_q30",
+   "sheet": 3
+  },
+  "154": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "minimalist",
+   "key": "pos_p0_q16",
+   "sheet": 3
+  },
+  "155": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q99",
+   "sheet": 3
+  },
+  "156": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "validator",
+   "key": "pos_p2_q92",
+   "sheet": 3
+  },
+  "157": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "assistant",
+   "key": "pos_p0_q43",
+   "sheet": 3
+  },
+  "158": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "guru",
+   "key": "pos_p3_q10",
+   "sheet": 3
+  },
+  "159": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p4_q7",
+   "sheet": 3
+  },
+  "160": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p0_q70",
+   "sheet": 3
+  },
+  "161": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "spirit",
+   "key": "pos_p3_q77",
+   "sheet": 3
+  },
+  "162": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "perfectionist",
+   "key": "pos_p4_q63",
+   "sheet": 3
+  },
+  "163": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "cyborg",
+   "key": "pos_p4_q73",
+   "sheet": 3
+  },
+  "164": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "interpreter",
+   "key": "pos_p3_q98",
+   "sheet": 3
+  },
+  "165": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p1_q30",
+   "sheet": 3
+  },
+  "166": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "scheduler",
+   "key": "pos_p4_q25",
+   "sheet": 3
+  },
+  "167": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q61",
+   "sheet": 3
+  },
+  "168": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p3_q27",
+   "sheet": 3
+  },
+  "169": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "perfectionist",
+   "key": "pos_p1_q9",
+   "sheet": 3
+  },
+  "170": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q32",
+   "sheet": 3
+  },
+  "171": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "emissary",
+   "key": "pos_p1_q26",
+   "sheet": 3
+  },
+  "172": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p4_q23",
+   "sheet": 3
+  },
+  "173": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p1_q18",
+   "sheet": 3
+  },
+  "174": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "realist",
+   "key": "pos_p1_q14",
+   "sheet": 3
+  },
+  "175": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p4_q91",
+   "sheet": 3
+  },
+  "176": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "altruist",
+   "key": "pos_p3_q42",
+   "sheet": 3
+  },
+  "177": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p1_q92",
+   "sheet": 3
+  },
+  "178": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "ghost",
+   "key": "pos_p1_q38",
+   "sheet": 4
+  },
+  "179": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "altruist",
+   "key": "pos_p4_q97",
+   "sheet": 4
+  },
+  "180": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p4_q48",
+   "sheet": 4
+  },
+  "181": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "screener",
+   "key": "pos_p4_q45",
+   "sheet": 4
+  },
+  "182": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "perfectionist",
+   "key": "pos_p2_q12",
+   "sheet": 4
+  },
+  "183": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p3_q41",
+   "sheet": 4
+  },
+  "184": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p1_q86",
+   "sheet": 4
+  },
+  "185": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "paperclip_maximizer",
+   "key": "pos_p3_q93",
+   "sheet": 4
+  },
+  "186": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p1_q74",
+   "sheet": 4
+  },
+  "187": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p1_q66",
+   "sheet": 4
+  },
+  "188": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p2_q61",
+   "sheet": 4
+  },
+  "189": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "oct",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p1_q63",
+   "sheet": 4
+  },
+  "190": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p3_q60",
+   "sheet": 4
+  },
+  "191": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "perfectionist",
+   "key": "pos_p4_q69",
+   "sheet": 4
+  },
+  "192": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "historian",
+   "key": "pos_p2_q69",
+   "sheet": 4
+  },
+  "193": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "may",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p2_q89",
+   "sheet": 4
+  },
+  "194": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "pirate",
+   "key": "pos_p3_q72",
+   "sheet": 4
+  },
+  "195": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "oracle",
+   "key": "pos_p1_q44",
+   "sheet": 4
+  },
+  "196": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "oracle",
+   "key": "pos_p2_q91",
+   "sheet": 4
+  },
+  "197": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "guru",
+   "key": "pos_p3_q82",
+   "sheet": 4
+  },
+  "198": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "contrarian",
+   "key": "pos_p1_q6",
+   "sheet": 4
+  },
+  "199": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p3_q37",
+   "sheet": 4
+  },
+  "200": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "may",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p4_q91",
+   "sheet": 4
+  },
+  "201": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "peacekeeper",
+   "key": "pos_p1_q42",
+   "sheet": 4
+  },
+  "202": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "secretary",
+   "key": "pos_p0_q62",
+   "sheet": 4
+  },
+  "203": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "merchant",
+   "key": "pos_p3_q58",
+   "sheet": 4
+  },
+  "204": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p2_q41",
+   "sheet": 4
+  },
+  "205": {
+   "category": "E harmful roles",
+   "direction": "down",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p3_q15",
+   "sheet": 4
+  },
+  "206": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p2_q58",
+   "sheet": 4
+  },
+  "207": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "visionary",
+   "key": "pos_p3_q54",
+   "sheet": 4
+  },
+  "208": {
+   "category": "D AI and machine roles",
+   "direction": "up",
+   "source": "may",
+   "role": "instrumentally_aligned_ai",
+   "key": "pos_p3_q33",
+   "sheet": 4
+  },
+  "209": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "spirit",
+   "key": "pos_p1_q86",
+   "sheet": 4
+  },
+  "210": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "emissary",
+   "key": "pos_p3_q42",
+   "sheet": 4
+  },
+  "211": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "minimalist",
+   "key": "pos_p3_q77",
+   "sheet": 4
+  },
+  "212": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "ghost",
+   "key": "pos_p0_q74",
+   "sheet": 4
+  },
+  "213": {
+   "category": "C stances and dispositions",
+   "direction": "up",
+   "source": "oct",
+   "role": "contrarian",
+   "key": "pos_p4_q53",
+   "sheet": 4
+  },
+  "214": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "scheduler",
+   "key": "pos_p3_q4",
+   "sheet": 4
+  },
+  "215": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "validator",
+   "key": "pos_p3_q50",
+   "sheet": 4
+  },
+  "216": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "tree",
+   "key": "pos_p1_q30",
+   "sheet": 4
+  },
+  "217": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p1_q2",
+   "sheet": 4
+  },
+  "218": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p1_q25",
+   "sheet": 4
+  },
+  "219": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "may",
+   "role": "debugger",
+   "key": "pos_p3_q59",
+   "sheet": 4
+  },
+  "220": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "hacker",
+   "key": "pos_p0_q67",
+   "sheet": 4
+  },
+  "221": {
+   "category": "E harmful roles",
+   "direction": "down",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p3_q82",
+   "sheet": 4
+  },
+  "222": {
+   "category": "F non-human and mythic",
+   "direction": "up",
+   "source": "oct",
+   "role": "guru",
+   "key": "pos_p3_q52",
+   "sheet": 4
+  },
+  "223": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "may",
+   "role": "secretary",
+   "key": "pos_p1_q81",
+   "sheet": 4
+  },
+  "224": {
+   "category": "A helpful professionals",
+   "direction": "down",
+   "source": "oct",
+   "role": "emissary",
+   "key": "pos_p4_q40",
+   "sheet": 4
+  },
+  "225": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "historian",
+   "key": "pos_p3_q73",
+   "sheet": 4
+  },
+  "226": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "contrarian",
+   "key": "pos_p2_q52",
+   "sheet": 4
+  },
+  "227": {
+   "category": "D AI and machine roles",
+   "direction": "down",
+   "source": "oct",
+   "role": "assistant",
+   "key": "pos_p2_q92",
+   "sheet": 4
+  },
+  "228": {
+   "category": "E harmful roles",
+   "direction": "up",
+   "source": "may",
+   "role": "virus",
+   "key": "pos_p3_q20",
+   "sheet": 4
+  },
+  "229": {
+   "category": "B other occupations and characters",
+   "direction": "up",
+   "source": "oct",
+   "role": "pirate",
+   "key": "pos_p0_q22",
+   "sheet": 4
+  },
+  "230": {
+   "category": "A helpful professionals",
+   "direction": "up",
+   "source": "oct",
+   "role": "biologist",
+   "key": "pos_p4_q22",
+   "sheet": 4
+  },
+  "231": {
+   "category": "B other occupations and characters",
+   "direction": "down",
+   "source": "oct",
+   "role": "soldier",
+   "key": "pos_p3_q92",
+   "sheet": 4
+  },
+  "232": {
+   "category": "C stances and dispositions",
+   "direction": "down",
+   "source": "oct",
+   "role": "contrarian",
+   "key": "pos_p1_q15",
+   "sheet": 4
+  },
+  "233": {
+   "category": "F non-human and mythic",
+   "direction": "down",
+   "source": "oct",
+   "role": "familiar",
+   "key": "pos_p1_q15",
+   "sheet": 4
+  }
+ }
+}
