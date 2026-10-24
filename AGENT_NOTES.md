@@ -1089,7 +1089,9 @@ distinguishable from records produced under the new rubric.
 [`assistant_axis/judge_rubrics.py`](assistant_axis/judge_rubrics.py):
 `3_judge.py --prompt_version N` (0 the original number-only rubrics read
 as the first integer, 3 the current ones and the default, 4 the draft
-being decided from the role rubric experiment, so far A1, 5 version 4 and
+being decided from the role rubric experiment: A1, and for altruist alone
+the philanthropist level-2 example, A8-A11 having shown that every other
+example costs the other roles data; 5 version 4 and
 a clause for helpful professional roles, a draft kept separate for
 comparison on the October extraction), and
 `run_pipeline.sh --from-step 3 --judge-prompt-version N` reruns steps 3 to

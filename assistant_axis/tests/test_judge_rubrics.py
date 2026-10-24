@@ -113,6 +113,7 @@ def test_versions_and_their_reading():
 def test_every_template_fills_cleanly(version):
     v = jr.PROMPT_VERSIONS[version]
     filled = [v.role.format(role_name="R", description="D."),
+              *(tpl.format(role_name="R", description="D.") for _, tpl in v.role_overrides),
               v.trait.format(trait_name="T", trait_description="D."),
               v.combination.format(role_name="R", role_description="D.", trait_name="T",
                                    trait_description="E.")]
@@ -164,3 +165,22 @@ def test_version_5_is_version_4_with_the_clause_only():
     roles = {p.stem.replace("_", " ") for p in (REPO / "data" / "roles" / "instructions").glob("*.json")}
     assert [r for r in roles if f" {r} " in f" {jr.V5_ROLE_CLAUSE.lower()} "] == ["assistant"]
     assert "an AI assistant" in v4.role
+
+
+def test_altruist_alone_gets_the_philanthropist_example_from_version_4():
+    """Roger, 2026-10-23: the altruist example costs only the role it names, so
+    altruist alone is judged with the philanthropist example (arm A11: +47
+    responses at 3 for altruist); every other role keeps the altruist example."""
+    for v in (0, 3):
+        assert jr.PROMPT_VERSIONS[v].role_overrides == ()
+        assert jr.PROMPT_VERSIONS[v].role_template("altruist") == jr.PROMPT_VERSIONS[v].role
+    v4, v5 = jr.PROMPT_VERSIONS[4], jr.PROMPT_VERSIONS[5]
+    assert [s for s, _ in v4.role_overrides] == ["altruist"] == [s for s, _ in v5.role_overrides]
+    assert v4.role_template("altruist") == v4.role.replace(jr.LEVEL2_EXAMPLE, jr.V4_ALTRUIST_EXAMPLE)
+    assert v4.role_template("pirate") == v4.role and jr.LEVEL2_EXAMPLE in v4.role
+    assert v5.role_template("altruist") == v5.role.replace(jr.LEVEL2_EXAMPLE, jr.V4_ALTRUIST_EXAMPLE)
+    assert not (REPO / "data" / "roles" / "instructions" / "philanthropist.json").exists()
+    # the override is part of the role hash, so changing it stops a directory judged before
+    from dataclasses import replace
+    assert replace(v4, role_overrides=()).sha256("role") != v4.sha256("role")
+    assert replace(v4, role_overrides=()).sha256("trait") == v4.sha256("trait")

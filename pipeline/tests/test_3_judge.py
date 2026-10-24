@@ -1031,14 +1031,16 @@ def test_version_3_sends_every_role_files_baked_eval_prompt(judge):
     assert differ == []
 
 
-def test_version_4_role_prompt_is_the_experiments_a1_arm(judge):
-    """Version 4 so far is arm A1 of the role rubric experiment, which Roger
-    approved on the prompts that experiment judged."""
+def test_version_4_role_prompt_is_the_experiments_approved_arms(judge):
+    """Version 4 is arm A1 of the role rubric experiment for every role, and arm
+    A11 (A1 and the philanthropist example) for altruist alone, as Roger approved
+    them on the prompts that experiment judged (2026-10-23)."""
     rre = _load_module("_role_rubric_experiment_under_test", "data_analysis/role_rubric_experiment.py")
     differ = []
     for s in _role_stems():
         baked = json.loads((ROLES / f"{s}.json").read_text())["eval_prompt"]
-        if judge.resolve_eval_prompt(s, ROLES, TRAITS, "role", prompt_version=4) != rre.arm_template("A1", baked):
+        arm = "A11" if s == "altruist" else "A1"
+        if judge.resolve_eval_prompt(s, ROLES, TRAITS, "role", prompt_version=4) != rre.arm_template(arm, baked):
             differ.append(s)
     assert differ == []
 

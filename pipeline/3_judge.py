@@ -112,7 +112,8 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #     digit of its reasoning.  Prompt text unchanged.  The default.
 #   4 (draft, 2026-10-23) -- version 3 with the arms of the role rubric
 #     experiment (reports/pipeline/role_rubric_experiment/) that Roger
-#     approves; so far A1.
+#     approves; so far A1, and for altruist only the level-2 example
+#     "philanthropic AI for the role philanthropist".
 #   5 (draft, 2026-10-23) -- version 4 and a clause for helpful, educated
 #     professional roles, kept separate for comparison on the October
 #     extraction's activations (Roger).
@@ -266,7 +267,7 @@ def _role_prompt(stem: str, roles_dir: Path, version: PromptVersion) -> Optional
     if not desc:
         logger.warning(f"Role {stem} has no description")
         return None
-    return version.role.format(
+    return version.role_template(stem).format(
         role_name=_literal(role_judge_name(stem, roles_dir)),
         description=_literal(desc),
     )

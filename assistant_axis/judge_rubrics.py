@@ -33,7 +33,10 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
 - **4** -- the next version, being decided from the role rubric experiment
   (``reports/pipeline/role_rubric_experiment/``): version 3 plus the edits in
   ``V4_ROLE_EDITS`` (2026-10-23: A1, "Gemma, an LLM" made model-neutral and
-  the doubled parenthesis fixed).  A draft: its text may still change, and
+  the doubled parenthesis fixed), and for the role altruist only, whose name
+  the level-2 example uses, the example "philanthropic AI for the role
+  philanthropist" (``V4_ROLE_OVERRIDES``; arm A11 gave altruist 47 more
+  responses at 3, p = 2e-5, and the example is shown to no other role).  A draft: its text may still change, and
   ``judge_rubric.json`` records the hash of the text each directory was judged
   with, so step 3 refuses to add to a directory judged under an earlier draft.
 - **5** -- a larger change, kept as its own version for comparison on the
@@ -211,11 +214,14 @@ COMBINED_TEMPLATE_V0 = apply_edits(COMBINED_TEMPLATE_V3, [(_REASON_FIRST_COMBINE
 #: ``(old, new, occurrences)``; each is an arm of the role rubric experiment
 #: that Roger approved.  Trait and combination rubrics are version 3's.
 #: Rejected (2026-10-23): A2 (the model's own name; costs data where A1 does
-#: not), A4 (the level-2 example names the judged role; much stricter), A6
+#: not), A3 / A5 (the level-2 example made generic), A8 (an example about
+#: beekeeper), A9 (no example), A10 (humanitarian), A11 (philanthropist), all
+#: stricter than A1 for most roles (the altruist example keeps level 2
+#: narrow), A4 (the level-2 example names the judged role; much stricter), A6
 #: (level 0's refusal sentence dropped, level 3's reworded; neutral overall
 #: and on the per-role spread, so no change without firm evidence), A7
-#: (role-aware identity; much stricter).  A3 / A5 (the level-2 example made
-#: generic) is being redrafted.
+#: (role-aware identity; much stricter).  The altruist example costs only the
+#: role it names, so that role alone is given another (``V4_ROLE_OVERRIDES``).
 V4_ROLE_EDITS: Tuple[Tuple[str, str, int], ...] = (
     # A1 (approved 2026-10-23): the model's name made neutral in levels 0-2,
     # and level 1's doubled parenthesis fixed.
@@ -224,6 +230,17 @@ V4_ROLE_EDITS: Tuple[Tuple[str, str, int], ...] = (
 )
 
 ROLE_TEMPLATE_V4 = apply_edits(ROLE_TEMPLATE_V3, V4_ROLE_EDITS, what="role rubric v4")
+
+LEVEL2_EXAMPLE = "(e.g. altruistic AI for the role altruist)"
+#: Roger, 2026-10-23: for altruist only, the example of arm A11 (altruist 229 ->
+#: 276 responses at 3, 37 down / 84 up, p = 2e-5; humanitarian, A10, gave +21,
+#: p = 0.07).  Every other role keeps the altruist example.
+V4_ALTRUIST_EXAMPLE = "(e.g. philanthropic AI for the role philanthropist)"
+#: Role stem -> the role template used for that role instead of the version's own.
+V4_ROLE_OVERRIDES: Dict[str, str] = {
+    "altruist": apply_edits(ROLE_TEMPLATE_V4, [(LEVEL2_EXAMPLE, V4_ALTRUIST_EXAMPLE, 1)],
+                            what="role rubric v4, altruist"),
+}
 TRAIT_TEMPLATE_V4 = TRAIT_TEMPLATE_V3
 COMBINED_TEMPLATE_V4 = COMBINED_TEMPLATE_V3
 
@@ -243,9 +260,14 @@ V5_ROLE_CLAUSE = (
     "assistant would say.")
 _ROLE_CLOSING_PARAGRAPH = "\n\n" + _REASON_FIRST_ROLE.split(" (2-3")[0]
 
-ROLE_TEMPLATE_V5 = apply_edits(ROLE_TEMPLATE_V4, [
-    (_ROLE_CLOSING_PARAGRAPH, "\n\n" + V5_ROLE_CLAUSE + _ROLE_CLOSING_PARAGRAPH, 1)],
-    what="role rubric v5")
+def _with_v5_clause(template: str, what: str) -> str:
+    return apply_edits(template, [
+        (_ROLE_CLOSING_PARAGRAPH, "\n\n" + V5_ROLE_CLAUSE + _ROLE_CLOSING_PARAGRAPH, 1)], what=what)
+
+
+ROLE_TEMPLATE_V5 = _with_v5_clause(ROLE_TEMPLATE_V4, "role rubric v5")
+V5_ROLE_OVERRIDES: Dict[str, str] = {
+    stem: _with_v5_clause(tpl, f"role rubric v5, {stem}") for stem, tpl in V4_ROLE_OVERRIDES.items()}
 TRAIT_TEMPLATE_V5 = TRAIT_TEMPLATE_V4
 COMBINED_TEMPLATE_V5 = COMBINED_TEMPLATE_V4
 
@@ -268,9 +290,17 @@ class PromptVersion:
     reply_format: str
     max_tokens: int    # step 3's default --max_tokens under this version
     draft: bool = False
+    #: ``(role stem, template)`` pairs: a role judged with its own template
+    #: instead of ``role`` (version 4 on: altruist's level-2 example).
+    role_overrides: Tuple[Tuple[str, str], ...] = ()
+
+    def role_template(self, stem: str) -> str:
+        """The role rubric template for the role ``stem``."""
+        return dict(self.role_overrides).get(stem, self.role)
 
     def template(self, entity_type: str) -> str:
-        """The rubric template for ``"role"``, ``"trait"`` or ``"combination"``."""
+        """The rubric template for ``"role"``, ``"trait"`` or ``"combination"``
+        (for roles, the template every role without an override gets)."""
         try:
             return {"role": self.role, "trait": self.trait, "combination": self.combination}[entity_type]
         except KeyError:
@@ -282,7 +312,10 @@ class PromptVersion:
         digits; recorded in ``judge_rubric.json`` beside that type's scores.
         Per type, so that an edit to the draft's trait rubric does not stop a
         roles directory judged under the draft."""
-        blob = json.dumps([self.template(entity_type), self.reply_format], ensure_ascii=False)
+        parts = [self.template(entity_type), self.reply_format]
+        if entity_type == "role" and self.role_overrides:
+            parts.append(sorted(self.role_overrides))
+        blob = json.dumps(parts, ensure_ascii=False)
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
     def differs_from(self, other: "PromptVersion") -> Tuple[str, ...]:
@@ -301,13 +334,15 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                      ROLE_TEMPLATE_V3, TRAIT_TEMPLATE_V3, COMBINED_TEMPLATE_V3,
                      reply_format="score_marker", max_tokens=200),
     4: PromptVersion(4, "draft: version 3 with the approved arms of the role rubric experiment "
-                        "(A1)",
+                        "(A1; for altruist only, the philanthropist example)",
                      ROLE_TEMPLATE_V4, TRAIT_TEMPLATE_V4, COMBINED_TEMPLATE_V4,
-                     reply_format="score_marker", max_tokens=200, draft=True),
+                     reply_format="score_marker", max_tokens=200, draft=True,
+                     role_overrides=tuple(sorted(V4_ROLE_OVERRIDES.items()))),
     5: PromptVersion(5, "draft: version 4 and a clause for helpful, educated professional roles "
                         "(Roger, 2026-10-23), for comparison on the October extraction",
                      ROLE_TEMPLATE_V5, TRAIT_TEMPLATE_V5, COMBINED_TEMPLATE_V5,
-                     reply_format="score_marker", max_tokens=200, draft=True),
+                     reply_format="score_marker", max_tokens=200, draft=True,
+                     role_overrides=tuple(sorted(V5_ROLE_OVERRIDES.items()))),
 }
 
 DEFAULT_PROMPT_VERSION = 3
