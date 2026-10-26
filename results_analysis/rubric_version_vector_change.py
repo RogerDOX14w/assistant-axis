@@ -73,6 +73,17 @@ def cosine(a: np.ndarray, b: np.ndarray) -> float:
     return float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
 
 
+def pair_stats(xb: np.ndarray, xo: np.ndarray, apply) -> dict:
+    """Two versions of one role's default-centred vector: the cosine between
+    them and the change in norm from ``xb`` to ``xo``, in percent, each both
+    after ``apply`` (the soft-shear) and raw (Roger, 2026-10-26)."""
+    sb, so = apply(xb), apply(xo)
+    nb, no = float(np.linalg.norm(sb)), float(np.linalg.norm(so))
+    return {"cos": cosine(sb, so), "cos_raw": cosine(xb, xo),
+            "norm_base": nb, "norm_other": no, "norm_change_pct": 100 * (no / nb - 1),
+            "norm_change_pct_raw": 100 * (float(np.linalg.norm(xo)) / float(np.linalg.norm(xb)) - 1)}
+
+
 def spearman(x, y) -> tuple[float, float]:
     from scipy.stats import spearmanr
     r = spearmanr(x, y)
@@ -95,11 +106,11 @@ def compare(base: Path, other: Path, rerun: Path | None, default_vec: np.ndarray
         for r in roles:
             xb, xo = vb[r][s, layer] - d, vo[r][s, layer] - d
             row = {"kept_base": kb[r], "kept_other": ko[r], "delta_kept": ko[r] - kb[r],
-                   "cos": cosine(shear.apply(xb), shear.apply(xo)), "cos_raw": cosine(xb, xo)}
+                   **pair_stats(xb, xo, shear.apply)}
             if rerun:
-                xr = vr[r][s, layer] - d
-                row["cos_rerun"] = cosine(shear.apply(xb), shear.apply(xr))
-                row["cos_rerun_raw"] = cosine(xb, xr)
+                pr = pair_stats(xb, vr[r][s, layer] - d, shear.apply)
+                row.update({"cos_rerun": pr["cos"], "cos_rerun_raw": pr["cos_raw"],
+                            "norm_change_pct_rerun": pr["norm_change_pct"]})
             rows[r] = row
         # step 5's axis: mean default minus mean role vector (pipeline/5_axis.py)
         ab = d - np.mean([vb[r][s, layer] for r in roles], axis=0)
@@ -108,13 +119,23 @@ def compare(base: Path, other: Path, rerun: Path | None, default_vec: np.ndarray
         delta = [rows[r]["delta_kept"] for r in roles]
         rho, p = spearman(delta, one_minus)
         rho_abs, p_abs = spearman([abs(x) for x in delta], one_minus)
+        cos = [rows[r]["cos"] for r in roles]
+        norm_pct = [rows[r]["norm_change_pct"] for r in roles]
         summary = {"median_1_minus_cos": float(np.median(one_minus)),
                    "mean_1_minus_cos": float(np.mean(one_minus)),
                    "median_1_minus_cos_raw": float(np.median([1 - rows[r]["cos_raw"] for r in roles])),
+                   "cos_range": [min(cos), max(cos)],
+                   "norm_change_pct_range": [min(norm_pct), max(norm_pct)],
+                   "median_abs_norm_change_pct": float(np.median(np.abs(norm_pct))),
                    "spearman_delta_kept": [rho, p], "spearman_abs_delta_kept": [rho_abs, p_abs],
                    "axis_cos": cosine(shear.apply(ab), shear.apply(ao)), "axis_cos_raw": cosine(ab, ao)}
         if rerun:
             summary["median_1_minus_cos_rerun"] = float(np.median([1 - rows[r]["cos_rerun"] for r in roles]))
+            cos_r = [rows[r]["cos_rerun"] for r in roles]
+            norm_r = [rows[r]["norm_change_pct_rerun"] for r in roles]
+            summary["cos_range_rerun"] = [min(cos_r), max(cos_r)]
+            summary["norm_change_pct_range_rerun"] = [min(norm_r), max(norm_r)]
+            summary["median_abs_norm_change_pct_rerun"] = float(np.median(np.abs(norm_r)))
             ar = d - np.mean([vr[r][s, layer] for r in roles], axis=0)
             summary["axis_cos_rerun"] = cosine(shear.apply(ab), shear.apply(ar))
             ratios = [(1 - rows[r]["cos"]) / (1 - rows[r]["cos_rerun"]) for r in roles
@@ -273,6 +294,12 @@ def main() -> None:
                  if "median_1_minus_cos_rerun" in s else "")
               + f"; rho(delta kept) {s['spearman_delta_kept'][0]:+.2f} p={s['spearman_delta_kept'][1]:.2g}"
               f"; axis cos {s['axis_cos']:.5f}")
+        print(f"   cos {s['cos_range'][0]:.5f} to {s['cos_range'][1]:.5f}; norm change "
+              f"{s['norm_change_pct_range'][0]:+.2f}% to {s['norm_change_pct_range'][1]:+.2f}% "
+              f"(median |change| {s['median_abs_norm_change_pct']:.2f}%)"
+              + (f"; judged twice: cos {s['cos_range_rerun'][0]:.5f} to {s['cos_range_rerun'][1]:.5f}, norm "
+                 f"{s['norm_change_pct_range_rerun'][0]:+.2f}% to {s['norm_change_pct_range_rerun'][1]:+.2f}%"
+                 if "cos_range_rerun" in s else ""))
     print(f"wrote {out_json} and the two plots beside it")
 
 
