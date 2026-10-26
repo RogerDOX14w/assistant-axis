@@ -129,6 +129,13 @@ parameters at launch.
     against $0.07) exist in AP-IN-1, CA-MTL-1, CA-MTL-4, EU-FR-1, EUR-NO-2 and US-CA-2, not in US-KS-2,
     and the console offers new volumes there as high-performance only; the container disk (local, $0.10
     /GB-month, cleared on stop) is fast scratch space in any data center.
+    **(a)-(c) measured 2026-10-26 on `roger-aa-5`** (1x A100 SXM, US-KS-2, a fresh host, cold October
+    activation files): `dd` 109 MB/s; `torch.load` 108 MB/s (24 s per 2.6-GB file, no slower than `dd`);
+    1, 2 and 4 parallel `dd` streams 110, 117 and 117 MB/s in total; 8 threads reading ranges of one file
+    107 MB/s.  So the volume gives a pod about 110-120 MB/s whatever the read pattern or parallelism:
+    read-ahead helpers and parallel range reads would not help, and the 9 MB/s of `roger-aa-4` was that
+    pod (or its host), not `torch.load`.  At 110 MB/s step 4 reads one entity in about 25 s, about 2 hours
+    per 300 entities.  Still open: (d), the step-2 save to the volume timed phase by phase.
 
 ## The test backlog: what only a pod can confirm (Roger, 2026-10-13)
 
