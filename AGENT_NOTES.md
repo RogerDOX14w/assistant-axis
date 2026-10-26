@@ -310,6 +310,24 @@ only other locations outside this repository an agent should ever touch:
   2026-09-25; prefer the scratchpad, since `/tmp` is cleared on reboot).
   Note that `/tmp` is only for scratch: nothing there is a deliverable.
 
+**The project's archive drive, `/Volumes/G-Drive/assistant-axis/`: read
+only** (Roger, 2026-10-26: "read only, please — it's an archive").  An
+external drive holding a mirror of `runpod_workspace/`, including most of
+the May 2026 activations under `runpod_workspace/qwen/qwen-3-32b Roger
+8slot/` (all roles, traits and the default; 1,685 of the 1,801
+combinations, the rest did not fit).  Read only: never write, move, rename
+or delete anything on it, and stay inside `assistant-axis/` on the drive.
+**It is usually not plugged in.**  When a task needs it and `/Volumes/G-Drive`
+is not mounted, ask Roger to connect it; do not look for the data anywhere
+else.  Reading it needs macOS's removable-volume permission for Cursor
+(System Settings → Privacy & Security → Files and Folders; granted
+2026-10-26).  Nothing but this rule stops a write: the Bash sandbox's
+`allowWrite` does not list the drive, so a shell write fails, but the Write
+and Edit tools run outside the sandbox, and the boundary hook checks only
+paths under the home directory.  A subagent brief that may touch the drive
+says "read only" in its own words.  A cold read from the drive runs at about
+100 MB/s (a 2.6-GB activation file in 26 s).
+
 Everything else on this machine stays off-limits.  **That includes
 "just checking what is installed"**: `~/.cache` (Hugging Face, pip, uv,
 torch caches), `~/.ssh`, `~/Library`, other projects under `~/Documents`,
