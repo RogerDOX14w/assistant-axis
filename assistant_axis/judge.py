@@ -612,8 +612,22 @@ def parse_batch_scores_json(
     return out
 
 
+#: The OpenAI service tiers a judge call may name (2026-10-26).  ``"flex"``:
+#: lower priority, priced at Batch rates, answered like a real-time call
+#: but slower, and refused with an uncharged HTTP 429 when capacity is short
+#: (developers.openai.com Flex processing guide, read 2026-10-26).
+SERVICE_TIERS = ("flex",)
+
+
+def usage_key(model: str, service_tier: Optional[str] = None) -> str:
+    """The name a call's tokens are charged under: ``<model>:flex`` for a Flex
+    call (priced at the batch rate, ``judge_pricing``), else ``model``."""
+    return f"{model}:{service_tier}" if service_tier else model
+
+
 def chat_request_body(prompt: str, model: str, max_tokens: int, *,
-                      temperature: Optional[float] = DEFAULT_TEMPERATURE) -> Dict[str, Any]:
+                      temperature: Optional[float] = DEFAULT_TEMPERATURE,
+                      service_tier: Optional[str] = None) -> Dict[str, Any]:
     """The chat-completion request a judge call sends: the keyword arguments
     of ``client.chat.completions.create`` and, unchanged, the ``body`` of an
     OpenAI Batch API line (``assistant_axis.openai_batch``), so that a
@@ -623,7 +637,8 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
     2026-10-12 sent ``"temperature": 1`` explicitly: the same sampling), and
     is checked against :data:`MODEL_CAPABILITIES` otherwise
     (:func:`request_temperature`).  The model's
-    :data:`JUDGE_REQUEST_SETTINGS` are added (GPT-6 Luna's reasoning effort)."""
+    :data:`JUDGE_REQUEST_SETTINGS` are added (GPT-6 Luna's reasoning effort),
+    and ``service_tier`` when given (one of :data:`SERVICE_TIERS`)."""
     body: Dict[str, Any] = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
@@ -633,6 +648,10 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
     if t is not None:
         body["temperature"] = t
     body.update(judge_request_settings(model))
+    if service_tier is not None:
+        if service_tier not in SERVICE_TIERS:
+            raise ValueError(f"service_tier {service_tier!r}: expected one of {SERVICE_TIERS}")
+        body["service_tier"] = service_tier
     return body
 
 
@@ -646,6 +665,7 @@ async def call_judge_single(
     *,
     temperature: Optional[float] = DEFAULT_TEMPERATURE,
     reject_truncated: bool = False,
+    service_tier: Optional[str] = None,
 ) -> Optional[str]:
     """Call the judge model with a single prompt.
 
@@ -653,7 +673,8 @@ async def call_judge_single(
     HTTP 400 is raised as :class:`JudgeRequestError` instead, as is a
     non-default ``temperature`` for a model that refuses one (before sending),
     except a 400 that flags this prompt's content (:func:`content_flag`),
-    which gives None with a WARNING.
+    which gives None with a WARNING.  ``service_tier`` (``"flex"``) is sent
+    and the tokens are charged under :func:`usage_key`.
 
     Args:
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
@@ -667,7 +688,8 @@ async def call_judge_single(
             (``finish_reason == "length"``), counted in
             :data:`TRUNCATED_REPLIES` (the usage is charged all the same).
     """
-    body = chat_request_body(prompt, model, max_tokens, temperature=temperature)
+    body = chat_request_body(prompt, model, max_tokens, temperature=temperature,
+                             service_tier=service_tier)
     await rate_limiter.acquire()
 
     try:
@@ -678,7 +700,7 @@ async def call_judge_single(
             # nothing from judge but judge.py is imported from many places).
             from .judge_pricing import extract_usage_openai
             pt, ct = extract_usage_openai(response)
-            usage.charge(model, pt, ct)
+            usage.charge(usage_key(model, service_tier), pt, ct)
 
         if reject_truncated and response.choices and \
                 getattr(response.choices[0], "finish_reason", None) == "length":
@@ -709,8 +731,11 @@ async def call_judge_batch(
     usage: Optional["MultiModelUsage"] = None,
     *,
     reject_truncated: bool = False,
+    service_tier: Optional[str] = None,
 ) -> List[Optional[str]]:
     """Call the judge model with multiple prompts concurrently.
+
+    ``service_tier`` (``"flex"``, OpenAI models only) is passed to every call.
 
     ``client`` is the provider's async client for ``model``
     (:func:`provider_for_model`): an ``openai.AsyncOpenAI`` for a GPT model,
@@ -743,7 +768,7 @@ async def call_judge_batch(
         else:
             tasks = [
                 call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
-                                  reject_truncated=reject_truncated)
+                                  reject_truncated=reject_truncated, service_tier=service_tier)
                 for prompt in batch
             ]
 

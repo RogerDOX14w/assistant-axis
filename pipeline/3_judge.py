@@ -599,10 +599,12 @@ async def score_entity(
     existing_scores: Dict[str, int],
     usage: Optional["MultiModelUsage"] = None,
     reply_format: str = "score_marker",
+    service_tier: Optional[str] = None,
 ) -> Tuple[dict, int, int]:
     """Score responses for a single entity.  ``usage`` (a
     MultiModelUsage) is ticked with every response's token counts;
-    ``reply_format`` is the prompt version's (:func:`score_reply`).
+    ``reply_format`` is the prompt version's (:func:`score_reply`);
+    ``service_tier`` (``"flex"``) is passed to every call.
 
     Returns
     -------
@@ -633,6 +635,7 @@ async def score_entity(
         usage=usage,
         # rubric v3 on: a reply cut at max_tokens is unparseable
         reject_truncated=reply_format == "score_marker",
+        service_tier=service_tier,
     )
 
     scores: Dict[str, int] = {}
@@ -939,11 +942,21 @@ def judge_key_name(model: str) -> str:
     return "ANTHROPIC_API_KEY" if provider_for_model(model) == "anthropic" else "OPENAI_API_KEY"
 
 
-def judge_client(model: str):
-    """The async client for the judge ``model``'s provider."""
+#: OpenAI Flex calls can wait in a queue and be refused with an uncharged 429
+#: when capacity is short: a longer client timeout and more SDK retries (with
+#: its exponential backoff), as the Flex guide recommends (read 2026-10-26).
+FLEX_TIMEOUT_S = 900.0
+FLEX_MAX_RETRIES = 8
+
+
+def judge_client(model: str, service_tier: Optional[str] = None):
+    """The async client for the judge ``model``'s provider (for a Flex run,
+    with :data:`FLEX_TIMEOUT_S` and :data:`FLEX_MAX_RETRIES`)."""
     if provider_for_model(model) == "anthropic":
         import anthropic
         return anthropic.AsyncAnthropic()
+    if service_tier == "flex":
+        return openai.AsyncOpenAI(timeout=FLEX_TIMEOUT_S, max_retries=FLEX_MAX_RETRIES)
     return openai.AsyncOpenAI()
 
 
@@ -989,6 +1002,11 @@ async def main_async():
                         help="Judge in real time instead of through the OpenAI Batch API.  "
                              "Batch is the default (Roger, 2026-10-10): half the price, results "
                              "within 24 hours, usually much sooner")
+    parser.add_argument("--service_tier", choices=["flex"], default=None,
+                        help="With --no_batch and an OpenAI judge: OpenAI Flex processing, priced "
+                             "at Batch rates but answered like real-time calls, slower and at "
+                             "lower priority (2026-10-26: Luna's batches did not move for hours).  "
+                             "Usage is recorded under <model>:flex")
     parser.add_argument("--batch_requests", type=int,
                         default=_openai_batch.DEFAULT_CHUNK_REQUESTS,
                         help="Requests per batch (service limit 50,000 and 200 MB; a batch over "
@@ -1040,6 +1058,16 @@ async def main_async():
         args.max_tokens = version.max_tokens
 
     problem = check_judge_model(args.judge_model, batch=not args.no_batch)
+    if not problem and args.service_tier:
+        if not args.no_batch:
+            problem = "--service_tier applies to real-time calls: pass --no_batch with it"
+        elif provider_for_model(args.judge_model) != "openai":
+            problem = "--service_tier flex is OpenAI's Flex processing"
+        else:
+            try:
+                price_for_model(f"{args.judge_model}:{args.service_tier}")
+            except KeyError as e:
+                problem = e.args[0] if e.args else f"no {args.service_tier} price"
     if problem:
         logger.error(f"--judge_model {args.judge_model}: {problem}")
         sys.exit(1)
@@ -1226,7 +1254,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         sys.exit(1)
     version = get_version(args.prompt_version)
 
-    client = judge_client(args.judge_model)
+    client = judge_client(args.judge_model, args.service_tier)
     rate_limiter = RateLimiter(args.requests_per_second)
 
     # The rubric stamp is written just before the first scores are, or the
@@ -1356,6 +1384,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                     existing_scores=existing_scores,
                     usage=run_usage,
                     reply_format=version.reply_format,
+                    service_tier=args.service_tier,
                 )
                 write_usage(usage_path, prior_usage, run_usage)
                 total_call_attempted += n_attempted

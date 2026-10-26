@@ -464,3 +464,44 @@ def test_luna_is_priced():
     assert price_for_model("gpt-6-luna") == (0.10, 0.50)
     assert price_for_model("gpt-6-luna:batch") == (0.05, 0.25)
     assert price_for_model("claude-haiku-5-5") == (0.10, 0.50)
+
+
+# ---------------------------------------------------------------------------
+# OpenAI Flex processing (2026-10-26: Luna's batches did not move for hours)
+# ---------------------------------------------------------------------------
+
+class _UsageOpenAI(FakeOpenAI):
+    def __init__(self):
+        super().__init__()
+
+        async def create(**kw):
+            self.calls.append(kw)
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="SCORE: 3"),
+                                                            finish_reason="stop")],
+                                   usage=SimpleNamespace(prompt_tokens=700, completion_tokens=50))
+        self.chat = SimpleNamespace(completions=SimpleNamespace(create=create))
+
+
+class TestFlex:
+    def test_body_carries_the_tier_only_when_asked(self):
+        assert "service_tier" not in chat_request_body("p", "gpt-6-luna", 200)
+        assert chat_request_body("p", "gpt-6-luna", 200, service_tier="flex")["service_tier"] == "flex"
+
+    def test_an_unknown_tier_is_refused(self):
+        with pytest.raises(ValueError, match="service_tier"):
+            chat_request_body("p", "gpt-6-luna", 200, service_tier="priority")
+
+    def test_flex_calls_are_charged_under_model_flex_at_the_batch_rate(self):
+        from assistant_axis.judge_pricing import MultiModelUsage, price_for_model
+        client, u = _UsageOpenAI(), MultiModelUsage()
+        out = _run(call_judge_batch(client, ["a", "b"], "gpt-6-luna", 200, RateLimiter(1000), usage=u,
+                                    service_tier="flex"))
+        assert out == ["SCORE: 3", "SCORE: 3"]
+        assert all(c["service_tier"] == "flex" and c["reasoning_effort"] == "none" for c in client.calls)
+        assert set(u.as_dict()["per_model"]) == {"gpt-6-luna:flex"}
+        assert price_for_model("gpt-6-luna:flex") == price_for_model("gpt-6-luna:batch") == (0.05, 0.25)
+
+    def test_flex_is_openai_only_in_pricing(self):
+        from assistant_axis.judge_pricing import price_for_model
+        with pytest.raises(KeyError, match="Flex"):
+            price_for_model("claude-haiku-5-5:flex")

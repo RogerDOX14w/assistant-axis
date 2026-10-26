@@ -498,7 +498,7 @@ def test_a_claude_judge_runs_in_real_time(judge, monkeypatch, tmp_path, caplog):
                                stop_reason="end_turn", stop_details=None,
                                usage=SimpleNamespace(input_tokens=300, output_tokens=40))
     client = SimpleNamespace(messages=SimpleNamespace(create=create))
-    monkeypatch.setattr(judge, "judge_client", lambda model: client)
+    monkeypatch.setattr(judge, "judge_client", lambda model, tier=None: client)
     monkeypatch.setattr(judge._judge_mod, "REFUSED_REPLIES", {})
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-used")
     with pytest.raises(SystemExit) as e:        # 2 of 3 parsed: under the 99% line, exit 1
@@ -551,7 +551,7 @@ def test_a_claude_judge_runs_in_batch(judge, monkeypatch, tmp_path, caplog):
             return gen()
 
     client = SimpleNamespace(messages=SimpleNamespace(batches=Batches()))
-    monkeypatch.setattr(judge, "judge_client", lambda model: client)
+    monkeypatch.setattr(judge, "judge_client", lambda model, tier=None: client)
     monkeypatch.setattr(judge._judge_mod, "REFUSED_REPLIES", {})
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-used")
     with pytest.raises(SystemExit) as e:        # 2 of 4 parsed: under the 99% line, exit 1
@@ -565,6 +565,55 @@ def test_a_claude_judge_runs_in_batch(judge, monkeypatch, tmp_path, caplog):
     usage = json.loads((output_dir / "usage.json").read_text())
     assert set(usage["per_model"]) == {"claude-haiku-5-5:batch"} and usage["n_calls"] == 4
     assert "1 refused" in caplog.text and "1 truncated" in caplog.text
+
+
+def test_flex_runs_in_real_time_and_is_charged_as_flex(judge, monkeypatch, tmp_path):
+    """--service_tier flex (2026-10-26): every request names the tier, usage goes under <model>:flex."""
+    from types import SimpleNamespace
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 3)
+    calls = []
+
+    async def create(**kw):
+        calls.append(kw)
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="Fits.\nSCORE: 3"),
+                                                        finish_reason="stop")],
+                               usage=SimpleNamespace(prompt_tokens=700, completion_tokens=50))
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    seen = {}
+
+    def fake_client(model, tier=None):
+        seen["tier"] = tier
+        return client
+    monkeypatch.setattr(judge, "judge_client", fake_client)
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "gpt-6-luna", "--service_tier", "flex")
+    assert seen["tier"] == "flex"
+    assert len(calls) == 3 and all(c["service_tier"] == "flex" and c["reasoning_effort"] == "none" for c in calls)
+    usage = json.loads((output_dir / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"gpt-6-luna:flex"}
+
+
+@pytest.mark.parametrize("extra, reason", [
+    ((), "pass --no_batch"),
+    (("--no_batch", "--judge_model", "claude-haiku-5-5"), "OpenAI's Flex"),
+])
+def test_flex_is_refused_outside_real_time_openai(judge, monkeypatch, tmp_path, caplog, extra, reason):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 1)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-used")
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-used")
+    monkeypatch.setattr(sys, "argv", ["3_judge.py", "--responses_dir", str(responses_dir), "--output_dir",
+                                      str(output_dir), "--roles_dir", str(ROLES), "--traits_dir", str(TRAITS),
+                                      "--entity_type", "trait", "--service_tier", "flex", *extra])
+    with pytest.raises(SystemExit) as e:
+        asyncio.run(judge.main_async())
+    assert e.value.code == 1 and reason in caplog.text
+
+
+def test_flex_client_waits_longer_and_retries_more(judge):
+    c = judge.judge_client("gpt-6-luna", "flex")
+    assert c.timeout == judge.FLEX_TIMEOUT_S and c.max_retries == judge.FLEX_MAX_RETRIES
+    assert judge.judge_client("gpt-6-luna").max_retries != judge.FLEX_MAX_RETRIES
 
 
 def test_judge_key_and_client_follow_the_provider(judge):

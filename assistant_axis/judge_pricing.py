@@ -209,6 +209,12 @@ _BATCH_PRICE_FACTORS: tuple[tuple[str, float], ...] = (
 )
 
 
+#: OpenAI Flex processing (``service_tier="flex"``) is billed at Batch API rates
+#: (developers.openai.com Flex guide, read 2026-10-26); its usage is kept under
+#: ``<model>:flex`` and priced with the batch factors.
+FLEX_SUFFIX = ":flex"
+
+
 def price_for_model(model: str) -> tuple[float, float]:
     """Return ``(input_rate, output_rate)`` in USD per 1M tokens for
     ``model`` (canonical name).
@@ -222,6 +228,10 @@ def price_for_model(model: str) -> tuple[float, float]:
     cost will silently appear free in budget reports.
     """
     m = model.lower()
+    if m.endswith(FLEX_SUFFIX):
+        if not m.startswith("gpt-"):
+            raise KeyError(f"Flex processing is OpenAI's; no flex price for {model!r}")
+        return price_for_model(m[: -len(FLEX_SUFFIX)] + BATCH_SUFFIX)
     if m.endswith(BATCH_SUFFIX):
         rate_in, rate_out = price_for_model(m[: -len(BATCH_SUFFIX)])
         for fragment, factor in _BATCH_PRICE_FACTORS:
