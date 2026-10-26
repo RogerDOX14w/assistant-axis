@@ -465,7 +465,6 @@ def test_a_transient_read_failure_is_retried_and_never_drops_saved_scores(judge,
 
 @pytest.mark.parametrize("model, reason", [
     ("gpt-9-turbo", "Unknown judge model"),                 # no price: usage would raise after paying
-    ("claude-haiku-4-5-20251001", "OpenAI Batch API only"),  # batch mode is OpenAI only
     ("llama-3-70b", "unknown judge model"),
 ])
 def test_an_unusable_judge_model_stops_before_any_request(judge, monkeypatch, tmp_path, caplog, model, reason):
@@ -514,12 +513,67 @@ def test_a_claude_judge_runs_in_real_time(judge, monkeypatch, tmp_path, caplog):
     assert "1 refused" in caplog.text
 
 
+def test_a_claude_judge_runs_in_batch(judge, monkeypatch, tmp_path, caplog):
+    """Batch mode with a Claude judge goes through Anthropic Message Batches (2026-10-26): the request is
+    the real-time one (thinking off for Haiku 5.5), results come back under the step-3 ids, usage is
+    recorded under <model>:batch, and a refusal or a reply cut at max_tokens is unparseable."""
+    from types import SimpleNamespace
+    caplog.set_level("INFO")
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 4)
+    sent = {}
+
+    class Batches:
+        async def create(self, requests):
+            sent["requests"] = requests
+            return SimpleNamespace(id="msgbatch_1", processing_status="in_progress")
+
+        async def retrieve(self, bid):
+            return SimpleNamespace(id=bid, processing_status="ended", request_counts=None)
+
+        async def results(self, bid):
+            async def gen():
+                for i, r in enumerate(sent["requests"]):
+                    stop, content = "end_turn", [SimpleNamespace(type="text", text="Plays it.\nSCORE: 3")]
+                    if i == 1:
+                        stop, content = "refusal", []
+                    if i == 2:
+                        stop, content = "max_tokens", [SimpleNamespace(type="text", text="Plays it because")]
+                    msg = SimpleNamespace(content=content, stop_reason=stop,
+                                          usage=SimpleNamespace(input_tokens=300, output_tokens=40))
+                    yield SimpleNamespace(custom_id=r["custom_id"], result=SimpleNamespace(type="succeeded", message=msg))
+            return gen()
+
+        def list(self, limit=100):
+            async def gen():
+                return
+                yield
+            return gen()
+
+    client = SimpleNamespace(messages=SimpleNamespace(batches=Batches()))
+    monkeypatch.setattr(judge, "judge_client", lambda model: client)
+    monkeypatch.setattr(judge._judge_mod, "REFUSED_REPLIES", {})
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-used")
+    with pytest.raises(SystemExit) as e:        # 2 of 4 parsed: under the 99% line, exit 1
+        _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "claude-haiku-5-5",
+             batch=True)
+    assert e.value.code == 1
+    params = [r["params"] for r in sent["requests"]]
+    assert len(params) == 4 and all(p["thinking"] == {"type": "disabled"} for p in params)
+    assert all(r["custom_id"].startswith("r") and "|" not in r["custom_id"] for r in sent["requests"])
+    assert sorted(json.loads((output_dir / "patient.json").read_text()).values()) == [3, 3]
+    usage = json.loads((output_dir / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"claude-haiku-5-5:batch"} and usage["n_calls"] == 4
+    assert "1 refused" in caplog.text and "1 truncated" in caplog.text
+
+
 def test_judge_key_and_client_follow_the_provider(judge):
     assert judge.judge_key_name("claude-haiku-5-5") == "ANTHROPIC_API_KEY"
     assert judge.judge_key_name("gpt-6-luna") == "OPENAI_API_KEY"
     assert judge.check_judge_model("claude-haiku-5-5", batch=False) is None
     assert judge.check_judge_model("gpt-6-luna", batch=True) is None
-    assert "OpenAI Batch API only" in judge.check_judge_model("claude-haiku-5-5", batch=True)
+    assert judge.check_judge_model("claude-haiku-5-5", batch=True) is None   # Message Batches
+    assert "unknown judge model" in judge.check_judge_model("llama-3-70b", batch=True)
 
 
 def test_default_corpus_dirs_do_not_depend_on_the_working_directory(judge, monkeypatch, tmp_path, caplog):

@@ -62,9 +62,11 @@ from assistant_axis.atomic_io import (  # NFS-safe; AGENT_NOTES "NFS-safe file I
 from assistant_axis.entity_id import (
     JUDGE_LABEL_FORM, display_form_name, judge_form_of_label, judge_label,
 )
+from assistant_axis.anthropic_batch import AnthropicBatchRunner
 from assistant_axis.judge import (
-    PARSE_RATE_LOUD_THRESHOLD, JudgeRequestError, RateLimiter, call_judge_batch,
-    chat_request_body, parse_judge_score, provider_for_model, warn_if_low_parse_rate,
+    PARSE_RATE_LOUD_THRESHOLD, JudgeRequestError, RateLimiter, anthropic_reply,
+    anthropic_request_params, call_judge_batch, chat_request_body, parse_judge_score,
+    provider_for_model, warn_if_low_parse_rate,
 )
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
 from assistant_axis.judge_rubrics import (
@@ -399,7 +401,8 @@ def uncollected_batches(output_dir: Path) -> Tuple[int, int]:
     if not path.exists():
         return 0, 0
     recs = [r for r in json.loads(path.read_text()).get("chunks", [])
-            if (r.get("batch_id") or r.get("input_file_id")) and not r.get("collected")]
+            if (r.get("batch_id") or r.get("input_file_id") or r.get("submitting_ts"))
+            and not r.get("collected")]
     return len(recs), sum(r.get("n_requests", 0) for r in recs)
 
 
@@ -792,11 +795,21 @@ async def judge_in_batches(
     ``reply_format``: the prompt version's (:func:`score_reply`).  Returns ``(n_attempted, n_parsed, n_left,
     entities_with_new_scores)``; ``n_left`` requests are unanswered and
     unscored, for a rerun."""
-    runner = OpenAIBatchRunner(
-        client, output_dir / BATCH_WORK_DIRNAME, output_dir / BATCH_STATE_FILENAME,
-        poll_seconds=poll_seconds,
-        metadata={"source": "pipeline/3_judge.py", "output_dir": str(output_dir)[-200:]},
-        logger=logger)
+    # A Claude judge goes through Anthropic Message Batches (2026-10-26), an
+    # OpenAI one through the OpenAI Batch API; the runners share an interface.
+    anthropic_judge = provider_for_model(judge_model) == "anthropic"
+    if anthropic_judge:
+        runner = AnthropicBatchRunner(
+            client, output_dir / BATCH_WORK_DIRNAME, output_dir / BATCH_STATE_FILENAME,
+            poll_seconds=poll_seconds, logger=logger)
+        request_for = anthropic_request_params
+    else:
+        runner = OpenAIBatchRunner(
+            client, output_dir / BATCH_WORK_DIRNAME, output_dir / BATCH_STATE_FILENAME,
+            poll_seconds=poll_seconds,
+            metadata={"source": "pipeline/3_judge.py", "output_dir": str(output_dir)[-200:]},
+            logger=logger)
+        request_for = chat_request_body
     inflight = await runner.resume()
     # Model drift (walk-through P5; review P3 D4): a batch in flight was
     # requested with another judge model.  Collected under this run's
@@ -815,7 +828,7 @@ async def judge_in_batches(
             for key, prompt in pending_prompts(responses, eval_tpl, existing, name=name):
                 cid = f"{name}{CUSTOM_ID_SEP}{key}"
                 if cid not in inflight:
-                    yield cid, chat_request_body(prompt, judge_model, max_tokens)
+                    yield cid, request_for(prompt, judge_model, max_tokens)
 
     chunks = runner.write_chunks(requests(), max_requests=chunk_requests)
     if chunks:
@@ -835,13 +848,19 @@ async def judge_in_batches(
             return   # counted when the fallback (or the remainder) takes it
         name, key = cid.split(CUSTOM_ID_SEP, 1)
         counts["attempted"] += 1
-        u = body.get("usage") or {}
-        run_usage.charge(batch_key, int(u.get("prompt_tokens") or 0),
-                         int(u.get("completion_tokens") or 0))
-        choices = body.get("choices") or []
-        text = ((choices[0].get("message") or {}).get("content") if choices else None)
-        score = score_reply(text, choices[0].get("finish_reason") if choices else None,
-                            reply_format=reply_format)
+        if anthropic_judge:
+            text, finish, n_in, n_out, refused = anthropic_reply(body)
+            if refused:   # counted as the real-time path counts it (judge.REFUSED_REPLIES)
+                _judge_mod.REFUSED_REPLIES[judge_model] = _judge_mod.REFUSED_REPLIES.get(judge_model, 0) + 1
+            run_usage.charge(batch_key, n_in, n_out)
+        else:
+            u = body.get("usage") or {}
+            run_usage.charge(batch_key, int(u.get("prompt_tokens") or 0),
+                             int(u.get("completion_tokens") or 0))
+            choices = body.get("choices") or []
+            text = ((choices[0].get("message") or {}).get("content") if choices else None)
+            finish = choices[0].get("finish_reason") if choices else None
+        score = score_reply(text, finish, reply_format=reply_format)
         if score is not None:
             buffer.setdefault(name, {})[key] = score
             counts["parsed"] += 1
@@ -894,21 +913,18 @@ _REPO_DIR = Path(__file__).resolve().parent.parent
 
 def check_judge_model(model: str, *, batch: bool) -> Optional[str]:
     """None when step 3 can call ``model`` and record what it cost, else the
-    reason it cannot.  Checked before any request: batch mode goes through
-    the OpenAI Batch API only, so a Claude judge runs in real time
-    (``--no_batch``; allowed since 2026-10-26 for the judge comparison), and
-    a model ``judge_pricing`` cannot price raises in the usage tracker after
-    the request is paid for (in real time the reply was then discarded as
-    unparseable, in a batch the collection stopped).  A batch run is priced
-    under ``<model>:batch``, and its fallback in real time under the plain
-    name."""
+    reason it cannot.  Checked before any request: the model must be an
+    OpenAI or a Claude model (a Claude judge since 2026-10-26, the judge
+    comparison: batch mode through Anthropic Message Batches,
+    ``assistant_axis/anthropic_batch.py``), and a model ``judge_pricing``
+    cannot price raises in the usage tracker after the request is paid for
+    (in real time the reply was then discarded as unparseable, in a batch
+    the collection stopped).  A batch run is priced under ``<model>:batch``,
+    and its fallback in real time under the plain name."""
     try:
-        provider = provider_for_model(model)
+        provider_for_model(model)
     except ValueError as e:
         return str(e)
-    if provider != "openai" and batch:
-        return (f"judge model {model!r} is a {provider} model; batch mode uses the OpenAI Batch "
-                f"API only: pass --no_batch to judge with it in real time")
     for name in ([model, f"{model}{BATCH_SUFFIX}"] if batch else [model]):
         try:
             price_for_model(name)

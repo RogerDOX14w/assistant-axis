@@ -870,6 +870,43 @@ def score_responses_sync(
 # prompt-instruction approach is simpler and works across both providers
 # uniformly).
 
+def anthropic_request_params(prompt: str, model: str, max_tokens: int, *,
+                             temperature: Optional[float] = DEFAULT_TEMPERATURE) -> Dict[str, Any]:
+    """The Messages API parameters a judge call sends: the keyword arguments
+    of ``client.messages.create`` and, unchanged, the ``params`` of a Message
+    Batches request (``assistant_axis.anthropic_batch``), as
+    :func:`chat_request_body` is for OpenAI.  ``temperature`` is left out at
+    the default; the model's :data:`JUDGE_REQUEST_SETTINGS` are added
+    (Haiku 5.5's thinking off)."""
+    params: Dict[str, Any] = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    t = request_temperature(model, temperature)
+    if t is not None:
+        params["temperature"] = t
+    params.update(judge_request_settings(model))
+    return params
+
+
+def anthropic_reply(message: Any) -> Tuple[Optional[str], Optional[str], int, int, bool]:
+    """``(text, finish_reason, input_tokens, output_tokens, refused)`` of an
+    Anthropic message, an SDK object or a plain dict (a Message Batches
+    result): the text of its text blocks (None when empty), ``"length"`` for
+    a reply cut at ``max_tokens`` (OpenAI's word, which step 3 reads), and
+    whether it stopped as a refusal."""
+    def g(obj: Any, name: str, default: Any = None) -> Any:
+        return obj.get(name, default) if isinstance(obj, dict) else getattr(obj, name, default)
+    stop = g(message, "stop_reason")
+    text = "".join(g(b, "text", "") or "" for b in (g(message, "content") or [])
+                   if g(b, "type", "text") == "text")
+    usage = g(message, "usage") or {}
+    return (text or None, "length" if stop == "max_tokens" else stop,
+            int(g(usage, "input_tokens", 0) or 0), int(g(usage, "output_tokens", 0) or 0),
+            stop == "refusal")
+
+
 async def call_anthropic_judge_single(
     client: "anthropic.AsyncAnthropic",
     prompt: str,
@@ -904,15 +941,7 @@ async def call_anthropic_judge_single(
             (``stop_reason == "max_tokens"``), counted in
             :data:`TRUNCATED_REPLIES`, as :func:`call_judge_single` does.
     """
-    params: Dict[str, Any] = {
-        "model": model,
-        "max_tokens": max_tokens,
-        "messages": [{"role": "user", "content": prompt}],
-    }
-    t = request_temperature(model, temperature)
-    if t is not None:
-        params["temperature"] = t
-    params.update(judge_request_settings(model))
+    params = anthropic_request_params(prompt, model, max_tokens, temperature=temperature)
     await rate_limiter.acquire()
 
     try:
