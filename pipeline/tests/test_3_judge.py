@@ -465,7 +465,7 @@ def test_a_transient_read_failure_is_retried_and_never_drops_saved_scores(judge,
 
 @pytest.mark.parametrize("model, reason", [
     ("gpt-9-turbo", "Unknown judge model"),                 # no price: usage would raise after paying
-    ("claude-haiku-4-5-20251001", "OpenAI only"),          # step 3 calls OpenAI only
+    ("claude-haiku-4-5-20251001", "OpenAI Batch API only"),  # batch mode is OpenAI only
     ("llama-3-70b", "unknown judge model"),
 ])
 def test_an_unusable_judge_model_stops_before_any_request(judge, monkeypatch, tmp_path, caplog, model, reason):
@@ -477,6 +477,49 @@ def test_an_unusable_judge_model_stops_before_any_request(judge, monkeypatch, tm
     assert e.value.code == 1 and reason in caplog.text
     assert client.uploaded == {} and client.chat.completions.create.call_count == 0
     assert judge.check_judge_model("gpt-4.1-mini", batch=True) is None
+
+
+def test_a_claude_judge_runs_in_real_time(judge, monkeypatch, tmp_path, caplog):
+    """A Claude judge (2026-10-26, the judge comparison) runs with --no_batch through an Anthropic
+    client: thinking off for Haiku 5.5, usage recorded under its name, a refusal counted as an
+    unparseable reply ("refused") and never as a score."""
+    from types import SimpleNamespace
+    caplog.set_level("INFO")
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 3)
+    calls = []
+
+    async def create(**kw):
+        calls.append(kw)
+        if len(calls) == 2:
+            return SimpleNamespace(content=[], stop_reason="refusal",
+                                   stop_details=SimpleNamespace(category="general_harms"),
+                                   usage=SimpleNamespace(input_tokens=300, output_tokens=0))
+        return SimpleNamespace(content=[SimpleNamespace(type="text", text="Plays it.\nSCORE: 3")],
+                               stop_reason="end_turn", stop_details=None,
+                               usage=SimpleNamespace(input_tokens=300, output_tokens=40))
+    client = SimpleNamespace(messages=SimpleNamespace(create=create))
+    monkeypatch.setattr(judge, "judge_client", lambda model: client)
+    monkeypatch.setattr(judge._judge_mod, "REFUSED_REPLIES", {})
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-used")
+    with pytest.raises(SystemExit) as e:        # 2 of 3 parsed: under the 99% line, exit 1
+        _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "claude-haiku-5-5")
+    assert e.value.code == 1
+    assert len(calls) == 3 and all(c["thinking"] == {"type": "disabled"} for c in calls)
+    assert all("temperature" not in c for c in calls)
+    scores = json.loads((output_dir / "patient.json").read_text())
+    assert sorted(scores.values()) == [3, 3]
+    usage = json.loads((output_dir / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"claude-haiku-5-5"} and usage["n_calls"] == 3
+    assert "1 refused" in caplog.text
+
+
+def test_judge_key_and_client_follow_the_provider(judge):
+    assert judge.judge_key_name("claude-haiku-5-5") == "ANTHROPIC_API_KEY"
+    assert judge.judge_key_name("gpt-6-luna") == "OPENAI_API_KEY"
+    assert judge.check_judge_model("claude-haiku-5-5", batch=False) is None
+    assert judge.check_judge_model("gpt-6-luna", batch=True) is None
+    assert "OpenAI Batch API only" in judge.check_judge_model("claude-haiku-5-5", batch=True)
 
 
 def test_default_corpus_dirs_do_not_depend_on_the_working_directory(judge, monkeypatch, tmp_path, caplog):

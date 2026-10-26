@@ -894,24 +894,41 @@ _REPO_DIR = Path(__file__).resolve().parent.parent
 
 def check_judge_model(model: str, *, batch: bool) -> Optional[str]:
     """None when step 3 can call ``model`` and record what it cost, else the
-    reason it cannot.  Checked before any request: the calls go to OpenAI
-    only, and a model ``judge_pricing`` cannot price raises in the usage
-    tracker after the request is paid for (in real time the reply was then
-    discarded as unparseable, in a batch the collection stopped).  A batch
-    run is priced under ``<model>:batch``, and its fallback in real time
-    under the plain name."""
+    reason it cannot.  Checked before any request: batch mode goes through
+    the OpenAI Batch API only, so a Claude judge runs in real time
+    (``--no_batch``; allowed since 2026-10-26 for the judge comparison), and
+    a model ``judge_pricing`` cannot price raises in the usage tracker after
+    the request is paid for (in real time the reply was then discarded as
+    unparseable, in a batch the collection stopped).  A batch run is priced
+    under ``<model>:batch``, and its fallback in real time under the plain
+    name."""
     try:
         provider = provider_for_model(model)
     except ValueError as e:
         return str(e)
-    if provider != "openai":
-        return f"judge model {model!r} is a {provider} model; step 3 calls OpenAI only"
+    if provider != "openai" and batch:
+        return (f"judge model {model!r} is a {provider} model; batch mode uses the OpenAI Batch "
+                f"API only: pass --no_batch to judge with it in real time")
     for name in ([model, f"{model}{BATCH_SUFFIX}"] if batch else [model]):
         try:
             price_for_model(name)
         except KeyError as e:
             return e.args[0] if e.args else f"no price for {name!r}"
     return None
+
+
+def judge_key_name(model: str) -> str:
+    """The environment variable holding the API key the judge ``model`` needs
+    (loaded from ``.env`` by ``load_dotenv``; only its presence is checked)."""
+    return "ANTHROPIC_API_KEY" if provider_for_model(model) == "anthropic" else "OPENAI_API_KEY"
+
+
+def judge_client(model: str):
+    """The async client for the judge ``model``'s provider."""
+    if provider_for_model(model) == "anthropic":
+        import anthropic
+        return anthropic.AsyncAnthropic()
+    return openai.AsyncOpenAI()
 
 
 async def main_async():
@@ -1006,13 +1023,13 @@ async def main_async():
     if args.max_tokens is None:
         args.max_tokens = version.max_tokens
 
-    if not args.dry_run and not os.getenv("OPENAI_API_KEY"):
-        logger.error("OPENAI_API_KEY not found")
-        sys.exit(1)
-
     problem = check_judge_model(args.judge_model, batch=not args.no_batch)
     if problem:
         logger.error(f"--judge_model {args.judge_model}: {problem}")
+        sys.exit(1)
+    key_name = judge_key_name(args.judge_model)
+    if not args.dry_run and not os.getenv(key_name):
+        logger.error(f"{key_name} not found")
         sys.exit(1)
 
     output_dir = Path(args.output_dir)
@@ -1193,7 +1210,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         sys.exit(1)
     version = get_version(args.prompt_version)
 
-    client = openai.AsyncOpenAI()
+    client = judge_client(args.judge_model)
     rate_limiter = RateLimiter(args.requests_per_second)
 
     # The rubric stamp is written just before the first scores are, or the
@@ -1222,6 +1239,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     successful = skipped = failed = 0
     REPLY_PROBLEMS.clear()
     truncated_at_start = _judge_mod.TRUNCATED_REPLIES.get(args.judge_model, 0)
+    refused_at_start = _judge_mod.REFUSED_REPLIES.get(args.judge_model, 0)
     # Aggregate parse-rate counters across all entities so the end-of-run
     # summary can warn loudly if the chosen judge is dropping >1% of calls.
     total_call_attempted = 0
@@ -1365,6 +1383,12 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     if rt_truncated:
         REPLY_PROBLEMS["no_reply"] -= rt_truncated
         REPLY_PROBLEMS["truncated"] += rt_truncated
+    # A Claude judge's refusal (stop_reason "refusal") also comes back as None
+    # (judge.REFUSED_REPLIES), so it is moved from no_reply to refused.
+    rt_refused = _judge_mod.REFUSED_REPLIES.get(args.judge_model, 0) - refused_at_start
+    if rt_refused:
+        REPLY_PROBLEMS["no_reply"] -= rt_refused
+        REPLY_PROBLEMS["refused"] += rt_refused
     problems = {k: v for k, v in REPLY_PROBLEMS.items() if v > 0}
     if problems:
         logger.info(f"Unparseable replies (rubric v{version.number}): " + ", ".join(

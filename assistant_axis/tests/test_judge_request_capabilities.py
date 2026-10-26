@@ -350,3 +350,117 @@ class TestContentFlaggedPromptIsPerItem:
                                            anthropic_client=FakeAnthropic(exc=_anthropic_400(ANTHROPIC_TEMPERATURE))))
         assert J.CONTENT_FLAGGED == {}
         assert "content flag" not in flagged.text
+
+
+# ---------------------------------------------------------------------------
+# judge request settings: judges run without thinking or reasoning
+# (2026-10-26, the step-3 judge comparison)
+# ---------------------------------------------------------------------------
+
+class _ScriptedAnthropic:
+    """An Anthropic client whose reply is set per test: content blocks, stop reason, stop details."""
+
+    def __init__(self, blocks, stop_reason="end_turn", stop_details=None):
+        self.calls = []
+
+        async def create(**kw):
+            self.calls.append(kw)
+            return SimpleNamespace(content=blocks, stop_reason=stop_reason, stop_details=stop_details,
+                                   usage=SimpleNamespace(input_tokens=300, output_tokens=40))
+        self.messages = SimpleNamespace(create=create)
+
+
+def _text(t):
+    return SimpleNamespace(type="text", text=t)
+
+
+class TestJudgeRequestSettings:
+    def test_settings_by_model(self):
+        assert J.judge_request_settings("gpt-6-luna") == {"reasoning_effort": "none"}
+        assert J.judge_request_settings("claude-haiku-5-5") == {"thinking": {"type": "disabled"}}
+        for model in ("gpt-4.1-mini", "claude-haiku-4-5-20251001", "claude-sonnet-4-6", "o3-mini"):
+            assert J.judge_request_settings(model) == {}, model
+
+    def test_luna_chat_body_and_batch_line_carry_reasoning_effort_none(self):
+        body = chat_request_body("p", "gpt-6-luna", 200)
+        assert body["reasoning_effort"] == "none" and "temperature" not in body
+        client = FakeOpenAI()
+        _run(call_judge_single(client, "p", "gpt-6-luna", 200, RateLimiter(1000)))
+        assert client.calls == [body]
+
+    def test_gpt_mini_body_is_unchanged(self):
+        assert chat_request_body("p", "gpt-4.1-mini", 200) == {
+            "model": "gpt-4.1-mini", "messages": [{"role": "user", "content": "p"}], "max_completion_tokens": 200}
+
+    def test_haiku_5_5_request_turns_thinking_off(self):
+        client = _ScriptedAnthropic([_text("Reason.\nSCORE: 3")])
+        out = _run(call_anthropic_judge_single(client, "p", "claude-haiku-5-5", 200, RateLimiter(1000)))
+        assert out == "Reason.\nSCORE: 3"
+        assert client.calls[0]["thinking"] == {"type": "disabled"} and "temperature" not in client.calls[0]
+
+    def test_haiku_4_5_request_is_unchanged(self):
+        client = _ScriptedAnthropic([_text("SCORE: 1")])
+        _run(call_anthropic_judge_single(client, "p", "claude-haiku-4-5", 100, RateLimiter(1000)))
+        assert client.calls == [{"model": "claude-haiku-4-5", "max_tokens": 100,
+                                 "messages": [{"role": "user", "content": "p"}]}]
+
+
+class TestAnthropicReplyReading:
+    def test_text_is_read_by_block_type(self):
+        """A model that thinks can begin its content with thinking blocks; the answer is the text blocks."""
+        blocks = [SimpleNamespace(type="thinking", thinking="", signature="sig"), _text("SCORE: "), _text("2")]
+        out = _run(call_anthropic_judge_single(_ScriptedAnthropic(blocks), "p", "claude-haiku-5-5", 200,
+                                               RateLimiter(1000)))
+        assert out == "SCORE: 2"
+
+    def test_a_refusal_gives_none_and_is_counted(self, monkeypatch, caplog):
+        monkeypatch.setattr(J, "REFUSED_REPLIES", {})
+        client = _ScriptedAnthropic([], stop_reason="refusal",
+                                    stop_details=SimpleNamespace(type="refusal", category="cyber", explanation="x"))
+        from assistant_axis.judge_pricing import MultiModelUsage
+        u = MultiModelUsage()
+        out = _run(call_anthropic_judge_single(client, "p", "claude-haiku-5-5", 200, RateLimiter(1000), usage=u))
+        assert out is None and J.REFUSED_REPLIES == {"claude-haiku-5-5": 1}
+        assert "refused a judge prompt (category cyber" in caplog.text
+        assert u.n_calls == 1                        # a refusal is charged all the same
+
+    def test_a_truncated_reply_is_rejected_only_when_asked(self, monkeypatch):
+        monkeypatch.setattr(J, "TRUNCATED_REPLIES", {})
+        blocks = [_text("The response plays the role because")]
+        kept = _run(call_anthropic_judge_single(_ScriptedAnthropic(blocks, stop_reason="max_tokens"), "p",
+                                                "claude-haiku-5-5", 10, RateLimiter(1000)))
+        assert kept == "The response plays the role because" and J.TRUNCATED_REPLIES == {}
+        cut = _run(call_anthropic_judge_single(_ScriptedAnthropic(blocks, stop_reason="max_tokens"), "p",
+                                               "claude-haiku-5-5", 10, RateLimiter(1000), reject_truncated=True))
+        assert cut is None and J.TRUNCATED_REPLIES == {"claude-haiku-5-5": 1}
+
+    def test_an_empty_text_gives_none(self):
+        assert _run(call_anthropic_judge_single(_ScriptedAnthropic([]), "p", "claude-haiku-5-5", 200,
+                                                RateLimiter(1000))) is None
+
+
+class TestBatchRoutesByProvider:
+    def test_a_claude_model_goes_to_the_anthropic_client(self):
+        client = _ScriptedAnthropic([_text("SCORE: 3")])
+        out = _run(call_judge_batch(client, ["a", "b"], "claude-haiku-5-5", 200, RateLimiter(1000)))
+        assert out == ["SCORE: 3", "SCORE: 3"] and len(client.calls) == 2
+        assert all(c["thinking"] == {"type": "disabled"} for c in client.calls)
+
+    def test_a_gpt_model_and_an_unknown_name_go_to_the_client_given(self):
+        for model in ("gpt-6-luna", "some-model"):
+            client = FakeOpenAI()
+            assert _run(call_judge_batch(client, ["a"], model, 200, RateLimiter(1000))) == ["SCORE: 2"]
+            assert len(client.calls) == 1
+
+    def test_reject_truncated_reaches_the_anthropic_path(self, monkeypatch):
+        monkeypatch.setattr(J, "TRUNCATED_REPLIES", {})
+        client = _ScriptedAnthropic([_text("cut")], stop_reason="max_tokens")
+        out = _run(call_judge_batch(client, ["a"], "claude-haiku-5-5", 10, RateLimiter(1000), reject_truncated=True))
+        assert out == [None] and J.TRUNCATED_REPLIES == {"claude-haiku-5-5": 1}
+
+
+def test_luna_is_priced():
+    from assistant_axis.judge_pricing import price_for_model
+    assert price_for_model("gpt-6-luna") == (0.10, 0.50)
+    assert price_for_model("gpt-6-luna:batch") == (0.05, 0.25)
+    assert price_for_model("claude-haiku-5-5") == (0.10, 0.50)

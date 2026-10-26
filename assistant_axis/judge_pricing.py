@@ -162,6 +162,10 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     ("qwen3-8b-base", 0.0, 0.0),
     ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
+    # GPT-6 Luna (developers.openai.com model page, read 2026-10-26): $0.10 / $0.50, cached input
+    # $0.01, batch at half (the "gpt-" batch factor below).  A reasoning model: judges send
+    # reasoning_effort "none" (judge.JUDGE_REQUEST_SETTINGS), else reasoning is billed as output.
+    ("gpt-6-luna", 0.10, 0.50),
     # Haiku 5.5 (claude-haiku-5-5, released 2026-10-07; pricing page read that day): $0.10 / $0.50 for
     # prompts up to 100,000 tokens, cache reads at the standard 0.1x ($0.01), batch at half (the "haiku"
     # batch factor below).  It must come before the bare "haiku" fragment, which would price it at 4.5's

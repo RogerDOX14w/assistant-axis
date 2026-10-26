@@ -118,6 +118,30 @@ MODEL_CAPABILITIES: Dict[str, Dict[str, bool]] = {
     "gpt-6": {"temperature": False},
 }
 
+#: Fields a judge request adds for a model, by model-id fragment (matched as in
+#: :data:`MODEL_CAPABILITIES`).  Judges run without thinking or reasoning, the
+#: mode gpt-4.1-mini works in, so that the reasoning the rubric asks for is in
+#: the reply and a short ``max_tokens`` holds the answer (Roger, 2026-10-26: the
+#: step-3 judge comparison).  GPT-6 Luna takes ``reasoning_effort`` "none" on
+#: Chat Completions and in the Batch API (its model page, read 2026-10-26).
+#: Haiku 5.5 thinks adaptively unless the request says otherwise, its thinking
+#: counts toward ``max_tokens``, and it accepts thinking disabled at its default
+#: effort (medium).  A model in no entry adds nothing.
+JUDGE_REQUEST_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "gpt-6": {"reasoning_effort": "none"},
+    "haiku-5": {"thinking": {"type": "disabled"}},
+}
+
+
+def judge_request_settings(model: str) -> Dict[str, Any]:
+    """The fields :data:`JUDGE_REQUEST_SETTINGS` adds to a request to ``model``."""
+    m = str(model).lower()
+    out: Dict[str, Any] = {}
+    for fragment, entry in JUDGE_REQUEST_SETTINGS.items():
+        if m.startswith(fragment) or f"-{fragment}" in m:
+            out.update(entry)
+    return out
+
 
 class JudgeRequestError(ValueError):
     """A judge request that is wrong for its model: an HTTP 400 from the API,
@@ -190,6 +214,11 @@ CONTENT_FLAGGED: Dict[str, int] = {}
 #: 3 since 2026-10-12, walk-through P4: a truncated reply is unparseable even
 #: when its text holds a ``SCORE:`` line, since the reasoning was cut).
 TRUNCATED_REPLIES: Dict[str, int] = {}
+
+#: Anthropic replies that stopped with ``stop_reason == "refusal"`` (a safety
+#: classifier declined the prompt; HTTP 200 and no answer), per model.  Such a
+#: call gives None, an unparseable reply, and is charged all the same.
+REFUSED_REPLIES: Dict[str, int] = {}
 
 
 def _error_code(exc: BaseException) -> Optional[str]:
@@ -593,7 +622,8 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
     ``temperature`` is left out at the default, 1 (every request until
     2026-10-12 sent ``"temperature": 1`` explicitly: the same sampling), and
     is checked against :data:`MODEL_CAPABILITIES` otherwise
-    (:func:`request_temperature`)."""
+    (:func:`request_temperature`).  The model's
+    :data:`JUDGE_REQUEST_SETTINGS` are added (GPT-6 Luna's reasoning effort)."""
     body: Dict[str, Any] = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
@@ -602,6 +632,7 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
     t = request_temperature(model, temperature)
     if t is not None:
         body["temperature"] = t
+    body.update(judge_request_settings(model))
     return body
 
 
@@ -669,7 +700,7 @@ async def call_judge_single(
 
 
 async def call_judge_batch(
-    client: openai.AsyncOpenAI,
+    client: Any,
     prompts: List[str],
     model: str,
     max_tokens: int,
@@ -681,24 +712,40 @@ async def call_judge_batch(
 ) -> List[Optional[str]]:
     """Call the judge model with multiple prompts concurrently.
 
+    ``client`` is the provider's async client for ``model``
+    (:func:`provider_for_model`): an ``openai.AsyncOpenAI`` for a GPT model,
+    an ``anthropic.AsyncAnthropic`` for a Claude model (pipeline step 3 in
+    real time, since 2026-10-26).
+
     ``usage``: optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
-    accumulator, passed to every :func:`call_judge_single` (AGENT_NOTES
-    "Token usage logging is mandatory on batched LLM call sites").
+    accumulator, passed to every single call (AGENT_NOTES "Token usage
+    logging is mandatory on batched LLM call sites").
 
     A failed call gives None in its place (a content-flagged prompt too),
     except a :class:`JudgeRequestError` (any other HTTP 400), which is raised
     once its chunk has finished.
     """
     results = []
+    try:
+        anthropic_model = provider_for_model(model) == "anthropic"
+    except ValueError:      # a name no prefix covers goes to the client given, as before
+        anthropic_model = False
 
     for i in range(0, len(prompts), batch_size):
         batch = prompts[i:i + batch_size]
 
-        tasks = [
-            call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
-                              reject_truncated=reject_truncated)
-            for prompt in batch
-        ]
+        if anthropic_model:
+            tasks = [
+                call_anthropic_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
+                                            reject_truncated=reject_truncated)
+                for prompt in batch
+            ]
+        else:
+            tasks = [
+                call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
+                                  reject_truncated=reject_truncated)
+                for prompt in batch
+            ]
 
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -831,6 +878,8 @@ async def call_anthropic_judge_single(
     rate_limiter: RateLimiter,
     temperature: Optional[float] = DEFAULT_TEMPERATURE,
     usage: Optional["MultiModelUsage"] = None,
+    *,
+    reject_truncated: bool = False,
 ) -> Optional[str]:
     """Call an Anthropic judge model with a single prompt.
 
@@ -840,12 +889,20 @@ async def call_anthropic_judge_single(
     :class:`JudgeRequestError` because every call would fail alike (a 400
     that flags this prompt's content, :func:`content_flag`, gives None).
 
+    The text is that of the response's text blocks, read by type: a model
+    that thinks can begin its content with ``thinking`` blocks.  A refusal
+    (``stop_reason == "refusal"``) gives None, counted in
+    :data:`REFUSED_REPLIES` with a WARNING naming its category.
+
     Args:
         temperature: sent only when it is not the default; a model that
             refuses one (:data:`MODEL_CAPABILITIES`) raises
             :class:`JudgeRequestError` for any other value, before sending.
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
             accumulator.  Same semantics as :func:`call_judge_single`.
+        reject_truncated: return None for a reply cut at ``max_tokens``
+            (``stop_reason == "max_tokens"``), counted in
+            :data:`TRUNCATED_REPLIES`, as :func:`call_judge_single` does.
     """
     params: Dict[str, Any] = {
         "model": model,
@@ -855,6 +912,7 @@ async def call_anthropic_judge_single(
     t = request_temperature(model, temperature)
     if t is not None:
         params["temperature"] = t
+    params.update(judge_request_settings(model))
     await rate_limiter.acquire()
 
     try:
@@ -863,9 +921,19 @@ async def call_anthropic_judge_single(
             from .judge_pricing import extract_usage_anthropic
             pt, ct = extract_usage_anthropic(response)
             usage.charge(model, pt, ct)
-        if response.content and response.content[0].text:
-            return response.content[0].text
-        return None
+        stop = getattr(response, "stop_reason", None)
+        if stop == "refusal":
+            REFUSED_REPLIES[model] = REFUSED_REPLIES.get(model, 0) + 1
+            details = getattr(response, "stop_details", None)
+            logger.warning("%s refused a judge prompt (category %s; %d refusals so far)", model,
+                           getattr(details, "category", None), REFUSED_REPLIES[model])
+            return None
+        if reject_truncated and stop == "max_tokens":
+            TRUNCATED_REPLIES[model] = TRUNCATED_REPLIES.get(model, 0) + 1
+            return None
+        text = "".join(getattr(b, "text", "") or "" for b in (response.content or [])
+                       if getattr(b, "type", "text") == "text")
+        return text or None
     except Exception as e:  # noqa: BLE001 - we deliberately catch everything
         if _is_bad_request(e):
             flag = content_flag(e)
@@ -887,6 +955,7 @@ async def call_judge_single_unified(
     anthropic_client: Optional["anthropic.AsyncAnthropic"] = None,
     temperature: Optional[float] = DEFAULT_TEMPERATURE,
     usage: Optional["MultiModelUsage"] = None,
+    reject_truncated: bool = False,
 ) -> Optional[str]:
     """Provider-agnostic single judge call.
 
@@ -923,6 +992,7 @@ async def call_judge_single_unified(
             rate_limiter=rate_limiter,
             usage=usage,
             temperature=temperature,
+            reject_truncated=reject_truncated,
         )
     if provider == "anthropic":
         if anthropic_client is None:
@@ -937,5 +1007,6 @@ async def call_judge_single_unified(
             rate_limiter=rate_limiter,
             temperature=temperature,
             usage=usage,
+            reject_truncated=reject_truncated,
         )
     raise ValueError(f"unknown provider for model {model!r}")
