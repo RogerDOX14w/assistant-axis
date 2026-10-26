@@ -6,16 +6,19 @@ and 5: the role rubric experiment's 30 sample roles (October responses), the
 11 May roles that keep little, and the 8 traits of the held-response sample.
 This reports, per judge and version:
 
-* responses kept (score 3), per set and per role category;
+* responses kept (score 3), per set and per role category (the categories of
+  the v5 check's key; A, helpful professionals, is v5's target);
 * judge noise: responses whose keep / drop flips between two runs of v3
-  (for gpt-4.1-mini's May roles, v4);
+  (for gpt-4.1-mini's May roles, v4), with Cohen's kappa, which corrects the
+  raw agreement for the judge's keep rate;
 * version effects: responses moved up to 3 and down from 3 between versions,
-  with a binomial test of the imbalance;
+  with a binomial test of the imbalance, and the reader marks on those flips;
 * agreement with the blind readers: every response a reader marked (the held
   sample, the arm reading sheets, the A1/A6, v5 and A11 checks), as the share
   of those marked good (G) that the judge scores 3, of those marked bad (B),
-  and borderline (T).  Those responses were chosen from gpt-4.1-mini's
-  discards and disagreements, so they over-represent its borderline cases.
+  and borderline (T), with the AUC of the 0-3 score (good over bad, whatever
+  the threshold).  Those responses were chosen from gpt-4.1-mini's discards
+  and disagreements, so they over-represent its borderline cases.
 
 Usage:
     uv run python results_analysis/judge_comparison.py --out reports/pipeline/judge_comparison/judge_comparison.json
@@ -153,6 +156,25 @@ def binom_p(up: int, down: int) -> float:
     return float(binomtest(up, up + down, 0.5).pvalue) if up + down else 1.0
 
 
+def kappa(n11: int, n10: int, n01: int, n00: int) -> float:
+    """Cohen's kappa of two keep / drop runs from their 2 x 2 counts (1 = kept): agreement beyond what
+    the two keep rates give by chance, so judges that keep very different shares can be compared."""
+    n = n11 + n10 + n01 + n00
+    if not n:
+        return float("nan")
+    pa, pb = (n11 + n10) / n, (n11 + n01) / n
+    pe = pa * pb + (1 - pa) * (1 - pb)
+    return ((n11 + n00) / n - pe) / (1 - pe) if pe < 1 else float("nan")
+
+
+def auc(pos, neg) -> float:
+    """The chance that a score from ``pos`` exceeds one from ``neg``, ties counted half (Mann-Whitney):
+    how well the 0-3 scale orders good above bad whatever the keep threshold."""
+    if not pos or not neg:
+        return float("nan")
+    return sum((p > q) + 0.5 * (p == q) for p in pos for q in neg) / (len(pos) * len(neg))
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--out", type=Path, required=True)
@@ -172,13 +194,28 @@ def main() -> None:
     for (j, s, v), c in sorted(cells.items()):
         n = sum(len(x) for x in c.values())
         k = sum(sum(1 for y in x.values() if y == 3) for x in c.values())
-        by_cat = Counter()
+        by_cat, n_cat = Counter(), Counter()
         for e, x in c.items():
-            by_cat[cat_of.get(e, "T" if s == "traits" else "?")] += sum(1 for y in x.values() if y == 3)
+            cat = cat_of.get(e, "T" if s == "traits" else "?")
+            by_cat[cat] += sum(1 for y in x.values() if y == 3)
+            n_cat[cat] += len(x)
         res["kept"][f"{j}|{s}|{v}"] = {"kept": k, "n": n, "entities": len(c),
                                        "per_entity": {e: sum(1 for y in x.values() if y == 3) for e, x in c.items()},
-                                       "by_category": dict(by_cat)}
+                                       "by_category": dict(by_cat), "n_by_category": dict(n_cat)}
         print(f"  {j:17s} {s:6s} {v:9s} {k:6d} / {n:6d} ({100 * k / n:4.1f}%)  {len(c)} entities")
+
+    letters = sorted(cats)
+    print("\n== kept per role category (% of the category's responses): "
+          + "; ".join(f"{c[:1]} {c[2:]}" for c in letters))
+    for s in ("oct", "may"):
+        for j in JUDGES:
+            for v in VERSIONS:
+                r = res["kept"].get(f"{j}|{s}|{v}")
+                if not r:
+                    continue
+                cells_ = [f"{c[:1]} {100 * r['by_category'].get(c[:1], 0) / r['n_by_category'][c[:1]]:5.1f}"
+                          if r["n_by_category"].get(c[:1]) else f"{c[:1]}   -  " for c in letters]
+                print(f"  {j:17s} {s:4s} {v:9s} " + "  ".join(cells_))
 
     print("\n== flips: up to 3 / down from 3 (p, binomial); second-run pairs are judge noise")
     for j in JUDGES:
@@ -187,22 +224,25 @@ def main() -> None:
                 ca, cb = cells.get((j, s, a)), cells.get((j, s, b))
                 if not ca or not cb:
                     continue
-                up = down = n = 0
+                up = down = both = n = 0
                 for e in set(ca) & set(cb):
                     for key in set(ca[e]) & set(cb[e]):
                         n += 1
                         up += ca[e][key] < 3 <= cb[e][key]
                         down += ca[e][key] == 3 > cb[e][key]
-                res["flips"][f"{j}|{s}|{a}->{b}"] = {"up": up, "down": down, "n": n, "p": binom_p(up, down)}
+                        both += ca[e][key] == 3 == cb[e][key]
+                k_ = kappa(both, down, up, n - both - up - down)
+                res["flips"][f"{j}|{s}|{a}->{b}"] = {"up": up, "down": down, "n": n, "p": binom_p(up, down),
+                                                     "kappa": k_}
                 print(f"  {j:17s} {s:6s} {a:>8s}->{b:9s} up {up:5d} down {down:5d} of {n:6d} "
-                      f"({100 * (up + down) / max(n, 1):4.1f}% flipped)  p={binom_p(up, down):.1g}")
+                      f"({100 * (up + down) / max(n, 1):4.1f}% flipped, kappa {k_:.2f})  p={binom_p(up, down):.1g}")
 
     items, conflicts = reader_items()
     print(f"\n== agreement with readers: {len(items)} marked responses ({Counter(i['mark'] for i in items)}; "
           f"{conflicts} marked differently by two sources, first kept)")
     for j in JUDGES:
         for v in VERSIONS:
-            row = {}
+            scores = {}
             for s in SETS:
                 c = cells.get((j, s, v))
                 if not c:
@@ -211,23 +251,49 @@ def main() -> None:
                     if it["set"] != s:
                         continue
                     sc = c.get(it["entity"], {}).get(it["key"])
-                    if sc is None:
-                        continue
-                    t = row.setdefault((s, it["mark"]), [0, 0])
-                    t[0] += sc == 3
-                    t[1] += 1
-            if not row:
+                    if sc is not None:
+                        scores.setdefault((s, it["mark"]), []).append(sc)
+            if not scores:
                 continue
-            out = {f"{s}|{m}": {"scored_3": a, "n": n} for (s, m), (a, n) in row.items()}
+            out = {f"{s}|{m}": {"scored_3": sum(x == 3 for x in xs), "scored_2_or_3": sum(x >= 2 for x in xs),
+                                "n": len(xs)} for (s, m), xs in scores.items()}
+            for s in SETS:
+                if (s, "G") in scores and (s, "B") in scores:
+                    out[f"{s}|auc_G_over_B"] = auc(scores[s, "G"], scores[s, "B"])
             res["readers"][f"{j}|{v}"] = out
             parts = []
             for s in SETS:
-                g, b = row.get((s, "G")), row.get((s, "B"))
+                g, b = scores.get((s, "G")), scores.get((s, "B"))
                 if g or b:
-                    parts.append(f"{s}: G {g[0]}/{g[1]}" if g else f"{s}:")
+                    parts.append(f"{s}: G {sum(x == 3 for x in g)}/{len(g)}" if g else f"{s}:")
                     if b:
-                        parts[-1] += f", B {b[0]}/{b[1]}"
+                        parts[-1] += f", B {sum(x == 3 for x in b)}/{len(b)}"
+                    if g and b:
+                        parts[-1] += f", AUC {out[f'{s}|auc_G_over_B']:.2f}"
             print(f"  {j:17s} {v:9s} " + "; ".join(parts))
+
+    marked = {(i["set"], i["entity"], i["key"]): i["mark"] for i in items}
+    print("\n== reader marks on each judge's version flips (marked flips: G / B / T)")
+    for j in JUDGES:
+        for s in SETS:
+            for a, b in PAIRS:
+                if b.endswith("_rerun"):
+                    continue
+                ca, cb = cells.get((j, s, a)), cells.get((j, s, b))
+                if not ca or not cb:
+                    continue
+                tally = {"up": Counter(), "down": Counter()}
+                for e in set(ca) & set(cb):
+                    for key in set(ca[e]) & set(cb[e]):
+                        m = marked.get((s, e, key))
+                        if m and ca[e][key] < 3 <= cb[e][key]:
+                            tally["up"][m] += 1
+                        elif m and ca[e][key] == 3 > cb[e][key]:
+                            tally["down"][m] += 1
+                res["flips"][f"{j}|{s}|{a}->{b}"]["reader_marks"] = {d: dict(t) for d, t in tally.items()}
+                if any(tally.values()):
+                    print(f"  {j:17s} {s:6s} {a:>3s}->{b:3s}  "
+                          + "   ".join(f"{d} {t['G']}/{t['B']}/{t['T']}" for d, t in tally.items()))
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     res["reader_items"] = items
