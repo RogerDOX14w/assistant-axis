@@ -85,6 +85,19 @@ def marks_of(sheet_paths) -> dict:
     return out
 
 
+def xy_mark(mark: str, item: dict):
+    """An arm reading sheet's verdict as G / B / T / ?, or None to skip.  ``X`` and ``Y`` say which of the
+    two scores was right (``x_is`` names the arm shown as X); a right score of 3 is G, any other B."""
+    m = (mark or "")[:1].upper()
+    if m in ("T", "?"):
+        return m
+    if m not in ("X", "Y"):
+        return None   # SKIP (a duplicate marked elsewhere) or unmarked
+    x_score, y_score = ((item["a0_score"], item["arm_score"]) if item["x_is"] == "A0"
+                        else (item["arm_score"], item["a0_score"]))
+    return "G" if (x_score if m == "X" else y_score) == 3 else "B"
+
+
 def reader_items() -> list:
     """Every reader-marked response as ``{set, entity, key, mark, source}`` with ``mark`` in G / B / T / ?;
     the first source to mark a response keeps it (held sample, v5 check, A11, A1/A6, arm sheets)."""
@@ -129,12 +142,8 @@ def reader_items() -> list:
     rk = json.loads((REPORTS / "reading_sheet_key.json").read_text())["items"]
     rm = marks_of(sorted((REPORTS / "reading_sheet").glob("page_*.md")))
     for i, it in rk.items():
-        m = rm.get(i, "")[:1].upper()
-        if m in ("X", "Y"):   # which score was right; X names the arm in x_is
-            x_score, y_score = ((it["a0_score"], it["arm_score"]) if it["x_is"] == "A0"
-                                else (it["arm_score"], it["a0_score"]))
-            add("oct", it["role"], it["key"], "G" if (x_score if m == "X" else y_score) == 3 else "B", "arm_sheets")
-        elif m in ("T", "?"):
+        m = xy_mark(rm.get(i, ""), it)
+        if m is not None:
             add("oct", it["role"], it["key"], m, "arm_sheets")
     return items, conflicts
 
