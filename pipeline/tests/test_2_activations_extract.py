@@ -319,3 +319,142 @@ def test_process_role_on_an_empty_file_returns_false(mod, pm, tmp_path, caplog):
                             list(range(N_LAYERS)), batch_size=2, max_length=2048) == (False, 0)
     assert "no responses" in caplog.text
     assert not (tmp_path / "blank.pt").exists()
+
+
+# ---------------------------------------------------------------------------
+# --prefix_token_means (the cap pilot, 2026-10-28): slot 0 over the first N
+# content tokens, beside the activation file, from the same forward pass.
+# ---------------------------------------------------------------------------
+
+LONG = "Arr matey. Law rules! The sea is wide and the law is wider still."
+
+
+def _prefix_run(mod, pm, tmp_path, responses, prefix, **kw):
+    _write_responses(tmp_path / "pirate.jsonl", responses)
+    kw.setdefault("batch_size", 2)
+    kw.setdefault("max_length", 2048)
+    saved = mod.process_role(pm, tmp_path / "pirate.jsonl", tmp_path, kw.pop("layers", [0, 1, 2]),
+                             prefix_tokens=prefix, **kw)
+    acts = torch.load(tmp_path / "pirate.pt", weights_only=False)
+    pfx = torch.load(tmp_path / "prefix_means" / "pirate.pt", weights_only=False)
+    return saved, acts, pfx
+
+
+def test_a_full_length_prefix_mean_is_slot_0_bit_for_bit(mod, pm, tmp_path):
+    _, acts, pfx = _prefix_run(mod, pm, tmp_path, [LONG, "Yes", "Arr matey."], [2, 1000])
+    meta = pfx.pop("metadata")
+    acts.pop("metadata")
+    assert sorted(pfx) == sorted(acts)                   # keyed exactly as the activations
+    for k, act in acts.items():
+        assert pfx[k].shape == (2, N_LAYERS, 4) and pfx[k].dtype == act.dtype == torch.bfloat16
+        assert torch.equal(pfx[k][1].view(torch.int16), act[0].view(torch.int16))
+        assert meta["short"][k] == [meta["n_content_tokens"][k] < 2, True]
+
+
+def test_a_prefix_mean_is_the_mean_of_the_first_n_content_positions(mod, pm, tmp_path):
+    _, _, pfx = _prefix_run(mod, pm, tmp_path, [LONG], [1, 3, 5])
+    _, content, _ = _expected_positions(pm.tokenizer, _conv(LONG))
+    assert len(content) > 5
+    row = pfx["pos_p0_q0"]
+    for i, n in enumerate([1, 3, 5]):
+        for j in range(N_LAYERS):
+            assert row[i, j, 0].item() == _bf16(sum(content[:n]) / n)
+            assert row[i, j, 1].item() == j + 1             # the layer
+    assert pfx["metadata"]["n_content_tokens"] == {"pos_p0_q0": len(content)}
+    assert pfx["metadata"]["short"] == {"pos_p0_q0": [False, False, False]}
+
+
+def test_a_short_response_gives_its_full_mean_and_is_marked(mod, pm, tmp_path):
+    _, acts, pfx = _prefix_run(mod, pm, tmp_path, ["Yes", LONG], [3, 1000])
+    _, content, _ = _expected_positions(pm.tokenizer, _conv("Yes"))
+    meta = pfx["metadata"]
+    assert meta["n_content_tokens"]["pos_p0_q0"] == len(content) < 3
+    assert meta["short"]["pos_p0_q0"] == [True, True]
+    assert meta["short"]["pos_p1_q1"] == [False, True]
+    short = pfx["pos_p0_q0"]
+    assert torch.equal(short[0], short[1]) and torch.equal(short[0], acts["pos_p0_q0"][0])
+
+
+def test_prefix_means_follow_the_truncation_and_drop_rules(mod, pm, tmp_path):
+    # Cut at max_length: the prefix sees only the kept tokens, as slot 0 does;
+    # an empty response has neither an activation nor a prefix mean.
+    _, content, _ = _expected_positions(pm.tokenizer, _conv(LONG))
+    max_length = content[0] + 4
+    _, acts, pfx = _prefix_run(mod, pm, tmp_path, [LONG, ""], [2, 6], max_length=max_length)
+    assert "pos_p1_q1" not in pfx and "pos_p1_q1" not in acts
+    assert pfx["metadata"]["n_content_tokens"] == {"pos_p0_q0": 4}
+    assert pfx["metadata"]["short"]["pos_p0_q0"] == [False, True]
+    assert torch.equal(pfx["pos_p0_q0"][1], acts["pos_p0_q0"][0])
+
+
+def test_the_flag_is_recorded_in_the_prefix_files_metadata(mod, pm, tmp_path):
+    _, acts, pfx = _prefix_run(mod, pm, tmp_path, [LONG], [2, 4])
+    meta, ameta = pfx["metadata"], acts["metadata"]
+    assert meta["prefix_tokens"] == [2, 4]
+    assert meta["layers"] == meta["activation_layers"] == ameta["layers"] == [0, 1, 2]
+    for k in ("model_type", "template_kwargs", "header_tokens", "max_length", "batch_size"):
+        assert meta[k] == ameta[k]
+    # the activation file is what it is without the flag
+    assert "prefix_tokens" not in ameta
+
+
+def test_prefix_layers_keep_a_subset_of_the_extracted_layers(mod, pm, tmp_path):
+    _, acts, pfx = _prefix_run(mod, pm, tmp_path, [LONG], [2], prefix_layers=[2])
+    assert pfx["pos_p0_q0"].shape == (1, 1, 4) and pfx["pos_p0_q0"][0, 0, 1].item() == 3.0
+    assert pfx["metadata"]["layers"] == [2] and pfx["metadata"]["activation_layers"] == [0, 1, 2]
+    assert acts["pos_p0_q0"].shape == (8, N_LAYERS, 4)
+    with pytest.raises(ValueError, match="not among the extracted layers"):
+        mod.process_role(pm, tmp_path / "pirate.jsonl", tmp_path / "other", [0, 1],
+                         batch_size=2, max_length=2048, prefix_tokens=[2], prefix_layers=[2])
+
+
+def test_off_by_default_no_prefix_file(mod, pm, tmp_path):
+    _write_responses(tmp_path / "pirate.jsonl", [LONG])
+    mod.process_role(pm, tmp_path / "pirate.jsonl", tmp_path, [0, 1, 2], batch_size=2,
+                     max_length=2048)
+    assert (tmp_path / "pirate.pt").exists() and not (tmp_path / "prefix_means").exists()
+
+
+def test_the_skip_rule_covers_both_files(mod, pm, tmp_path):
+    out = tmp_path / "acts"
+    out.mkdir()
+    _write_responses(tmp_path / "pirate.jsonl", [LONG, "Yes"])
+    _write_responses(tmp_path / "parrot.jsonl", ["Squawk"])
+    # A tree extracted without the flag: both entities pending once it is given.
+    for name in ("pirate", "parrot"):
+        mod.process_role(pm, tmp_path / f"{name}.jsonl", out, [0, 1, 2], batch_size=2,
+                         max_length=2048)
+    assert mod.pending_response_files(tmp_path, out) == []
+    assert [f.stem for f in mod.pending_response_files(tmp_path, out, prefix_means=True)] == \
+        ["parrot", "pirate"]
+    before = (out / "pirate.pt").read_bytes()
+    mod.process_role(pm, tmp_path / "pirate.jsonl", out, [0, 1, 2], batch_size=2,
+                     max_length=2048, prefix_tokens=[2])
+    assert (out / "pirate.pt").read_bytes() == before     # the activation file is not rewritten
+    assert (out / "prefix_means" / "pirate.pt").exists()
+    assert [f.stem for f in mod.pending_response_files(tmp_path, out, prefix_means=True)] == \
+        ["parrot"]
+    # Both files there: nothing is computed (no forward pass).
+    n_calls = len(pm.model.calls)
+    assert mod.process_role(pm, tmp_path / "pirate.jsonl", out, [0, 1, 2], batch_size=2,
+                            max_length=2048, prefix_tokens=[2]) == (True, 0)
+    assert len(pm.model.calls) == n_calls
+
+
+def test_extract_with_prefix_means_pairs_each_activation(mod, pm):
+    convs = [_conv(""), _conv(LONG), _conv("Yes")]
+    acts, pfx, _, _ = mod.extract_activations_with_prefix_means(
+        pm, convs, [0, 1, 2], [2], batch_size=2)
+    assert acts[0] is None and pfx[0] is None
+    assert all(p is not None and p[0].shape == (1, N_LAYERS, 4) for p in pfx[1:])
+    # The same activations as without the flag.
+    plain, _, _ = _extract(mod, pm, convs, batch_size=2)
+    assert all(torch.equal(a, b) for a, b in zip(acts[1:], plain[1:]))
+
+
+@pytest.mark.parametrize("spec", ["512,256", "0,1", "256,256", "x", ""])
+def test_prefix_token_counts_are_validated(mod, spec):
+    import argparse
+    with pytest.raises(argparse.ArgumentTypeError, match="--prefix_token_means"):
+        mod.parse_prefix_tokens(spec)
+    assert mod.parse_prefix_tokens("256, 512,768") == [256, 512, 768]

@@ -25,6 +25,10 @@ Usage:
         --model google/gemma-2-27b-it \
         --tensor_parallel_size 2 \
         ...
+
+    # The cap pilot's 1024 tree: also slot 0 over each response's first 256,
+    # 512 and 768 content tokens, into <output_dir>/prefix_means/<name>.pt
+    uv run pipeline/2_activations.py ... --prefix_token_means 256,512,768
 """
 
 import argparse
@@ -85,6 +89,31 @@ def _layers_arg(spec: str) -> str:
     return spec
 
 
+# Where --prefix_token_means writes, under --output_dir: one file per entity
+# beside (not among) the activation files, so step 4's ``*.pt`` glob of the
+# activations directory never takes one for an entity.
+PREFIX_MEANS_DIR = "prefix_means"
+
+
+def parse_prefix_tokens(spec: str) -> List[int]:
+    """``--prefix_token_means``: comma-separated token counts, positive and
+    strictly increasing (``256,512,768``)."""
+    try:
+        ns = [int(x.strip()) for x in spec.split(",") if x.strip()]
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            f"--prefix_token_means {spec!r}: not a comma-separated list of integers") from None
+    if not ns or any(n <= 0 for n in ns) or any(b <= a for a, b in zip(ns, ns[1:])):
+        raise argparse.ArgumentTypeError(
+            f"--prefix_token_means {spec!r}: token counts must be positive and strictly "
+            f"increasing (e.g. 256,512,768)")
+    return ns
+
+
+def prefix_means_file(output_dir: Path, name: str) -> Path:
+    return Path(output_dir) / PREFIX_MEANS_DIR / f"{name}.pt"
+
+
 class _RemovedFlag(argparse.Action):
     """A flag that is gone: an argparse error saying why."""
 
@@ -126,24 +155,48 @@ def build_parser() -> argparse.ArgumentParser:
                              "span of its first N conversations and compare it with the stored "
                              "content; exit 1 on any mismatch (default 0, off; the smoke runs "
                              "pass 20)")
+    parser.add_argument("--prefix_token_means", type=parse_prefix_tokens, default=None,
+                        metavar="N[,N...]",
+                        help="Also write, per entity, <output_dir>/prefix_means/<name>.pt: for "
+                             "every response, slot 0's mean over the first N content tokens of "
+                             "the response, one row per N (e.g. 256,512,768; the cap pilot), in "
+                             "the same forward pass; a response with fewer than N content tokens "
+                             "gives its full mean and is marked short.  The activation file is "
+                             "unchanged.  An entity is pending while either file is missing, and "
+                             "an existing file is never rewritten.  Off by default")
+    parser.add_argument("--prefix_token_layers", type=_layers_arg, default=None,
+                        help="With --prefix_token_means: the layers its file keeps, a subset of "
+                             "--layers in the same form (default: every extracted layer; at all "
+                             "64 layers of Qwen3-32B a file is about 1 GB per 500 responses and "
+                             "three N, at one layer about 16 MB)")
     return parser
 
 
 def pending_response_files(responses_dir: Path, output_dir: Path, *,
                            roles: Optional[List[str]] = None,
-                           name_prefix: Optional[str] = None) -> List[Path]:
+                           name_prefix: Optional[str] = None,
+                           prefix_means: bool = False) -> List[Path]:
     """The response files (narrowed by ``--roles`` / ``--name_prefix``) whose
-    ``<name>.pt`` does not exist yet.  Standard library only, so that a rerun
-    with nothing to do can return before torch is imported (below)."""
+    ``<name>.pt`` does not exist yet, or, with ``prefix_means``
+    (``--prefix_token_means``), whose ``prefix_means/<name>.pt`` does not.
+    Standard library only, so that a rerun with nothing to do can return
+    before torch is imported (below)."""
     files = sorted(Path(responses_dir).glob("*.jsonl"))
     if roles:
         files = [f for f in files if f.stem in roles]
     if name_prefix:
         files = [f for f in files if f.stem.startswith(name_prefix)]
-    pending = [f for f in files if not (Path(output_dir) / f"{f.stem}.pt").exists()]
+
+    def done(f: Path) -> bool:
+        if not (Path(output_dir) / f"{f.stem}.pt").exists():
+            return False
+        return not prefix_means or prefix_means_file(output_dir, f.stem).exists()
+
+    pending = [f for f in files if not done(f)]
     if len(files) > len(pending):
+        what = "activations and prefix means" if prefix_means else "activations"
         logger.info(f"Skipping {len(files) - len(pending)} of {len(files)} response file(s) "
-                    f"whose activations already exist")
+                    f"whose {what} already exist")
     return pending
 
 
@@ -154,7 +207,8 @@ def pending_response_files(responses_dir: Path, output_dir: Path, *,
 if __name__ == "__main__":
     _early = build_parser().parse_args()
     if not pending_response_files(Path(_early.responses_dir), Path(_early.output_dir),
-                                  roles=_early.roles, name_prefix=_early.name_prefix):
+                                  roles=_early.roles, name_prefix=_early.name_prefix,
+                                  prefix_means=bool(_early.prefix_token_means)):
         logger.info("Nothing to process — all activations already exist")
         sys.exit(0)
 
@@ -478,6 +532,60 @@ def extract_activations_batch(
         ``template_kwargs``, ``generation_prompt_ids``; only ``model_type``
         and ``template_kwargs`` when headers are not extracted).
     """
+    acts, _, mismatches, header_metadata = _extract_batches(
+        pm, conversations, layers, batch_size, max_length,
+        layout=layout, extract_headers=extract_headers, entity=entity)
+    return acts, mismatches, header_metadata
+
+
+def extract_activations_with_prefix_means(
+    pm: ProbingModel,
+    conversations: List[List[Dict[str, str]]],
+    layers: List[int],
+    prefix_tokens: List[int],
+    batch_size: int = 16,
+    max_length: int = 2048,
+    *,
+    prefix_layer_index: Optional[List[int]] = None,
+    layout: Optional[ChatLayout] = None,
+    extract_headers: bool = True,
+    entity: str = "?",
+) -> tuple[List[Optional[torch.Tensor]], List[Optional[tuple]], List[Dict], Dict]:
+    """:func:`extract_activations_batch` plus ``--prefix_token_means``, from
+    the same forward passes: for each conversation with an activation, slot
+    0's mean over the first N content tokens of its response for each N in
+    ``prefix_tokens`` (:meth:`SpanMapper.prefix_means`), at the positions
+    ``prefix_layer_index`` of the layer axis (default all).
+
+    Returns:
+        (activations_list, prefix_list, all_mismatches, header_metadata);
+        ``prefix_list[i]`` is None where ``activations_list[i]`` is, else
+        ``(means, n_content_tokens)``: ``means`` ``(len(prefix_tokens),
+        n_layers, hidden)`` in the activations' dtype, ``n_content_tokens``
+        the number of tokens slot 0 averaged.
+    """
+    return _extract_batches(pm, conversations, layers, batch_size, max_length,
+                            layout=layout, extract_headers=extract_headers, entity=entity,
+                            prefix_tokens=prefix_tokens, prefix_layer_index=prefix_layer_index)
+
+
+def _extract_batches(
+    pm: ProbingModel,
+    conversations: List[List[Dict[str, str]]],
+    layers: List[int],
+    batch_size: int,
+    max_length: int,
+    *,
+    layout: Optional[ChatLayout],
+    extract_headers: bool,
+    entity: str,
+    prefix_tokens: Optional[List[int]] = None,
+    prefix_layer_index: Optional[List[int]] = None,
+) -> tuple[List[Optional[torch.Tensor]], List[Optional[tuple]], List[Dict], Dict]:
+    """The loop behind both extraction functions.  Without
+    ``prefix_tokens`` it computes exactly what it did before 2026-10-28 (the
+    golden gate, test_step2_qwen3_golden.py) and the prefix list is all
+    None."""
     family = pm.family
     chat_kwargs = dict(family.template_kwargs)
     encoder = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder=family.span_builder)
@@ -507,6 +615,7 @@ def extract_activations_batch(
     print(f"DEBUG: chat_kwargs = {chat_kwargs}")
 
     all_activations: List[Optional[torch.Tensor]] = []
+    all_prefix: List[Optional[tuple]] = []
     all_mismatches: List[Dict] = []
     num_conversations = len(conversations)
 
@@ -552,6 +661,10 @@ def extract_activations_batch(
             extract_headers=extract_headers,
         )
         all_mismatches.extend(mismatches)
+        # --prefix_token_means: from the same batch activations and spans.
+        batch_prefix = (SpanMapper.prefix_means(batch_activations, batch_spans, batch_metadata,
+                                                prefix_tokens, layer_index=prefix_layer_index)
+                        if prefix_tokens else None)
 
         # The assistant turn by its role (multi-model plan § 5.4), not by
         # parity: exactly one is allowed.  For a [system?, user, assistant]
@@ -566,19 +679,29 @@ def extract_activations_batch(
                     f"assistant turns; the pipeline is single-turn")
             if not assistant_turns or conv_acts.numel() == 0:
                 all_activations.append(None)
+                all_prefix.append(None)
                 continue
             t = assistant_turns[0]
             # A copy, not a view: a view would keep (and torch.save would
             # write) the whole stacked turns tensor.
             act = conv_acts[:, t] if conv_acts.ndim == 4 else conv_acts[t]
             all_activations.append(act.to("cpu", copy=True))   # (1+N, layers, hidden) or (layers, hidden)
+            if batch_prefix is None:
+                all_prefix.append(None)
+                continue
+            found = batch_prefix[local]
+            if len(found) != 1:      # the same spans and rule as map_spans: cannot happen
+                raise RuntimeError(f"{entity}: conversation {batch_start + local} has an "
+                                   f"activation but {len(found)} prefix-mean spans")
+            means, n_tokens = found[0]
+            all_prefix.append((means.to("cpu", copy=True), int(n_tokens)))
 
         # Cleanup
         del batch_activations
         if (batch_start // batch_size) % 5 == 0:
             torch.cuda.empty_cache()
 
-    return all_activations, all_mismatches, header_metadata
+    return all_activations, all_prefix, all_mismatches, header_metadata
 
 
 def process_role(
@@ -592,12 +715,28 @@ def process_role(
     layout: Optional[ChatLayout] = None,
     extract_headers: bool = True,
     verify_spans: int = 0,
+    prefix_tokens: Optional[List[int]] = None,
+    prefix_layers: Optional[List[int]] = None,
 ) -> tuple[bool, int]:
     """Process a single role file and save activations.
 
     ``layout`` is the worker's header layout (derived from the template when
     None); ``verify_spans`` > 0 runs :func:`verify_assistant_spans` on the
     first that many conversations before extracting anything.
+
+    ``prefix_tokens`` (``--prefix_token_means``, the cap pilot, 2026-10-28)
+    also writes ``<output_dir>/prefix_means/<role>.pt`` from the same forward
+    pass: keyed as the activation file, one ``(len(prefix_tokens), n_layers,
+    hidden)`` tensor per response in the activations' dtype (row i slot 0's
+    mean over the response's first ``prefix_tokens[i]`` content tokens), at
+    the model layers ``prefix_layers`` (default ``layers``), plus a
+    ``"metadata"`` entry: the activation metadata, with ``layers`` naming
+    this file's layer axis and ``activation_layers`` the activation file's,
+    and ``prefix_tokens``, ``n_content_tokens`` (per key, the tokens slot 0
+    averaged) and ``short`` (per key, one flag per N: fewer than N content
+    tokens, so that row is the full mean).  With it each of the two files is
+    written only if it does not exist yet, so a tree extracted without the
+    flag gains its prefix means on a rerun and keeps its activation files.
 
     Returns:
         (saved, mismatch_count) for the caller to accumulate; ``saved`` is
@@ -612,6 +751,22 @@ def process_role(
     """
     role = role_file.stem
     output_file = output_dir / f"{role}.pt"
+    prefix_file = prefix_means_file(output_dir, role) if prefix_tokens else None
+    # Without --prefix_token_means the activation file is written as before
+    # (the callers pass only pending entities); with it, neither existing
+    # file is rewritten.
+    write_activations = prefix_file is None or not output_file.exists()
+    write_prefix = prefix_file is not None and not prefix_file.exists()
+    if prefix_file is not None and not (write_activations or write_prefix):
+        logger.info(f"{role}: activations and prefix means already exist")
+        return True, 0
+    prefix_layer_index = None
+    if prefix_file is not None and prefix_layers is not None:
+        missing = [x for x in prefix_layers if x not in layers]
+        if missing:
+            raise ValueError(f"{role}: --prefix_token_layers {missing} not among the extracted "
+                             f"layers {list(layers)}")
+        prefix_layer_index = [list(layers).index(x) for x in prefix_layers]
 
     # Load responses
     responses = load_responses(role_file)
@@ -639,16 +794,24 @@ def process_role(
                 f"{role}: {len(bad)} of {min(verify_spans, len(conversations))} assistant spans "
                 f"do not decode to the stored content (logged above); nothing extracted")
 
-    activations_list, mismatches, header_metadata = extract_activations_batch(
-        pm=pm,
-        conversations=conversations,
-        layers=layers,
-        batch_size=batch_size,
-        max_length=max_length,
-        layout=layout,
-        extract_headers=extract_headers,
-        entity=role,
-    )
+    if prefix_file is None:
+        activations_list, mismatches, header_metadata = extract_activations_batch(
+            pm=pm,
+            conversations=conversations,
+            layers=layers,
+            batch_size=batch_size,
+            max_length=max_length,
+            layout=layout,
+            extract_headers=extract_headers,
+            entity=role,
+        )
+        prefix_list = [None] * len(activations_list)
+    else:
+        activations_list, prefix_list, mismatches, header_metadata = (
+            extract_activations_with_prefix_means(
+                pm, conversations, layers, list(prefix_tokens), batch_size, max_length,
+                prefix_layer_index=prefix_layer_index, layout=layout,
+                extract_headers=extract_headers, entity=role))
 
     if mismatches:
         logger.warning(
@@ -664,10 +827,14 @@ def process_role(
             logger.warning(f"    ... and {len(mismatches) - 5} more")
 
     activations_dict = {}
-    for i, (act, meta) in enumerate(zip(activations_list, metadata)):
+    prefix_dict: Dict[str, torch.Tensor] = {}
+    n_content: Dict[str, int] = {}
+    for i, (act, pfx, meta) in enumerate(zip(activations_list, prefix_list, metadata)):
         if act is not None:
             key = f"{meta['label']}_p{meta['prompt_index']}_q{meta['question_index']}"
             activations_dict[key] = act
+            if pfx is not None:          # a repeated key: the last wins, in both files
+                prefix_dict[key], n_content[key] = pfx
 
     if not activations_dict:
         raise NoActivationsError(
@@ -723,15 +890,42 @@ def process_role(
             "max_length": int(max_length),
             "batch_size": int(batch_size),
         })
-        activations_dict["metadata"] = file_metadata
-        torch_save_with_retry(
-            activations_dict, output_file,
-            use_zipfile_serialization=False,
-            logger_obj=logger,
-        )
-        n_act = len(activations_dict) - (1 if "metadata" in activations_dict else 0)
-        logger.info(f"Saved {n_act} activations (+ metadata) for {role} "
-                    f"({output_file.stat().st_size:,} bytes)")
+        if write_activations:
+            activations_dict["metadata"] = file_metadata
+            torch_save_with_retry(
+                activations_dict, output_file,
+                use_zipfile_serialization=False,
+                logger_obj=logger,
+            )
+            n_act = len(activations_dict) - (1 if "metadata" in activations_dict else 0)
+            logger.info(f"Saved {n_act} activations (+ metadata) for {role} "
+                        f"({output_file.stat().st_size:,} bytes)")
+        else:
+            logger.info(f"{role}: {output_file.name} exists and is left as it is; "
+                        f"writing only the prefix means")
+        if write_prefix:
+            # The cap pilot's content-only measure (plan_max_tokens_pilot.md
+            # § 5 item 5), saved like the activation file.
+            prefix_metadata = dict(file_metadata)
+            prefix_metadata.update({
+                "layers": [int(x) for x in (prefix_layers if prefix_layers is not None
+                                            else layers)],
+                "activation_layers": [int(x) for x in layers],
+                "prefix_tokens": [int(n) for n in prefix_tokens],
+                "n_content_tokens": dict(n_content),
+                "short": {k: [n < int(p) for p in prefix_tokens] for k, n in n_content.items()},
+                "what": "per response, row i = slot 0's mean over the first prefix_tokens[i] "
+                        "tokens of its content span (all of it when short)",
+            })
+            prefix_dict["metadata"] = prefix_metadata
+            prefix_file.parent.mkdir(parents=True, exist_ok=True)
+            torch_save_with_retry(prefix_dict, prefix_file, use_zipfile_serialization=False,
+                                  logger_obj=logger)
+            n_short = sum(any(s) for s in prefix_metadata["short"].values())
+            logger.info(f"Saved prefix means over {list(prefix_tokens)} tokens for {role}: "
+                        f"{len(n_content)} responses, {n_short} shorter than "
+                        f"{max(prefix_tokens)} content tokens "
+                        f"({prefix_file.stat().st_size:,} bytes)")
 
     # Cleanup
     gc.collect()
@@ -818,6 +1012,8 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
                     args.batch_size, args.max_length,
                     layout=layout, extract_headers=extract_headers,
                     verify_spans=getattr(args, "verify_spans", 0) if i == 0 else 0,
+                    prefix_tokens=getattr(args, "prefix_token_means", None),
+                    prefix_layers=getattr(args, "prefix_layers", None),
                 )
                 total_mismatches += n_mm
                 if saved:
@@ -886,7 +1082,9 @@ def run_multi_worker(args) -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     role_files = pending_response_files(responses_dir, output_dir,
-                                        roles=args.roles, name_prefix=args.name_prefix)
+                                        roles=args.roles, name_prefix=args.name_prefix,
+                                        prefix_means=bool(getattr(args, "prefix_token_means",
+                                                                  None)))
 
     if not role_files:
         logger.info("No roles to process")
@@ -946,6 +1144,26 @@ def run_multi_worker(args) -> int:
     return 0
 
 
+def resolve_prefix_layers(parser, args, n_layers: Optional[int],
+                          extracted: List[int]) -> Optional[List[int]]:
+    """``--prefix_token_layers`` as model layer indices, checked against the
+    model's range and required to be among the extracted ``--layers``; None
+    (every extracted layer) when it is not given."""
+    if args.prefix_token_layers is None:
+        return None
+    try:
+        chosen = parse_layers(args.prefix_token_layers, n_layers)
+    except LayersError as e:
+        parser.error(str(e).replace("--layers", "--prefix_token_layers"))
+    if n_layers is None or not chosen:
+        return chosen or None
+    outside = [x for x in chosen if x not in extracted]
+    if outside:
+        parser.error(f"--prefix_token_layers {args.prefix_token_layers}: {outside} not among "
+                     f"the extracted --layers")
+    return chosen
+
+
 def main():
     parser = build_parser()
     args = parser.parse_args()
@@ -967,8 +1185,11 @@ def main():
     # box when all activations are already cached (e.g. re-running just to
     # drive the downstream pipeline steps).
     responses_dir = Path(args.responses_dir)
+    if args.prefix_token_layers is not None and not args.prefix_token_means:
+        parser.error("--prefix_token_layers needs --prefix_token_means")
     role_files = pending_response_files(responses_dir, output_dir,
-                                        roles=args.roles, name_prefix=args.name_prefix)
+                                        roles=args.roles, name_prefix=args.name_prefix,
+                                        prefix_means=bool(args.prefix_token_means))
     if not role_files:
         logger.info("Nothing to process — all activations already exist")
         return
@@ -984,9 +1205,14 @@ def main():
         logger.error(f"{args.model}: {e}")
         sys.exit(1)
     try:
-        parse_layers(args.layers, pre.n_layers)
+        extracted_layers = parse_layers(args.layers, pre.n_layers)
     except LayersError as e:
         parser.error(str(e))
+    args.prefix_layers = resolve_prefix_layers(parser, args, pre.n_layers, extracted_layers)
+    if args.prefix_token_means:
+        logger.info(f"--prefix_token_means {args.prefix_token_means}: writing "
+                    f"{output_dir / PREFIX_MEANS_DIR}/<name>.pt, layers "
+                    f"{args.prefix_layers if args.prefix_layers is not None else 'as extracted'}")
     log_layout(pre.layout)
     # Step 1's side-car against this model (§ 5.5), still before any load.
     try:
@@ -1039,6 +1265,8 @@ def main():
                     args.batch_size, args.max_length,
                     layout=layout, extract_headers=extract_headers,
                     verify_spans=args.verify_spans if i == 0 else 0,
+                    prefix_tokens=args.prefix_token_means,
+                    prefix_layers=args.prefix_layers,
                 )
             except NoActivationsError as e:
                 # Logged and carried on, like the multi-worker mode; any

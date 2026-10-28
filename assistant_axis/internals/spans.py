@@ -354,6 +354,63 @@ class SpanMapper:
 
         return conversation_activations, all_mismatches, turn_roles
 
+    @staticmethod
+    def prefix_means(
+        batch_activations: torch.Tensor,
+        batch_spans: List[Dict[str, Any]],
+        batch_metadata: Dict[str, Any],
+        prefix_tokens: Sequence[int],
+        *,
+        layer_index: Optional[Sequence[int]] = None,
+    ) -> List[List[Tuple[torch.Tensor, int]]]:
+        """Slot 0 over the first N tokens of each assistant span, one N per
+        entry of ``prefix_tokens`` (step 2's ``--prefix_token_means``, the cap
+        pilot, 2026-10-28).
+
+        The span is the one :meth:`map_spans` averages for slot 0, with the
+        same truncation rule (a span past ``truncated_lengths`` is dropped,
+        one that runs past it is cut there), so a prefix at least as long as
+        the span is slot 0 bit for bit: the same slice, the same ``mean`` (or
+        ``squeeze`` for one token).  A span shorter than N gives its full
+        mean for that N; the caller marks it from the token count.
+
+        Args:
+            batch_activations: (num_layers, batch_size, max_seq_len, hidden_size)
+            layer_index: positions on the layer axis to keep (default all)
+
+        Returns:
+            per conversation, in turn order, one ``(means, n_tokens)`` per
+            assistant span :meth:`map_spans` keeps: ``means`` is
+            ``(len(prefix_tokens), n_layers, hidden)`` in the activations'
+            dtype, ``n_tokens`` the span's length (what slot 0 averaged).
+        """
+        out: List[List[Tuple[torch.Tensor, int]]] = [
+            [] for _ in range(batch_metadata['total_conversations'])]
+        for span in sorted(batch_spans, key=lambda s: (s['conversation_id'], s['turn'])):
+            if span.get('role') != 'assistant':
+                continue
+            conv_id = span['conversation_id']
+            start_idx = span['start']
+            actual_length = batch_metadata['truncated_lengths'][conv_id]
+            if start_idx >= actual_length:
+                continue
+            end_idx = min(span['end'], actual_length)
+            if start_idx >= end_idx:
+                continue
+            span_activations = batch_activations[:, conv_id, start_idx:end_idx, :]
+            span_length = span_activations.size(1)
+            if span_length == 0:
+                continue
+            rows = []
+            for n in prefix_tokens:
+                part = span_activations[:, :min(int(n), span_length), :]
+                rows.append(part.squeeze(1) if part.size(1) == 1 else part.mean(dim=1))
+            means = torch.stack(rows)                      # (K, num_layers, hidden)
+            if layer_index is not None:
+                means = means[:, list(layer_index), :]
+            out[conv_id].append((means, span_length))
+        return out
+
     def map_spans_no_code(
         self,
         batch_activations: torch.Tensor,
