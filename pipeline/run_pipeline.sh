@@ -245,6 +245,10 @@ while [[ $# -gt 0 ]]; do
             # step 3's --save_replies: every reply beside the scores, so that a
             # change of reading needs no rejudging (3_judge.py --reread_replies)
             JUDGE_ARGS+=(--save_replies); shift ;;
+        --judge-mark-truncated)
+            # step 3's --mark_truncated: a response cut at --max_tokens is shown
+            # to the judge with " …" appended (2026-10-28; the stored text is unchanged)
+            JUDGE_ARGS+=(--mark_truncated); shift ;;
         --from-step)
             FROM_STEP="$2"; shift 2 ;;
         --no-scan)

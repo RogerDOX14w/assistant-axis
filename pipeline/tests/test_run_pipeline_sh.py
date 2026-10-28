@@ -350,6 +350,14 @@ def test_judge_model_and_save_replies_reach_step_3(tmp_path):
     assert "Judge:  gpt-5.6-luna, prompt version 10" in proc.stdout
 
 
+def test_judge_mark_truncated_reaches_step_3(tmp_path):
+    """Step 3's --mark_truncated (Roger, 2026-10-28): the driver passes it to every step-3 call."""
+    proc, calls = _run_full(tmp_path, None, "--judge-mark-truncated")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and all(c.endswith("--mark_truncated") for c in judge)
+
+
 # ---------------------------------------------------------------------------
 # Rubric versions and --from-step (2026-10-23)
 # ---------------------------------------------------------------------------

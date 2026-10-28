@@ -639,6 +639,52 @@ def response_key(resp: dict) -> str:
     return f"{resp['label']}_p{resp['prompt_index']}_q{resp['question_index']}"
 
 
+# --mark_truncated (Roger, 2026-10-28, after the steering runner's sentinel,
+# steering_runner._decode_with_truncation_marker): a response step 1 cut at
+# --max_tokens (finish_reason "length") is shown to the judge with this
+# appended, so that the judge sees it was cut off rather than ended.  Only the
+# judge's copy is marked: the stored text is what step 2 runs through the
+# model, and a marker there would put tokens the model never wrote into slot
+# 0's mean.  Recorded in judge_rubric.json ("truncation_marker"); a scores
+# directory holds one setting (truncation_marker_conflict).
+TRUNCATION_MARKER = " …"
+
+
+def mark_truncated_responses(responses: List[dict],
+                             marker: str = TRUNCATION_MARKER) -> Tuple[List[dict], int]:
+    """``(responses, n_marked)``: copies of the responses whose
+    ``finish_reason`` is ``"length"`` with ``marker`` appended to their
+    assistant turn, the others as they are.  A response without
+    ``finish_reason`` (written before 2026-10-12) is left unmarked.  The input
+    is not changed."""
+    out, n = [], 0
+    for resp in responses:
+        if resp.get("finish_reason") != "length":
+            out.append(resp)
+            continue
+        conv = [dict(m, content=m["content"] + marker) if m.get("role") == "assistant" else m
+                for m in resp["conversation"]]
+        out.append({**resp, "conversation": conv})
+        n += 1
+    return out, n
+
+
+def truncation_marker_conflict(output_dir: Path, marker: Optional[str]) -> Optional[str]:
+    """Why ``output_dir`` cannot take scores judged with ``marker`` (None: no
+    marker), or None: its scores were judged with the other setting.  A stamp
+    without the field predates --mark_truncated (no marker)."""
+    path = output_dir / RUBRIC_STAMP_FILENAME
+    if not path.exists():
+        return None
+    recorded = json.loads(path.read_text()).get("truncation_marker")
+    if recorded == marker:
+        return None
+    def say(m: Optional[str]) -> str:
+        return "no truncation marker" if m is None else f"the truncation marker {m!r}"
+    return (f"{output_dir}: the scores there were judged with {say(recorded)}, this run with "
+            f"{say(marker)} (--mark_truncated); judge into another --output_dir")
+
+
 def pending_prompts(responses: List[dict], eval_prompt_template: str,
                     existing_scores: Dict[str, int], *, name: str = "") -> List[Tuple[str, str]]:
     """``(key, judge prompt)`` for every response not yet scored, one per
@@ -1239,7 +1285,9 @@ def reread_replies(args, *, source_dir: Path, output_dir: Path) -> None:
                              prompt_version=version.number, extra={"reread_from": {
                                  "dir": str(source_dir), "rubric_version": src_version.number,
                                  "prompt_sha256": recorded,
-                                 "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}})
+                                 "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())},
+                                 # the replies were given to the source's prompts
+                                 "truncation_marker": src.get("truncation_marker")})
             stamped.append(True)
         atomic_write_text(json.dumps(new, indent=2), output_dir / f"{name}.json", logger_obj=logger)
         log_disagreements(output_dir, name, notes)
@@ -1334,6 +1382,12 @@ async def main_async():
     parser.add_argument("--batch_fallback_max", type=int, default=2000,
                         help="Requests no batch answered are judged in real time up to this "
                              "many; past it they are left for a rerun and the run exits 1")
+    parser.add_argument("--mark_truncated", action="store_true",
+                        help=f"Show the judge a response cut at step 1's --max_tokens "
+                             f"(finish_reason \"length\") with {TRUNCATION_MARKER.strip()!r} "
+                             f"appended, as the steering judges see it (2026-10-28).  Only the "
+                             f"judge's copy is marked.  Recorded in judge_rubric.json; a scores "
+                             f"directory judged with the other setting is refused")
     parser.add_argument("--save_replies", action="store_true",
                         help="Also write every judge reply, with its key and score, to "
                              "<output_dir>/_replies/<entity>.jsonl, to read why a response got "
@@ -1504,7 +1558,9 @@ async def main_async():
         logger.info("Dry run — no API calls")
         logger.info(f"Prompt version {version.number}{' (draft)' if version.draft else ''}: "
                     f"{version.summary}; --max_tokens {args.max_tokens}")
-        conflict = prompt_version_conflict(output_dir, args.prompt_version, args.entity_type) \
+        conflict = (prompt_version_conflict(output_dir, args.prompt_version, args.entity_type)
+                    or truncation_marker_conflict(
+                        output_dir, TRUNCATION_MARKER if args.mark_truncated else None)) \
             if output_dir.is_dir() else None
         if conflict:
             logger.error(f"A live run would stop: {conflict}")
@@ -1527,6 +1583,9 @@ async def main_async():
             if name in excluded_pairs:
                 responses = [r for r in responses
                              if r["prompt_index"] not in excluded_pairs[name]]
+            if args.mark_truncated:
+                responses, n_marked = mark_truncated_responses(responses)
+                logger.info(f"  {name}: {n_marked} of {len(responses)} responses marked as cut off")
             pending = pending_prompts(responses, eval_tpl, existing_scores, name=name)
             count = len(pending)
             sample_prompt = pending[0][1] if pending else None
@@ -1581,6 +1640,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     """Judge every pending response (batch mode, or real time with
     ``--no_batch``), write the scores, usage record and rubric stamp, and
     exit 1 when the run is not complete.  Called with the lock held."""
+    marker = TRUNCATION_MARKER if args.mark_truncated else None
+    marked_counts = [0, 0]   # responses marked as cut off, responses read (--mark_truncated)
     if args.no_batch:
         # Judging in real time what earlier batches are still answering pays
         # twice and leaves the batches uncollected (2026-10-12).
@@ -1593,7 +1654,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
 
     # One prompt version per scores directory (2026-10-23), checked before
     # any request: step 4 averages whatever a directory's score files keep.
-    conflict = prompt_version_conflict(output_dir, args.prompt_version, args.entity_type)
+    conflict = prompt_version_conflict(output_dir, args.prompt_version, args.entity_type) \
+        or truncation_marker_conflict(output_dir, marker)
     if conflict:
         logger.error(conflict)
         sys.exit(1)
@@ -1610,7 +1672,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     def stamp_once() -> None:
         if not stamped:
             stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=args.judge_model,
-                         prompt_version=args.prompt_version)
+                         prompt_version=args.prompt_version,
+                         extra={"truncation_marker": marker})
             stamped.append(True)
 
     logger.info(f"Rubric version {version.number}{' (draft)' if version.draft else ''}: "
@@ -1662,6 +1725,10 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
             if n_read != len(responses):
                 logger.info(f"{name}: excluded {n_read - len(responses)} "
                             f"responses (incongruous pairs {excluded_pairs[name]})")
+        if args.mark_truncated:
+            responses, n_marked = mark_truncated_responses(responses)
+            marked_counts[0] += n_marked
+            marked_counts[1] += len(responses)
         if not responses:
             if n_read:   # every variant judged incongruous: nothing to do, as intended
                 logger.info(f"Skipping {name}: every response is from an incongruous pair")
@@ -1769,6 +1836,9 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     logger.info(f"Successful: {successful}")
     logger.info(f"Skipped:    {skipped}")
     logger.info(f"Failed:     {failed}")
+    if args.mark_truncated:
+        logger.info(f"Marked as cut off ({TRUNCATION_MARKER.strip()!r} shown to the judge): "
+                    f"{marked_counts[0]} of {marked_counts[1]} responses read")
     if errors:
         logger.info("\nErrors:")
         for e in errors[:10]:

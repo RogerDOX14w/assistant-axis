@@ -183,7 +183,8 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
         tdir = out / t
         usage = MultiModelUsage()
         rubric = {"rubric_versions": set(), "judge_models": set(), "entity_type": None,
-                  "label_form": None, "script": None, "prompt_sha256": {}, "reply_formats": set()}
+                  "label_form": None, "script": None, "prompt_sha256": {}, "reply_formats": set(),
+                  "truncation_markers": set()}
         abc_rows: List[str] = []
         runs = []
         c = {"responses": 0, "scores": 0, "vectors": 0, "pods": sorted(dirs)}
@@ -221,6 +222,8 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
                                            f"hash {sha}, another pod with {rubric['prompt_sha256'][v]}")
                 if r.get("reply_format"):
                     rubric["reply_formats"].add(r["reply_format"])
+                # step 3's --mark_truncated (2026-10-28); a stamp without the field: no marker
+                rubric["truncation_markers"].add(r.get("truncation_marker"))
             gc = d / "responses" / GENERATION_CONFIG_NAME
             if gc.exists():
                 runs += [{**run, "pod": name} for run in json.loads(gc.read_text()).get("runs", [])]
@@ -229,6 +232,9 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
         if len(rubric["reply_formats"]) > 1:
             raise MergeRefused(f"{t}: the pods read replies in several ways: "
                                f"{', '.join(sorted(rubric['reply_formats']))}")
+        if len(rubric["truncation_markers"]) > 1:
+            raise MergeRefused(f"{t}: the pods judged with and without step 3's --mark_truncated: "
+                               f"{', '.join(sorted(repr(m) for m in rubric['truncation_markers']))}")
         if abc_rows:
             (tdir / "scores" / ABC_LOG).write_text("\n".join(abc_rows) + "\n")
             c["abc_disagreements"] = len(abc_rows)
@@ -240,6 +246,7 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
                 "judge_models": sorted(rubric["judge_models"]),
                 **({"prompt_sha256": rubric["prompt_sha256"]} if rubric["prompt_sha256"] else {}),
                 **({"reply_format": next(iter(rubric["reply_formats"]))} if rubric["reply_formats"] else {}),
+                "truncation_marker": next(iter(rubric["truncation_markers"]), None),
                 "merged_from_pods": sorted(dirs)}, indent=2, sort_keys=True) + "\n")
         if runs:
             (tdir / "responses" / GENERATION_CONFIG_NAME).write_text(

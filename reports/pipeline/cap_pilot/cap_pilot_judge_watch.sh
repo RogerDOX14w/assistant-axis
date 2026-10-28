@@ -2,7 +2,8 @@
 # Cap pilot, step 3 on the Mac (plan § 4; 2026-10-28): for each tree, wait until the pod has its
 # 64 response files, copy them to roger/cap_pilot/<tree>/responses, judge them (roles by
 # gpt-5.6-luna on OpenAI Flex with --save_replies; traits and combinations by gpt-4.1-mini through
-# the Batch API, since Flex refuses gpt-4.1-mini), one directory per type under
+# the Batch API, since Flex refuses gpt-4.1-mini; every judging with --mark_truncated, a
+# response cut at the cap shown to the judge with " …"), one directory per type under
 # judged/<scores>/<type>/ (step 3 stamps one rubric record per directory, and version 10's role and
 # trait rubrics differ), gather the per-entity score files into <tree>/<scores>/ for step 4 and the
 # compare tool, and copy them back to the pod.  cap512 is judged twice (scores/ and
@@ -22,16 +23,16 @@ judge() {  # tree scores_subdir
     local t=$1 sub=$2 out=roger/cap_pilot/$1
     stamp "$t: step 3 into $sub"
     $UV run python pipeline/3_judge.py --entity_type role --roles $(names role) \
-        --judge_model gpt-5.6-luna --save_replies --no_batch --service_tier flex \
+        --judge_model gpt-5.6-luna --save_replies --mark_truncated --no_batch --service_tier flex \
         --responses_dir "$out/responses" --output_dir "$out/judged/$sub/role" || return 1
     for T in trait combination; do
-        $UV run python pipeline/3_judge.py --entity_type $T --roles $(names $T) \
+        $UV run python pipeline/3_judge.py --entity_type $T --roles $(names $T) --mark_truncated \
             --responses_dir "$out/responses" --output_dir "$out/judged/$sub/$T" || return 1
     done
     mkdir -p "$out/$sub"
     for T in role trait combination; do
         for f in "$out/judged/$sub/$T"/*.json; do
-            case "$(basename "$f")" in usage.json|judge_rubric.json) ;; *) cp "$f" "$out/$sub/" ;; esac
+            case "$(basename "$f")" in usage.json|judge_rubric.json|batch_state.json) ;; *) cp "$f" "$out/$sub/" ;; esac
         done
     done
     n=$(ls "$out/$sub"/*.json 2>/dev/null | wc -l | tr -d ' ')
