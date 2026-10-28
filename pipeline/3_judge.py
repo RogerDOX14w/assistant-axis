@@ -1361,7 +1361,9 @@ async def main_async():
                         help="With --no_batch and an OpenAI judge: OpenAI Flex processing, priced "
                              "at Batch rates but answered like real-time calls, slower and at "
                              "lower priority (2026-10-26: Luna's batches did not move for hours).  "
-                             "Usage is recorded under <model>:flex")
+                             "Usage is recorded under <model>:flex.  Not every model takes it: "
+                             "gpt-4.1-mini is refused with HTTP 400 'Invalid service_tier "
+                             "argument' (2026-10-28); judge it by batch, the default")
     parser.add_argument("--batch_requests", type=int,
                         default=_openai_batch.DEFAULT_CHUNK_REQUESTS,
                         help="Requests per batch (service limit 50,000 and 200 MB; a batch over "
