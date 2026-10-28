@@ -187,7 +187,7 @@ def stratum_of(role: str) -> Optional[str]:
 # ---------------------------------------------------------------------------
 
 JUDGE_MODEL = "gpt-4.1-mini"      # pipeline/3_judge.py --judge_model default
-MAX_TOKENS = 200                  # pipeline/3_judge.py --max_tokens default
+MAX_TOKENS = 200                  # pipeline/3_judge.py --max_tokens under version 3
 CUSTOM_ID_SEP = "|"               # as step 3's; arms, stems and keys never contain it
 
 # Token counting for the estimate.  gpt-4.1-mini uses o200k_base; the chat format adds a few
@@ -911,7 +911,8 @@ def update_record(out_dir: Path, plan: Sequence[RolePlan], arms: Sequence[str], 
                     "messages": "one user message, the filled template",
                     "reader": "pipeline/3_judge.py score_reply: parse_judge_score(require_marker="
                               "True), finish_reason 'length' unparseable",
-                    "step3_rubric_version": step3().JUDGE_RUBRIC_VERSION,
+                    # the arms are edits of version 3 (step 3's default until 2026-10-28)
+                    "step3_rubric_version": 3,
                     "transport": "OpenAI Batch API (assistant_axis/openai_batch.py)"}
     rec["model_name"] = {"value": model_name, "source": model_name_source, "used_by": "A2"}
     rec["sample"] = {"strata": {k: list(v) for k, v in SAMPLE_STRATA.items()},

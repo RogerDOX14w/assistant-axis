@@ -38,18 +38,20 @@
 #                                                     # rsync or cp (assistant_axis/tmpfs.py)
 #   ./run_pipeline.sh --types roles --from-step 3 --judge-prompt-version 4
 #                                                     # steps 3-5 again under rubric 4
-#   ./run_pipeline.sh --types roles --judge-prompt-version 10 \
-#       --judge-model gpt-5.6-luna --judge-save-replies   # the October role judging
+#   ./run_pipeline.sh --types roles --judge-model gpt-5.6-luna --judge-save-replies
+#                                                     # the October role judging (version 10)
 #
 # Rubric versions (--judge-prompt-version N, 2026-10-23): step 3 judges under
 # version N of its rubrics (3_judge.py --prompt_version; 0 the original
-# number-only rubrics, 3 the current ones, 4 the next version, a draft; 5
+# number-only rubrics, 3 the rubrics from 2026-10-12, 4 a draft; 5
 # version 4 and a clause for helpful professional roles, a draft; 6 the role
 # rubric as a decision procedure, 7 version 6 without its reversal rule and 8
 # version 7 with its helpful-professional clause given its converse, drafts;
 # 9, a rejected draft, is not runnable; 10 version 8's text with a role reply
-# scored from its A, B and C answers, settled, the role rubric for the October
-# extraction, roles judged by gpt-5.6-luna only: --judge-model).  A
+# scored from its A, B and C answers, settled, the default since 2026-10-28:
+# the role rubric for the October extraction, roles judged by gpt-5.6-luna
+# only, so a roles run needs --judge-model gpt-5.6-luna; traits and
+# combinations as version 3).  A
 # version other than the default writes scores_v<N>/, vectors_v<N>/ and
 # axis_v<N>.pt beside the default's scores/, vectors/ and axis.pt, so the
 # versions can be compared on the same responses and activations; the scan
@@ -180,7 +182,7 @@ JUDGE_ARGS=()                   # --judge-realtime adds --no_batch for step 3
 # under another rubric on the same responses and activations (Roger,
 # 2026-10-23; with --from-step 3).  The default is step 3's
 # DEFAULT_PROMPT_VERSION (a test pins the two together).
-JUDGE_PROMPT_VERSION_DEFAULT=3
+JUDGE_PROMPT_VERSION_DEFAULT=10
 JUDGE_PROMPT_VERSION=""
 # First step to run: 1 (everything, the default), or 3, 4 or 5 to rerun from
 # that step on outputs already there.  From step 3 on no step uses the GPU or

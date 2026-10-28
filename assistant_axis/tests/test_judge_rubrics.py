@@ -104,7 +104,7 @@ def test_settled_versions_are_never_edited():
 
 
 def test_versions_and_their_reading():
-    assert jr.DEFAULT_PROMPT_VERSION == 3
+    assert jr.DEFAULT_PROMPT_VERSION == 10                    # 3 until 2026-10-28
     assert (jr.PROMPT_VERSIONS[0].reply_format, jr.PROMPT_VERSIONS[0].max_tokens) == ("first_integer", 10)
     for v in (3, 4):
         assert (jr.PROMPT_VERSIONS[v].reply_format, jr.PROMPT_VERSIONS[v].max_tokens) == ("score_marker", 200)
@@ -316,3 +316,16 @@ def test_abc_score_is_the_rubrics_table():
     assert "- 0 if A, and not C.\n- 1 if not A, and not C.\n- 2 if C, and A or B.\n" \
            "- 3 if C, and neither A nor B." in jr.PROMPT_VERSIONS[10].role
     assert jr.abc_pattern({"A": False, "B": True, "C": False}) == "AnByCn"
+
+
+def test_versions_that_send_the_same_rubric_may_share_a_directory():
+    """Since 2026-10-28: version 10's traits and combinations are version 3's
+    (and so mix with 1 and 2 as 3 does); its roles are not, nor version 0's anything."""
+    share = jr.may_share_directory
+    for kind in ("trait", "combination"):
+        assert share(3, 10, kind) and share(1, 10, kind) and share(4, 8, kind)
+        assert not share(0, 10, kind)
+    assert not share(3, 10, "role") and not share(8, 10, "role") and not share(1, 10, "role")
+    assert share(1, 3, "role") and share(2, 3, "role") and share(10, 10, "role")
+    assert not share(9, 10, "role") and not share(9, 3, "trait")     # 9: rejected, unknown text
+

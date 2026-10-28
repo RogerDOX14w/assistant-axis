@@ -320,9 +320,9 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
     marks).  **Decided 2026-10-28** (Roger), after drafts 6 to 9 and the judge comparison
     ([judge_comparison/](./judge_comparison/)): roles are judged by gpt-5.6-luna under **prompt version 10**,
     version 8's decision-procedure text with a reply scored from its A/B/C answers
-    ([judge_rubrics.py](../../assistant_axis/judge_rubrics.py); `run_pipeline.sh --types roles
-    --judge-prompt-version 10 --judge-model gpt-5.6-luna --judge-save-replies`).  To be revisited on the
-    extraction's data: item 12.
+    ([judge_rubrics.py](../../assistant_axis/judge_rubrics.py); step 3's default version since that day, so
+    `run_pipeline.sh --types roles --judge-model gpt-5.6-luna --judge-save-replies`; a roles run without
+    `--judge-model gpt-5.6-luna` is refused).  To be revisited on the extraction's data: item 12.
 
 12. **Revisit version 10's "answers win" reading on the full role run** (Roger, 2026-10-28).  Where luna's
     stated score and its A/B/C answers disagree, version 10 takes the answers.  That was decided on the
@@ -339,9 +339,14 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
        merge carries it), the disagreement rate overall and per role against the experiment's 0.22% (0.05%
        changing keep or drop), and the commonest patterns.  Step 3's summary warns above 1%.
     2. Roger blind-marks the responses whose keep or drop the reading changed (all of them if about a
-       hundred or fewer, else a sample stratified by role and pattern), shown without either score, on a
-       sheet like [reader_check_v7](./judge_comparison/reader_check_v7/)'s, to see whether the answers or
-       the stated score was right.
+       hundred or fewer, else a sample stratified by role and pattern), shown without either score, by the
+       readers' criteria ([criteria.md](./judge_comparison/reader_check_v6/criteria.md), Roger's rulings
+       through 2026-10-28 included), on a sheet built like
+       [reader_check_v7](./judge_comparison/reader_check_v7/)'s
+       ([build_v8.py](./judge_comparison/reader_check_v7/build_v8.py) and
+       [roger_sheet.py](./judge_comparison/reader_check_v7/roger_sheet.py) write the sheets and their keys,
+       [tally.py](./judge_comparison/reader_check_v7/tally.py) reads the marks), to see whether the answers
+       or the stated score was right.  A new builder reads the disagreement log in place of a judge cell.
     3. The role vectors both ways on the same activations: the stated-score reading's score files are
        version 10's with each logged key set back to its `stated` score (a key with no stated score
        dropped), or, with the replies saved, `3_judge.py --prompt_version 8 --reread_replies

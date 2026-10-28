@@ -1106,12 +1106,19 @@ distinguishable from records produced under the new rubric.
 **Pipeline step 3's rubrics are versioned (Roger, 2026-10-23)** in
 [`assistant_axis/judge_rubrics.py`](assistant_axis/judge_rubrics.py):
 `3_judge.py --prompt_version N` (0 the original number-only rubrics read
-as the first integer, 3 the current ones and the default, 4 the draft
-being decided from the role rubric experiment: A1, and for altruist alone
+as the first integer, 3 the rubrics from 2026-10-12 and the default until
+2026-10-28, 4 a draft from the role rubric experiment: A1, and for altruist alone
 the philanthropist level-2 example, A8-A11 having shown that every other
 example costs the other roles data; 5 version 4 and
-a clause for helpful professional roles, a draft kept separate for
-comparison on the October extraction), and
+a clause for helpful professional roles, a draft; 6 to 8 the role rubric
+as a decision procedure, drafts; 9 rejected; **10 the default since
+2026-10-28** (Roger): version 8's role text with a reply scored from its
+A/B/C answers, the role rubric for the October extraction, roles judged by
+gpt-5.6-luna only (step 3 refuses another judge; `run_pipeline.sh
+--judge-model gpt-5.6-luna`), and version 3's rubrics for traits and
+combinations; revisit on the extraction's role data,
+[`pre_extraction_pod_todo.md`](reports/pipeline/pre_extraction_pod_todo.md)
+item 12), and
 `run_pipeline.sh --from-step 3 --judge-prompt-version N` reruns steps 3 to
 5 into `scores_v<N>/`, `vectors_v<N>/`, `axis_v<N>.pt` to compare a
 rubric's vectors on the same activations.  A change to a step-3 rubric

@@ -347,7 +347,7 @@ def test_judge_model_and_save_replies_reach_step_3(tmp_path):
     assert proc.returncode == 0, proc.stdout + proc.stderr
     judge = [c for c in calls if "3_judge.py" in c]
     assert judge and all(c.endswith("--judge_model gpt-5.6-luna --save_replies") for c in judge)
-    assert "Judge:  gpt-5.6-luna, prompt version 3" in proc.stdout
+    assert "Judge:  gpt-5.6-luna, prompt version 10" in proc.stdout
 
 
 # ---------------------------------------------------------------------------
@@ -385,12 +385,16 @@ def test_a_prompt_version_from_step_3_reruns_steps_3_to_5_into_its_own_dirs(tmp_
 
 
 def test_the_default_version_keeps_the_usual_dirs(tmp_path):
-    proc, calls = _run_full(tmp_path, None, "--judge-prompt-version", "3")
+    # 10 since 2026-10-28 (3 before); version 3 now goes to its own directories
+    proc, calls = _run_full(tmp_path, None, "--judge-prompt-version", "10")
     assert proc.returncode == 0, proc.stdout + proc.stderr
     out = tmp_path / "out" / "traits"
     [judge] = [c for c in calls if "3_judge.py" in c]
-    assert f"--output_dir {out / 'scores'} " in judge and judge.endswith("--prompt_version 3")
+    assert f"--output_dir {out / 'scores'} " in judge and judge.endswith("--prompt_version 10")
     assert any(f"--output {out / 'axis.pt'}" in c for c in calls if "5_axis.py" in c)
+    proc, calls = _run_full(tmp_path / "v3", None, "--judge-prompt-version", "3")
+    [judge] = [c for c in calls if "3_judge.py" in c]
+    assert f"/traits/scores_v3 " in judge and judge.endswith("--prompt_version 3")
     # no flag: step 3 is not told a version, and takes its own default
     proc, calls = _run_full(tmp_path / "again", None)
     assert proc.returncode == 0 and not any("--prompt_version" in c for c in calls)

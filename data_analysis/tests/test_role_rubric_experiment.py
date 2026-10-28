@@ -146,10 +146,10 @@ class TestSettings:
         src = (REPO / "pipeline" / "3_judge.py").read_text()
         assert re.search(r'"--judge_model", type=str, default="([^"]+)"', src).group(1) == exp.JUDGE_MODEL
         # Step 3's --max_tokens defaults to its prompt version's since 2026-10-23;
-        # the experiment's arms are edits of version 3, the default.
-        from assistant_axis.judge_rubrics import DEFAULT_PROMPT_VERSION, PROMPT_VERSIONS
-        assert DEFAULT_PROMPT_VERSION == 3
-        assert PROMPT_VERSIONS[DEFAULT_PROMPT_VERSION].max_tokens == exp.MAX_TOKENS
+        # the experiment's arms are edits of version 3 (the default until
+        # 2026-10-28; changed expectation: this pinned the default, then 3).
+        from assistant_axis.judge_rubrics import PROMPT_VERSIONS
+        assert PROMPT_VERSIONS[3].max_tokens == exp.MAX_TOKENS
         body = exp.request_body("hello")
         assert body == {"model": "gpt-4.1-mini", "messages": [{"role": "user", "content": "hello"}],
                         "max_completion_tokens": 200}            # no temperature: the default
@@ -209,7 +209,7 @@ class TestArms:
         j3 = exp.step3()
         for stem in exp.SAMPLE:
             baked = json.loads((ROLES / f"{stem}.json").read_text())["eval_prompt"]
-            assert j3.resolve_eval_prompt(stem, ROLES, TRAITS, "role") == baked
+            assert j3.resolve_eval_prompt(stem, ROLES, TRAITS, "role", prompt_version=3) == baked
             assert exp.arm_template("A0", baked) == baked == exp.arm_template("A0b", baked)
 
     @pytest.mark.parametrize("stem", exp.SAMPLE)

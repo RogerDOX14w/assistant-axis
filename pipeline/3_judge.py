@@ -8,14 +8,16 @@ Handles three response types (--entity_type):
 - Combined (r_/t_ prefix): a compound 0-3 eval_prompt checking both
 
 The rubrics are versioned (--prompt_version; assistant_axis/judge_rubrics.py):
-0, the original number-only rubrics; 3, the current ones (the default); 4,
+0, the original number-only rubrics; 3, the rubrics from 2026-10-12 (the
+default until 2026-10-28); 4,
 the next version, a draft; 5, version 4 and a clause for helpful professional
 roles, a draft for comparison on the October extraction; 6, the role rubric as
 an explicit decision procedure, a draft; 7, version 6 without its rule
 excluding the role reversed, a draft; 8, version 7 with its helpful-professional
 clause given its converse, a draft (9, a rejected draft, is not runnable); 10,
 version 8's text with a role reply scored from its A, B and C answers, settled
-(2026-10-28: the role rubric for the October extraction, with gpt-5.6-luna).
+and the default since 2026-10-28 (the role rubric for the October extraction,
+roles judged by gpt-5.6-luna only; traits and combinations as version 3).
 --reread_replies scores the replies a run saved (--save_replies) under another
 version's reading, with no judge calls.
 
@@ -77,8 +79,8 @@ from assistant_axis.judge import (
 )
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
 from assistant_axis.judge_rubrics import (
-    DEFAULT_PROMPT_VERSION, MIXABLE_VERSIONS, PROMPT_VERSIONS, PromptVersion, abc_answers,
-    abc_pattern, abc_score, first_integer_score, get_version,
+    DEFAULT_PROMPT_VERSION, PROMPT_VERSIONS, PromptVersion, abc_answers,
+    abc_pattern, abc_score, first_integer_score, get_version, may_share_directory,
 )
 from assistant_axis.openai_batch import OpenAIBatchRunner
 
@@ -118,7 +120,8 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #     read: exactly one ``SCORE: <int>`` marker is the answer
 #     (parse_judge_score(require_marker=True)); a reply with none or several,
 #     or cut at max_tokens (finish_reason "length"), is unparseable, never a
-#     digit of its reasoning.  Prompt text unchanged.  The default.
+#     digit of its reasoning.  Prompt text unchanged.  The default until
+#     2026-10-28.
 #   4 (draft, 2026-10-23) -- version 3 with the arms of the role rubric
 #     experiment (reports/pipeline/role_rubric_experiment/) that Roger
 #     approves; so far A1, and for altruist only the level-2 example
@@ -128,7 +131,7 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #     extraction's activations (Roger).
 #   6 to 8 (drafts, 2026-10-27 and 28) -- the role rubric as a decision
 #     procedure (A, B, C, then the score); 9 rejected, not runnable.
-#   10 (settled, 2026-10-28) -- version 8's text, a role reply scored from its
+#   10 (settled, the default since 2026-10-28) -- version 8's text, a role reply scored from its
 #     A, B and C answers (:func:`read_reply`), each disagreement with its
 #     SCORE line logged (:data:`ABC_LOG_FILENAME`).
 # Every version renders a role's rubric from its template, the role's judge
@@ -565,13 +568,16 @@ def prompt_version_conflict(output_dir: Path, prompt_version: int,
     """Why ``output_dir`` cannot take ``entity_type`` scores judged under
     ``prompt_version``, or None.  Its scores were judged under another version (other than a mix
     of versions 1-3, which send the same text and differ in how a reply was
-    read, and which step 3 has only warned about), or under another text of
+    read, and which step 3 has only warned about, or versions that send the
+    type the same rubric and read it the same way: ``may_share_directory``,
+    such as 3 and 10 for traits), or under another text of
     the same version (a draft that has changed since): step 4 would average
     responses kept by two rubrics into one vector.  Checked before any
     request, and in a dry run."""
     recorded, hashes = _recorded_versions(output_dir)
-    others = sorted(set(recorded) - {prompt_version})
-    if others and not (set(recorded) | {prompt_version}) <= MIXABLE_VERSIONS:
+    others = [v for v in sorted(set(recorded) - {prompt_version})
+              if not may_share_directory(v, prompt_version, entity_type)]
+    if others:
         return (f"{output_dir}: the scores there were judged under prompt version(s) "
                 f"{', '.join(str(v) for v in others)}, not {prompt_version}; judge version "
                 f"{prompt_version} into another --output_dir (run_pipeline.sh "
@@ -593,7 +599,7 @@ def stamp_rubric(output_dir: Path, *, entity_type: str, judge_model: str,
     its text for ``entity_type``.  Versions, hashes and models accumulate across runs into the
     same directory; score files already there with no stamp beside them
     predate stamping (version 1).  Warns when the directory mixes versions
-    (only versions 1-3 can be mixed: :func:`prompt_version_conflict`).
+    (which versions can be mixed: :func:`prompt_version_conflict`).
     ``extra`` adds fields (``--reread_replies``: where the replies came from)."""
     path = output_dir / RUBRIC_STAMP_FILENAME
     old = json.loads(path.read_text()) if path.exists() else {}
@@ -1278,13 +1284,13 @@ async def main_async():
     parser.add_argument("--prompt_version", type=int, default=DEFAULT_PROMPT_VERSION,
                         help="Rubric version (assistant_axis/judge_rubrics.py): 0, the original "
                              "number-only rubrics read as the first integer in the reply; 3, the "
-                             "current rubrics (the default); 4, the next version, a draft (version "
+                             "rubrics from 2026-10-12; 4, a draft (version "
                              "3 with the approved arms of the role rubric experiment); 5, a draft, "
                              "version 4 and a clause for helpful professional roles; 6 to 8, "
                              "drafts, the role rubric as a decision procedure; 10, version 8's "
                              "text with a role reply scored from its A, B and C answers, the role "
                              "rubric for the October extraction (roles judged by gpt-5.6-luna "
-                             "only).  A scores "
+                             "only; traits and combinations as version 3), the default.  A scores "
                              "directory holds one version: a run refuses a directory judged under "
                              "another (run_pipeline.sh --judge-prompt-version gives each version "
                              f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")
@@ -1405,7 +1411,8 @@ async def main_async():
         problem = (f"prompt version {version.number} scores a role reply from its A/B/C answers, a "
                    f"reading chosen for {', '.join(version.judges)} (abc_consistency.json: for "
                    f"gpt-4.1-mini the stated score was the right part, not its answers); judge with "
-                   f"{version.judges[0]}, or use version 8 for another judge")
+                   f"{version.judges[0]} (run_pipeline.sh --judge-model), or pass --prompt_version 8 "
+                   f"(or 3) for another judge")
     if problem:
         logger.error(f"--judge_model {args.judge_model}: {problem}")
         sys.exit(1)

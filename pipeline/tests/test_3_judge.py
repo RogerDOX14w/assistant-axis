@@ -67,7 +67,7 @@ def test_the_scripts_modules_are_the_packages():
 
 class TestJudgeDisplayForm:
     def test_rubric_version(self, judge):
-        assert judge.JUDGE_RUBRIC_VERSION == 3        # 2 -> 3: P4, 2026-10-12
+        assert judge.JUDGE_RUBRIC_VERSION == 10       # 2 -> 3: P4, 2026-10-12; 3 -> 10: 2026-10-28
         assert judge.JUDGE_LABEL_FORM == "judge-display-v1"
 
     def test_trait_prompt_uses_the_long_form_of_a_standard(self, judge):
@@ -91,7 +91,9 @@ class TestJudgeDisplayForm:
 
     def test_role_prompt_is_the_files_eval_prompt(self, judge):
         doc = json.loads((ROLES / "devils_advocate.json").read_text())
-        assert judge.resolve_eval_prompt("devils_advocate", ROLES, TRAITS, "role") == doc["eval_prompt"]
+        # the baked eval_prompt is version 3's (the default until 2026-10-28)
+        assert judge.resolve_eval_prompt("devils_advocate", ROLES, TRAITS, "role",
+                                         prompt_version=3) == doc["eval_prompt"]
         assert "**devil's advocate**" in doc["eval_prompt"]
 
     def test_traits_dir_outside_the_corpus_layout(self, judge, tmp_path):
@@ -164,7 +166,7 @@ def test_main_writes_usage_json_and_merges_on_resume(judge, monkeypatch, tmp_pat
     assert json.loads((output_dir / "patient.json").read_text()) == {
         f"pos_p0_q{q}": 3 for q in range(4)}
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
-    assert stamp["rubric_version"] == 3 and stamp["rubric_versions"] == [3]
+    assert stamp["rubric_version"] == 10 and stamp["rubric_versions"] == [10]
     assert stamp["label_form"] == "judge-display-v1" and stamp["judge_models"] == ["gpt-4.1-mini"]
 
     # Resume with two more responses: only those are judged, and the record
@@ -185,12 +187,12 @@ def test_main_writes_usage_json_and_merges_on_resume(judge, monkeypatch, tmp_pat
 def test_stamp_marks_unstamped_scores_as_version_1(judge, tmp_path, caplog):
     (tmp_path / "patient.json").write_text(json.dumps({"pos_p0_q0": 3}))
     stamp = judge.stamp_rubric(tmp_path, entity_type="trait", judge_model="gpt-4.1-mini")
-    assert stamp["rubric_versions"] == [1, 3]
-    assert "rubric versions [1, 3]" in caplog.text
+    assert stamp["rubric_versions"] == [1, 10]
+    assert "rubric versions [1, 10]" in caplog.text
     # side-cars alone do not count as scores
     fresh = tmp_path / "fresh"; fresh.mkdir()
     (fresh / "usage.json").write_text("{}")
-    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [3]
+    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [10]
 
 
 # ---------------------------------------------------------------------------
@@ -303,8 +305,9 @@ def test_batch_is_the_default_and_sends_the_real_time_request(judge, monkeypatch
     lines = client._lines("file-0")
     assert [l["custom_id"] for l in lines] == [f"patient|pos_p0_q{q}" for q in range(4)]
     body = lines[0]["body"]
-    assert body == judge.chat_request_body(body["messages"][0]["content"], "gpt-4.1-mini", 200)
-    assert "temperature" not in body and body["max_completion_tokens"] == 200  # the default (1) is not sent (B1)
+    assert body == judge.chat_request_body(body["messages"][0]["content"], "gpt-4.1-mini", 300)
+    # the default temperature (1) is not sent (B1); 300 tokens, version 10's default (200 until 2026-10-28)
+    assert "temperature" not in body and body["max_completion_tokens"] == 300
     usage = json.loads((output_dir / "usage.json").read_text())
     assert set(usage["per_model"]) == {"gpt-4.1-mini:batch"} and usage["n_calls"] == 4
     # priced at half the real-time rates
@@ -1288,9 +1291,9 @@ def test_a_directory_of_another_version_is_refused(judge, monkeypatch, tmp_path,
     _write_responses(responses_dir, "patient", 4)                    # two more to judge
     client = _client()
     with pytest.raises(SystemExit) as e:
-        _run(judge, monkeypatch, responses_dir, output_dir, client)  # the default, version 3
+        _run(judge, monkeypatch, responses_dir, output_dir, client)  # the default, version 10
     assert e.value.code == 1 and client.chat.completions.create.call_count == 0
-    assert "judged under prompt version(s) 0, not 3" in caplog.text
+    assert "judged under prompt version(s) 0, not 10" in caplog.text
 
 
 def test_a_changed_draft_is_refused(judge, monkeypatch, tmp_path, caplog):
@@ -1309,10 +1312,17 @@ def test_a_changed_draft_is_refused(judge, monkeypatch, tmp_path, caplog):
 def test_old_versions_1_to_3_may_still_mix(judge, tmp_path):
     """Versions 1-3 send the same text and differ in how a reply was read:
     a directory of unstamped (version 1) scores takes version 3 with the old
-    warning, as before 2026-10-23, but not version 0 or 4."""
+    warning, as before 2026-10-23, but not version 0, nor 4 for roles.
+    Changed expectation (2026-10-28, may_share_directory): a version that sends
+    a type version 3's rubric and reading counts as 3 for that type, so traits
+    take 4 and 10 too (their trait rubric is version 3's); before, 4 was refused
+    for traits by its number alone."""
     (tmp_path / "patient.json").write_text(json.dumps({"pos_p0_q0": 3}))
     assert judge.prompt_version_conflict(tmp_path, 3, "trait") is None
-    assert "version(s) 1, not 4" in judge.prompt_version_conflict(tmp_path, 4, "trait")
+    assert judge.prompt_version_conflict(tmp_path, 10, "trait") is None
+    assert judge.prompt_version_conflict(tmp_path, 4, "trait") is None
+    assert "version(s) 1, not 4" in judge.prompt_version_conflict(tmp_path, 4, "role")
+    assert "version(s) 1, not 10" in judge.prompt_version_conflict(tmp_path, 10, "role")
     assert "version(s) 1, not 0" in judge.prompt_version_conflict(tmp_path, 0, "trait")
     (tmp_path / "judge_rubric.json").write_text(json.dumps({"rubric_versions": [2, 3]}))
     assert judge.prompt_version_conflict(tmp_path, 3, "trait") is None   # no hash recorded: accepted
@@ -1493,7 +1503,8 @@ def test_reread_replies_refusals(judge, monkeypatch, tmp_path, caplog):
     v8, v3 = tmp_path / "scores_v8", tmp_path / "scores_v3"
     _run(judge, monkeypatch, responses_dir, v8, _client(text=IN_ROLE_REFUSAL), "--entity_type", "role",
          "--prompt_version", "8", "--save_replies")
-    _run(judge, monkeypatch, responses_dir, v3, _client(), "--entity_type", "role", "--save_replies")
+    _run(judge, monkeypatch, responses_dir, v3, _client(), "--entity_type", "role", "--prompt_version", "3",
+         "--save_replies")
     bare = tmp_path / "scores_v8_bare"
     _run(judge, monkeypatch, responses_dir, bare, _client(text=IN_ROLE_REFUSAL), "--entity_type", "role",
          "--prompt_version", "8")

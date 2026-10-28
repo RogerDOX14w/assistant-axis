@@ -27,9 +27,10 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   shows the judge display form, which for every entity of the May corpus is
   the name it was judged under), so neither would be an experiment worth
   running.
-- **3** -- the current rubric (2026-10-12, walk-through P4 / D5): version 2's
+- **3** -- the rubric from 2026-10-12 (walk-through P4 / D5): version 2's
   text, a reply read as exactly one ``SCORE: <int>`` marker, a reply cut at
-  ``max_tokens`` unparseable.  The default.
+  ``max_tokens`` unparseable.  The default until 2026-10-28; the trait and
+  combination rubrics of every later version so far.
 - **4** -- the next version, being decided from the role rubric experiment
   (``reports/pipeline/role_rubric_experiment/``): version 3 plus the edits in
   ``V4_ROLE_EDITS`` (2026-10-23: A1, "Gemma, an LLM" made model-neutral and
@@ -90,9 +91,10 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   is scored.  For gpt-4.1-mini the reverse holds (its answer lines slip, its
   score is right), so this reading is for gpt-5.6-luna (``judges``: step 3
   refuses a role run under it with another judge).  Traits and combinations
-  as version 8.  **Settled** (Roger, 2026-10-28: the role rubric and reading
-  for the October extraction), so version 8's text, which it sends, is
-  pinned too; to be revisited on the extraction's role data
+  as version 8 (and so as version 3: the same hashes).  **Settled, and the
+  default** (Roger, 2026-10-28: the role rubric and reading for the October
+  extraction), so version 8's text, which it sends, is pinned too; to be
+  revisited on the extraction's role data
   (``reports/pipeline/pre_extraction_pod_todo.md``, item 12).
 
 One number covers all three rubrics: a version may change any of the role,
@@ -112,7 +114,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Sequence, Tuple
 
 # ---------------------------------------------------------------------------
-# Version 3: the current rubrics
+# Version 3: the rubrics from 2026-10-12 (the default until 2026-10-28)
 # ---------------------------------------------------------------------------
 
 # Equal to data_analysis/regenerate_role_instructions.py's
@@ -599,7 +601,7 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                         "the April 2026 trait and combination rubrics), first-integer reading",
                      ROLE_TEMPLATE_V0, TRAIT_TEMPLATE_V0, COMBINED_TEMPLATE_V0,
                      reply_format="first_integer", max_tokens=10),
-    3: PromptVersion(3, "the current rubrics: reason first, exactly one SCORE marker "
+    3: PromptVersion(3, "the rubrics from 2026-10-12: reason first, exactly one SCORE marker "
                         "(2026-10-12)",
                      ROLE_TEMPLATE_V3, TRAIT_TEMPLATE_V3, COMBINED_TEMPLATE_V3,
                      reply_format="score_marker", max_tokens=200),
@@ -644,7 +646,9 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                       role_reply_format="abc_answers", judges=("gpt-5.6-luna",)),
 }
 
-DEFAULT_PROMPT_VERSION = 3
+#: Version 10 since 2026-10-28 (Roger): the role rubric for the October
+#: extraction, and version 3's rubrics for traits and combinations; 3 before.
+DEFAULT_PROMPT_VERSION = 10
 
 #: Versions recorded in ``judge_rubric.json`` files that this module cannot
 #: run, and why.
@@ -661,8 +665,26 @@ HISTORICAL_VERSIONS: Dict[int, str] = {
 #: Versions whose score files may share a directory: they send the same rubric
 #: text (names aside) and differ only in how a reply was read, so step 3 only
 #: warns when it finds them mixed, as it did before versions were selectable.
-#: Any other mix is refused.
+#: Versions that send an entity type the same rubric and read it the same way
+#: may share that type's directory too (:func:`may_share_directory`).  Any other
+#: mix is refused.
 MIXABLE_VERSIONS = frozenset({1, 2, 3})
+
+
+def may_share_directory(a: int, b: int, entity_type: str) -> bool:
+    """Whether scores judged under versions ``a`` and ``b`` may share one
+    ``entity_type`` scores directory: the two send that type the same rubric and
+    read its replies the same way (equal hashes: version 10's traits and
+    combinations are version 3's, so a traits directory judged under 3 takes
+    version 10), or both are in :data:`MIXABLE_VERSIONS`, a version with version
+    3's hash counting as 3.  Since 2026-10-28; before, only 1-3 could mix."""
+    def norm(v: int):
+        if v in PROMPT_VERSIONS:
+            h = PROMPT_VERSIONS[v].sha256(entity_type)
+            return 3 if h == PROMPT_VERSIONS[3].sha256(entity_type) else h
+        return v
+    x, y = norm(a), norm(b)
+    return x == y or (x in MIXABLE_VERSIONS and y in MIXABLE_VERSIONS)
 
 
 def get_version(number: int) -> PromptVersion:
