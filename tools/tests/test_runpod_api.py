@@ -155,3 +155,132 @@ def test_history_shares_levels_and_gaps(tmp_path):
     buf = io.StringIO()
     assert rp.main(["history", "--log", str(log), "--gpu", "A100"], key="unused", out=buf) == 0
     assert "4 samples" in buf.getvalue() and "2/4" in buf.getvalue()
+    assert "By GPU count: no sample records it" in buf.getvalue()
+
+
+# ---------------------------------------------------------------------------
+# Pods of 1, 2 and 4 GPUs (2026-10-28)
+# ---------------------------------------------------------------------------
+
+import re  # noqa: E402
+
+LISTING = {"data": {
+    "dataCenters": [{"id": "US-KS-2", "name": "KS", "storageSupport": True, "gpuAvailability": []},
+                    {"id": "EU-RO-1", "name": "RO", "storageSupport": False, "gpuAvailability": []}],
+    "gpuTypes": [
+        {"id": "NVIDIA A100-SXM4-80GB", "displayName": "A100 SXM", "memoryInGb": 80,
+         "lowestPrice": {"uninterruptablePrice": 1.79, "stockStatus": "Low"}},
+        {"id": "NVIDIA H100 80GB HBM3", "displayName": "H100 SXM", "memoryInGb": 80,
+         "lowestPrice": {"uninterruptablePrice": 2.99, "stockStatus": "High"}},
+        {"id": "NVIDIA GeForce RTX 4090", "displayName": "RTX 4090", "memoryInGb": 24,
+         "lowestPrice": {"uninterruptablePrice": 0.69, "stockStatus": "High"}}]}}
+
+# (type id, datacenter, count) -> stockStatus; anything absent answers null.
+BY_COUNT = {("NVIDIA A100-SXM4-80GB", "US-KS-2", 1): "Low",
+            ("NVIDIA A100-SXM4-80GB", "US-KS-2", 2): "Low",
+            ("NVIDIA H100 80GB HBM3", "US-KS-2", 1): "High",
+            ("NVIDIA H100 80GB HBM3", "US-KS-2", 2): "Medium",
+            ("NVIDIA H100 80GB HBM3", "US-KS-2", 4): "Low",
+            ("NVIDIA H100 80GB HBM3", "EU-RO-1", 4): "Low"}
+
+_ALIAS = re.compile(r'(a\d+): lowestPrice\(input: \{gpuCount: (\d+), secureCloud: true, '
+                    r'dataCenterId: "([^"]+)"\}\) \{ stockStatus uninterruptablePrice \}')
+
+
+class RoutingOpener:
+    """The listing for the stock query; for a per-type query, each alias
+    answered from ``stock`` (or an error for the types in ``fail``)."""
+
+    def __init__(self, stock=BY_COUNT, fail=()):
+        self.stock, self.fail, self.queries = stock, set(fail), []
+
+    def __call__(self, req, timeout):
+        q = json.loads(req.data)["query"]
+        self.queries.append(q)
+        m = re.search(r"gpuTypes\(input: \{id: (\"[^\"]*\")\}\)", q)
+        if not m:
+            return json.dumps(LISTING).encode()
+        gid = json.loads(m.group(1))
+        if gid in self.fail:
+            return json.dumps({"errors": [{"message": f"boom {KEY}"}]}).encode()
+        got = {"id": gid}
+        for a, n, dc in _ALIAS.findall(q):
+            st = self.stock.get((gid, dc, int(n)))
+            got[a] = {"stockStatus": st, "uninterruptablePrice": 1.0 if st else None}
+        return json.dumps({"data": {"gpuTypes": [got]}}).encode()
+
+
+def test_count_query_aliases_every_datacenter_and_count():
+    q, aliases = rp.count_query('A100 "SXM"', ["US-KS-2", 'bad"}id', "EU-RO-1"])
+    assert q.startswith('{ gpuTypes(input: {id: "A100 \\"SXM\\""})')
+    assert sorted(aliases.values()) == sorted((dc, n) for dc in ("US-KS-2", "EU-RO-1")
+                                              for n in (1, 2, 4))
+    assert len(_ALIAS.findall(q)) == 6 and "bad" not in q     # an odd id is left out
+
+
+def test_stock_shows_pods_of_1_2_and_4_gpus():
+    fake = RoutingOpener()
+    buf = io.StringIO()
+    assert rp.main(["stock"], opener=fake, key=KEY, out=buf) == 0
+    text = buf.getvalue()
+    # one listing request, then one per kept type (A100 SXM, H100 SXM; not the RTX)
+    per_type = [q for q in fake.queries if "gpuTypes(input:" in q]
+    assert len(fake.queries) == 3 and len(per_type) == 2
+    assert not any("RTX" in q for q in per_type)
+    assert all(len(_ALIAS.findall(q)) == 6 for q in per_type)
+    assert "pods of 1x, 2x, 4x GPUs" in text and "2 GPU types asked" in text
+    by_dc = {tuple(line.split()[:3]): line.split()[3:] for line in text.splitlines()
+             if line.startswith(("A100 SXM", "H100 SXM")) and "-" in line}
+    assert by_dc[("H100", "SXM", "US-KS-2")] == ["True", "High", "Medium", "Low"]
+    assert by_dc[("A100", "SXM", "US-KS-2")] == ["True", "Low", "Low"]      # no 4x: blank
+    assert by_dc[("H100", "SXM", "EU-RO-1")] == ["False", "Low"]           # 4x only
+    assert KEY not in text
+    _, text2, _ = run(["stock", "--volumes-only"], LISTING)
+    assert "EU-RO-1" not in text2
+
+
+def test_record_and_history_by_count(tmp_path):
+    log = tmp_path / "stock.jsonl"
+    old = _sample("2026-10-22T20:00:00+00:00", ["A100 SXM"])           # the 1x-only form
+    log.write_text(json.dumps(old) + "\n")
+    rp.record_stock(log, KEY, opener=RoutingOpener(), now="2026-10-28T20:00:00+00:00")
+    gone = dict(BY_COUNT)
+    del gone[("NVIDIA H100 80GB HBM3", "US-KS-2", 4)]
+    rp.record_stock(log, KEY, opener=RoutingOpener(gone), now="2026-10-28T20:15:00+00:00")
+    rp.record_stock(log, KEY, opener=RoutingOpener(fail={"NVIDIA H100 80GB HBM3"}),
+                    now="2026-10-28T20:30:00+00:00")
+    samples = [json.loads(x) for x in log.read_text().splitlines()]
+    bc = samples[1]["by_count"]
+    assert bc["counts"] == [1, 2, 4] and bc["gpus"] == ["A100 SXM", "H100 SXM"]
+    assert bc["datacenters"] == ["US-KS-2", "EU-RO-1"] and bc["errors"] == []
+    assert {(e["gpu"], e["datacenter"], e["count"]) for e in bc["in_stock"]} == {
+        ("A100 SXM", "US-KS-2", 1), ("A100 SXM", "US-KS-2", 2), ("H100 SXM", "US-KS-2", 1),
+        ("H100 SXM", "US-KS-2", 2), ("H100 SXM", "US-KS-2", 4), ("H100 SXM", "EU-RO-1", 4)}
+    # a type whose request failed: under errors, not asked, and never the key
+    failed = samples[3]["by_count"]
+    assert failed["gpus"] == ["A100 SXM"] and failed["errors"][0]["gpu"] == "H100 SXM"
+    assert KEY not in log.read_text()
+
+    rows = {(r["gpu"], r["datacenter"], r["count"]): r
+            for r in rp.stock_history_by_count(samples, ["H100", "A100"], False)}
+    h4 = rows[("H100 SXM", "US-KS-2", "4x")]
+    assert h4["in_stock"] == "1/2" and h4["share"] == 0.5 and h4["longest_gap_samples"] == 1
+    assert rows[("H100 SXM", "EU-RO-1", "4x")]["in_stock"] == "2/2"
+    assert rows[("A100 SXM", "US-KS-2", "2x")]["in_stock"] == "3/3"
+    assert ("A100 SXM", "US-KS-2", "4x") not in rows                 # never in stock
+    vol = rp.stock_history_by_count(samples, ["H100"], True)
+    assert {r["datacenter"] for r in vol} == {"US-KS-2"}
+
+    buf = io.StringIO()
+    assert rp.main(["history", "--log", str(log), "--gpu", "H100"], key="unused", out=buf) == 0
+    text = buf.getvalue()
+    assert "4 samples" in text and "3 of 4 samples record it" in text and "1/2" in text
+
+
+def test_record_cli_reports_the_counts(tmp_path):
+    buf = io.StringIO()
+    log = tmp_path / "s.jsonl"
+    assert rp.main(["record", "--log", str(log), "--gpu", "H100"], opener=RoutingOpener(),
+                   key=KEY, out=buf) == 0
+    assert "4 (datacenter, type, count) of 1 types asked at 1x/2x/4x" in buf.getvalue()
+    assert json.loads(log.read_text())["by_count"]["gpus"] == ["H100 SXM"]
