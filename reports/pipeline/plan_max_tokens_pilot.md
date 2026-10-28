@@ -33,11 +33,11 @@ The list is generated once by the builder, [`cap_pilot_entities.py`](../../tools
 
 ## 4. Runs
 
-One output root per cap, all on the pod's local disk (not `/workspace`), under one pilot root, e.g. `/local/cap_pilot/cap{256,512,768,1024}/`.  For each cap, from `pipeline/`:
+One output root per cap on the pod's **network volume** (updated 2026-10-28: Roger's ruling since the first October pods is that outputs go on the volume, not the container disk; a fresh volume of about 1 TB, the activations below, in whatever data center has a multi-GPU pod in stock at launch), under one pilot root, e.g. `/workspace/cap_pilot/cap{256,512,768,1024}/`.  For each cap, from `pipeline/`:
 
 ```
 E=../reports/pipeline/cap_pilot_entities.json
-OUT=/local/cap_pilot/cap<CAP>
+OUT=/workspace/cap_pilot/cap<CAP>
 uv run 1_generate.py --model Qwen/Qwen3-32B --mode roger --roles_only \
     --roles $(jq -r '.by_type.role[]' $E) --max_tokens <CAP> --output_dir $OUT/responses
 uv run 1_generate.py --model Qwen/Qwen3-32B --mode roger --non_goal_count 54 \
@@ -45,7 +45,10 @@ uv run 1_generate.py --model Qwen/Qwen3-32B --mode roger --non_goal_count 54 \
     --max_tokens <CAP> --output_dir $OUT/responses
 uv run 2_activations.py --model Qwen/Qwen3-32B --responses_dir $OUT/responses \
     --output_dir $OUT/activations --max_length 2048
-for T in role trait combination; do
+uv run 3_judge.py --entity_type role --roles $(jq -r '.by_type.role[]' $E) \
+    --judge_model gpt-5.6-luna --save_replies \
+    --responses_dir $OUT/responses --output_dir $OUT/scores
+for T in trait combination; do
   uv run 3_judge.py --entity_type $T --roles $(jq -r ".by_type.$T[]" $E) \
       --responses_dir $OUT/responses --output_dir $OUT/scores
 done
@@ -53,7 +56,9 @@ uv run 4_vectors.py --activations_dir $OUT/activations --scores_dir $OUT/scores 
     --output_dir $OUT/vectors --min_count 30
 ```
 
-(Corrected 2026-10-12 by the pipeline fix batch, when the list was built: standalone roles are generated only with `--roles_only`, so step 1 runs twice; step 3 runs once per entity type with that type's names; `--min_count 30` is the driver's roger-mode value.  `--roles` filters the work items by output name in every mode since 2026-10-12; `--max_length 2048` holds a 1024-token response plus its prompt.  The list holds no name that is both a role and a trait, so one responses directory per cap can hold all three types.)  Step 3 goes by batch, the default.  Activations (64 × 4 × 2.6 GB ≈ 670 GB) stay on the pod's volume, which is discarded at the end (Roger, 2026-10-13: deleting them saves nothing on RunPod); responses, scores and vectors (small) come back to the repo under [`roger/cap_pilot/`](../../roger/cap_pilot/) (not there yet; `roger/` is git-ignored).
+(Judges, 2026-10-28: step 3's default prompt version is 10, settled for roles on that day, which judges roles with gpt-5.6-luna, `--judge_model gpt-5.6-luna`, and scores a reply from its A/B/C answers; its trait and combination rubrics are version 3's text, hash-identical, judged by the default gpt-4.1-mini while the trait rubric is still being worked on.  One `scores/` directory can hold all three types: step 3's version check is per entity type.)
+
+(Corrected 2026-10-12 by the pipeline fix batch, when the list was built: standalone roles are generated only with `--roles_only`, so step 1 runs twice; step 3 runs once per entity type with that type's names; `--min_count 30` is the driver's roger-mode value.  `--roles` filters the work items by output name in every mode since 2026-10-12; `--max_length 2048` holds a 1024-token response plus its prompt.  The list holds no name that is both a role and a trait, so one responses directory per cap can hold all three types.)  Step 3 goes by batch, the default (an OpenAI batch of luna's sat unprocessed for hours on 2026-10-26, so the roles may go by `--service_tier flex` instead, priced the same).  Activations (64 × 4 × 2.6 GB ≈ 670 GB) stay on the pod's volume, which is discarded at the end (Roger, 2026-10-13: deleting them saves nothing on RunPod; 2026-10-28: where the extraction's activations are archived is decided later, and the pilot's may follow the same route); responses, scores and vectors (small) come back to the repo under [`roger/cap_pilot/`](../../roger/cap_pilot/) (not there yet; `roger/` is git-ignored).  The entity list was checked against the current goal file on 2026-10-28 (same hash, `45b79d73…`).
 
 ## 5. Measurements and the decision rule
 
@@ -77,9 +82,9 @@ Power: 64 paired entities put a standard error of about 0.002 on a mean cosine d
 
 ## 6. Cost — to be confirmed by Roger before launch
 
-- **Pod time:** step 1 at the April pace is ~2 min per entity at 512 and scales with the cap, so 64 × (0.5 + 1 + 1.5 + 2) × 2 min ≈ **10.7 GPU-hours**; step 2 scales the same way at roughly half, ≈ **5 GPU-hours**; total ≈ **16 GPU-hours**, over the 13 GPU-hour line in CLAUDE.md.  Parameters that differ from the defaults: `--max_tokens` 256/768/1024 (default 512), the entity filter `--roles` (default: all).  Everything else at the pipeline defaults.
-- **Judge:** 64 × 4 × 500 = 128,000 calls at gpt-4.1-mini batch rates, ≈ **$25**, under the $20-per-invocation line per cap run (four runs of ≈ $6).  Real time would be ≈ $50; batch, as the default.
-- Disk on the pod: ≈ 670 GB of activations transiently; ≈ 1 GB returned.
+- **Pod time** (re-estimated 2026-10-28 from the October pods; the April-pace figure was 16 GPU-hours): on `roger-aa-2` (1× A100 SXM, 2026-10-22) step 1 took 280 s per entity at 512 and step 2 175 s.  Both scale with the cap, so 64 × (0.5 + 1 + 1.5 + 2) × (280 + 175) s ≈ **40 GPU-hours**, over the 13 GPU-hour line in CLAUDE.md: about $72 on A100 SXM at $1.79/h, about 10 h of wall time on a 4-GPU pod (one worker per GPU, tensor-parallel 1, the driver's default).  Parameters that differ from the defaults: `--max_tokens` 256/768/1024 (default 512), the entity filter `--roles` (default: all).  Everything else at the pipeline defaults.
+- **Judge:** 64 × 4 × 500 = 128,000 calls, the 40,000 role calls at gpt-5.6-luna's rates ($0.20 / $1.20 per million tokens, half of gpt-4.1-mini's input rate, with longer A/B/C replies) and the rest at gpt-4.1-mini batch rates, ≈ **$25**, under the $20-per-invocation line per cap run (four runs of ≈ $6).  Real time would be ≈ $50; batch, as the default.
+- Disk: ≈ 670 GB of activations on the volume (a 1 TB volume, about $70 a month while it exists); ≈ 1 GB returned.
 
 Halving the entity count to 32 keeps the paired design (standard errors ×1.4) at half the pod time, if 16 GPU-hours is more than this question deserves.
 
