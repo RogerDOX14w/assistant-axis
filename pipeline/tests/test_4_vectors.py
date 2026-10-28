@@ -361,3 +361,79 @@ def test_the_default_mean_is_float32(step4, dirs):
     _write_entity(dirs, "default", None, {"default_p0_q0": 2.0, "default_p0_q1": 4.0})
     assert _main(step4, dirs) == 0
     assert _load(dirs["vec"] / "default.pt")["vector"].dtype == torch.float32
+
+
+# ---------------------------------------------------------------------------
+# --all_responses (the cap pilot's selection-only measure, 2026-10-28): the
+# mean over every response, no score file.
+# ---------------------------------------------------------------------------
+
+def _main_all(step4, dirs, *extra, min_count=2):
+    return step4.main(["--activations_dir", str(dirs["act"]), "--all_responses",
+                       "--output_dir", str(dirs["vec"]), "--min_count", str(min_count), *extra])
+
+
+def test_all_responses_averages_every_response_without_scores(step4, dirs):
+    values = {"pos_p0_q0": 1.0, "pos_p0_q1": 3.0, "pos_p1_q0": 100.0}
+    # A scores file beside it is not read: score 0 everywhere changes nothing.
+    _write_entity(dirs, "pirate", {k: 0 for k in values}, values, nan_keys={"pos_p0_q0"})
+    assert _main_all(step4, dirs) == 0
+    out = _load(dirs["vec"] / "pirate.pt")
+    v = out["vector"]
+    assert v.dtype == torch.float32 and v.shape == (N_SLOTS, N_LAYERS, HIDDEN)
+    assert torch.allclose(v[0], torch.full((N_LAYERS, HIDDEN), (1 + 3 + 100) / 3))
+    assert torch.allclose(v[1], torch.full((N_LAYERS, HIDDEN), (3 + 100) / 2))   # nanmean
+    # Not "mean", which step 5 takes for the default vector.
+    assert out["type"] == "all_responses"
+    assert out["metadata"]["all_responses"] is True and out["metadata"]["n_responses"] == 3
+    assert out["metadata"]["header_ids"] == [1, 2]                 # the activation metadata kept
+    assert out["inputs"]["all_responses"] is True and out["inputs"]["n_responses"] == 3
+    assert "scores_file" not in out["inputs"]
+
+
+def test_all_responses_equals_the_score_3_vector_when_every_response_is_3(step4, dirs, tmp_path):
+    values = {f"pos_p0_q{q}": float(q) for q in range(5)}
+    _write_entity(dirs, "pirate", {k: 3 for k in values}, values)
+    assert _main(step4, dirs) == 0
+    selected = _load(dirs["vec"] / "pirate.pt")["vector"]
+    dirs["vec"] = tmp_path / "vectors_all"
+    assert _main_all(step4, dirs) == 0
+    assert torch.equal(_load(dirs["vec"] / "pirate.pt")["vector"], selected)
+
+
+def test_all_responses_reads_min_count_as_responses(step4, dirs):
+    _write_entity(dirs, "few", None, {"pos_p0_q0": 1.0, "pos_p0_q1": 2.0})
+    _write_entity(dirs, "enough", None, {f"pos_p0_q{q}": 1.0 for q in range(3)})
+    assert _main_all(step4, dirs, min_count=3) == 0            # filtered, not failed
+    assert not (dirs["vec"] / "few.pt").exists()
+    assert _load(dirs["vec"] / "enough.pt")["inputs"]["min_count"] == 3
+
+
+def test_all_responses_refuses_a_scores_dir_and_the_normal_mode_requires_one(step4, dirs):
+    _write_entity(dirs, "pirate", None, {"pos_p0_q0": 1.0})
+    with pytest.raises(SystemExit):
+        _main_all(step4, dirs, "--scores_dir", str(dirs["scores"]))
+    with pytest.raises(SystemExit):
+        step4.main(["--activations_dir", str(dirs["act"]), "--output_dir", str(dirs["vec"])])
+    assert not (dirs["vec"] / "pirate.pt").exists()
+
+
+def test_all_responses_skips_an_existing_vector_unless_overwritten(step4, dirs):
+    import argparse
+    _write_entity(dirs, "pirate", None, {"pos_p0_q0": 1.0, "pos_p0_q1": 1.0})
+    torch.save({"vector": torch.zeros(1), "type": "old", "role": "pirate"},
+               dirs["vec"] / "pirate.pt")
+    args = argparse.Namespace(activations_dir=str(dirs["act"]), scores_dir=None,
+                              output_dir=str(dirs["vec"]), overwrite=False, all_responses=True)
+    assert step4.nothing_to_do(args) is True
+    assert _main_all(step4, dirs) == 0
+    assert _load(dirs["vec"] / "pirate.pt")["type"] == "old"
+    assert _main_all(step4, dirs, "--overwrite") == 0
+    assert _load(dirs["vec"] / "pirate.pt")["type"] == "all_responses"
+
+
+def test_all_responses_keeps_default_a_mean(step4, dirs):
+    _write_entity(dirs, "default", None, {"default_p0_q0": 2.0, "default_p0_q1": 4.0})
+    assert _main_all(step4, dirs) == 0
+    d = _load(dirs["vec"] / "default.pt")
+    assert d["type"] == "mean" and d["metadata"]["all_responses"] is True

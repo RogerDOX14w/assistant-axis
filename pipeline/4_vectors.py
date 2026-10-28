@@ -21,6 +21,17 @@ Usage (from pipeline/):
     # overwritten; entities with no vector are computed anyway):
     uv run 4_vectors.py ... --overwrite vectors/missing_vectors_rerun.txt
 
+    # the mean over every response, no score file (the cap pilot's
+    # selection-only measure, 2026-10-28); --scores_dir is refused with it:
+    uv run 4_vectors.py --activations_dir ... --all_responses --output_dir .../vectors_all
+
+With ``--all_responses`` every entity's vector is the mean of all its
+activations (type ``all_responses``; ``default`` keeps ``mean``), at least
+--min_count of them, and an existing vector is skipped unless overwritten (no
+scores, so nothing can make it stale).  The vector records
+``"all_responses": true`` and ``n_responses`` in its ``metadata`` and its
+``inputs``.
+
 Recompute rule (walk-through P2, 2026-10-12): an existing vector is skipped
 unless it is stale, i.e. its recorded ``inputs.scores_file.sha256`` differs
 from the scores file on disk now (a vector made while step 3 was still
@@ -74,9 +85,20 @@ def _setup_logging() -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Compute per-role vectors")
     parser.add_argument("--activations_dir", type=str, required=True, help="Directory with activation .pt files")
-    parser.add_argument("--scores_dir", type=str, required=True, help="Directory with score JSON files")
+    parser.add_argument("--scores_dir", type=str, default=None,
+                        help="Directory with score JSON files (required, except with --all_responses, "
+                             "which refuses it)")
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for vector .pt files")
-    parser.add_argument("--min_count", type=int, default=50, help="Minimum score=3 samples required")
+    parser.add_argument("--min_count", type=int, default=50,
+                        help="Minimum score=3 samples required (with --all_responses: minimum "
+                             "responses)")
+    parser.add_argument("--all_responses", action="store_true",
+                        help="Each entity's vector is the mean over every response in its "
+                             "activation file, with no score file (the cap pilot's selection-only "
+                             "measure, 2026-10-28); type 'all_responses' ('mean' for default), "
+                             "'all_responses': true and n_responses in the vector's metadata.  "
+                             "Write them to their own --output_dir (vectors_all/); never beside "
+                             "the score-3 vectors")
     parser.add_argument("--overwrite", nargs="?", const=True, default=False, metavar="RERUN_LIST",
                         help="Overwrite existing output files.  With a file argument (one entity "
                              "name per line, e.g. a scan's missing_vectors_rerun.txt) only those "
@@ -85,6 +107,17 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Take only activations with q_idx %% N == 0 (default 1 = no reduction). "
                              "Compounds with any reduction already done at step 1.")
     return parser
+
+
+def check_args(parser: argparse.ArgumentParser, args) -> None:
+    """``--scores_dir`` is required, except with ``--all_responses``, which
+    refuses it (a score file there would mean nothing: no response is
+    filtered)."""
+    if getattr(args, "all_responses", False):
+        if args.scores_dir is not None:
+            parser.error("--all_responses averages every response and takes no --scores_dir")
+    elif args.scores_dir is None:
+        parser.error("--scores_dir is required (unless --all_responses)")
 
 
 def is_default_entity(name: str) -> bool:
@@ -135,14 +168,20 @@ def nothing_to_do(args) -> bool:
     if args.overwrite:
         return False
     acts = sorted(Path(args.activations_dir).glob("*.pt"))
-    out, scores = Path(args.output_dir), Path(args.scores_dir)
+    out = Path(args.output_dir)
+    # --all_responses: no scores, so an existing vector is never stale.
+    scores = (None if getattr(args, "all_responses", False) or args.scores_dir is None
+              else Path(args.scores_dir))
     return bool(acts) and not any(
-        needs_work(a, out / a.name, False, scores / f"{a.stem}.json") for a in acts)
+        needs_work(a, out / a.name, False, scores / f"{a.stem}.json" if scores else None)
+        for a in acts)
 
 
 if __name__ == "__main__":
     _setup_logging()
-    _early = build_parser().parse_args()
+    _early_parser = build_parser()
+    _early = _early_parser.parse_args()
+    check_args(_early_parser, _early)
     if nothing_to_do(_early):
         logger.info("Nothing to do: every activation file in %s has a vector in %s "
                     "(or is a 0-byte placeholder)", _early.activations_dir, _early.output_dir)
@@ -340,12 +379,14 @@ def read_overwrite_list(path: Path) -> set[str]:
     return names
 
 
-def process_entity(act_file: Path, output_file: Path, scores_dir: Path, *,
-                   min_count: int, reduce_questions: int) -> str:
+def process_entity(act_file: Path, output_file: Path, scores_dir: Path | None, *,
+                   min_count: int, reduce_questions: int, all_responses: bool = False) -> str:
     """Compute and save one entity's vector.  Returns ``"ok"``,
     ``"filtered"`` (fewer than ``min_count`` usable samples, or no scores
     file: a legitimate skip) or ``"failed"`` (an I/O or data error; the
-    reason is logged at ERROR)."""
+    reason is logged at ERROR).  With ``all_responses`` (``--all_responses``)
+    the vector is the mean over every response, at least ``min_count`` of
+    them, and ``scores_dir`` is not read."""
     role = act_file.stem
     if not act_file.exists():
         # Listed a moment ago and gone now (a cleanup running beside step 4,
@@ -376,8 +417,19 @@ def process_entity(act_file: Path, output_file: Path, scores_dir: Path, *,
         "vector_dtype": "float32",
         "accumulation": "float64",
     }
+    n_responses = None
     try:
-        if is_default_entity(role):
+        if all_responses:
+            # The cap pilot's selection-only measure: no score filter at all.
+            # Not "mean" for the others, which step 5 would take for default.
+            n_responses = sum(1 for k in activations if _keep_by_reduce(k, reduce_questions))
+            if n_responses < max(min_count, 1):
+                raise BelowMinCount(f"Only {n_responses} responses, need {min_count}")
+            vector = compute_mean_vector(activations, reduce_questions)
+            vector_type = "mean" if is_default_entity(role) else "all_responses"
+            inputs["all_responses"] = True
+            inputs["n_responses"] = n_responses
+        elif is_default_entity(role):
             # Default role: use all activations (no score filtering)
             vector = compute_mean_vector(activations, reduce_questions)
             vector_type = "mean"
@@ -429,7 +481,12 @@ def process_entity(act_file: Path, output_file: Path, scores_dir: Path, *,
         # "metadata", which step 5 copies into the axis from the first file.
         "inputs": inputs,
     }
-    if act_metadata:
+    if all_responses:
+        # In "metadata" too (2026-10-28, the cap pilot's brief), so that an axis
+        # made from these vectors says what they were.
+        save_data["metadata"] = {**act_metadata, "all_responses": True,
+                                 "n_responses": n_responses}
+    elif act_metadata:
         save_data["metadata"] = act_metadata
 
     # Atomic save with project-standard retry: TMPDIR staging + retry/backoff
@@ -448,13 +505,16 @@ def main(argv=None) -> int:
     _setup_logging()
     parser = build_parser()
     args = parser.parse_args(argv)
+    check_args(parser, args)
 
     # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     activations_dir = Path(args.activations_dir)
-    scores_dir = Path(args.scores_dir)
+    scores_dir = None if args.all_responses else Path(args.scores_dir)
+    if args.all_responses:
+        print("--all_responses: each vector is the mean over every response (no scores)")
 
     # Get all activation files
     activation_files = sorted(activations_dir.glob("*.pt"))
@@ -490,7 +550,7 @@ def main(argv=None) -> int:
         # vector computed while step 3 was still collecting batches).
         stale = False
         if output_file.exists() and not overwrite:
-            if is_default_entity(role):
+            if is_default_entity(role) or args.all_responses:
                 counts["skipped"] += 1
                 continue
             stale, recorded, current = vector_is_stale(output_file, scores_dir / f"{role}.json")
@@ -515,7 +575,8 @@ def main(argv=None) -> int:
 
         status = process_entity(act_file, output_file, scores_dir,
                                 min_count=args.min_count,
-                                reduce_questions=args.reduce_questions)
+                                reduce_questions=args.reduce_questions,
+                                all_responses=args.all_responses)
         counts[status] += 1
         if status == "failed":
             failed_names.append(role)
