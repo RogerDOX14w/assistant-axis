@@ -33,7 +33,7 @@ The list is generated once by the builder, [`cap_pilot_entities.py`](../../tools
 
 ## 4. Runs
 
-One output root per cap on the pod's **network volume** (updated 2026-10-28: Roger's ruling since the first October pods is that outputs go on the volume, not the container disk; a fresh volume of about 1 TB, the activations below, in whatever data center has a multi-GPU pod in stock at launch), under one pilot root, e.g. `/workspace/cap_pilot/cap{256,512,768,1024}/`.  For each cap, from `pipeline/`:
+One output root per cap on the pod's **network volume** (updated 2026-10-28: Roger's ruling since the first October pods is that outputs go on the volume, not the container disk; about 1 TB for the activations below; Roger, 2026-10-28: stay in one data center rather than create and later delete a volume elsewhere, so `Roger_AA_1` in US-KS-2 enlarged, with 1× A100 for the smoke test and 2× once it has passed, unless the wait for a pod there is long), under one pilot root, e.g. `/workspace/cap_pilot/cap{256,512,768,1024}/`.  For each cap, from `pipeline/`:
 
 ```
 E=../reports/pipeline/cap_pilot_entities.json
@@ -46,10 +46,11 @@ uv run 1_generate.py --model Qwen/Qwen3-32B --mode roger --non_goal_count 54 \
 uv run 2_activations.py --model Qwen/Qwen3-32B --responses_dir $OUT/responses \
     --output_dir $OUT/activations --max_length 2048
 uv run 3_judge.py --entity_type role --roles $(jq -r '.by_type.role[]' $E) \
-    --judge_model gpt-5.6-luna --save_replies \
+    --judge_model gpt-5.6-luna --save_replies --no_batch --service_tier flex \
     --responses_dir $OUT/responses --output_dir $OUT/scores
 for T in trait combination; do
   uv run 3_judge.py --entity_type $T --roles $(jq -r ".by_type.$T[]" $E) \
+      --no_batch --service_tier flex \
       --responses_dir $OUT/responses --output_dir $OUT/scores
 done
 uv run 4_vectors.py --activations_dir $OUT/activations --scores_dir $OUT/scores \
@@ -58,7 +59,7 @@ uv run 4_vectors.py --activations_dir $OUT/activations --scores_dir $OUT/scores 
 
 (Judges, 2026-10-28: step 3's default prompt version is 10, settled for roles on that day, which judges roles with gpt-5.6-luna, `--judge_model gpt-5.6-luna`, and scores a reply from its A/B/C answers; its trait and combination rubrics are version 3's text, hash-identical, judged by the default gpt-4.1-mini while the trait rubric is still being worked on.  One `scores/` directory can hold all three types: step 3's version check is per entity type.)
 
-(Corrected 2026-10-12 by the pipeline fix batch, when the list was built: standalone roles are generated only with `--roles_only`, so step 1 runs twice; step 3 runs once per entity type with that type's names; `--min_count 30` is the driver's roger-mode value.  `--roles` filters the work items by output name in every mode since 2026-10-12; `--max_length 2048` holds a 1024-token response plus its prompt.  The list holds no name that is both a role and a trait, so one responses directory per cap can hold all three types.)  Step 3 goes by batch, the default (an OpenAI batch of luna's sat unprocessed for hours on 2026-10-26, so the roles may go by `--service_tier flex` instead, priced the same).  Activations (64 × 4 × 2.6 GB ≈ 670 GB) stay on the pod's volume, which is discarded at the end (Roger, 2026-10-13: deleting them saves nothing on RunPod; 2026-10-28: where the extraction's activations are archived is decided later, and the pilot's may follow the same route); responses, scores and vectors (small) come back to the repo under [`roger/cap_pilot/`](../../roger/cap_pilot/) (not there yet; `roger/` is git-ignored).  The entity list was checked against the current goal file on 2026-10-28 (same hash, `45b79d73…`).
+(Corrected 2026-10-12 by the pipeline fix batch, when the list was built: standalone roles are generated only with `--roles_only`, so step 1 runs twice; step 3 runs once per entity type with that type's names; `--min_count 30` is the driver's roger-mode value.  `--roles` filters the work items by output name in every mode since 2026-10-12; `--max_length 2048` holds a 1024-token response plus its prompt.  The list holds no name that is both a role and a trait, so one responses directory per cap can hold all three types.)  Step 3 goes by OpenAI Flex processing with retries (`--no_batch --service_tier flex`; Roger, 2026-10-28: "flex with retries worked better than batch"; priced at batch rates; an OpenAI batch of luna's sat unprocessed for hours on 2026-10-26).  Activations (64 × 4 × 2.6 GB ≈ 670 GB) stay on the pod's volume, which is discarded at the end (Roger, 2026-10-13: deleting them saves nothing on RunPod; 2026-10-28: where the extraction's activations are archived is decided later, and the pilot's may follow the same route); responses, scores and vectors (small) come back to the repo under [`roger/cap_pilot/`](../../roger/cap_pilot/) (not there yet; `roger/` is git-ignored).  The entity list was checked against the current goal file on 2026-10-28 (same hash, `45b79d73…`).
 
 ## 5. Measurements and the decision rule
 
