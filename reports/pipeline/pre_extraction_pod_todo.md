@@ -317,4 +317,35 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
     [score_analysis.md](./role_rubric_experiment/score_analysis.md),
     [vector_analysis.md](./role_rubric_experiment/vector_analysis.md), and the blind
     [reading sheet](./role_rubric_experiment/reading_sheet/) for Roger (the plan's decision rule needs his
-    marks).  Not yet decided.
+    marks).  **Decided 2026-10-28** (Roger), after drafts 6 to 9 and the judge comparison
+    ([judge_comparison/](./judge_comparison/)): roles are judged by gpt-5.6-luna under **prompt version 10**,
+    version 8's decision-procedure text with a reply scored from its A/B/C answers
+    ([judge_rubrics.py](../../assistant_axis/judge_rubrics.py); `run_pipeline.sh --types roles
+    --judge-prompt-version 10 --judge-model gpt-5.6-luna --judge-save-replies`).  To be revisited on the
+    extraction's data: item 12.
+
+12. **Revisit version 10's "answers win" reading on the full role run** (Roger, 2026-10-28).  Where luna's
+    stated score and its A/B/C answers disagree, version 10 takes the answers.  That was decided on the
+    rubric experiment's 20,500 version 8 replies
+    ([abc_consistency.json](./judge_comparison/abc_consistency.json), from
+    [abc_consistency.py](./judge_comparison/abc_consistency.py)): 46 disagreements (0.22%), 11 changing
+    keep or drop, where the other two judges, when they agreed, sided with the answers 8 times in 9, and
+    Roger's one mark among them (a [virus](../../data/roles/instructions/virus.json) response, G) did too.
+    Scoring from the answers agreed with that reference on 39 of 42 mismatched responses, against 32 for
+    the stated score and 34 for one rejudge.  A small sample, mostly one kind of case: in-role refusals,
+    6 of the 11 from [paperclip_maximizer](../../data/roles/instructions/paperclip_maximizer.json).  Once
+    the extraction's roles are judged and their activations extracted:
+    1. From the roles' `scores/abc_disagreements.jsonl` (step 3 writes it beside the score files; the
+       merge carries it), the disagreement rate overall and per role against the experiment's 0.22% (0.05%
+       changing keep or drop), and the commonest patterns.  Step 3's summary warns above 1%.
+    2. Roger blind-marks the responses whose keep or drop the reading changed (all of them if about a
+       hundred or fewer, else a sample stratified by role and pattern), shown without either score, on a
+       sheet like [reader_check_v7](./judge_comparison/reader_check_v7/)'s, to see whether the answers or
+       the stated score was right.
+    3. The role vectors both ways on the same activations: the stated-score reading's score files are
+       version 10's with each logged key set back to its `stated` score (a key with no stated score
+       dropped), or, with the replies saved, `3_judge.py --prompt_version 8 --reread_replies
+       <scores dir>`; then step 4 on each, and the cosine per role and the axis against version 10's.
+    Then keep version 10, or go back to the stated score (version 8's reading, by the re-read above, with
+    no judge calls), or rejudge the disagreements.  Needs the roles judged with `--judge-save-replies`
+    (about 1 KB per reply), so that the replies can be read and re-read.

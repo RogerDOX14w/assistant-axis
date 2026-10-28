@@ -88,8 +88,12 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   SCORE line is read only when the answers cannot be (one missing, or one
   answered both ways); a reply that answers all three and gives no SCORE line
   is scored.  For gpt-4.1-mini the reverse holds (its answer lines slip, its
-  score is right), so this reading is for gpt-5.6-luna.  Traits and
-  combinations as version 8.  A draft.
+  score is right), so this reading is for gpt-5.6-luna (``judges``: step 3
+  refuses a role run under it with another judge).  Traits and combinations
+  as version 8.  **Settled** (Roger, 2026-10-28: the role rubric and reading
+  for the October extraction), so version 8's text, which it sends, is
+  pinned too; to be revisited on the extraction's role data
+  (``reports/pipeline/pre_extraction_pod_todo.md``, item 12).
 
 One number covers all three rubrics: a version may change any of the role,
 trait and combination rubrics and leave the others as they were
@@ -456,6 +460,8 @@ V8_PROFESSIONAL_CLAUSE = (
     "of the kind a human assistant would give is out of character, then such an answer does not count "
     "as C.")
 _V8_EDITS = ((V7_PROFESSIONAL_CLAUSE, V8_PROFESSIONAL_CLAUSE, 1),)
+# Version 10 (settled) sends this text: an edit to it, or to versions 6 and 7
+# it is built from, changes version 10 and fails its pinned hash.
 ROLE_TEMPLATE_V8 = apply_edits(ROLE_TEMPLATE_V7, _V8_EDITS, what="role rubric v8")
 V8_ROLE_OVERRIDES: Dict[str, str] = {
     stem: apply_edits(tpl, _V8_EDITS, what=f"role rubric v8, {stem}") for stem, tpl in V7_ROLE_OVERRIDES.items()}
@@ -540,6 +546,9 @@ class PromptVersion:
     #: How a role reply is read when that differs from ``reply_format``
     #: (version 10: ``"abc_answers"``).
     role_reply_format: Optional[str] = None
+    #: The judge models the version's role reading was chosen for (version
+    #: 10: gpt-5.6-luna); step 3 refuses a role run under it with another.
+    judges: Tuple[str, ...] = ()
 
     def role_template(self, stem: str) -> str:
         """The role rubric template for the role ``stem``."""
@@ -625,13 +634,14 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V8, COMBINED_TEMPLATE_V8,
                      reply_format="score_marker", max_tokens=300, draft=True,
                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items()))),
-    10: PromptVersion(10, "draft: version 8's text, a role reply scored from its A, B and C answers "
-                          "by the rubric's table, the SCORE line only when the answers cannot be read "
-                          "(Roger, 2026-10-28; for gpt-5.6-luna, whose stated score was the wrong part)",
+    10: PromptVersion(10, "version 8's text, a role reply scored from its A, B and C answers by the "
+                          "rubric's table, the SCORE line only when the answers cannot be read (Roger, "
+                          "2026-10-28; the role rubric for the October extraction, judged by "
+                          "gpt-5.6-luna, whose stated score was the wrong part)",
                       ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V8, COMBINED_TEMPLATE_V8,
-                      reply_format="score_marker", max_tokens=300, draft=True,
+                      reply_format="score_marker", max_tokens=300,
                       role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
-                      role_reply_format="abc_answers"),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",)),
 }
 
 DEFAULT_PROMPT_VERSION = 3

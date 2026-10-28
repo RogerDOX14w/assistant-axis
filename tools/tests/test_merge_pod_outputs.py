@@ -162,3 +162,38 @@ def test_expected_counts(tmp_path, pods, capsys):
 def test_an_existing_destination_is_refused(tmp_path, pods):
     (tmp_path / "merged").mkdir()
     assert _merge(tmp_path, pods) == 1
+
+
+def test_version_10_logs_replies_and_rubric_hashes_are_carried(tmp_path, pods):
+    """The October role judging (2026-10-28): version 10's disagreement log and
+    the saved replies reach the merged tree, and the rubric stamp keeps the hash
+    and the reply format (--reread_replies and step 3's version check need them)."""
+    s = pods["roles"] / "roles" / "scores"
+    (s / "judge_rubric.json").write_text(json.dumps(
+        {"rubric_version": 10, "rubric_versions": [10], "judge_models": ["gpt-5.6-luna"],
+         "entity_type": "role", "label_form": "judge-display-v1", "script": "pipeline/3_judge.py",
+         "prompt_sha256": {"10": "c19e859a53c91d5e"}, "reply_format": "abc_answers"}))
+    row = {"entity": "pirate", "key": "pos_p0_q1", "answers": "AnBnCy", "stated": 2, "score": 3,
+           "keep_changed": True}
+    (s / "abc_disagreements.jsonl").write_text(json.dumps(row) + "\n")
+    (s / "_replies").mkdir()
+    (s / "_replies" / "pirate.jsonl").write_text(json.dumps({"key": "pos_p0_q1", "score": 3,
+                                                               "reply": "A: no"}) + "\n")
+    assert _merge(tmp_path, pods) == 0
+    m = tmp_path / "merged" / "roles" / "scores"
+    assert [json.loads(l) for l in (m / "abc_disagreements.jsonl").read_text().splitlines()] == [row]
+    assert (m / "_replies" / "pirate.jsonl").exists() and not (m / "_replies.json").exists()
+    rb = json.loads((m / "judge_rubric.json").read_text())
+    assert rb["prompt_sha256"] == {"10": "c19e859a53c91d5e"} and rb["reply_format"] == "abc_answers"
+    rec = json.loads((tmp_path / "merged" / "MERGED.json").read_text())
+    assert rec["counts"]["roles"]["abc_disagreements"] == 1 and rec["counts"]["roles"]["replies"] == 1
+    assert not (tmp_path / "merged" / "traits" / "scores" / "abc_disagreements.jsonl").exists()
+
+
+def test_two_hashes_for_one_version_refuse_the_merge(tmp_path, pods, capsys):
+    for name, sha in (("rcomb", "aaaa"), ("tcomb", "bbbb")):
+        p = pods[name] / "combinations" / "scores" / "judge_rubric.json"
+        p.write_text(json.dumps({**json.loads(p.read_text()), "prompt_sha256": {"2": sha}}))
+    assert _merge(tmp_path, pods) == 1 and not (tmp_path / "merged").exists()
+    assert "rubric hash bbbb, another pod with aaaa" in capsys.readouterr().err
+

@@ -93,10 +93,14 @@ def test_settled_versions_are_never_edited():
     """A settled version's text is fixed: if this fails, the change belongs in
     a new version (or in the draft), not in this one.  The draft is not pinned."""
     pins = {0: {"role": "64b2f40f105169fc", "trait": "fb7b719698c5848c", "combination": "a3e0e4c381062b08"},
-            3: {"role": "15d953a9bce06828", "trait": "9b9adda764fe6d86", "combination": "bee3d69ad7a814a8"}}
+            3: {"role": "15d953a9bce06828", "trait": "9b9adda764fe6d86", "combination": "bee3d69ad7a814a8"},
+            # settled 2026-10-28; its role text is version 8's, whose hash the experiment's
+            # version 8 directories record (522fae510e0dd298)
+            10: {"role": "c19e859a53c91d5e", "trait": "9b9adda764fe6d86", "combination": "bee3d69ad7a814a8"}}
     for v, by_type in pins.items():
         assert {k: jr.PROMPT_VERSIONS[v].sha256(k) for k in by_type} == by_type
     assert jr.PROMPT_VERSIONS[4].draft and not jr.PROMPT_VERSIONS[3].draft
+    assert not jr.PROMPT_VERSIONS[10].draft and jr.PROMPT_VERSIONS[8].sha256("role") == "522fae510e0dd298"
 
 
 def test_versions_and_their_reading():
@@ -270,9 +274,11 @@ def test_altruist_alone_gets_the_philanthropist_example_from_version_4():
 
 def test_version_10_is_version_8_read_from_the_answers():
     """Roger, 2026-10-28: version 8's text, with a role reply scored from its A,
-    B and C answers; traits and combinations as version 8 in text and reading."""
+    B and C answers, for gpt-5.6-luna; traits and combinations as version 8 in text
+    and reading (and so as version 3)."""
     v8, v10 = jr.PROMPT_VERSIONS[8], jr.PROMPT_VERSIONS[10]
-    assert v10.draft and (v10.reply_format, v10.max_tokens) == ("score_marker", 300)
+    assert (v10.reply_format, v10.max_tokens) == ("score_marker", 300)
+    assert v10.judges == ("gpt-5.6-luna",) and v8.judges == ()
     assert all(v10.same_text(v8, k) for k in ("role", "trait", "combination"))
     assert not v10.same_text(jr.PROMPT_VERSIONS[7], "role") and v10.same_text(jr.PROMPT_VERSIONS[7], "trait")
     assert v10.reply_format_for("role") == "abc_answers" and v10.reply_format_for("trait") == "score_marker"

@@ -340,6 +340,16 @@ def test_judge_batch_requests_reaches_step_3(tmp_path):
     assert judge and all(c.endswith("--batch_requests 3000") for c in judge)
 
 
+def test_judge_model_and_save_replies_reach_step_3(tmp_path):
+    """The October role judging (Roger, 2026-10-28): version 10 with gpt-5.6-luna,
+    replies saved for a later re-read."""
+    proc, calls = _run_full(tmp_path, None, "--judge-model", "gpt-5.6-luna", "--judge-save-replies")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and all(c.endswith("--judge_model gpt-5.6-luna --save_replies") for c in judge)
+    assert "Judge:  gpt-5.6-luna, prompt version 3" in proc.stdout
+
+
 # ---------------------------------------------------------------------------
 # Rubric versions and --from-step (2026-10-23)
 # ---------------------------------------------------------------------------

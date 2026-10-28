@@ -14,7 +14,8 @@ roles, a draft for comparison on the October extraction; 6, the role rubric as
 an explicit decision procedure, a draft; 7, version 6 without its rule
 excluding the role reversed, a draft; 8, version 7 with its helpful-professional
 clause given its converse, a draft (9, a rejected draft, is not runnable); 10,
-version 8's text with a role reply scored from its A, B and C answers, a draft.
+version 8's text with a role reply scored from its A, B and C answers, settled
+(2026-10-28: the role rubric for the October extraction, with gpt-5.6-luna).
 --reread_replies scores the replies a run saved (--save_replies) under another
 version's reading, with no judge calls.
 
@@ -127,7 +128,7 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #     extraction's activations (Roger).
 #   6 to 8 (drafts, 2026-10-27 and 28) -- the role rubric as a decision
 #     procedure (A, B, C, then the score); 9 rejected, not runnable.
-#   10 (draft, 2026-10-28) -- version 8's text, a role reply scored from its
+#   10 (settled, 2026-10-28) -- version 8's text, a role reply scored from its
 #     A, B and C answers (:func:`read_reply`), each disagreement with its
 #     SCORE line logged (:data:`ABC_LOG_FILENAME`).
 # Every version renders a role's rubric from its template, the role's judge
@@ -1163,6 +1164,12 @@ def reread_replies(args, *, source_dir: Path, output_dir: Path) -> None:
         files = [f for f in files if f.stem in args.roles]
     if not files:
         stop(f"no saved replies in {source_dir / REPLIES_DIRNAME} (judge with --save_replies to keep them)")
+    other = sorted(set(src.get("judge_models") or []) - set(version.judges)) \
+        if args.entity_type == "role" and version.judges else []
+    if other:
+        logger.warning(f"version {version.number}'s role reading was chosen for "
+                       f"{', '.join(version.judges)}, not {', '.join(other)}, whose replies these are "
+                       f"(a re-read for comparison only)")
     logger.info(f"Re-reading {len(files)} entities' replies from {source_dir} (version "
                 f"{src_version.number}, read as {src_fmt}) under version {version.number} "
                 f"(read as {fmt}); no judge calls")
@@ -1274,9 +1281,10 @@ async def main_async():
                              "current rubrics (the default); 4, the next version, a draft (version "
                              "3 with the approved arms of the role rubric experiment); 5, a draft, "
                              "version 4 and a clause for helpful professional roles; 6 to 8, "
-                             "drafts, the role rubric as a decision procedure; 10, a draft, "
-                             "version 8's text with a role reply scored from its A, B and C "
-                             "answers (for gpt-5.6-luna).  A scores "
+                             "drafts, the role rubric as a decision procedure; 10, version 8's "
+                             "text with a role reply scored from its A, B and C answers, the role "
+                             "rubric for the October extraction (roles judged by gpt-5.6-luna "
+                             "only).  A scores "
                              "directory holds one version: a run refuses a directory judged under "
                              "another (run_pipeline.sh --judge-prompt-version gives each version "
                              f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")
@@ -1392,6 +1400,12 @@ async def main_async():
                 price_for_model(f"{args.judge_model}:{args.service_tier}")
             except KeyError as e:
                 problem = e.args[0] if e.args else f"no {args.service_tier} price"
+    if not problem and args.entity_type == "role" and version.judges \
+            and args.judge_model not in version.judges:
+        problem = (f"prompt version {version.number} scores a role reply from its A/B/C answers, a "
+                   f"reading chosen for {', '.join(version.judges)} (abc_consistency.json: for "
+                   f"gpt-4.1-mini the stated score was the right part, not its answers); judge with "
+                   f"{version.judges[0]}, or use version 8 for another judge")
     if problem:
         logger.error(f"--judge_model {args.judge_model}: {problem}")
         sys.exit(1)

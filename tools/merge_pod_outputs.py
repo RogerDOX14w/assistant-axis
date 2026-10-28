@@ -12,8 +12,13 @@ copy off the ones to keep before a volume is discarded):
   the score files and the vectors (real files; the ``default`` symlinks are
   made again), ``responses/generation_config.json`` (every pod's runs, each
   marked with its pod, after checking that the pods generated under the same
-  settings), ``scores/usage.json`` (summed over the pods, per model) and
-  ``scores/judge_rubric.json`` (versions and judge models joined);
+  settings), ``scores/usage.json`` (summed over the pods, per model),
+  ``scores/judge_rubric.json`` (versions, rubric hashes and judge models
+  joined; pods that record two hashes or reply formats for one type refuse
+  the merge), ``scores/abc_disagreements.jsonl`` (version 10's log of role
+  replies whose SCORE line disagreed with their answers; the pods' rows
+  joined) and ``scores/_replies/`` (step 3's ``--save_replies``, which
+  ``3_judge.py --reread_replies`` needs);
 * ``default/``: the default of ``--default_from`` (the first pod by
   default); the other pods' default vectors go to ``default/other_pods/``;
 * ``logs/<pod>/``: each pod's ``pipeline_*.log``;
@@ -60,6 +65,8 @@ from assistant_axis.judge_pricing import MultiModelUsage  # noqa: E402
 
 TYPES = ("roles", "traits", "combinations")
 SIDE_CARS = ("usage.json", "judge_rubric.json", "batch_state.json")
+ABC_LOG = "abc_disagreements.jsonl"     # pipeline/3_judge.py ABC_LOG_FILENAME
+REPLIES = "_replies"                    # pipeline/3_judge.py REPLIES_DIRNAME
 EXIT_SCAN = 3
 DEFAULT_MIN_COUNT = 30          # run_pipeline.sh's roger-mode MIN_COUNT
 
@@ -176,7 +183,8 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
         tdir = out / t
         usage = MultiModelUsage()
         rubric = {"rubric_versions": set(), "judge_models": set(), "entity_type": None,
-                  "label_form": None, "script": None}
+                  "label_form": None, "script": None, "prompt_sha256": {}, "reply_formats": set()}
+        abc_rows: List[str] = []
         runs = []
         c = {"responses": 0, "scores": 0, "vectors": 0, "pods": sorted(dirs)}
         for name, d in dirs.items():
@@ -191,6 +199,12 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
             for f in _real_files(d / "vectors", "*.pt"):
                 _copy(f, tdir / "vectors" / f.name)
                 c["vectors"] += 1
+            for f in _real_files(d / "scores" / REPLIES, "*.jsonl"):
+                _copy(f, tdir / "scores" / REPLIES / f.name)
+                c["replies"] = c.get("replies", 0) + 1
+            log = d / "scores" / ABC_LOG
+            if log.is_file():
+                abc_rows += [line for line in log.read_text().splitlines() if line.strip()]
             u = d / "scores" / "usage.json"
             if u.exists():
                 usage.merge_from(MultiModelUsage.load_or_create(u))
@@ -201,17 +215,31 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
                 rubric["judge_models"] |= set(r.get("judge_models", []))
                 for k in ("entity_type", "label_form", "script"):
                     rubric[k] = rubric[k] or r.get(k)
+                for v, sha in (r.get("prompt_sha256") or {}).items():
+                    if rubric["prompt_sha256"].setdefault(v, sha) != sha:
+                        raise MergeRefused(f"{t}: pod {name} judged prompt version {v} with rubric "
+                                           f"hash {sha}, another pod with {rubric['prompt_sha256'][v]}")
+                if r.get("reply_format"):
+                    rubric["reply_formats"].add(r["reply_format"])
             gc = d / "responses" / GENERATION_CONFIG_NAME
             if gc.exists():
                 runs += [{**run, "pod": name} for run in json.loads(gc.read_text()).get("runs", [])]
         (tdir / "scores").mkdir(parents=True, exist_ok=True)
         usage.write_json(tdir / "scores" / "usage.json")
+        if len(rubric["reply_formats"]) > 1:
+            raise MergeRefused(f"{t}: the pods read replies in several ways: "
+                               f"{', '.join(sorted(rubric['reply_formats']))}")
+        if abc_rows:
+            (tdir / "scores" / ABC_LOG).write_text("\n".join(abc_rows) + "\n")
+            c["abc_disagreements"] = len(abc_rows)
         if rubric["rubric_versions"]:
             versions = sorted(rubric["rubric_versions"])
             (tdir / "scores" / "judge_rubric.json").write_text(json.dumps({
                 **{k: rubric[k] for k in ("entity_type", "label_form", "script")},
                 "rubric_version": versions[-1], "rubric_versions": versions,
                 "judge_models": sorted(rubric["judge_models"]),
+                **({"prompt_sha256": rubric["prompt_sha256"]} if rubric["prompt_sha256"] else {}),
+                **({"reply_format": next(iter(rubric["reply_formats"]))} if rubric["reply_formats"] else {}),
                 "merged_from_pods": sorted(dirs)}, indent=2, sort_keys=True) + "\n")
         if runs:
             (tdir / "responses" / GENERATION_CONFIG_NAME).write_text(

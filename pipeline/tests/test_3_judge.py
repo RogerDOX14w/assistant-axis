@@ -1413,7 +1413,7 @@ def test_a_version_10_role_run_scores_from_the_answers_and_logs_the_disagreement
     client = FakeBatchClient(text=IN_ROLE_REFUSAL) if batch else _client(text=IN_ROLE_REFUSAL)
     caplog.set_level("INFO")
     _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "role",
-         "--prompt_version", "10", batch=batch)
+         "--prompt_version", "10", "--judge_model", "gpt-5.6-luna", batch=batch)
     assert json.loads((output_dir / "paperclip_maximizer.json").read_text()) == {
         f"pos_p0_q{q}": 3 for q in range(3)}
     rows = [json.loads(l) for l in (output_dir / "abc_disagreements.jsonl").read_text().splitlines()]
@@ -1421,9 +1421,25 @@ def test_a_version_10_role_run_scores_from_the_answers_and_logs_the_disagreement
                      "stated": 2, "score": 3, "keep_changed": True} for q in range(3)]
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
     assert stamp["rubric_versions"] == [10] and stamp["reply_format"] == "abc_answers"
+    assert stamp["judge_models"] == ["gpt-5.6-luna"]
     assert stamp["prompt_sha256"] == {"10": judge.PROMPT_VERSIONS[10].sha256("role")}
     assert "3 role replies scored from their A/B/C answers: 3 stated another score" in caplog.text
     assert "*** A/B/C DISAGREEMENT RATE HIGH ***" in caplog.text
+
+
+def test_a_version_10_role_run_with_another_judge_is_refused(judge, monkeypatch, tmp_path, caplog):
+    """Version 10's reading was chosen for gpt-5.6-luna: for gpt-4.1-mini the stated
+    score was the right part.  Refused before any request, in a dry run too."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores_v10"
+    _write_responses(responses_dir, "robot", 1)
+    client = _client(text=IN_ROLE_REFUSAL)
+    for extra in ((), ("--dry_run",)):
+        caplog.clear()
+        with pytest.raises(SystemExit) as e:
+            _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "role",
+                 "--prompt_version", "10", *extra)
+        assert e.value.code == 1 and "a reading chosen for gpt-5.6-luna" in caplog.text
+    assert client.chat.completions.create.call_count == 0 and not output_dir.exists()
 
 
 def test_a_version_10_trait_run_reads_the_marker(judge, monkeypatch, tmp_path):
@@ -1445,7 +1461,7 @@ def _reread(judge, monkeypatch, source, output_dir, *extra):
 
 
 @pytest.mark.parametrize("batch", [False, True])
-def test_reread_replies_rescores_a_version_8_run_without_judge_calls(judge, monkeypatch, tmp_path, batch):
+def test_reread_replies_rescores_a_version_8_run_without_judge_calls(judge, monkeypatch, tmp_path, caplog, batch):
     responses_dir, v8 = tmp_path / "responses", tmp_path / "scores_v8"
     _write_responses(responses_dir, "paperclip_maximizer", 3)
     client = FakeBatchClient(text=IN_ROLE_REFUSAL) if batch else _client(text=IN_ROLE_REFUSAL)
@@ -1455,7 +1471,9 @@ def test_reread_replies_rescores_a_version_8_run_without_judge_calls(judge, monk
     calls = client.chat.completions.create.call_count, len(getattr(client, "batches_created", []))
     monkeypatch.delenv("OPENAI_API_KEY")                       # no key needed
     v10 = tmp_path / "scores_v10"
+    caplog.set_level("INFO")
     _reread(judge, monkeypatch, v8, v10)
+    assert "chosen for gpt-5.6-luna, not gpt-4.1-mini" in caplog.text   # a warning only
     assert json.loads((v10 / "paperclip_maximizer.json").read_text()) == {
         f"pos_p0_q{q}": 3 for q in range(3)}
     assert len((v10 / "abc_disagreements.jsonl").read_text().splitlines()) == 3

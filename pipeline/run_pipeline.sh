@@ -38,6 +38,8 @@
 #                                                     # rsync or cp (assistant_axis/tmpfs.py)
 #   ./run_pipeline.sh --types roles --from-step 3 --judge-prompt-version 4
 #                                                     # steps 3-5 again under rubric 4
+#   ./run_pipeline.sh --types roles --judge-prompt-version 10 \
+#       --judge-model gpt-5.6-luna --judge-save-replies   # the October role judging
 #
 # Rubric versions (--judge-prompt-version N, 2026-10-23): step 3 judges under
 # version N of its rubrics (3_judge.py --prompt_version; 0 the original
@@ -46,7 +48,8 @@
 # rubric as a decision procedure, 7 version 6 without its reversal rule and 8
 # version 7 with its helpful-professional clause given its converse, drafts;
 # 9, a rejected draft, is not runnable; 10 version 8's text with a role reply
-# scored from its A, B and C answers, a draft, for gpt-5.6-luna).  A
+# scored from its A, B and C answers, settled, the role rubric for the October
+# extraction, roles judged by gpt-5.6-luna only: --judge-model).  A
 # version other than the default writes scores_v<N>/, vectors_v<N>/ and
 # axis_v<N>.pt beside the default's scores/, vectors/ and axis.pt, so the
 # versions can be compared on the same responses and activations; the scan
@@ -197,6 +200,7 @@ RUN_SCAN=true
 # ---- Parse command line ---------------------------------------------------
 TYPES=""
 SKIP_GPU_CHECK=false
+JUDGE_MODEL=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --mode)
@@ -231,6 +235,14 @@ while [[ $# -gt 0 ]]; do
             JUDGE_ARGS+=(--batch_requests "$2"); shift 2 ;;
         --judge-prompt-version)
             JUDGE_PROMPT_VERSION="$2"; shift 2 ;;
+        --judge-model)
+            # step 3's --judge_model (its default: gpt-4.1-mini); roles under
+            # version 10 need gpt-5.6-luna (Roger, 2026-10-28)
+            JUDGE_MODEL="$2"; JUDGE_ARGS+=(--judge_model "$2"); shift 2 ;;
+        --judge-save-replies)
+            # step 3's --save_replies: every reply beside the scores, so that a
+            # change of reading needs no rejudging (3_judge.py --reread_replies)
+            JUDGE_ARGS+=(--save_replies); shift ;;
         --from-step)
             FROM_STEP="$2"; shift 2 ;;
         --no-scan)
@@ -317,7 +329,7 @@ echo "TP size:$TENSOR_PARALLEL_SIZE"
 echo "Tmpfs:  $USE_TMPFS"
 echo "Steps 2+3: $([ "$STEPS23_PARALLEL" = "true" ] && echo "parallel (GPU+judge concurrent)" || echo "serial (--steps23serial)")"
 echo "Scan:   $([ "$RUN_SCAN" = "true" ] && echo "yes (before step 5; re-run candidates stop the run; --no-scan to skip)" || echo "no (--no-scan)")"
-echo "Judge:  prompt version ${JUDGE_PROMPT_VERSION:-$JUDGE_PROMPT_VERSION_DEFAULT} (into $SCORES_SUB/, $VECTORS_SUB/, $AXIS_NAME)"
+echo "Judge:  ${JUDGE_MODEL:-the default model}, prompt version ${JUDGE_PROMPT_VERSION:-$JUDGE_PROMPT_VERSION_DEFAULT} (into $SCORES_SUB/, $VECTORS_SUB/, $AXIS_NAME)"
 if [ "$FROM_STEP" -gt 1 ]; then
     echo "From:   step $FROM_STEP (earlier steps not run)"
 fi
