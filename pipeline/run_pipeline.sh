@@ -45,7 +45,8 @@
 # version 4 and a clause for helpful professional roles, a draft; 6 the role
 # rubric as a decision procedure, 7 version 6 without its reversal rule and 8
 # version 7 with its helpful-professional clause given its converse, drafts;
-# 9, a rejected draft, is not runnable).  A
+# 9, a rejected draft, is not runnable; 10 version 8's text with a role reply
+# scored from its A, B and C answers, a draft, for gpt-5.6-luna).  A
 # version other than the default writes scores_v<N>/, vectors_v<N>/ and
 # axis_v<N>.pt beside the default's scores/, vectors/ and axis.pt, so the
 # versions can be compared on the same responses and activations; the scan

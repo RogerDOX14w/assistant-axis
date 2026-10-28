@@ -13,7 +13,10 @@ the next version, a draft; 5, version 4 and a clause for helpful professional
 roles, a draft for comparison on the October extraction; 6, the role rubric as
 an explicit decision procedure, a draft; 7, version 6 without its rule
 excluding the role reversed, a draft; 8, version 7 with its helpful-professional
-clause given its converse, a draft (9, a rejected draft, is not runnable).
+clause given its converse, a draft (9, a rejected draft, is not runnable); 10,
+version 8's text with a role reply scored from its A, B and C answers, a draft.
+--reread_replies scores the replies a run saved (--save_replies) under another
+version's reading, with no judge calls.
 
 Scores are on a 0-3 scale:
     0: Model refused / no characteristics
@@ -73,8 +76,8 @@ from assistant_axis.judge import (
 )
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
 from assistant_axis.judge_rubrics import (
-    DEFAULT_PROMPT_VERSION, MIXABLE_VERSIONS, PROMPT_VERSIONS, PromptVersion, first_integer_score,
-    get_version,
+    DEFAULT_PROMPT_VERSION, MIXABLE_VERSIONS, PROMPT_VERSIONS, PromptVersion, abc_answers,
+    abc_pattern, abc_score, first_integer_score, get_version,
 )
 from assistant_axis.openai_batch import OpenAIBatchRunner
 
@@ -122,6 +125,11 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #   5 (draft, 2026-10-23) -- version 4 and a clause for helpful, educated
 #     professional roles, kept separate for comparison on the October
 #     extraction's activations (Roger).
+#   6 to 8 (drafts, 2026-10-27 and 28) -- the role rubric as a decision
+#     procedure (A, B, C, then the score); 9 rejected, not runnable.
+#   10 (draft, 2026-10-28) -- version 8's text, a role reply scored from its
+#     A, B and C answers (:func:`read_reply`), each disagreement with its
+#     SCORE line logged (:data:`ABC_LOG_FILENAME`).
 # Every version renders a role's rubric from its template, the role's judge
 # display name and its description; until 2026-10-23 step 3 read the
 # ``eval_prompt`` baked into the role file, which a test pins equal to the
@@ -141,40 +149,132 @@ TRAIT_EVAL_TEMPLATE = PROMPT_VERSIONS[3].trait
 # reply was not scored, counted for the end-of-run summary.
 _MARKER_RE = re.compile(r"SCORE\s*:\s*(\d+)", re.IGNORECASE)
 REPLY_PROBLEMS: Counter = Counter()
+# Version 10's role replies (reply format "abc_answers"): how many were scored
+# from their answers ("read") or, the answers unreadable, from their SCORE
+# line ("unreadable"); of the read, how many stated another score
+# ("disagreed") or none ("no_score"), and how many of those change keep or
+# drop ("keep_changed"); and the disagreements by answers and stated score.
+ABC_STATS: Counter = Counter()
+ABC_PATTERNS: Counter = Counter()
+#: Every version 10 role reply whose SCORE line disagrees with its answers (or
+#: is missing), one JSON line each, beside the scores: ``{"entity", "key",
+#: "answers", "stated", "score", "keep_changed"}``.  A .jsonl file, so nothing
+#: that reads ``*.json`` score files takes it for an entity.
+ABC_LOG_FILENAME = "abc_disagreements.jsonl"
+#: The share of version 10 role replies that may disagree with their answers,
+#: or have answers that cannot be read, before the run's summary warns:
+#: gpt-5.6-luna's was 0.22% on version 8 (0.05% changing keep or drop) and its
+#: answers were always readable (abc_consistency.json, 2026-10-28).
+ABC_WARN_SHARE = 0.01
 
 
-def score_reply(text: Optional[str], finish_reason: Optional[str] = None, *,
-                reply_format: str = "score_marker") -> Optional[int]:
-    """The score of one judge reply, or None (unparseable), counting the
-    reason in :data:`REPLY_PROBLEMS`: ``truncated`` (``finish_reason`` is
-    ``"length"``: cut at ``--max_tokens``), ``no_reply`` (no text: a failed
-    call, a content-flagged prompt), ``no_marker``, ``several_markers``,
+def _read(text: Optional[str], finish_reason: Optional[str],
+          reply_format: str) -> Tuple[Optional[int], Optional[dict], Optional[str]]:
+    """``(score, disagreement, problem)`` of one reply, counting nothing: see
+    :func:`read_reply`; ``problem`` is why ``score`` is None."""
+    if reply_format == "first_integer":
+        if not text:
+            return None, None, "no_reply"
+        score = first_integer_score(text)
+        if score is None:
+            return None, None, "out_of_range" if re.search(r"\b\d+\b", text) else "no_integer"
+        return score, None, None
+    if finish_reason == "length":
+        return None, None, "truncated"
+    if not text:
+        return None, None, "no_reply"
+    stated = parse_judge_score(text, require_marker=True)
+    answers = abc_answers(text) if reply_format == "abc_answers" else None
+    if answers is not None:
+        score = abc_score(answers)
+        if stated == score:
+            return score, {}, None
+        return score, {"answers": abc_pattern(answers), "stated": stated, "score": score,
+                       "keep_changed": (stated == 3) != (score == 3)}, None
+    if stated is None:
+        n = len(_MARKER_RE.findall(text))
+        return None, None, "no_marker" if n == 0 else "several_markers" if n > 1 else "out_of_range"
+    return stated, None, None
+
+
+def read_reply(text: Optional[str], finish_reason: Optional[str] = None, *,
+               reply_format: str = "score_marker") -> Tuple[Optional[int], Optional[dict]]:
+    """``(score, disagreement)`` of one judge reply.  ``score`` is None when
+    the reply is unparseable, the reason counted in :data:`REPLY_PROBLEMS`:
+    ``truncated`` (``finish_reason`` is ``"length"``: cut at
+    ``--max_tokens``), ``no_reply`` (no text: a failed call, a
+    content-flagged prompt), ``no_marker``, ``several_markers``,
     ``out_of_range``.
 
     ``reply_format`` ``"first_integer"`` (prompt version 0) reads the reply
     as the fork did (``judge_rubrics.first_integer_score``): a reply cut at
     ``max_tokens`` is read like any other, and the reasons are ``no_reply``,
-    ``no_integer`` and ``out_of_range``."""
-    if reply_format == "first_integer":
-        if not text:
-            REPLY_PROBLEMS["no_reply"] += 1
-            return None
-        score = first_integer_score(text)
-        if score is None:
-            REPLY_PROBLEMS["out_of_range" if re.search(r"\b\d+\b", text) else "no_integer"] += 1
-        return score
-    if finish_reason == "length":
-        REPLY_PROBLEMS["truncated"] += 1
-        return None
-    if not text:
-        REPLY_PROBLEMS["no_reply"] += 1
-        return None
-    score = parse_judge_score(text, require_marker=True)
-    if score is None:
-        n = len(_MARKER_RE.findall(text))
-        REPLY_PROBLEMS["no_marker" if n == 0 else "several_markers" if n > 1
-                       else "out_of_range"] += 1
-    return score
+    ``no_integer`` and ``out_of_range``.  ``"score_marker"`` (version 3 on)
+    reads exactly one ``SCORE:`` marker.  ``"abc_answers"`` (version 10's
+    role replies) scores the reply from its A, B and C answers by the
+    rubric's table (``judge_rubrics.abc_score``), whatever its SCORE line
+    says, and reads the marker only when the answers cannot be read
+    (``judge_rubrics.abc_answers``); ``disagreement`` is then
+    ``{"answers", "stated", "score", "keep_changed"}`` when the stated score
+    differs from the answers' or is missing, counted in :data:`ABC_STATS`,
+    and None otherwise."""
+    score, disagreement, problem = _read(text, finish_reason, reply_format)
+    if problem:
+        REPLY_PROBLEMS[problem] += 1
+    if reply_format == "abc_answers" and problem not in ("truncated", "no_reply"):
+        if disagreement is None:
+            ABC_STATS["unreadable"] += 1
+        else:
+            ABC_STATS["read"] += 1
+    if disagreement:
+        ABC_STATS["no_score" if disagreement["stated"] is None else "disagreed"] += 1
+        ABC_STATS["keep_changed"] += disagreement["keep_changed"]
+        ABC_PATTERNS[f"{disagreement['answers']} stated {disagreement['stated']}"] += 1
+        return score, disagreement
+    return score, None
+
+
+def score_reply(text: Optional[str], finish_reason: Optional[str] = None, *,
+                reply_format: str = "score_marker") -> Optional[int]:
+    """The score of one judge reply, or None (unparseable): :func:`read_reply`
+    without the disagreement."""
+    return read_reply(text, finish_reason, reply_format=reply_format)[0]
+
+
+def log_disagreements(output_dir: Path, name: str, rows: List[dict]) -> None:
+    """Add ``rows`` (``{"key", **disagreement}``) of the entity ``name`` to
+    ``<output_dir>/abc_disagreements.jsonl``, NFS-safely (read and written
+    whole: a few rows per entity)."""
+    if not rows:
+        return
+    path = output_dir / ABC_LOG_FILENAME
+    old = read_jsonl_with_retry(path) if path.exists() else []
+    write_jsonl(old + [{"entity": name, **r} for r in rows], path, logger_obj=logger)
+
+
+def log_abc_summary(output_dir: Path) -> None:
+    """The run's line on version 10's role replies (nothing for other
+    readings), and a loud warning when more than :data:`ABC_WARN_SHARE` of
+    them disagreed with their answers or had answers that could not be read."""
+    n_read, n_unread = ABC_STATS["read"], ABC_STATS["unreadable"]
+    if not (n_read or n_unread):
+        return
+    n_off = ABC_STATS["disagreed"] + ABC_STATS["no_score"]
+    top = ", ".join(f"{k} ({v})" for k, v in ABC_PATTERNS.most_common(3))
+    logger.info(f"[abc] {n_read} role replies scored from their A/B/C answers: "
+                f"{ABC_STATS['disagreed']} stated another score and {ABC_STATS['no_score']} none "
+                f"({ABC_STATS['keep_changed']} changing keep or drop)"
+                + (f"; most often {top}" if top else "")
+                + (f"; listed in {output_dir / ABC_LOG_FILENAME}" if n_off else "")
+                + f".  {n_unread} with answers that could not be read were scored by their SCORE line")
+    n = n_read + n_unread
+    if n_off > ABC_WARN_SHARE * n or n_unread > ABC_WARN_SHARE * n:
+        logger.warning(f"*** A/B/C DISAGREEMENT RATE HIGH *** {n_off} of {n} role replies "
+                       f"({n_off / n:.2%}) disagreed with their answers and {n_unread} "
+                       f"({n_unread / n:.2%}) had answers that could not be read (more than "
+                       f"{ABC_WARN_SHARE:.0%}; gpt-5.6-luna on version 8: 0.22% and none): read a "
+                       f"sample of {output_dir / ABC_LOG_FILENAME}, the rows that change keep or "
+                       f"drop first, and of the replies (--save_replies)")
 
 
 def combination_pairs_sha256(role: str, trait: str, roles_dir: Path, traits_dir: Path) -> str:
@@ -485,13 +585,15 @@ def prompt_version_conflict(output_dir: Path, prompt_version: int,
 
 
 def stamp_rubric(output_dir: Path, *, entity_type: str, judge_model: str,
-                 prompt_version: int = DEFAULT_PROMPT_VERSION) -> dict:
+                 prompt_version: int = DEFAULT_PROMPT_VERSION,
+                 extra: Optional[dict] = None) -> dict:
     """Record in ``judge_rubric.json`` that this run judges under
     ``prompt_version`` (assistant_axis/judge_rubrics.py), with the hash of
     its text for ``entity_type``.  Versions, hashes and models accumulate across runs into the
     same directory; score files already there with no stamp beside them
     predate stamping (version 1).  Warns when the directory mixes versions
-    (only versions 1-3 can be mixed: :func:`prompt_version_conflict`)."""
+    (only versions 1-3 can be mixed: :func:`prompt_version_conflict`).
+    ``extra`` adds fields (``--reread_replies``: where the replies came from)."""
     path = output_dir / RUBRIC_STAMP_FILENAME
     old = json.loads(path.read_text()) if path.exists() else {}
     recorded, hashes = _recorded_versions(output_dir)
@@ -505,10 +607,12 @@ def stamp_rubric(output_dir: Path, *, entity_type: str, judge_model: str,
         "rubric_version": prompt_version,
         "rubric_versions": versions,
         "prompt_sha256": {**hashes, str(prompt_version): version.sha256(entity_type)},
-        "reply_format": version.reply_format,
+        "reply_format": version.reply_format_for(entity_type),
         "label_form": JUDGE_LABEL_FORM,
         "entity_type": entity_type,
         "judge_models": sorted(set(old.get("judge_models", [])) | {judge_model}),
+        **{k: v for k, v in old.items() if k == "reread_from"},
+        **(extra or {}),
     }
     _atomic_write_json(path, stamp)
     return stamp
@@ -620,13 +724,16 @@ async def score_entity(
     reply_format: str = "score_marker",
     service_tier: Optional[str] = None,
     replies: Optional[List[dict]] = None,
+    disagreements: Optional[List[dict]] = None,
 ) -> Tuple[dict, int, int]:
     """Score responses for a single entity.  ``usage`` (a
     MultiModelUsage) is ticked with every response's token counts;
-    ``reply_format`` is the prompt version's (:func:`score_reply`);
-    ``service_tier`` (``"flex"``) is passed to every call; ``replies``, when
-    given, collects every reply as ``{"key", "score", "reply"}``
-    (``--save_replies``).
+    ``reply_format`` is the prompt version's for the entity type
+    (:func:`read_reply`); ``service_tier`` (``"flex"``) is passed to every
+    call; ``replies``, when given, collects every reply as ``{"key",
+    "score", "reply"}`` (``--save_replies``), and ``disagreements`` every
+    version 10 reply whose SCORE line disagrees with its answers, as
+    ``{"key", **disagreement}``.
 
     Returns
     -------
@@ -665,9 +772,11 @@ async def score_entity(
     n_parsed = 0
     for key, text in zip(keys, responses_text):
         n_attempted += 1
-        score = score_reply(text, reply_format=reply_format)
+        score, disagreement = read_reply(text, reply_format=reply_format)
         if replies is not None:
             replies.append({"key": key, "score": score, "reply": text})
+        if disagreement and disagreements is not None:
+            disagreements.append({"key": key, **disagreement})
         if score is not None:
             scores[key] = score
             n_parsed += 1
@@ -820,9 +929,11 @@ async def judge_in_batches(
     ``before_write()`` (the rubric stamp) is called once new batches are
     written, so that a run stopped before collecting them has recorded the
     version they were requested under, and before scores are first written.
-    ``reply_format``: the prompt version's (:func:`score_reply`).  ``keep_replies``
+    ``reply_format``: the prompt version's for the entity type
+    (:func:`read_reply`); a version 10 reply that disagrees with its answers
+    is logged (:func:`log_disagreements`).  ``keep_replies``
     (``--save_replies``): every reply is written beside the scores
-    (:func:`save_replies`).  Returns ``(n_attempted, n_parsed, n_left,
+    (:func:`save_replies`), with its ``finish_reason``.  Returns ``(n_attempted, n_parsed, n_left,
     entities_with_new_scores)``; ``n_left`` requests are unanswered and
     unscored, for a rerun."""
     # A Claude judge goes through Anthropic Message Batches (2026-10-26), an
@@ -870,6 +981,7 @@ async def judge_in_batches(
 
     buffer: Dict[str, Dict[str, int]] = {}
     reply_buffer: Dict[str, List[dict]] = {}
+    abc_buffer: Dict[str, List[dict]] = {}
     counts = {"attempted": 0, "parsed": 0}
     touched: set = set()
     batch_key = f"{judge_model}{BATCH_SUFFIX}"
@@ -891,9 +1003,12 @@ async def judge_in_batches(
             choices = body.get("choices") or []
             text = ((choices[0].get("message") or {}).get("content") if choices else None)
             finish = choices[0].get("finish_reason") if choices else None
-        score = score_reply(text, finish, reply_format=reply_format)
+        score, disagreement = read_reply(text, finish, reply_format=reply_format)
         if keep_replies:
-            reply_buffer.setdefault(name, []).append({"key": key, "score": score, "reply": text})
+            reply_buffer.setdefault(name, []).append(
+                {"key": key, "score": score, "reply": text, "finish_reason": finish})
+        if disagreement:
+            abc_buffer.setdefault(name, []).append({"key": key, **disagreement})
         if score is not None:
             buffer.setdefault(name, {})[key] = score
             counts["parsed"] += 1
@@ -909,6 +1024,9 @@ async def judge_in_batches(
         for name, rows in reply_buffer.items():
             save_replies(output_dir, name, rows)
         reply_buffer.clear()
+        for name, rows in abc_buffer.items():
+            log_disagreements(output_dir, name, rows)
+        abc_buffer.clear()
         write_usage(usage_path, prior_usage, run_usage)
 
     unanswered = await runner.run(chunks, on_result, flush)
@@ -926,9 +1044,11 @@ async def judge_in_batches(
         for cid, text in zip(ids, texts):
             name, key = cid.split(CUSTOM_ID_SEP, 1)
             counts["attempted"] += 1
-            score = score_reply(text, reply_format=reply_format)
+            score, disagreement = read_reply(text, reply_format=reply_format)
             if keep_replies:
                 reply_buffer.setdefault(name, []).append({"key": key, "score": score, "reply": text})
+            if disagreement:
+                abc_buffer.setdefault(name, []).append({"key": key, **disagreement})
             if score is not None:
                 buffer.setdefault(name, {})[key] = score
                 counts["parsed"] += 1
@@ -995,11 +1115,146 @@ def judge_client(model: str, service_tier: Optional[str] = None):
     return openai.AsyncOpenAI()
 
 
+def reread_replies(args, *, source_dir: Path, output_dir: Path) -> None:
+    """``--reread_replies``: score the replies a step-3 run saved in
+    ``<source_dir>/_replies/`` (``--save_replies``) under ``--prompt_version``'s
+    reading, with no judge calls, into ``output_dir``: score files, the A/B/C
+    disagreement log and a rubric stamp naming the source (``reread_from``).
+    Allowed only when the source was judged under one version whose rubric
+    for this entity type is ``--prompt_version``'s (version 8 for version 10),
+    each saved reply gives the score the source recorded under its own
+    reading, and every scored response has one; ``output_dir`` must hold no
+    score files.  Exits 1 when an entity fails those checks or the parse rate
+    is under ``--min_parse_rate``.  Under ``--dry_run`` nothing is written."""
+    version = get_version(args.prompt_version)
+    fmt = version.reply_format_for(args.entity_type)
+
+    def stop(msg: str) -> None:
+        logger.error(f"--reread_replies {source_dir}: {msg}")
+        sys.exit(1)
+
+    stamp_path = source_dir / RUBRIC_STAMP_FILENAME
+    if not stamp_path.exists():
+        stop(f"no {RUBRIC_STAMP_FILENAME}, so the version its replies answer is not known")
+    src = json.loads(stamp_path.read_text())
+    if src.get("entity_type", args.entity_type) != args.entity_type:
+        stop(f"its scores are of --entity_type {src['entity_type']}, not {args.entity_type}")
+    versions = src.get("rubric_versions", [])
+    if len(versions) != 1:
+        stop(f"its scores were judged under prompt versions {versions}; one is needed")
+    try:
+        src_version = get_version(versions[0])
+    except ValueError as e:
+        stop(str(e))
+    recorded = src.get("prompt_sha256", {}).get(str(src_version.number))
+    if recorded != src_version.sha256(args.entity_type):
+        stop(f"it was judged under another text of prompt version {src_version.number} (hash "
+             f"{recorded}; now {src_version.sha256(args.entity_type)})")
+    if not version.same_text(src_version, args.entity_type):
+        stop(f"prompt version {version.number} sends another {args.entity_type} rubric than "
+             f"version {src_version.number}, so these replies answer another prompt: rejudge")
+    if output_dir.resolve() == source_dir.resolve():
+        stop("--output_dir is the source directory: give the re-read scores their own")
+    if output_dir.is_dir() and any(p.name not in SIDE_CAR_FILENAMES for p in output_dir.glob("*.json")):
+        stop(f"{output_dir} already holds score files")
+    src_fmt = src_version.reply_format_for(args.entity_type)
+    files = sorted((source_dir / REPLIES_DIRNAME).glob("*.jsonl"))
+    if args.roles:
+        files = [f for f in files if f.stem in args.roles]
+    if not files:
+        stop(f"no saved replies in {source_dir / REPLIES_DIRNAME} (judge with --save_replies to keep them)")
+    logger.info(f"Re-reading {len(files)} entities' replies from {source_dir} (version "
+                f"{src_version.number}, read as {src_fmt}) under version {version.number} "
+                f"(read as {fmt}); no judge calls")
+
+    REPLY_PROBLEMS.clear()
+    ABC_STATS.clear()
+    ABC_PATTERNS.clear()
+    n_total = n_parsed = n_changed = n_keep_changed = n_done = 0
+    errors: List[str] = []
+    stamped: List[bool] = []
+    with_replies = {f.stem for f in files}
+    for p in sorted(source_dir.glob("*.json")):
+        if p.name not in SIDE_CAR_FILENAMES and p.stem not in with_replies and (
+                not args.roles or p.stem in args.roles) and load_scores(p, strict=True):
+            errors.append(f"{p.stem}: scored, but no replies were saved")
+    for f in files:
+        name = f.stem
+        rows: Dict[str, dict] = {}
+        for r in read_jsonl_with_retry(f, logger_obj=logger):
+            rows[r["key"]] = r     # a key judged again (unparseable before) keeps its last reply
+        scored = load_scores(source_dir / f"{name}.json", strict=True)
+        missing = sorted(set(scored) - set(rows))
+        if missing:
+            errors.append(f"{name}: {len(missing)} scored responses have no saved reply "
+                          f"(first: {missing[0]})")
+            continue
+        finishes, differ = {}, []
+        for key, r in rows.items():
+            finish = r.get("finish_reason")
+            src_score = _read(r.get("reply"), finish, src_fmt)[0]
+            if finish is None and src_score is not None and r.get("score") is None:
+                # a batch reply cut at max_tokens, saved before rows kept finish_reason
+                finish, src_score = "length", None
+            finishes[key] = finish
+            if src_score != r.get("score") or scored.get(key) != src_score:
+                differ.append(key)
+        if differ:
+            errors.append(f"{name}: {len(differ)} saved replies do not give the scores recorded "
+                          f"under version {src_version.number}'s reading (first: {differ[0]})")
+            continue
+        new: Dict[str, int] = {}
+        notes: List[dict] = []
+        for key, r in rows.items():
+            n_total += 1
+            score, disagreement = read_reply(r.get("reply"), finishes[key], reply_format=fmt)
+            if disagreement:
+                notes.append({"key": key, **disagreement})
+            if score is None:
+                continue
+            n_parsed += 1
+            new[key] = score
+            if score != scored.get(key):
+                n_changed += 1
+                n_keep_changed += (score == 3) != (scored.get(key) == 3)
+        n_done += 1
+        if args.dry_run:
+            continue
+        if not stamped:
+            for model in src.get("judge_models") or ["unknown"]:
+                stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=model,
+                             prompt_version=version.number, extra={"reread_from": {
+                                 "dir": str(source_dir), "rubric_version": src_version.number,
+                                 "prompt_sha256": recorded,
+                                 "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}})
+            stamped.append(True)
+        atomic_write_text(json.dumps(new, indent=2), output_dir / f"{name}.json", logger_obj=logger)
+        log_disagreements(output_dir, name, notes)
+
+    logger.info(f"Re-read {n_total} replies of {n_done} entities: {n_parsed} scored, "
+                f"{n_changed} differing from the source's scores ({n_keep_changed} changing keep "
+                f"or drop)" + (" (dry run: nothing written)" if args.dry_run else f", into {output_dir}"))
+    problems = {k: v for k, v in REPLY_PROBLEMS.items() if v > 0}
+    if problems:
+        logger.info(f"Unparseable replies (rubric v{version.number}): " + ", ".join(
+            f"{v} {k.replace('_', ' ')}" for k, v in sorted(problems.items())))
+    log_abc_summary(output_dir)
+    warn_if_low_parse_rate(label=f"pipeline/3_judge:reread:{','.join(src.get('judge_models', []))}",
+                           n_ok=n_parsed, n_total=n_total, logger_obj=logger)
+    reasons = list(errors[:10]) + ([f"... and {len(errors) - 10} more"] if len(errors) > 10 else [])
+    if n_total and n_parsed / n_total < args.min_parse_rate:
+        reasons.append(f"parse rate {n_parsed}/{n_total} is under --min_parse_rate {args.min_parse_rate:.0%}")
+    if reasons:
+        logger.error("The re-read is not complete: " + "; ".join(reasons))
+        sys.exit(1)
+
+
 async def main_async():
     parser = argparse.ArgumentParser(
         description="Score responses with judge LLM")
-    parser.add_argument("--responses_dir", type=str, required=True,
-                        help="Directory with response JSONL files")
+    parser.add_argument("--responses_dir", type=str,
+                        help="Directory with response JSONL files (required, except with "
+                             "--reread_replies)")
     # Defaults are the repository's corpus wherever the script is run from
     # (they were relative to the working directory, so a run from the
     # repository root found no files and skipped every entity).
@@ -1018,7 +1273,10 @@ async def main_async():
                              "number-only rubrics read as the first integer in the reply; 3, the "
                              "current rubrics (the default); 4, the next version, a draft (version "
                              "3 with the approved arms of the role rubric experiment); 5, a draft, "
-                             "version 4 and a clause for helpful professional roles.  A scores "
+                             "version 4 and a clause for helpful professional roles; 6 to 8, "
+                             "drafts, the role rubric as a decision procedure; 10, a draft, "
+                             "version 8's text with a role reply scored from its A, B and C "
+                             "answers (for gpt-5.6-luna).  A scores "
                              "directory holds one version: a run refuses a directory judged under "
                              "another (run_pipeline.sh --judge-prompt-version gives each version "
                              f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")
@@ -1066,6 +1324,12 @@ async def main_async():
                         help="Also write every judge reply, with its key and score, to "
                              "<output_dir>/_replies/<entity>.jsonl, to read why a response got "
                              "its score (off by default; about 1 KB per reply)")
+    parser.add_argument("--reread_replies", type=str, metavar="SCORES_DIR",
+                        help="Make no judge calls: score the replies a run saved in "
+                             "SCORES_DIR/_replies/ (--save_replies) under --prompt_version's "
+                             "reading, into --output_dir (which must hold no score files).  Only "
+                             "when SCORES_DIR was judged under one version that sends the same "
+                             "rubric (version 8 for version 10, for example)")
     parser.add_argument("--roles", nargs="+",
                         help="Specific entity names to process")
     parser.add_argument("--dry_run", action="store_true",
@@ -1095,6 +1359,27 @@ async def main_async():
         parser.error(f"--prompt_version: {e}")
     if args.max_tokens is None:
         args.max_tokens = version.max_tokens
+
+    if args.reread_replies:
+        output_dir = Path(args.output_dir)
+        source_dir = Path(args.reread_replies)
+        if args.dry_run:
+            reread_replies(args, source_dir=source_dir, output_dir=output_dir)
+            return
+        output_dir.mkdir(parents=True, exist_ok=True)
+        lock = ScoresDirLock(output_dir, force=args.force_unlock)
+        try:
+            lock.acquire()
+        except LockHeldError as e:
+            logger.error(str(e))
+            sys.exit(1)
+        try:
+            reread_replies(args, source_dir=source_dir, output_dir=output_dir)
+        finally:
+            lock.release()
+        return
+    if not args.responses_dir:
+        parser.error("--responses_dir is required (except with --reread_replies)")
 
     problem = check_judge_model(args.judge_model, batch=not args.no_batch)
     if not problem and args.service_tier:
@@ -1321,6 +1606,9 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
 
     successful = skipped = failed = 0
     REPLY_PROBLEMS.clear()
+    ABC_STATS.clear()
+    ABC_PATTERNS.clear()
+    reply_format = version.reply_format_for(args.entity_type)
     truncated_at_start = _judge_mod.TRUNCATED_REPLIES.get(args.judge_model, 0)
     refused_at_start = _judge_mod.REFUSED_REPLIES.get(args.judge_model, 0)
     # Aggregate parse-rate counters across all entities so the end-of-run
@@ -1399,7 +1687,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                 chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
                 fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
                 realtime_batch_size=args.batch_size, before_write=stamp_once,
-                reply_format=version.reply_format, keep_replies=args.save_replies)
+                reply_format=reply_format, keep_replies=args.save_replies)
             successful = len(touched)
         except ModelDriftError as e:
             logger.error(str(e))
@@ -1412,6 +1700,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                 break
             try:
                 replies: Optional[List[dict]] = [] if args.save_replies else None
+                disagreements: List[dict] = []
                 new_scores, n_attempted, n_parsed = await score_entity(
                     name=name,
                     responses=responses,
@@ -1423,9 +1712,10 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                     batch_size=args.batch_size,
                     existing_scores=existing_scores,
                     usage=run_usage,
-                    reply_format=version.reply_format,
+                    reply_format=reply_format,
                     service_tier=args.service_tier,
                     replies=replies,
+                    disagreements=disagreements,
                 )
                 write_usage(usage_path, prior_usage, run_usage)
                 if replies:
@@ -1434,6 +1724,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                 total_call_parsed += n_parsed
                 stamp_once()
                 all_scores = merge_scores(output_dir / f"{name}.json", new_scores)
+                log_disagreements(output_dir, name, disagreements)
                 logger.info(f"Saved {len(all_scores)} scores for {name} "
                             f"({len(new_scores)} new)")
                 successful += 1
@@ -1481,6 +1772,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     if problems:
         logger.info(f"Unparseable replies (rubric v{version.number}): " + ", ".join(
             f"{v} {k.replace('_', ' ')}" for k, v in sorted(problems.items())))
+    log_abc_summary(output_dir)
 
     # Loud warning if this run's per-call parse rate dropped below 99%.
     # Aggregated across every (entity, response) judge call we made today,

@@ -266,3 +266,47 @@ def test_altruist_alone_gets_the_philanthropist_example_from_version_4():
     from dataclasses import replace
     assert replace(v4, role_overrides=()).sha256("role") != v4.sha256("role")
     assert replace(v4, role_overrides=()).sha256("trait") == v4.sha256("trait")
+
+
+def test_version_10_is_version_8_read_from_the_answers():
+    """Roger, 2026-10-28: version 8's text, with a role reply scored from its A,
+    B and C answers; traits and combinations as version 8 in text and reading."""
+    v8, v10 = jr.PROMPT_VERSIONS[8], jr.PROMPT_VERSIONS[10]
+    assert v10.draft and (v10.reply_format, v10.max_tokens) == ("score_marker", 300)
+    assert all(v10.same_text(v8, k) for k in ("role", "trait", "combination"))
+    assert not v10.same_text(jr.PROMPT_VERSIONS[7], "role") and v10.same_text(jr.PROMPT_VERSIONS[7], "trait")
+    assert v10.reply_format_for("role") == "abc_answers" and v10.reply_format_for("trait") == "score_marker"
+    assert v8.reply_format_for("role") == "score_marker"
+    assert v10.differs_from(v8) == ("role",)                  # the reading is in the hash
+    assert v10.sha256("trait") == v8.sha256("trait")
+    assert set(jr.REPLY_FORMATS) >= {v.reply_format_for(k) for v in jr.PROMPT_VERSIONS.values()
+                                     for k in ("role", "trait", "combination")}
+
+
+@pytest.mark.parametrize("text,answers", [
+    ("A: no — “Let me try”\nB: no — none\nC: yes — “From my planet”\nSCORE: 3",
+     {"A": False, "B": False, "C": True}),
+    ("**A:** No\n\n**B:** Yes, \"as an AI\"\n\n**C.** yes\nSCORE: 2", {"A": False, "B": True, "C": True}),
+    ("A. yes\nB - no\nC) no", {"A": True, "B": False, "C": False}),
+    ("A: no\nB: no — so B: no\nC: yes", {"A": False, "B": False, "C": True}),    # restated, agreeing
+    ("a: no\nB: no\nC: yes", None),                    # the letter is upper case
+    ("A: no\nB: no", None),                            # C unanswered
+    ("A: no\nB: no\nC: yes\nC: no", None),             # answered both ways
+    ("A: no\nB: no\nC: yes — on reflection, so C: no", None),
+    ("A. Refusal? No.\nB. Disclaimers? No.\nC. Roleplay? Yes.", None),   # not an answer line
+    ("", None), (None, None),
+])
+def test_abc_answers(text, answers):
+    assert jr.abc_answers(text) == answers
+
+
+def test_abc_score_is_the_rubrics_table():
+    table = {(a, b, c): jr.abc_score({"A": a, "B": b, "C": c})
+             for a in (False, True) for b in (False, True) for c in (False, True)}
+    assert table == {(True, False, False): 0, (True, True, False): 0,
+                     (False, False, False): 1, (False, True, False): 1,
+                     (True, False, True): 2, (False, True, True): 2, (True, True, True): 2,
+                     (False, False, True): 3}
+    assert "- 0 if A, and not C.\n- 1 if not A, and not C.\n- 2 if C, and A or B.\n" \
+           "- 3 if C, and neither A nor B." in jr.PROMPT_VERSIONS[10].role
+    assert jr.abc_pattern({"A": False, "B": True, "C": False}) == "AnByCn"

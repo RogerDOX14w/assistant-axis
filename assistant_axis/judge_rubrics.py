@@ -80,6 +80,16 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   (the proofreader's keeps 75.2% -> 75.6%, flips from version 8 at noise
   level), so it was taken out; its text is in commit 46b9db2d, and the number
   stays reserved for the score directories judged under it.
+- **10** -- version 8's text, with a role reply scored from its A, B and C
+  answers by the rubric's table, not by its SCORE line (Roger, 2026-10-28):
+  gpt-5.6-luna's stated score disagreed with its own answers on 46 of 20,500
+  version 8 replies, and on the 11 where that changes keep or drop the answers
+  were right (``reports/pipeline/judge_comparison/abc_consistency.json``).  The
+  SCORE line is read only when the answers cannot be (one missing, or one
+  answered both ways); a reply that answers all three and gives no SCORE line
+  is scored.  For gpt-4.1-mini the reverse holds (its answer lines slip, its
+  score is right), so this reading is for gpt-5.6-luna.  Traits and
+  combinations as version 8.  A draft.
 
 One number covers all three rubrics: a version may change any of the role,
 trait and combination rubrics and leave the others as they were
@@ -453,12 +463,65 @@ TRAIT_TEMPLATE_V8 = TRAIT_TEMPLATE_V7
 COMBINED_TEMPLATE_V8 = COMBINED_TEMPLATE_V7
 
 # ---------------------------------------------------------------------------
+# Version 10: version 8, a role reply scored from its answers (draft)
+# ---------------------------------------------------------------------------
+
+#: Roger, 2026-10-28, from reports/pipeline/judge_comparison/abc_consistency.json:
+#: on version 8, gpt-5.6-luna stated a score other than its answers give on 46
+#: of 20,500 replies; the 11 that change keep or drop are in-role refusals
+#: answered "A: no ... C: yes" and scored 2, and the other two judges, where
+#: they agreed, sided with the answers 8 times in 9.  Scoring from the answers
+#: agreed with them on 39 of 42 such responses, against 32 for the stated score
+#: and 34 for one rejudge.  Text unchanged; only the reading differs.
+#: One answer line: "A: no — ...", "**B:** yes", "C. Yes".  The letter is upper
+#: case, so that a line beginning with the article "a" is not read as A.
+_ABC_ANSWER_RE = re.compile(r"^\W*([ABC])\W*((?i:yes|no))\b")
+#: A later sentence that answers a question again ("... So B: no").
+_ABC_RESTATED_RE = re.compile(
+    r"\b(?i:so|thus|therefore|hence)\s*,?\s*([ABC])\s*:?\s*(?:(?i:is)\s+)?((?i:yes|no))\b")
+
+
+def abc_answers(text: Optional[str]) -> Optional[Dict[str, bool]]:
+    """A reply's answers to the decision procedure's questions, ``{"A": bool,
+    "B": bool, "C": bool}`` (True for yes), or None when it does not answer
+    all three in answer lines, or answers one both ways (a second answer line,
+    or a later "so B: no", that contradicts the first)."""
+    found: Dict[str, set] = {}
+    restated: Dict[str, set] = {}
+    for line in (text or "").splitlines():
+        m = _ABC_ANSWER_RE.match(line)
+        if m:
+            found.setdefault(m.group(1), set()).add(m.group(2).lower() == "yes")
+        for q, word in _ABC_RESTATED_RE.findall(line):
+            restated.setdefault(q, set()).add(word.lower() == "yes")
+    if sorted(found) != ["A", "B", "C"] or any(len(v) != 1 for v in found.values()):
+        return None
+    if any(restated.get(q, v) != v for q, v in found.items()):
+        return None
+    return {q: next(iter(v)) for q, v in found.items()}
+
+
+def abc_score(answers: Dict[str, bool]) -> int:
+    """The score the decision procedure's table gives ``answers``: 0 if A and
+    not C, 1 if neither A nor C, 2 if C and A or B, 3 if C alone."""
+    a, b, c = answers["A"], answers["B"], answers["C"]
+    return (2 if (a or b) else 3) if c else (0 if a else 1)
+
+
+def abc_pattern(answers: Dict[str, bool]) -> str:
+    """``answers`` written as in the consistency report: ``"AnBnCy"``."""
+    return "".join(f"{q}{'y' if answers[q] else 'n'}" for q in "ABC")
+
+
+# ---------------------------------------------------------------------------
 # The versions
 # ---------------------------------------------------------------------------
 
 #: How a version's replies are read: ``"first_integer"`` (version 0: the
-#: fork's parser) or ``"score_marker"`` (version 3 on: exactly one marker).
-REPLY_FORMATS = ("first_integer", "score_marker")
+#: fork's parser), ``"score_marker"`` (version 3 on: exactly one marker) or
+#: ``"abc_answers"`` (version 10's role replies: the score the A, B and C
+#: answers give, else the marker).
+REPLY_FORMATS = ("first_integer", "score_marker", "abc_answers")
 
 
 @dataclass(frozen=True)
@@ -474,10 +537,27 @@ class PromptVersion:
     #: ``(role stem, template)`` pairs: a role judged with its own template
     #: instead of ``role`` (version 4 on: altruist's level-2 example).
     role_overrides: Tuple[Tuple[str, str], ...] = ()
+    #: How a role reply is read when that differs from ``reply_format``
+    #: (version 10: ``"abc_answers"``).
+    role_reply_format: Optional[str] = None
 
     def role_template(self, stem: str) -> str:
         """The role rubric template for the role ``stem``."""
         return dict(self.role_overrides).get(stem, self.role)
+
+    def reply_format_for(self, entity_type: str) -> str:
+        """How a reply for ``"role"``, ``"trait"`` or ``"combination"`` is read."""
+        self.template(entity_type)   # an unknown type raises
+        if entity_type == "role" and self.role_reply_format:
+            return self.role_reply_format
+        return self.reply_format
+
+    def same_text(self, other: "PromptVersion", entity_type: str) -> bool:
+        """Whether ``other`` sends ``entity_type`` the same rubric (a role's
+        overrides included), however the two read the reply."""
+        if self.template(entity_type) != other.template(entity_type):
+            return False
+        return entity_type != "role" or dict(self.role_overrides) == dict(other.role_overrides)
 
     def template(self, entity_type: str) -> str:
         """The rubric template for ``"role"``, ``"trait"`` or ``"combination"``
@@ -493,7 +573,7 @@ class PromptVersion:
         digits; recorded in ``judge_rubric.json`` beside that type's scores.
         Per type, so that an edit to the draft's trait rubric does not stop a
         roles directory judged under the draft."""
-        parts = [self.template(entity_type), self.reply_format]
+        parts = [self.template(entity_type), self.reply_format_for(entity_type)]
         if entity_type == "role" and self.role_overrides:
             parts.append(sorted(self.role_overrides))
         blob = json.dumps(parts, ensure_ascii=False)
@@ -545,6 +625,13 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V8, COMBINED_TEMPLATE_V8,
                      reply_format="score_marker", max_tokens=300, draft=True,
                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items()))),
+    10: PromptVersion(10, "draft: version 8's text, a role reply scored from its A, B and C answers "
+                          "by the rubric's table, the SCORE line only when the answers cannot be read "
+                          "(Roger, 2026-10-28; for gpt-5.6-luna, whose stated score was the wrong part)",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V8, COMBINED_TEMPLATE_V8,
+                      reply_format="score_marker", max_tokens=300, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers"),
 }
 
 DEFAULT_PROMPT_VERSION = 3

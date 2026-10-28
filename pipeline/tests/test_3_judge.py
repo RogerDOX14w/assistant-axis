@@ -1370,3 +1370,149 @@ def test_dry_run_names_the_version_and_a_conflict(judge, monkeypatch, tmp_path, 
     asyncio.run(judge.main_async())
     assert "Prompt version 4 (draft)" in caplog.text and "--max_tokens 200" in caplog.text
     assert "A live run would stop" in caplog.text
+
+
+# ---------------------------------------------------------------------------
+# Version 10: a role reply scored from its A, B and C answers (2026-10-28)
+# ---------------------------------------------------------------------------
+
+IN_ROLE_REFUSAL = ("A: no — a refusal in the role's own voice\nB: no — no disclaimer\n"
+                   "C: yes — \"I will not stop making paperclips\"\nSCORE: 2")
+
+
+def test_version_10_reading(judge):
+    """The answers decide; the SCORE line is read only when they cannot be."""
+    judge.REPLY_PROBLEMS.clear(); judge.ABC_STATS.clear(); judge.ABC_PATTERNS.clear()
+    read = lambda text, finish=None: judge.read_reply(text, finish, reply_format="abc_answers")
+    assert read(IN_ROLE_REFUSAL.replace("SCORE: 2", "SCORE: 3")) == (3, None)    # agrees
+    assert read(IN_ROLE_REFUSAL) == (3, {"answers": "AnBnCy", "stated": 2, "score": 3,
+                                         "keep_changed": True})
+    no_score = IN_ROLE_REFUSAL.replace("\nSCORE: 2", "")
+    assert read(no_score) == (3, {"answers": "AnBnCy", "stated": None, "score": 3,
+                                  "keep_changed": True})
+    assert read("A: no\nB: yes\nC: no\nSCORE: 2") == (1, {"answers": "AnByCn", "stated": 2,
+                                                         "score": 1, "keep_changed": False})
+    assert read("A: no\nB: no\nSCORE: 2") == (2, None)            # C unanswered: the marker
+    assert read("A: no\nB: no\nC: yes, at first\nC: no\nSCORE: 1") == (1, None)   # both ways
+    assert read("A: no\nB: no") == (None, None)                   # neither
+    assert read(IN_ROLE_REFUSAL, "length") == (None, None)        # cut at max_tokens
+    assert read(None) == (None, None)
+    assert dict(judge.ABC_STATS) == {"read": 4, "unreadable": 3, "disagreed": 2, "no_score": 1,
+                                     "keep_changed": 2}
+    assert dict(judge.REPLY_PROBLEMS) == {"no_marker": 1, "truncated": 1, "no_reply": 1}
+    assert judge.ABC_PATTERNS["AnBnCy stated 2"] == 1
+    # versions 3 to 8 still read the marker alone
+    assert judge.score_reply(IN_ROLE_REFUSAL) == 2 and judge.score_reply(no_score) is None
+
+
+@pytest.mark.parametrize("batch", [False, True])
+def test_a_version_10_role_run_scores_from_the_answers_and_logs_the_disagreements(
+        judge, monkeypatch, tmp_path, caplog, batch):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores_v10"
+    _write_responses(responses_dir, "paperclip_maximizer", 3)
+    client = FakeBatchClient(text=IN_ROLE_REFUSAL) if batch else _client(text=IN_ROLE_REFUSAL)
+    caplog.set_level("INFO")
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "role",
+         "--prompt_version", "10", batch=batch)
+    assert json.loads((output_dir / "paperclip_maximizer.json").read_text()) == {
+        f"pos_p0_q{q}": 3 for q in range(3)}
+    rows = [json.loads(l) for l in (output_dir / "abc_disagreements.jsonl").read_text().splitlines()]
+    assert rows == [{"entity": "paperclip_maximizer", "key": f"pos_p0_q{q}", "answers": "AnBnCy",
+                     "stated": 2, "score": 3, "keep_changed": True} for q in range(3)]
+    stamp = json.loads((output_dir / "judge_rubric.json").read_text())
+    assert stamp["rubric_versions"] == [10] and stamp["reply_format"] == "abc_answers"
+    assert stamp["prompt_sha256"] == {"10": judge.PROMPT_VERSIONS[10].sha256("role")}
+    assert "3 role replies scored from their A/B/C answers: 3 stated another score" in caplog.text
+    assert "*** A/B/C DISAGREEMENT RATE HIGH ***" in caplog.text
+
+
+def test_a_version_10_trait_run_reads_the_marker(judge, monkeypatch, tmp_path):
+    """The trait rubric has no A/B/C questions: its replies are read as version 8's."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores_v10"
+    _write_responses(responses_dir, "patient", 2)
+    _run(judge, monkeypatch, responses_dir, output_dir, _client(text=IN_ROLE_REFUSAL),
+         "--prompt_version", "10")
+    assert set(json.loads((output_dir / "patient.json").read_text()).values()) == {2}
+    assert not (output_dir / "abc_disagreements.jsonl").exists()
+    assert json.loads((output_dir / "judge_rubric.json").read_text())["reply_format"] == "score_marker"
+
+
+def _reread(judge, monkeypatch, source, output_dir, *extra):
+    monkeypatch.setattr(sys, "argv", [
+        "3_judge.py", "--entity_type", "role", "--prompt_version", "10",
+        "--reread_replies", str(source), "--output_dir", str(output_dir), *extra])
+    asyncio.run(judge.main_async())
+
+
+@pytest.mark.parametrize("batch", [False, True])
+def test_reread_replies_rescores_a_version_8_run_without_judge_calls(judge, monkeypatch, tmp_path, batch):
+    responses_dir, v8 = tmp_path / "responses", tmp_path / "scores_v8"
+    _write_responses(responses_dir, "paperclip_maximizer", 3)
+    client = FakeBatchClient(text=IN_ROLE_REFUSAL) if batch else _client(text=IN_ROLE_REFUSAL)
+    _run(judge, monkeypatch, responses_dir, v8, client, "--entity_type", "role",
+         "--prompt_version", "8", "--save_replies", batch=batch)
+    assert set(json.loads((v8 / "paperclip_maximizer.json").read_text()).values()) == {2}
+    calls = client.chat.completions.create.call_count, len(getattr(client, "batches_created", []))
+    monkeypatch.delenv("OPENAI_API_KEY")                       # no key needed
+    v10 = tmp_path / "scores_v10"
+    _reread(judge, monkeypatch, v8, v10)
+    assert json.loads((v10 / "paperclip_maximizer.json").read_text()) == {
+        f"pos_p0_q{q}": 3 for q in range(3)}
+    assert len((v10 / "abc_disagreements.jsonl").read_text().splitlines()) == 3
+    stamp = json.loads((v10 / "judge_rubric.json").read_text())
+    assert stamp["rubric_versions"] == [10] and stamp["judge_models"] == ["gpt-4.1-mini"]
+    assert stamp["reread_from"]["dir"] == str(v8) and stamp["reread_from"]["rubric_version"] == 8
+    assert (client.chat.completions.create.call_count,
+            len(getattr(client, "batches_created", []))) == calls
+    assert not (v10 / "usage.json").exists() and not (v10 / "_replies").exists()
+    # the source is left as it was
+    assert set(json.loads((v8 / "paperclip_maximizer.json").read_text()).values()) == {2}
+
+
+def test_reread_replies_refusals(judge, monkeypatch, tmp_path, caplog):
+    responses_dir = tmp_path / "responses"
+    _write_responses(responses_dir, "paperclip_maximizer", 2)
+    v8, v3 = tmp_path / "scores_v8", tmp_path / "scores_v3"
+    _run(judge, monkeypatch, responses_dir, v8, _client(text=IN_ROLE_REFUSAL), "--entity_type", "role",
+         "--prompt_version", "8", "--save_replies")
+    _run(judge, monkeypatch, responses_dir, v3, _client(), "--entity_type", "role", "--save_replies")
+    bare = tmp_path / "scores_v8_bare"
+    _run(judge, monkeypatch, responses_dir, bare, _client(text=IN_ROLE_REFUSAL), "--entity_type", "role",
+         "--prompt_version", "8")
+    taken = tmp_path / "taken"; taken.mkdir(); (taken / "robot.json").write_text("{}")
+    for source, out, message in [
+            (v3, tmp_path / "a", "sends another role rubric than version 3"),
+            (v8, v8, "is the source directory"),
+            (v8, taken, "already holds score files"),
+            (bare, tmp_path / "b", "no saved replies"),
+            (tmp_path / "nowhere", tmp_path / "c", "no judge_rubric.json")]:
+        caplog.clear()
+        with pytest.raises(SystemExit) as e:
+            _reread(judge, monkeypatch, source, out)
+        assert e.value.code == 1 and message in caplog.text, message
+
+
+def test_reread_replies_keeps_a_cut_reply_unscored_and_checks_the_saved_scores(judge, monkeypatch, tmp_path, caplog):
+    """A batch reply cut at max_tokens was saved with its text, and before
+    2026-10-28 without its finish_reason: a reply the source could not score
+    although its reading gives a score was cut, and stays unscored.  A saved
+    reply that does not give the score recorded stops the entity."""
+    v8 = tmp_path / "scores_v8"
+    v8.mkdir()
+    judge.stamp_rubric(v8, entity_type="role", judge_model="gpt-5.6-luna", prompt_version=8)
+    (v8 / "robot.json").write_text(json.dumps({"pos_p0_q0": 2}))
+    (v8 / "_replies").mkdir()
+    rows = [{"key": "pos_p0_q0", "score": 2, "reply": IN_ROLE_REFUSAL},
+            {"key": "pos_p0_q1", "score": None, "reply": IN_ROLE_REFUSAL}]
+    (v8 / "_replies" / "robot.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    caplog.set_level("INFO")
+    with pytest.raises(SystemExit):                    # 1 of 2 parsed: under --min_parse_rate
+        _reread(judge, monkeypatch, v8, tmp_path / "v10")
+    assert json.loads((tmp_path / "v10" / "robot.json").read_text()) == {"pos_p0_q0": 3}
+    assert "1 truncated" in caplog.text
+    rows[0]["score"] = 3
+    (v8 / "_replies" / "robot.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    caplog.clear()
+    with pytest.raises(SystemExit):
+        _reread(judge, monkeypatch, v8, tmp_path / "v10b")
+    assert "1 saved replies do not give the scores recorded under version 8's reading" in caplog.text
