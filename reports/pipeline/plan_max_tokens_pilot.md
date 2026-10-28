@@ -58,12 +58,12 @@ uv run 2_activations.py --model Qwen/Qwen3-32B --responses_dir $OUT/responses \
     $([ <CAP> = 1024 ] && echo --prefix_token_means 256,512,768 --prefix_token_layers 25)
 uv run 3_judge.py --entity_type role --roles $(jq -r '.by_type.role[]' $E) \
     --judge_model gpt-5.6-luna --save_replies --no_batch --service_tier flex \
-    --responses_dir $OUT/responses --output_dir $OUT/scores
+    --responses_dir $OUT/responses --output_dir $OUT/judged/scores/role
 for T in trait combination; do
   uv run 3_judge.py --entity_type $T --roles $(jq -r ".by_type.$T[]" $E) \
-      --no_batch --service_tier flex \
-      --responses_dir $OUT/responses --output_dir $OUT/scores
+      --responses_dir $OUT/responses --output_dir $OUT/judged/scores/$T
 done
+# then the per-entity files of judged/scores/*/ gathered into $OUT/scores/
 uv run 4_vectors.py --activations_dir $OUT/activations --scores_dir $OUT/scores \
     --output_dir $OUT/vectors --min_count 30
 uv run 4_vectors.py --activations_dir $OUT/activations --all_responses \
@@ -72,7 +72,7 @@ uv run 4_vectors.py --activations_dir $OUT/activations --all_responses \
 
 Then the judge-noise run, the 512 tree's responses scored again into `cap512/scores_rejudge/` (the same three step-3 commands with `--output_dir $OUT/scores_rejudge`), and, for any entity the per-entity rule flags (§ 5), two more judgings of its cap tree and of the 1024 tree, into `scores_rejudge2/` and `scores_rejudge3/` (`--roles <entity>`).
 
-- **Judges** (2026-10-28): step 3's default prompt version is 10, settled for roles on that day: roles are judged by gpt-5.6-luna (`--judge_model gpt-5.6-luna`; a roles run without it is refused) and a reply is scored from its A/B/C answers; the trait and combination rubrics are version 3's text, hash-identical, judged by the default gpt-4.1-mini while the trait rubric is still being worked on.  One `scores/` directory holds all three types (the version check is per type).  Every judging goes by OpenAI Flex processing with retries, `--no_batch --service_tier flex` (Roger, 2026-10-28: "flex with retries worked better than batch"; priced at batch rates; a batch of luna's sat unprocessed for hours on 2026-10-26).
+- **Judges** (2026-10-28): step 3's default prompt version is 10, settled for roles on that day: roles are judged by gpt-5.6-luna (`--judge_model gpt-5.6-luna`; a roles run without it is refused) and a reply is scored from its A/B/C answers; the trait and combination rubrics are version 3's text, hash-identical, judged by the default gpt-4.1-mini while the trait rubric is still being worked on.  The roles go by OpenAI Flex processing with retries, `--no_batch --service_tier flex` (Roger, 2026-10-28: "flex with retries worked better than batch"; priced at batch rates; a batch of luna's sat unprocessed for hours on 2026-10-26); the traits and combinations through the Batch API, step 3's default, since OpenAI refuses Flex for gpt-4.1-mini ("Invalid service_tier argument", found in the smoke test) and real time would double their cost.  **One scores directory per type** (found in the smoke test: step 3 stamps one rubric record per directory, and version 10's role rubric hash differs from its trait rubric's, so a second type is refused): each judging goes to `judged/<scores>/<type>/`, and its per-entity score files are gathered into `<scores>/`, which step 4 and the compare tool read by entity name.  The Mac does the judging, from [cap_pilot_judge_watch.sh](./cap_pilot/cap_pilot_judge_watch.sh), and copies the scores to the pod (the pod has no API key).
 - **Steps** (corrected 2026-10-12 when the list was built): standalone roles are generated only with `--roles_only`, so step 1 runs twice; step 3 runs once per entity type with that type's names; `--min_count 30` is the driver's roger-mode value; `--roles` filters the work items by output name in every mode; `--max_length 2048` holds a 1024-token response plus its prompt; the list holds no name that is both a role and a trait, so one responses directory per tree holds all three types.  Step 1 for every tree can run before any step 2, so that the GPU is busy while item 4 of § 3 is built; the 1024 tree's step 2 waits for `--prefix_token_means`.
 - **Data**: activations 64 × 5 × 2.6 GB ≈ 830 GB stay on the volume until the readout is accepted; then they are archived or deleted (2026-10-28: where the extraction's activations are kept is decided later, and the pilot's may follow the same route), and the volume goes on to the roles run of the extraction.  Responses, scores, vectors, `vectors_all` and the prefix means (small at one layer: three slot-0 rows per response, about 1 GB for the tree) come back to the repo under [`roger/cap_pilot/`](../../roger/cap_pilot/) (not there yet; `roger/` is git-ignored).
 
