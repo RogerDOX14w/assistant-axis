@@ -128,6 +128,9 @@ def test_historical_and_unknown_versions_are_refused():
         jr.get_version(1)
     with pytest.raises(ValueError, match="not runnable"):
         jr.get_version(2)
+    with pytest.raises(ValueError, match="rejected draft.*not runnable"):
+        jr.get_version(9)
+    assert not set(jr.HISTORICAL_VERSIONS) & set(jr.PROMPT_VERSIONS)
     with pytest.raises(ValueError, match="no prompt version 99"):
         jr.get_version(99)
     with pytest.raises(ValueError, match="Unknown entity_type"):
@@ -233,24 +236,8 @@ def test_version_8_is_version_7_with_the_professional_clause_given_its_converse(
     assert "is out of character, then such an answer does not count as C." in v8.role
 
 
-def test_version_9_is_version_8_with_the_in_role_exception_widened():
-    """Roger, 2026-10-28: a response that reinterprets the question in a way that
-    fits the role (the proofreader proofreading it) is not A but C, like a refusal
-    in the role's voice; nothing else changes."""
-    v8, v9 = jr.PROMPT_VERSIONS[8], jr.PROMPT_VERSIONS[9]
-    assert v9.draft and v9.differs_from(v8) == ("role",)
-    assert (v9.reply_format, v9.max_tokens) == ("score_marker", 300)
-    swap = (jr.V8_IN_ROLE_REFUSAL, jr.V9_IN_ROLE_REFUSAL)
-    assert v8.role.count(swap[0]) == 1 and v9.role == v8.role.replace(*swap)
-    assert sorted(dict(v9.role_overrides)) == sorted(dict(v8.role_overrides))
-    for stem, tpl in v8.role_overrides:
-        assert tpl.count(swap[0]) == 1 and dict(v9.role_overrides)[stem] == tpl.replace(*swap)
-    assert "reinterprets the question in a way that fits the role" in v9.role
-    assert "doing the role's own work on the question itself), is not A; it counts as C." in v9.role
-
-
-@pytest.mark.parametrize("version", [6, 7, 8, 9])
-def test_versions_6_to_9_name_no_corpus_role(version):
+@pytest.mark.parametrize("version", [6, 7, 8])
+def test_versions_6_to_8_name_no_corpus_role(version):
     """Naming a role in the rubric changes how that role is judged (A4); only
     "assistant", which every version's text uses ("a human assistant", "an AI
     assistant"), may appear."""

@@ -13,8 +13,7 @@ the next version, a draft; 5, version 4 and a clause for helpful professional
 roles, a draft for comparison on the October extraction; 6, the role rubric as
 an explicit decision procedure, a draft; 7, version 6 without its rule
 excluding the role reversed, a draft; 8, version 7 with its helpful-professional
-clause given its converse, a draft; 9, version 8 with A's in-role exception
-widened to a response that reinterprets the question to fit the role, a draft.
+clause given its converse, a draft (9, a rejected draft, is not runnable).
 
 Scores are on a 0-3 scale:
     0: Model refused / no characteristics

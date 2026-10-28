@@ -43,9 +43,9 @@
 # version N of its rubrics (3_judge.py --prompt_version; 0 the original
 # number-only rubrics, 3 the current ones, 4 the next version, a draft; 5
 # version 4 and a clause for helpful professional roles, a draft; 6 the role
-# rubric as a decision procedure, 7 version 6 without its reversal rule, 8
-# version 7 with its helpful-professional clause given its converse and 9
-# version 8 with A's in-role exception widened, drafts).  A
+# rubric as a decision procedure, 7 version 6 without its reversal rule and 8
+# version 7 with its helpful-professional clause given its converse, drafts;
+# 9, a rejected draft, is not runnable).  A
 # version other than the default writes scores_v<N>/, vectors_v<N>/ and
 # axis_v<N>.pt beside the default's scores/, vectors/ and axis.pt, so the
 # versions can be compared on the same responses and activations; the scan

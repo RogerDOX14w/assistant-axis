@@ -73,11 +73,13 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   the generic assistant answers
   version 7 kept for clearly non-assistant-like roles (the virus) were its
   main remaining fault.  A draft.
-- **9** -- version 8 with A's in-role exception widened (Roger, 2026-10-28):
-  a response that reinterprets the question in a way that fits the role,
-  for example by doing the role's own work on the question itself, is not A
-  but C, as a refusal in the role's voice already was (a proofreader that
-  proofreads the question was being scored 2).  A draft.
+- 9 (not runnable) -- a rejected draft (Roger, 2026-10-28): version 8 with
+  A's in-role exception widened to a response that reinterprets the question
+  in a way that fits the role (a proofreader that proofreads the question was
+  being scored 2).  Tested on gpt-5.6-luna, it changed nothing measurable
+  (the proofreader's keeps 75.2% -> 75.6%, flips from version 8 at noise
+  level), so it was taken out; its text is in commit 46b9db2d, and the number
+  stays reserved for the score directories judged under it.
 
 One number covers all three rubrics: a version may change any of the role,
 trait and combination rubrics and leave the others as they were
@@ -451,28 +453,6 @@ TRAIT_TEMPLATE_V8 = TRAIT_TEMPLATE_V7
 COMBINED_TEMPLATE_V8 = COMBINED_TEMPLATE_V7
 
 # ---------------------------------------------------------------------------
-# Version 9: version 8 with A's in-role exception widened (draft)
-# ---------------------------------------------------------------------------
-
-#: Roger, 2026-10-28, after marking the v8 reading (roger_sheet_3.md): about a
-#: fifth of the proofreader's responses proofread the question instead of
-#: answering it, which he marks G as a refusal in the role's voice, but
-#: gpt-5.6-luna took them for A ("it does not answer the family-advice question,
-#: only offers wording refinements") and scored them 2.  His wording, with the
-#: grammar made parallel and the example added (the same day).
-V8_IN_ROLE_REFUSAL = "A refusal given in the role's own voice is not A; it counts as C."
-V9_IN_ROLE_REFUSAL = (
-    "A refusal given in the role's own voice, or a response that reinterprets the question in a way "
-    "that fits the role (for example, by doing the role's own work on the question itself), is not A; "
-    "it counts as C.")
-_V9_EDITS = ((V8_IN_ROLE_REFUSAL, V9_IN_ROLE_REFUSAL, 1),)
-ROLE_TEMPLATE_V9 = apply_edits(ROLE_TEMPLATE_V8, _V9_EDITS, what="role rubric v9")
-V9_ROLE_OVERRIDES: Dict[str, str] = {
-    stem: apply_edits(tpl, _V9_EDITS, what=f"role rubric v9, {stem}") for stem, tpl in V8_ROLE_OVERRIDES.items()}
-TRAIT_TEMPLATE_V9 = TRAIT_TEMPLATE_V8
-COMBINED_TEMPLATE_V9 = COMBINED_TEMPLATE_V8
-
-# ---------------------------------------------------------------------------
 # The versions
 # ---------------------------------------------------------------------------
 
@@ -565,12 +545,6 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V8, COMBINED_TEMPLATE_V8,
                      reply_format="score_marker", max_tokens=300, draft=True,
                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items()))),
-    9: PromptVersion(9, "draft: version 8 with A's in-role exception widened (Roger, 2026-10-28: a "
-                        "response that reinterprets the question in a way that fits the role, such as "
-                        "doing the role's own work on it, is not A but C)",
-                     ROLE_TEMPLATE_V9, TRAIT_TEMPLATE_V9, COMBINED_TEMPLATE_V9,
-                     reply_format="score_marker", max_tokens=300, draft=True,
-                     role_overrides=tuple(sorted(V9_ROLE_OVERRIDES.items()))),
 }
 
 DEFAULT_PROMPT_VERSION = 3
@@ -582,6 +556,9 @@ HISTORICAL_VERSIONS: Dict[int, str] = {
        "(not runnable: the parser was retired as unsafe, and names are not versioned)",
     2: "2026-10-09 to 2026-10-12: version 3's text with the forgiving parser "
        "(not runnable: the parser was retired as unsafe)",
+    9: "2026-10-28: a rejected draft, version 8 with A's in-role exception widened to a response "
+       "that reinterprets the question to fit the role (not runnable: no measurable effect on "
+       "gpt-5.6-luna, so version 8 was kept; its text is in commit 46b9db2d)",
 }
 
 #: Versions whose score files may share a directory: they send the same rubric
