@@ -1129,7 +1129,7 @@ rubrics from these templates and no longer reads a role file's
 `eval_prompt` (pinned equal to version 3 for every role).  A scores
 directory holds one version: step 3 refuses one judged under another, or
 under an earlier text of the draft (`judge_rubric.json`'s `prompt_sha256`).
-Details: [`pipeline/README.md`](pipeline/README.md), "Prompt versions".
+Details: [`pipeline/README.md`](pipeline/README.md), "Prompt versions".  **Since 2026-10-28 step 3 marks a response cut at `--max_tokens` for the judge** (` …` appended to the judge's copy only; Roger, after the steering runner's sentinel): recorded in `judge_rubric.json` as `truncation_marker`, a scores directory holds one setting, so a rerun into a directory judged before then needs `--no_mark_truncated`, and christina mode passes it.
 
 **Per-entity drift-on-resume check (May 2026)**.  Both static-mode
 ([`score_static_mode`](results_analysis/axis_judge_correlation.py))

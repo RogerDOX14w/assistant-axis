@@ -245,10 +245,11 @@ while [[ $# -gt 0 ]]; do
             # step 3's --save_replies: every reply beside the scores, so that a
             # change of reading needs no rejudging (3_judge.py --reread_replies)
             JUDGE_ARGS+=(--save_replies); shift ;;
-        --judge-mark-truncated)
-            # step 3's --mark_truncated: a response cut at --max_tokens is shown
-            # to the judge with " …" appended (2026-10-28; the stored text is unchanged)
-            JUDGE_ARGS+=(--mark_truncated); shift ;;
+        --judge-no-mark-truncated)
+            # step 3's --no_mark_truncated: show the judge a response cut at
+            # --max_tokens as stored, without the " …" step 3 appends by default
+            # (Roger, 2026-10-28; christina mode passes it on its own)
+            JUDGE_ARGS+=(--no_mark_truncated); shift ;;
         --from-step)
             FROM_STEP="$2"; shift 2 ;;
         --no-scan)
@@ -276,6 +277,11 @@ case "$MODE" in
     roger|christina) ;;
     *) echo "Invalid mode: $MODE (must be roger or christina)" >&2; exit 1 ;;
 esac
+# Step 3 marks a response cut at --max_tokens for the judge by default (Roger,
+# 2026-10-28), except in christina mode, which reproduces the paper's method.
+if [ "$MODE" = "christina" ] && [[ " ${JUDGE_ARGS[*]-} " != *" --no_mark_truncated "* ]]; then
+    JUDGE_ARGS+=(--no_mark_truncated)
+fi
 case "$TMPFS_METHOD" in
     auto|rsync|cp) ;;
     *) echo "Invalid --tmpfs-method: $TMPFS_METHOD (must be auto, rsync or cp)" >&2; exit 1 ;;

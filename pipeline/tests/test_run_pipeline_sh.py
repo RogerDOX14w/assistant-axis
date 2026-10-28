@@ -350,12 +350,34 @@ def test_judge_model_and_save_replies_reach_step_3(tmp_path):
     assert "Judge:  gpt-5.6-luna, prompt version 10" in proc.stdout
 
 
-def test_judge_mark_truncated_reaches_step_3(tmp_path):
-    """Step 3's --mark_truncated (Roger, 2026-10-28): the driver passes it to every step-3 call."""
-    proc, calls = _run_full(tmp_path, None, "--judge-mark-truncated")
+def test_roger_mode_leaves_the_cut_off_marker_to_step_3s_default(tmp_path):
+    """Step 3 marks a response cut at --max_tokens by default (Roger, 2026-10-28): roger mode
+    passes nothing; --judge-no-mark-truncated turns it off."""
+    proc, calls = _run_full(tmp_path, None)
     assert proc.returncode == 0, proc.stdout + proc.stderr
     judge = [c for c in calls if "3_judge.py" in c]
-    assert judge and all(c.endswith("--mark_truncated") for c in judge)
+    assert judge and not any("mark_truncated" in c for c in judge)
+    proc, calls = _run_full(tmp_path / "off", None, "--judge-no-mark-truncated")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and all(c.endswith("--no_mark_truncated") for c in judge)
+
+
+def test_christina_mode_judges_without_the_cut_off_marker(tmp_path):
+    """Christina mode reproduces the paper's method: no marker (Roger, 2026-10-28), passed once
+    even when --judge-no-mark-truncated is given too."""
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina",
+                            "--roles_dir", "../data/roles/instructions", "--judge-no-mark-truncated",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and all(c.count("--no_mark_truncated") == 1 for c in judge)
+    proc, calls = _run_full(tmp_path / "plain", None, "--mode", "christina",
+                            "--roles_dir", "../data/roles/instructions",
+                            workdir=_corpus(tmp_path / "plain"), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and all(c.endswith("--no_mark_truncated") for c in judge)
 
 
 # ---------------------------------------------------------------------------

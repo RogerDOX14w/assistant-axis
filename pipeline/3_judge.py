@@ -646,7 +646,11 @@ def response_key(resp: dict) -> str:
 # judge's copy is marked: the stored text is what step 2 runs through the
 # model, and a marker there would put tokens the model never wrote into slot
 # 0's mean.  Recorded in judge_rubric.json ("truncation_marker"); a scores
-# directory holds one setting (truncation_marker_conflict).
+# directory holds one setting (truncation_marker_conflict).  On by default since
+# the same day (Roger: "default behavior, except in Christina mode"):
+# --no_mark_truncated turns it off, and run_pipeline.sh passes that in christina
+# mode.  A stamp written before then has no field and reads as no marker, so a
+# rerun into such a directory needs --no_mark_truncated.
 TRUNCATION_MARKER = " …"
 
 
@@ -1384,12 +1388,18 @@ async def main_async():
     parser.add_argument("--batch_fallback_max", type=int, default=2000,
                         help="Requests no batch answered are judged in real time up to this "
                              "many; past it they are left for a rerun and the run exits 1")
-    parser.add_argument("--mark_truncated", action="store_true",
+    parser.add_argument("--mark_truncated", dest="mark_truncated", action="store_true",
+                        default=True,
                         help=f"Show the judge a response cut at step 1's --max_tokens "
                              f"(finish_reason \"length\") with {TRUNCATION_MARKER.strip()!r} "
-                             f"appended, as the steering judges see it (2026-10-28).  Only the "
-                             f"judge's copy is marked.  Recorded in judge_rubric.json; a scores "
-                             f"directory judged with the other setting is refused")
+                             f"appended, as the steering judges see it.  The default since "
+                             f"2026-10-28 (Roger); only the judge's copy is marked.  Recorded in "
+                             f"judge_rubric.json; a scores directory judged with the other "
+                             f"setting is refused")
+    parser.add_argument("--no_mark_truncated", dest="mark_truncated", action="store_false",
+                        help="Show the judge every response as stored, with no cut-off marker: "
+                             "run_pipeline.sh's christina mode, which reproduces the paper's "
+                             "method, and a directory judged before 2026-10-28")
     parser.add_argument("--save_replies", action="store_true",
                         help="Also write every judge reply, with its key and score, to "
                              "<output_dir>/_replies/<entity>.jsonl, to read why a response got "

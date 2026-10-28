@@ -104,31 +104,54 @@ def _write(responses_dir, finish_reasons):
             f.write(json.dumps(r) + "\n")
 
 
-def test_a_run_with_the_flag_marks_stamps_and_refuses_the_other_setting(judge, monkeypatch, tmp_path, caplog):
+def test_by_default_a_run_marks_stamps_and_refuses_the_other_setting(judge, monkeypatch, tmp_path, caplog):
+    """The default since 2026-10-28 (Roger): marked, with no flag."""
     caplog.set_level("INFO")
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
     _write(responses_dir, ["length", "stop", "length"])
     prompts = []
-    _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts), "--mark_truncated")
+    _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts))
     assert sum("answer 0 …" in p for p in prompts) == 1 and sum("answer 2 …" in p for p in prompts) == 1
     assert not any("answer 1 …" in p for p in prompts)
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
     assert stamp["truncation_marker"] == judge.TRUNCATION_MARKER
     assert "Marked as cut off" in caplog.text and "2 of 3 responses read" in caplog.text
 
-    # the same directory without the flag is refused, before any request
+    # the same directory with --no_mark_truncated is refused, before any request
     _write(responses_dir, ["length", "stop", "length", "stop"])   # one response not yet scored
     n_before = len(prompts)
     with pytest.raises(SystemExit) as e:
-        _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts))
+        _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts), "--no_mark_truncated")
     assert e.value.code == 1 and len(prompts) == n_before
     assert "judged with the truncation marker" in caplog.text
+    # --mark_truncated, kept for explicit commands, is the default's setting
+    _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts), "--mark_truncated")
+    assert len(prompts) == n_before + 1
 
 
-def test_a_run_without_the_flag_shows_the_text_as_stored(judge, monkeypatch, tmp_path):
+def test_no_mark_truncated_shows_the_text_as_stored(judge, monkeypatch, tmp_path):
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
     _write(responses_dir, ["length", "stop"])
     prompts = []
-    _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts))
+    _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts), "--no_mark_truncated")
     assert prompts and not any("…" in p for p in prompts)
     assert json.loads((output_dir / "judge_rubric.json").read_text())["truncation_marker"] is None
+
+
+def test_a_directory_judged_before_the_default_needs_the_flag_off(judge, monkeypatch, tmp_path, caplog):
+    """A stamp written before 2026-10-28 has no truncation_marker: a default run into it is
+    refused, naming --mark_truncated, and --no_mark_truncated resumes it."""
+    caplog.set_level("INFO")
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write(responses_dir, ["length", "stop"])
+    output_dir.mkdir()
+    judge.stamp_rubric(output_dir, entity_type="trait", judge_model="gpt-4.1-mini")
+    stamp = json.loads((output_dir / "judge_rubric.json").read_text())
+    stamp.pop("truncation_marker", None)
+    (output_dir / "judge_rubric.json").write_text(json.dumps(stamp))
+    prompts = []
+    with pytest.raises(SystemExit):
+        _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts))
+    assert not prompts and "no truncation marker" in caplog.text
+    _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts), "--no_mark_truncated")
+    assert len(prompts) == 2 and not any("…" in p for p in prompts)
