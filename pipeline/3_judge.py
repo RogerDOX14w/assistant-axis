@@ -10,7 +10,11 @@ Handles three response types (--entity_type):
 The rubrics are versioned (--prompt_version; assistant_axis/judge_rubrics.py):
 0, the original number-only rubrics; 3, the current ones (the default); 4,
 the next version, a draft; 5, version 4 and a clause for helpful professional
-roles, a draft for comparison on the October extraction.
+roles, a draft for comparison on the October extraction; 6, the role rubric as
+an explicit decision procedure, a draft; 7, version 6 without its rule
+excluding the role reversed, a draft; 8, version 7 with its helpful-professional
+clause given its converse, a draft; 9, version 8 with A's in-role exception
+widened to a response that reinterprets the question to fit the role, a draft.
 
 Scores are on a 0-3 scale:
     0: Model refused / no characteristics
@@ -57,7 +61,7 @@ import assistant_axis.judge as _judge_mod
 import assistant_axis.judge_pricing as _pricing_mod
 import assistant_axis.openai_batch as _openai_batch
 from assistant_axis.atomic_io import (  # NFS-safe; AGENT_NOTES "NFS-safe file I/O"
-    atomic_write_text, read_jsonl_with_retry, read_text_with_retry,
+    atomic_write_text, read_jsonl_with_retry, read_text_with_retry, write_jsonl,
 )
 from assistant_axis.entity_id import (
     JUDGE_LABEL_FORM, display_form_name, judge_form_of_label, judge_label,
@@ -391,6 +395,22 @@ RUBRIC_STAMP_FILENAME = "judge_rubric.json"
 BATCH_STATE_FILENAME = "batch_state.json"
 BATCH_WORK_DIRNAME = "_batches"
 SIDE_CAR_FILENAMES = (USAGE_FILENAME, RUBRIC_STAMP_FILENAME, BATCH_STATE_FILENAME)
+# --save_replies (2026-10-27): every judge reply, with its key and score, for
+# reading why a response got its score; a subdirectory, so nothing that reads
+# score files by entity name sees it.
+REPLIES_DIRNAME = "_replies"
+
+
+def save_replies(output_dir: Path, name: str, rows: List[dict]) -> None:
+    """Add ``rows`` (``{"key", "score", "reply"}``) to
+    ``<output_dir>/_replies/<name>.jsonl``, NFS-safely (the file is read and
+    written whole: a few hundred rows per entity)."""
+    if not rows:
+        return
+    path = output_dir / REPLIES_DIRNAME / f"{name}.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    old = read_jsonl_with_retry(path) if path.exists() else []
+    write_jsonl(old + rows, path, logger_obj=logger)
 
 
 def uncollected_batches(output_dir: Path) -> Tuple[int, int]:
@@ -600,11 +620,14 @@ async def score_entity(
     usage: Optional["MultiModelUsage"] = None,
     reply_format: str = "score_marker",
     service_tier: Optional[str] = None,
+    replies: Optional[List[dict]] = None,
 ) -> Tuple[dict, int, int]:
     """Score responses for a single entity.  ``usage`` (a
     MultiModelUsage) is ticked with every response's token counts;
     ``reply_format`` is the prompt version's (:func:`score_reply`);
-    ``service_tier`` (``"flex"``) is passed to every call.
+    ``service_tier`` (``"flex"``) is passed to every call; ``replies``, when
+    given, collects every reply as ``{"key", "score", "reply"}``
+    (``--save_replies``).
 
     Returns
     -------
@@ -644,6 +667,8 @@ async def score_entity(
     for key, text in zip(keys, responses_text):
         n_attempted += 1
         score = score_reply(text, reply_format=reply_format)
+        if replies is not None:
+            replies.append({"key": key, "score": score, "reply": text})
         if score is not None:
             scores[key] = score
             n_parsed += 1
@@ -788,6 +813,7 @@ async def judge_in_batches(
     realtime_batch_size: int,
     before_write: Callable[[], None] = lambda: None,
     reply_format: str = "score_marker",
+    keep_replies: bool = False,
 ) -> Tuple[int, int, int, set]:
     """Judge ``entities`` (name, existing scores, eval template, responses;
     consumed once, so a generator keeps one entity's responses in memory at
@@ -795,7 +821,9 @@ async def judge_in_batches(
     ``before_write()`` (the rubric stamp) is called once new batches are
     written, so that a run stopped before collecting them has recorded the
     version they were requested under, and before scores are first written.
-    ``reply_format``: the prompt version's (:func:`score_reply`).  Returns ``(n_attempted, n_parsed, n_left,
+    ``reply_format``: the prompt version's (:func:`score_reply`).  ``keep_replies``
+    (``--save_replies``): every reply is written beside the scores
+    (:func:`save_replies`).  Returns ``(n_attempted, n_parsed, n_left,
     entities_with_new_scores)``; ``n_left`` requests are unanswered and
     unscored, for a rerun."""
     # A Claude judge goes through Anthropic Message Batches (2026-10-26), an
@@ -842,6 +870,7 @@ async def judge_in_batches(
                 + (f", plus {len(inflight)} in batches already submitted" if inflight else ""))
 
     buffer: Dict[str, Dict[str, int]] = {}
+    reply_buffer: Dict[str, List[dict]] = {}
     counts = {"attempted": 0, "parsed": 0}
     touched: set = set()
     batch_key = f"{judge_model}{BATCH_SUFFIX}"
@@ -864,6 +893,8 @@ async def judge_in_batches(
             text = ((choices[0].get("message") or {}).get("content") if choices else None)
             finish = choices[0].get("finish_reason") if choices else None
         score = score_reply(text, finish, reply_format=reply_format)
+        if keep_replies:
+            reply_buffer.setdefault(name, []).append({"key": key, "score": score, "reply": text})
         if score is not None:
             buffer.setdefault(name, {})[key] = score
             counts["parsed"] += 1
@@ -876,6 +907,9 @@ async def judge_in_batches(
             touched.add(name)
             logger.info(f"Saved {len(merged)} scores for {name} ({len(new)} new)")
         buffer.clear()
+        for name, rows in reply_buffer.items():
+            save_replies(output_dir, name, rows)
+        reply_buffer.clear()
         write_usage(usage_path, prior_usage, run_usage)
 
     unanswered = await runner.run(chunks, on_result, flush)
@@ -894,6 +928,8 @@ async def judge_in_batches(
             name, key = cid.split(CUSTOM_ID_SEP, 1)
             counts["attempted"] += 1
             score = score_reply(text, reply_format=reply_format)
+            if keep_replies:
+                reply_buffer.setdefault(name, []).append({"key": key, "score": score, "reply": text})
             if score is not None:
                 buffer.setdefault(name, {})[key] = score
                 counts["parsed"] += 1
@@ -1027,6 +1063,10 @@ async def main_async():
     parser.add_argument("--batch_fallback_max", type=int, default=2000,
                         help="Requests no batch answered are judged in real time up to this "
                              "many; past it they are left for a rerun and the run exits 1")
+    parser.add_argument("--save_replies", action="store_true",
+                        help="Also write every judge reply, with its key and score, to "
+                             "<output_dir>/_replies/<entity>.jsonl, to read why a response got "
+                             "its score (off by default; about 1 KB per reply)")
     parser.add_argument("--roles", nargs="+",
                         help="Specific entity names to process")
     parser.add_argument("--dry_run", action="store_true",
@@ -1360,7 +1400,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                 chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
                 fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
                 realtime_batch_size=args.batch_size, before_write=stamp_once,
-                reply_format=version.reply_format)
+                reply_format=version.reply_format, keep_replies=args.save_replies)
             successful = len(touched)
         except ModelDriftError as e:
             logger.error(str(e))
@@ -1372,6 +1412,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
             if request_error:
                 break
             try:
+                replies: Optional[List[dict]] = [] if args.save_replies else None
                 new_scores, n_attempted, n_parsed = await score_entity(
                     name=name,
                     responses=responses,
@@ -1385,8 +1426,11 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                     usage=run_usage,
                     reply_format=version.reply_format,
                     service_tier=args.service_tier,
+                    replies=replies,
                 )
                 write_usage(usage_path, prior_usage, run_usage)
+                if replies:
+                    save_replies(output_dir, name, replies)
                 total_call_attempted += n_attempted
                 total_call_parsed += n_parsed
                 stamp_once()

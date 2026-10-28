@@ -320,6 +320,28 @@ def test_batch_is_the_default_and_sends_the_real_time_request(judge, monkeypatch
     assert len(client.batches_created) == 1
 
 
+@pytest.mark.parametrize("batch", [False, True])
+def test_save_replies_writes_every_reply_beside_the_scores(judge, monkeypatch, tmp_path, batch):
+    """--save_replies (2026-10-27): each reply, its key and its score (None when
+    unparseable) in _replies/<entity>.jsonl, in both modes; a resume adds to it.
+    Off by default."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 3)
+    client = FakeBatchClient() if batch else _client()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, batch=batch)
+    assert not (output_dir / "_replies").exists()
+    output_dir2 = tmp_path / "scores2"
+    _run(judge, monkeypatch, responses_dir, output_dir2, client, "--save_replies", batch=batch)
+    rows = [json.loads(l) for l in (output_dir2 / "_replies" / "patient.jsonl").read_text().splitlines()]
+    assert sorted(r["key"] for r in rows) == [f"pos_p0_q{q}" for q in range(3)]
+    assert all(r["score"] == 3 and r["reply"].endswith("SCORE: 3") for r in rows)
+    assert json.loads((output_dir2 / "patient.json").read_text()) == {f"pos_p0_q{q}": 3 for q in range(3)}
+    with open(responses_dir / "patient.jsonl", "a") as f:
+        f.write(json.dumps(_responses(4)[3]) + "\n")
+    _run(judge, monkeypatch, responses_dir, output_dir2, client, "--save_replies", batch=batch)
+    assert len((output_dir2 / "_replies" / "patient.jsonl").read_text().splitlines()) == 4
+
+
 def test_requests_are_split_into_batches_of_the_given_size(judge, monkeypatch, tmp_path):
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
     _write_responses(responses_dir, "patient", 7)
@@ -1327,7 +1349,7 @@ def test_a_batch_run_stamps_its_version_before_collecting(judge, monkeypatch, tm
     assert "version(s) 0, not 3" in judge.prompt_version_conflict(output_dir, 3, "trait")
 
 
-@pytest.mark.parametrize("value,message", [("1", "not runnable"), ("9", "no prompt version 9")])
+@pytest.mark.parametrize("value,message", [("1", "not runnable"), ("99", "no prompt version 99")])
 def test_unrunnable_versions_are_refused_at_the_command_line(judge, monkeypatch, tmp_path, capsys,
                                                              value, message):
     with pytest.raises(SystemExit) as e:

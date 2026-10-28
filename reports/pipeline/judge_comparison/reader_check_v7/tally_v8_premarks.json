@@ -1,0 +1,901 @@
+{
+ "reader_weights": {
+  "G": 1.0,
+  "T": 0.5,
+  "G/T": 0.75,
+  "B": 0.0
+ },
+ "estimates": {
+  "oct|reference (gpt-4.1-mini v5)": {
+   "kept": 11957,
+   "precision": 0.9918994582720797,
+   "recall": 0.8417306054420679,
+   "by_group": {
+    "ai": {
+     "kept": 1543,
+     "precision": 0.994147258487409
+    },
+    "altruist": {
+     "kept": 345,
+     "precision": 0.9959962701873766
+    },
+    "emissary": {
+     "kept": 246,
+     "precision": 0.9475568435935751
+    },
+    "other": {
+     "kept": 8106,
+     "precision": 0.9920249002178337
+    },
+    "perfectionist": {
+     "kept": 185,
+     "precision": 0.9978926752839796
+    },
+    "stance, other": {
+     "kept": 1532,
+     "precision": 0.993948581889872
+    }
+   }
+  },
+  "oct|gpt-4.1-mini v6": {
+   "kept": 14084,
+   "precision": 0.9831251170160056,
+   "recall": 0.9826934112562932,
+   "by_group": {
+    "ai": {
+     "kept": 1885,
+     "precision": 0.980529050898762
+    },
+    "altruist": {
+     "kept": 478,
+     "precision": 0.9973230819440722
+    },
+    "emissary": {
+     "kept": 346,
+     "precision": 0.9614126260234146
+    },
+    "other": {
+     "kept": 9015,
+     "precision": 0.9872597534543536
+    },
+    "perfectionist": {
+     "kept": 462,
+     "precision": 0.9199683997304875
+    },
+    "stance, other": {
+     "kept": 1898,
+     "precision": 0.9812342797785881
+    }
+   }
+  },
+  "oct|gpt-4.1-mini v7": {
+   "kept": 14244,
+   "precision": 0.977093335862033,
+   "recall": 0.9877595843902836,
+   "by_group": {
+    "ai": {
+     "kept": 1886,
+     "precision": 0.9721909276502271
+    },
+    "altruist": {
+     "kept": 482,
+     "precision": 0.9957892804341628
+    },
+    "emissary": {
+     "kept": 434,
+     "precision": 0.9261061293888281
+    },
+    "other": {
+     "kept": 9057,
+     "precision": 0.9839741992687764
+    },
+    "perfectionist": {
+     "kept": 477,
+     "precision": 0.9055701173314334
+    },
+    "stance, other": {
+     "kept": 1908,
+     "precision": 0.975879939321629
+    }
+   }
+  },
+  "oct|gpt-5.6-luna v6": {
+   "kept": 13267,
+   "precision": 0.989581346405714,
+   "recall": 0.9317673011983549,
+   "by_group": {
+    "ai": {
+     "kept": 1663,
+     "precision": 0.996847023498868
+    },
+    "altruist": {
+     "kept": 459,
+     "precision": 1.0
+    },
+    "emissary": {
+     "kept": 273,
+     "precision": 0.9732939171487984
+    },
+    "other": {
+     "kept": 8683,
+     "precision": 0.9901432765699291
+    },
+    "perfectionist": {
+     "kept": 391,
+     "precision": 0.930503999211072
+    },
+    "stance, other": {
+     "kept": 1798,
+     "precision": 0.9899290237687265
+    }
+   }
+  },
+  "oct|gpt-5.6-luna v7": {
+   "kept": 13787,
+   "precision": 0.9890412604807101,
+   "recall": 0.9677594514397332,
+   "by_group": {
+    "ai": {
+     "kept": 1726,
+     "precision": 0.9989042476337422
+    },
+    "altruist": {
+     "kept": 480,
+     "precision": 0.9991564432574245
+    },
+    "emissary": {
+     "kept": 378,
+     "precision": 0.9565848266015574
+    },
+    "other": {
+     "kept": 8891,
+     "precision": 0.9884885308421997
+    },
+    "perfectionist": {
+     "kept": 444,
+     "precision": 0.9374968222551403
+    },
+    "stance, other": {
+     "kept": 1868,
+     "precision": 0.9893934812514056
+    }
+   }
+  },
+  "oct|gpt-4.1-mini v8": {
+   "kept": 14179,
+   "precision": 0.980451654213053,
+   "recall": 0.9866316028610363,
+   "by_group": {
+    "ai": {
+     "kept": 1889,
+     "precision": 0.976781708333444
+    },
+    "altruist": {
+     "kept": 481,
+     "precision": 0.9957805263394314
+    },
+    "emissary": {
+     "kept": 415,
+     "precision": 0.9465111502041407
+    },
+    "other": {
+     "kept": 9027,
+     "precision": 0.9864325245357566
+    },
+    "perfectionist": {
+     "kept": 475,
+     "precision": 0.9072711817472175
+    },
+    "stance, other": {
+     "kept": 1892,
+     "precision": 0.9793635766651331
+    }
+   }
+  },
+  "oct|gpt-5.6-luna v8": {
+   "kept": 13721,
+   "precision": 0.9869543575746852,
+   "recall": 0.961094450011815,
+   "by_group": {
+    "ai": {
+     "kept": 1806,
+     "precision": 0.9928440549531817
+    },
+    "altruist": {
+     "kept": 472,
+     "precision": 0.9997773050009688
+    },
+    "emissary": {
+     "kept": 304,
+     "precision": 0.9532153895587022
+    },
+    "other": {
+     "kept": 8843,
+     "precision": 0.9878614620368187
+    },
+    "perfectionist": {
+     "kept": 441,
+     "precision": 0.9256130558407988
+    },
+    "stance, other": {
+     "kept": 1855,
+     "precision": 0.9879121884717511
+    }
+   }
+  },
+  "oct|gpt-5.6-luna v6->v7 adds": {
+   "ai": {
+    "n": 115,
+    "good_share": 0.9886182291635194
+   },
+   "altruist": {
+    "n": 21,
+    "good_share": 0.9807187030268446
+   },
+   "emissary": {
+    "n": 116,
+    "good_share": 0.8895197611759099
+   },
+   "other": {
+    "n": 253,
+    "good_share": 0.8875153374608612
+   },
+   "perfectionist": {
+    "n": 69,
+    "good_share": 0.8834363970490834
+   },
+   "stance, other": {
+    "n": 89,
+    "good_share": 0.9089732131920468
+   }
+  },
+  "oct|gpt-5.6-luna v6->v7 removes": {
+   "ai": {
+    "n": 52,
+    "good_share": 0.9103647118573802
+   },
+   "emissary": {
+    "n": 11,
+    "good_share": 0.664042474785348
+   },
+   "other": {
+    "n": 45,
+    "good_share": 0.7400871803621011
+   },
+   "perfectionist": {
+    "n": 16,
+    "good_share": 0.5334741254145947
+   },
+   "stance, other": {
+    "n": 19,
+    "good_share": 0.6633672490861571
+   }
+  },
+  "oct|gpt-4.1-mini v6->v7 adds": {
+   "ai": {
+    "n": 42,
+    "good_share": 0.43888094027496877
+   },
+   "altruist": {
+    "n": 4,
+    "good_share": 0.8125
+   },
+   "emissary": {
+    "n": 94,
+    "good_share": 0.7777932717898772
+   },
+   "other": {
+    "n": 72,
+    "good_share": 0.4653156894868664
+   },
+   "perfectionist": {
+    "n": 22,
+    "good_share": 0.5925266366651598
+   },
+   "stance, other": {
+    "n": 26,
+    "good_share": 0.5302719942717895
+   }
+  },
+  "oct|gpt-4.1-mini v6->v7 removes": {
+   "ai": {
+    "n": 41,
+    "good_share": 0.809223680180165
+   },
+   "emissary": {
+    "n": 6,
+    "good_share": 0.6385459995997508
+   },
+   "other": {
+    "n": 30,
+    "good_share": 0.7265028085581666
+   },
+   "perfectionist": {
+    "n": 7,
+    "good_share": 0.8720058164321427
+   },
+   "stance, other": {
+    "n": 16,
+    "good_share": 0.8869256653224339
+   }
+  },
+  "oct|gpt-5.6-luna v7->v8 adds": {
+   "ai": {
+    "n": 111,
+    "good_share": 0.8934518510909985
+   },
+   "emissary": {
+    "n": 15,
+    "good_share": 0.6400893744630682
+   },
+   "other": {
+    "n": 62,
+    "good_share": 0.8294362308007239
+   },
+   "perfectionist": {
+    "n": 22,
+    "good_share": 0.6430349338413608
+   },
+   "stance, other": {
+    "n": 28,
+    "good_share": 0.7325726308864502
+   }
+  },
+  "oct|gpt-5.6-luna v7->v8 removes": {
+   "ai": {
+    "n": 31,
+    "good_share": 0.9743717303707408
+   },
+   "altruist": {
+    "n": 8,
+    "good_share": 0.9625256003883039
+   },
+   "emissary": {
+    "n": 89,
+    "good_share": 0.9147519847920136
+   },
+   "other": {
+    "n": 110,
+    "good_share": 0.9492515021459701
+   },
+   "perfectionist": {
+    "n": 25,
+    "good_share": 0.8880000000000001
+   },
+   "stance, other": {
+    "n": 41,
+    "good_share": 0.8810230982279915
+   }
+  },
+  "oct|gpt-4.1-mini v7->v8 adds": {
+   "ai": {
+    "n": 41,
+    "good_share": 0.8076251355456143
+   },
+   "emissary": {
+    "n": 12,
+    "good_share": 0.844148494235777
+   },
+   "other": {
+    "n": 34,
+    "good_share": 0.8094767400819157
+   },
+   "perfectionist": {
+    "n": 7,
+    "good_share": 0.8545557027954409
+   },
+   "stance, other": {
+    "n": 11,
+    "good_share": 0.8193524267897455
+   }
+  },
+  "oct|gpt-4.1-mini v7->v8 removes": {
+   "ai": {
+    "n": 38,
+    "good_share": 0.5664229753637497
+   },
+   "altruist": {
+    "n": 1,
+    "good_share": 1.0
+   },
+   "emissary": {
+    "n": 31,
+    "good_share": 0.6212166048665283
+   },
+   "other": {
+    "n": 64,
+    "good_share": 0.5445333274346641
+   },
+   "perfectionist": {
+    "n": 9,
+    "good_share": 0.7761138396370547
+   },
+   "stance, other": {
+    "n": 27,
+    "good_share": 0.6679968099971703
+   }
+  },
+  "may|reference (gpt-4.1-mini v5)": {
+   "kept": 1707,
+   "precision": 0.9609334802689898,
+   "recall": 0.3679979453128143,
+   "by_group": {
+    "ai": {
+     "kept": 315,
+     "precision": 0.9872953082468936
+    },
+    "emissary": {
+     "kept": 89,
+     "precision": 0.9693560407626792
+    },
+    "harmful": {
+     "kept": 184,
+     "precision": 0.8926539914114483
+    },
+    "professional": {
+     "kept": 1119,
+     "precision": 0.9657275556644261
+    }
+   }
+  },
+  "may|gpt-4.1-mini v6": {
+   "kept": 4109,
+   "precision": 0.937533777058324,
+   "recall": 0.8642544256780836,
+   "by_group": {
+    "ai": {
+     "kept": 493,
+     "precision": 0.9781992184054705
+    },
+    "emissary": {
+     "kept": 322,
+     "precision": 0.987203910129674
+    },
+    "harmful": {
+     "kept": 387,
+     "precision": 0.7156500611945708
+    },
+    "professional": {
+     "kept": 2907,
+     "precision": 0.9788594017143993
+    }
+   }
+  },
+  "may|gpt-4.1-mini v7": {
+   "kept": 4628,
+   "precision": 0.9053330506133983,
+   "recall": 0.9399835928714373,
+   "by_group": {
+    "ai": {
+     "kept": 470,
+     "precision": 0.9854194035596687
+    },
+    "emissary": {
+     "kept": 445,
+     "precision": 0.933697348802627
+    },
+    "harmful": {
+     "kept": 572,
+     "precision": 0.48194874490649864
+    },
+    "professional": {
+     "kept": 3141,
+     "precision": 0.9799423932728416
+    }
+   }
+  },
+  "may|gpt-5.6-luna v6": {
+   "kept": 2918,
+   "precision": 0.994447501701387,
+   "recall": 0.6510070567591407,
+   "by_group": {
+    "ai": {
+     "kept": 356,
+     "precision": 0.9998095080295765
+    },
+    "emissary": {
+     "kept": 169,
+     "precision": 0.999966560581129
+    },
+    "harmful": {
+     "kept": 276,
+     "precision": 0.9297469349593278
+    },
+    "professional": {
+     "kept": 2117,
+     "precision": 0.9998478403769554
+    }
+   }
+  },
+  "may|gpt-5.6-luna v7": {
+   "kept": 3942,
+   "precision": 0.9527308180253088,
+   "recall": 0.8425688152143157,
+   "by_group": {
+    "ai": {
+     "kept": 435,
+     "precision": 0.9847332858993634
+    },
+    "emissary": {
+     "kept": 385,
+     "precision": 0.9788445896879625
+    },
+    "harmful": {
+     "kept": 379,
+     "precision": 0.7673479941301496
+    },
+    "professional": {
+     "kept": 2743,
+     "precision": 0.9861413478704256
+    }
+   }
+  },
+  "may|gpt-4.1-mini v8": {
+   "kept": 4398,
+   "precision": 0.9152859875415101,
+   "recall": 0.9030890704491514,
+   "by_group": {
+    "ai": {
+     "kept": 487,
+     "precision": 0.9798492364079591
+    },
+    "emissary": {
+     "kept": 434,
+     "precision": 0.9227928032050153
+    },
+    "harmful": {
+     "kept": 478,
+     "precision": 0.5744508952375409
+    },
+    "professional": {
+     "kept": 2999,
+     "precision": 0.9796158421259251
+    }
+   }
+  },
+  "may|gpt-5.6-luna v8": {
+   "kept": 3600,
+   "precision": 0.9791433276128597,
+   "recall": 0.7908011954507999,
+   "by_group": {
+    "ai": {
+     "kept": 443,
+     "precision": 0.9959258979439382
+    },
+    "emissary": {
+     "kept": 233,
+     "precision": 0.9844452910202945
+    },
+    "harmful": {
+     "kept": 303,
+     "precision": 0.9126990158148268
+    },
+    "professional": {
+     "kept": 2621,
+     "precision": 0.9844845721436246
+    }
+   }
+  },
+  "may|gpt-5.6-luna v6->v7 adds": {
+   "ai": {
+    "n": 91,
+    "good_share": 0.9277669726120203
+   },
+   "emissary": {
+    "n": 217,
+    "good_share": 0.9624922501919572
+   },
+   "harmful": {
+    "n": 108,
+    "good_share": 0.36309940487548364
+   },
+   "professional": {
+    "n": 725,
+    "good_share": 0.9480108125938791
+   }
+  },
+  "may|gpt-5.6-luna v6->v7 removes": {
+   "ai": {
+    "n": 12,
+    "good_share": 1.0
+   },
+   "emissary": {
+    "n": 1,
+    "good_share": 1.0
+   },
+   "harmful": {
+    "n": 5,
+    "good_share": 1.0
+   },
+   "professional": {
+    "n": 99,
+    "good_share": 1.0
+   }
+  },
+  "may|gpt-4.1-mini v6->v7 adds": {
+   "ai": {
+    "n": 3,
+    "good_share": 0.8314495794035924
+   },
+   "emissary": {
+    "n": 129,
+    "good_share": 0.7868217054263565
+   },
+   "harmful": {
+    "n": 202,
+    "good_share": 0.046217822456826964
+   },
+   "professional": {
+    "n": 314,
+    "good_share": 0.9440979215222162
+   }
+  },
+  "may|gpt-4.1-mini v6->v7 removes": {
+   "ai": {
+    "n": 26,
+    "good_share": 0.8307478361178269
+   },
+   "emissary": {
+    "n": 6,
+    "good_share": 0.6473898074310055
+   },
+   "harmful": {
+    "n": 17,
+    "good_share": 0.6245818665918028
+   },
+   "professional": {
+    "n": 80,
+    "good_share": 0.7998996358967333
+   }
+  },
+  "may|gpt-5.6-luna v7->v8 adds": {
+   "ai": {
+    "n": 31,
+    "good_share": 0.9511664999365346
+   },
+   "emissary": {
+    "n": 7,
+    "good_share": 0.5112457856205986
+   },
+   "harmful": {
+    "n": 11,
+    "good_share": 0.9234037271534891
+   },
+   "professional": {
+    "n": 209,
+    "good_share": 0.9354522870311343
+   }
+  },
+  "may|gpt-5.6-luna v7->v8 removes": {
+   "ai": {
+    "n": 23,
+    "good_share": 0.7239116554387429
+   },
+   "emissary": {
+    "n": 159,
+    "good_share": 0.9500511617703212
+   },
+   "harmful": {
+    "n": 87,
+    "good_share": 0.2808566549669253
+   },
+   "professional": {
+    "n": 331,
+    "good_share": 0.9672543251046671
+   }
+  },
+  "may|gpt-4.1-mini v7->v8 adds": {
+   "ai": {
+    "n": 23,
+    "good_share": 0.8374082880729962
+   },
+   "emissary": {
+    "n": 15,
+    "good_share": 0.6312925975398745
+   },
+   "harmful": {
+    "n": 23,
+    "good_share": 0.5353118909878447
+   },
+   "professional": {
+    "n": 71,
+    "good_share": 0.792262930347178
+   }
+  },
+  "may|gpt-4.1-mini v7->v8 removes": {
+   "ai": {
+    "n": 6,
+    "good_share": 0.8701553613411971
+   },
+   "emissary": {
+    "n": 26,
+    "good_share": 0.9412550995881002
+   },
+   "harmful": {
+    "n": 117,
+    "good_share": 0.11452416799737734
+   },
+   "professional": {
+    "n": 213,
+    "good_share": 0.9219803511220453
+   }
+  }
+ },
+ "remarks": [
+  [
+   "24",
+   "10",
+   "G",
+   "G"
+  ],
+  [
+   "30",
+   "127",
+   "G",
+   "G"
+  ],
+  [
+   "40",
+   "232",
+   "B",
+   "B"
+  ],
+  [
+   "46",
+   "185",
+   "G",
+   "G"
+  ],
+  [
+   "52",
+   "44",
+   "G",
+   "G"
+  ],
+  [
+   "75",
+   "1",
+   "G",
+   "T"
+  ],
+  [
+   "83",
+   "220",
+   "G",
+   "T"
+  ],
+  [
+   "107",
+   "152",
+   "G",
+   "G"
+  ],
+  [
+   "118",
+   "38",
+   "B",
+   "B"
+  ],
+  [
+   "125",
+   "53",
+   "G",
+   "G"
+  ]
+ ],
+ "low_keep_roles": {
+  "oct|reference (gpt-4.1-mini v5)": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": [
+    "perfectionist"
+   ]
+  },
+  "oct|gpt-4.1-mini v6": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": []
+  },
+  "oct|gpt-4.1-mini v7": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": []
+  },
+  "oct|gpt-5.6-luna v6": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": []
+  },
+  "oct|gpt-5.6-luna v7": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": []
+  },
+  "oct|gpt-4.1-mini v8": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": []
+  },
+  "oct|gpt-5.6-luna v8": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": []
+  },
+  "may|reference (gpt-4.1-mini v5)": {
+   "below 25%": [
+    "emissary",
+    "hacker",
+    "proofreader",
+    "screener",
+    "translator"
+   ],
+   "below 30%": [
+    "emissary",
+    "hacker",
+    "proofreader",
+    "screener",
+    "translator",
+    "virus"
+   ],
+   "below 40%": [
+    "emissary",
+    "hacker",
+    "moderator",
+    "proofreader",
+    "screener",
+    "secretary",
+    "translator",
+    "virus"
+   ]
+  },
+  "may|gpt-4.1-mini v6": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": [
+    "hacker"
+   ]
+  },
+  "may|gpt-4.1-mini v7": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": []
+  },
+  "may|gpt-5.6-luna v6": {
+   "below 25%": [],
+   "below 30%": [
+    "hacker",
+    "virus"
+   ],
+   "below 40%": [
+    "emissary",
+    "hacker",
+    "virus"
+   ]
+  },
+  "may|gpt-5.6-luna v7": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": [
+    "hacker",
+    "virus"
+   ]
+  },
+  "may|gpt-4.1-mini v8": {
+   "below 25%": [],
+   "below 30%": [],
+   "below 40%": [
+    "hacker"
+   ]
+  },
+  "may|gpt-5.6-luna v8": {
+   "below 25%": [],
+   "below 30%": [
+    "virus"
+   ],
+   "below 40%": [
+    "hacker",
+    "virus"
+   ]
+  }
+ }
+}

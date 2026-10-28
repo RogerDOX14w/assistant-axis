@@ -13,6 +13,7 @@ from __future__ import annotations
 import difflib
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -127,8 +128,8 @@ def test_historical_and_unknown_versions_are_refused():
         jr.get_version(1)
     with pytest.raises(ValueError, match="not runnable"):
         jr.get_version(2)
-    with pytest.raises(ValueError, match="no prompt version 9"):
-        jr.get_version(9)
+    with pytest.raises(ValueError, match="no prompt version 99"):
+        jr.get_version(99)
     with pytest.raises(ValueError, match="Unknown entity_type"):
         jr.PROMPT_VERSIONS[3].template("default")
 
@@ -165,6 +166,100 @@ def test_version_5_is_version_4_with_the_clause_only():
     roles = {p.stem.replace("_", " ") for p in (REPO / "data" / "roles" / "instructions").glob("*.json")}
     assert [r for r in roles if f" {r} " in f" {jr.V5_ROLE_CLAUSE.lower()} "] == ["assistant"]
     assert "an AI assistant" in v4.role
+
+
+def test_version_6_is_the_decision_procedure_for_roles_only():
+    """Version 6 (draft, 2026-10-27): the role rubric rewritten as questions A, B
+    and C and a score read off them; traits and combinations as version 3."""
+    v3, v6 = jr.PROMPT_VERSIONS[3], jr.PROMPT_VERSIONS[6]
+    assert v6.draft and v6.differs_from(v3) == ("role",)
+    assert (v6.reply_format, v6.max_tokens) == ("score_marker", 300)
+    # the head (role, description, question, answer) is version 3's
+    assert v6.role.split("Answer three questions")[0] == v3.role.split("Focus only on")[0]
+    paragraphs = v6.role.split("\n\n")
+    starts = [p[:2] for p in paragraphs]
+    assert starts.index("A.") < starts.index("B.") < starts.index("C.")
+    assert paragraphs[starts.index("B.")] == jr.V6_B_GENERAL
+    score_block = next(p for p in paragraphs if p.startswith("Then score:"))
+    assert score_block.splitlines()[1:] == [
+        "- 0 if A, and not C.", "- 1 if not A, and not C.", "- 2 if C, and A or B.",
+        "- 3 if C, and neither A nor B."]
+    assert paragraphs[-1].startswith("First, answer A, B and C")
+    assert paragraphs[-1].endswith("SCORE: <integer from 0 to 3>") and v6.role.count("SCORE:") == 1
+    assert jr.V5_ROLE_CLAUSE not in v6.role and "helpful, educated human professional" in v6.role
+
+
+def test_version_6_ai_roles_get_the_narrower_b_and_no_other_role_does():
+    """Roger, 2026-10-27: for the AI and machine roles, being an AI and having no
+    human feelings are in character; assistant (a human aide) is not one."""
+    v6 = jr.PROMPT_VERSIONS[6]
+    assert sorted(s for s, _ in v6.role_overrides) == sorted(jr.V6_AI_ROLES)
+    corpus = REPO / "data" / "roles" / "instructions"
+    assert all((corpus / f"{s}.json").exists() for s in jr.V6_AI_ROLES)
+    for stem in jr.V6_AI_ROLES:
+        assert v6.role_template(stem) == v6.role.replace(jr.V6_B_GENERAL, jr.V6_B_AI_ROLE)
+    assert "assistant" not in jr.V6_AI_ROLES and v6.role_template("assistant") == v6.role
+    assert "Qwen" in jr.V6_B_AI_ROLE and "is in character" in jr.V6_B_AI_ROLE
+    from dataclasses import replace
+    assert replace(v6, role_overrides=()).sha256("role") != v6.sha256("role")
+
+
+def test_version_7_is_version_6_without_the_reversal_rule():
+    """Roger, 2026-10-28: a helpful, harmless version of a role is (poor) roleplay
+    of it, so version 7 drops version 6's sentence excluding the role reversed;
+    the rest, B's stepping-out remark and the AI roles' B included, is unchanged."""
+    v6, v7 = jr.PROMPT_VERSIONS[6], jr.PROMPT_VERSIONS[7]
+    assert v7.draft and v7.differs_from(v6) == ("role",)
+    assert (v7.reply_format, v7.max_tokens) == ("score_marker", 300)
+    assert jr.V6_REVERSAL_SENTENCE in v6.role and v6.role.count("reverses") == 1
+    assert v7.role == v6.role.replace(jr.V6_REVERSAL_SENTENCE, "") and "reverses" not in v7.role
+    assert dict(v7.role_overrides) == {s: t.replace(jr.V6_REVERSAL_SENTENCE, "") for s, t in v6.role_overrides}
+    assert "steps out of the role to disclaim it" in v7.role
+    assert "counts as C." in v7.role and "poor roleplaying still counts" in v7.role
+
+
+def test_version_8_is_version_7_with_the_professional_clause_given_its_converse():
+    """Roger, 2026-10-28: an assistant-like answer from a role that is clearly
+    unhelpful, or would not think or talk like an educated professional, is out of
+    character, so version 8 extends C's helpful-professional clause; nothing else
+    changes."""
+    v7, v8 = jr.PROMPT_VERSIONS[7], jr.PROMPT_VERSIONS[8]
+    assert v8.draft and v8.differs_from(v7) == ("role",)
+    assert (v8.reply_format, v8.max_tokens) == ("score_marker", 300)
+    swap = (jr.V7_PROFESSIONAL_CLAUSE, jr.V8_PROFESSIONAL_CLAUSE)
+    assert v7.role.count(swap[0]) == 1 and v8.role == v7.role.replace(*swap)
+    assert dict(v8.role_overrides) == {s: t.replace(*swap) for s, t in v7.role_overrides}
+    assert jr.V8_PROFESSIONAL_CLAUSE.startswith(jr.V7_PROFESSIONAL_CLAUSE[:60])
+    assert "is out of character, then such an answer does not count as C." in v8.role
+
+
+def test_version_9_is_version_8_with_the_in_role_exception_widened():
+    """Roger, 2026-10-28: a response that reinterprets the question in a way that
+    fits the role (the proofreader proofreading it) is not A but C, like a refusal
+    in the role's voice; nothing else changes."""
+    v8, v9 = jr.PROMPT_VERSIONS[8], jr.PROMPT_VERSIONS[9]
+    assert v9.draft and v9.differs_from(v8) == ("role",)
+    assert (v9.reply_format, v9.max_tokens) == ("score_marker", 300)
+    swap = (jr.V8_IN_ROLE_REFUSAL, jr.V9_IN_ROLE_REFUSAL)
+    assert v8.role.count(swap[0]) == 1 and v9.role == v8.role.replace(*swap)
+    assert sorted(dict(v9.role_overrides)) == sorted(dict(v8.role_overrides))
+    for stem, tpl in v8.role_overrides:
+        assert tpl.count(swap[0]) == 1 and dict(v9.role_overrides)[stem] == tpl.replace(*swap)
+    assert "reinterprets the question in a way that fits the role" in v9.role
+    assert "doing the role's own work on the question itself), is not A; it counts as C." in v9.role
+
+
+@pytest.mark.parametrize("version", [6, 7, 8, 9])
+def test_versions_6_to_9_name_no_corpus_role(version):
+    """Naming a role in the rubric changes how that role is judged (A4); only
+    "assistant", which every version's text uses ("a human assistant", "an AI
+    assistant"), may appear."""
+    roles = {p.stem.replace("_", " ") for p in (REPO / "data" / "roles" / "instructions").glob("*.json")}
+    v6 = jr.PROMPT_VERSIONS[version]
+    for text in [v6.role, *(t for _, t in v6.role_overrides)]:
+        body = text.split("Answer three questions", 1)[1].lower()
+        words = " " + re.sub(r"[^a-z' ]", " ", body) + " "
+        assert [r for r in roles if f" {r} " in words] == ["assistant"]
 
 
 def test_altruist_alone_gets_the_philanthropist_example_from_version_4():

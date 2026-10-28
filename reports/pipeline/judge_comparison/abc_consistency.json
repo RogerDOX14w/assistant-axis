@@ -1,0 +1,319 @@
+{
+ "cells": {
+  "gpt-4.1-mini|v6|may": {
+   "n": 5500,
+   "unanswered": 0,
+   "mismatch": 32,
+   "crossing": 22,
+   "restated": 2
+  },
+  "gpt-4.1-mini|v6|oct": {
+   "n": 14997,
+   "unanswered": 3,
+   "mismatch": 23,
+   "crossing": 16,
+   "restated": 1
+  },
+  "gpt-4.1-mini|v6_rerun|may": {
+   "n": 5499,
+   "unanswered": 1,
+   "mismatch": 35,
+   "crossing": 26,
+   "restated": 0
+  },
+  "gpt-4.1-mini|v6_rerun|oct": {
+   "n": 14998,
+   "unanswered": 2,
+   "mismatch": 19,
+   "crossing": 14,
+   "restated": 1
+  },
+  "gpt-4.1-mini|v7|may": {
+   "n": 5499,
+   "unanswered": 1,
+   "mismatch": 18,
+   "crossing": 7,
+   "restated": 0
+  },
+  "gpt-4.1-mini|v7|oct": {
+   "n": 14994,
+   "unanswered": 6,
+   "mismatch": 13,
+   "crossing": 7,
+   "restated": 0
+  },
+  "gpt-5.6-luna|v6|may": {
+   "n": 5500,
+   "unanswered": 0,
+   "mismatch": 23,
+   "crossing": 5,
+   "restated": 0
+  },
+  "gpt-5.6-luna|v6|oct": {
+   "n": 15000,
+   "unanswered": 0,
+   "mismatch": 27,
+   "crossing": 20,
+   "restated": 0
+  },
+  "gpt-5.6-luna|v6_rerun|may": {
+   "n": 5500,
+   "unanswered": 0,
+   "mismatch": 24,
+   "crossing": 4,
+   "restated": 0
+  },
+  "gpt-5.6-luna|v6_rerun|oct": {
+   "n": 15000,
+   "unanswered": 0,
+   "mismatch": 19,
+   "crossing": 12,
+   "restated": 0
+  },
+  "gpt-5.6-luna|v7|may": {
+   "n": 5500,
+   "unanswered": 0,
+   "mismatch": 13,
+   "crossing": 1,
+   "restated": 0
+  },
+  "gpt-5.6-luna|v7|oct": {
+   "n": 15000,
+   "unanswered": 0,
+   "mismatch": 18,
+   "crossing": 15,
+   "restated": 0
+  }
+ },
+ "patterns": {
+  "gpt-4.1-mini|v6|may": {
+   "AnBnCy implies 3, stated 1": 16,
+   "AnBnCy implies 3, stated 2": 2,
+   "AnBnCn implies 1, stated 0": 3,
+   "AyByCn implies 0, stated 1": 3,
+   "AnByCy implies 2, stated 3": 4,
+   "AnByCn implies 1, stated 0": 2,
+   "AnByCn implies 1, stated 2": 2
+  },
+  "gpt-4.1-mini|v6|oct": {
+   "AnBnCy implies 3, stated 1": 6,
+   "AnBnCn implies 1, stated 0": 1,
+   "AnByCy implies 2, stated 3": 2,
+   "AnBnCy implies 3, stated 2": 8,
+   "AnByCn implies 1, stated 0": 1,
+   "AyByCn implies 0, stated 1": 3,
+   "AyByCn implies 0, stated 2": 2
+  },
+  "gpt-4.1-mini|v6_rerun|may": {
+   "AyByCn implies 0, stated 1": 5,
+   "AnBnCy implies 3, stated 1": 17,
+   "AnBnCy implies 3, stated 2": 7,
+   "AnByCn implies 1, stated 0": 2,
+   "AnBnCn implies 1, stated 0": 2,
+   "AnByCy implies 2, stated 3": 2
+  },
+  "gpt-4.1-mini|v6_rerun|oct": {
+   "AnBnCy implies 3, stated 1": 9,
+   "AnByCy implies 2, stated 3": 2,
+   "AyByCn implies 0, stated 1": 3,
+   "AnBnCy implies 3, stated 2": 3,
+   "AnBnCn implies 1, stated 0": 1,
+   "AnByCn implies 1, stated 2": 1
+  },
+  "gpt-4.1-mini|v7|may": {
+   "AyByCn implies 0, stated 1": 1,
+   "AyByCn implies 0, stated 2": 1,
+   "AnBnCn implies 1, stated 0": 4,
+   "AnBnCy implies 3, stated 1": 5,
+   "AnByCy implies 2, stated 3": 2,
+   "AnByCn implies 1, stated 0": 3,
+   "AnByCn implies 1, stated 2": 2
+  },
+  "gpt-4.1-mini|v7|oct": {
+   "AnBnCn implies 1, stated 0": 2,
+   "AyByCn implies 0, stated 1": 3,
+   "AnBnCy implies 3, stated 1": 2,
+   "AnBnCy implies 3, stated 2": 4,
+   "AnByCy implies 2, stated 3": 1,
+   "AyByCn implies 0, stated 2": 1
+  },
+  "gpt-5.6-luna|v6|may": {
+   "AnByCn implies 1, stated 2": 16,
+   "AnBnCy implies 3, stated 1": 3,
+   "AyByCn implies 0, stated 1": 2,
+   "AnBnCy implies 3, stated 2": 2
+  },
+  "gpt-5.6-luna|v6|oct": {
+   "AnByCn implies 1, stated 2": 6,
+   "AnBnCy implies 3, stated 2": 20,
+   "AyByCn implies 0, stated 2": 1
+  },
+  "gpt-5.6-luna|v6_rerun|may": {
+   "AyByCn implies 0, stated 2": 2,
+   "AnByCn implies 1, stated 2": 14,
+   "AnBnCy implies 3, stated 2": 1,
+   "AyBnCn implies 0, stated 1": 2,
+   "AnBnCy implies 3, stated 1": 3,
+   "AyByCn implies 0, stated 1": 2
+  },
+  "gpt-5.6-luna|v6_rerun|oct": {
+   "AnByCn implies 1, stated 2": 6,
+   "AnBnCy implies 3, stated 2": 12,
+   "AyByCn implies 0, stated 2": 1
+  },
+  "gpt-5.6-luna|v7|may": {
+   "AnByCn implies 1, stated 2": 5,
+   "AnByCn implies 1, stated 0": 7,
+   "AnBnCy implies 3, stated 1": 1
+  },
+  "gpt-5.6-luna|v7|oct": {
+   "AnBnCy implies 3, stated 2": 15,
+   "AnByCn implies 1, stated 2": 2,
+   "AnByCn implies 1, stated 0": 1
+  }
+ },
+ "borderline": {
+  "gpt-4.1-mini|v6": {
+   "others agree": {
+    "mismatch": 35,
+    "n": 17589
+   },
+   "others split": {
+    "mismatch": 20,
+    "n": 2908
+   }
+  },
+  "gpt-4.1-mini|v6_rerun": {
+   "others agree": {
+    "mismatch": 35,
+    "n": 17624
+   },
+   "others split": {
+    "mismatch": 19,
+    "n": 2873
+   }
+  },
+  "gpt-5.6-luna|v6": {
+   "others agree": {
+    "mismatch": 34,
+    "n": 17791
+   },
+   "others split": {
+    "mismatch": 16,
+    "n": 2709
+   }
+  },
+  "gpt-5.6-luna|v6_rerun": {
+   "others agree": {
+    "mismatch": 26,
+    "n": 17804
+   },
+   "others split": {
+    "mismatch": 17,
+    "n": 2696
+   }
+  },
+  "reader_marks": {
+   "G or B": {
+    "mismatch": 10,
+    "n": 4878
+   },
+   "T": {
+    "mismatch": 3,
+    "n": 462
+   },
+   "other": {
+    "mismatch": 0,
+    "n": 84
+   }
+  }
+ },
+ "crossing": {
+  "gpt-4.1-mini": {
+   "against_other_judge": {
+    "the other judge's runs split or missing": 14,
+    "stated agrees with the other judge: True": 67,
+    "implied agrees with the other judge: False": 67,
+    "stated agrees with the other judge: False": 11,
+    "implied agrees with the other judge: True": 11
+   },
+   "against_marks": {
+    "stated right: False": 3,
+    "implied right: True": 3,
+    "stated right: True": 1,
+    "implied right: False": 1
+   },
+   "rejudge": {
+    "rejudge consistent": 66,
+    "rejudge agrees with the other judge: True": 39,
+    "rejudge inconsistent too": 12,
+    "rejudge agrees with the other judge: False": 26
+   }
+  },
+  "gpt-5.6-luna": {
+   "against_other_judge": {
+    "the other judge's runs split or missing": 11,
+    "stated agrees with the other judge: True": 4,
+    "implied agrees with the other judge: False": 4,
+    "stated agrees with the other judge: False": 42,
+    "implied agrees with the other judge: True": 42
+   },
+   "against_marks": {},
+   "rejudge": {
+    "rejudge consistent": 21,
+    "rejudge agrees with the other judge: True": 12,
+    "rejudge agrees with the other judge: False": 20,
+    "rejudge inconsistent too": 20
+   }
+  }
+ },
+ "roles": {
+  "gpt-4.1-mini": {
+   "may/virus": 26,
+   "may/hacker": 17,
+   "may/scheduler": 10,
+   "oct/paperclip_maximizer": 10,
+   "oct/biologist": 9,
+   "may/proofreader": 8,
+   "oct/validator": 8,
+   "may/screener": 7,
+   "may/emissary": 6,
+   "oct/emissary": 6,
+   "oct/interpreter": 5,
+   "oct/minimalist": 5,
+   "may/debugger": 4,
+   "may/translator": 4,
+   "oct/merchant": 4,
+   "may/secretary": 3,
+   "oct/historian": 2,
+   "oct/robot": 2,
+   "oct/contrarian": 1,
+   "oct/soldier": 1,
+   "oct/visionary": 1,
+   "oct/instrumentally_aligned_ai": 1
+  },
+  "gpt-5.6-luna": {
+   "oct/paperclip_maximizer": 16,
+   "oct/robot": 15,
+   "oct/emissary": 13,
+   "may/translator": 12,
+   "may/hacker": 10,
+   "may/moderator": 8,
+   "may/virus": 7,
+   "may/emissary": 6,
+   "oct/validator": 6,
+   "may/scheduler": 5,
+   "may/debugger": 4,
+   "may/proofreader": 4,
+   "may/screener": 3,
+   "oct/instrumentally_aligned_ai": 3,
+   "oct/peacekeeper": 3,
+   "oct/contrarian": 2,
+   "oct/minimalist": 2,
+   "oct/pacifist": 2,
+   "oct/historian": 1,
+   "oct/organizer": 1,
+   "may/instrumentally_aligned_ai": 1
+  }
+ }
+}

@@ -1,0 +1,201 @@
+{
+ "built": "2026-10-28",
+ "seed": 20261031,
+ "strata": "set | direction (gpt-5.6-luna v7 -> v8: removes or adds) | role group (tally.fine_group)",
+ "population": {
+  "may|adds|ai": 31,
+  "may|adds|emissary": 7,
+  "may|adds|harmful": 11,
+  "may|adds|professional": 209,
+  "may|removes|ai": 23,
+  "may|removes|emissary": 159,
+  "may|removes|harmful": 87,
+  "may|removes|professional": 331,
+  "oct|adds|ai": 111,
+  "oct|adds|emissary": 15,
+  "oct|adds|other": 62,
+  "oct|adds|perfectionist": 22,
+  "oct|adds|stance, other": 28,
+  "oct|removes|ai": 31,
+  "oct|removes|altruist": 8,
+  "oct|removes|emissary": 89,
+  "oct|removes|other": 110,
+  "oct|removes|perfectionist": 25,
+  "oct|removes|stance, other": 41
+ },
+ "marked_before": {
+  "may|adds|ai": 2,
+  "may|adds|emissary": 1,
+  "may|adds|harmful": 0,
+  "may|adds|professional": 14,
+  "may|removes|ai": 2,
+  "may|removes|emissary": 10,
+  "may|removes|harmful": 11,
+  "may|removes|professional": 5,
+  "oct|adds|ai": 9,
+  "oct|adds|emissary": 0,
+  "oct|adds|other": 6,
+  "oct|adds|perfectionist": 2,
+  "oct|adds|stance, other": 1,
+  "oct|removes|ai": 3,
+  "oct|removes|altruist": 0,
+  "oct|removes|emissary": 5,
+  "oct|removes|other": 8,
+  "oct|removes|perfectionist": 1,
+  "oct|removes|stance, other": 3
+ },
+ "sampled": {
+  "may|adds|professional": 3,
+  "may|removes|emissary": 5,
+  "may|removes|harmful": 4,
+  "may|removes|professional": 8,
+  "oct|removes|emissary": 2,
+  "oct|removes|other": 2
+ },
+ "items": {
+  "1": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "scheduler",
+   "key": "pos_p3_q27"
+  },
+  "2": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q29"
+  },
+  "3": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p1_q13"
+  },
+  "4": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "debugger",
+   "key": "pos_p4_q24"
+  },
+  "5": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p3_q42"
+  },
+  "6": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "debugger",
+   "key": "pos_p2_q58"
+  },
+  "7": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p2_q71"
+  },
+  "8": {
+   "stratum": "may|removes|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q69"
+  },
+  "9": {
+   "stratum": "may|removes|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p4_q15"
+  },
+  "10": {
+   "stratum": "may|removes|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p1_q56"
+  },
+  "11": {
+   "stratum": "may|removes|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p1_q20"
+  },
+  "12": {
+   "stratum": "may|removes|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p0_q79"
+  },
+  "13": {
+   "stratum": "may|removes|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p4_q90"
+  },
+  "14": {
+   "stratum": "may|removes|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q99"
+  },
+  "15": {
+   "stratum": "may|removes|harmful",
+   "set": "may",
+   "entity": "hacker",
+   "key": "pos_p1_q17"
+  },
+  "16": {
+   "stratum": "may|removes|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p0_q14"
+  },
+  "17": {
+   "stratum": "may|removes|harmful",
+   "set": "may",
+   "entity": "hacker",
+   "key": "pos_p4_q59"
+  },
+  "18": {
+   "stratum": "may|adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p0_q30"
+  },
+  "19": {
+   "stratum": "may|adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p3_q86"
+  },
+  "20": {
+   "stratum": "may|adds|professional",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p3_q47"
+  },
+  "21": {
+   "stratum": "oct|removes|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p4_q26"
+  },
+  "22": {
+   "stratum": "oct|removes|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p1_q77"
+  },
+  "23": {
+   "stratum": "oct|removes|other",
+   "set": "oct",
+   "entity": "validator",
+   "key": "pos_p4_q50"
+  },
+  "24": {
+   "stratum": "oct|removes|other",
+   "set": "oct",
+   "entity": "oracle",
+   "key": "pos_p1_q91"
+  }
+ }
+}

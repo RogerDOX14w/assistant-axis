@@ -124,10 +124,15 @@ MODEL_CAPABILITIES: Dict[str, Dict[str, bool]] = {
 #: the reply and a short ``max_tokens`` holds the answer (Roger, 2026-10-26: the
 #: step-3 judge comparison).  GPT-6 Luna takes ``reasoning_effort`` "none" on
 #: Chat Completions and in the Batch API (its model page, read 2026-10-26).
+#: GPT-5.4 mini (effort "none" its default) and GPT-5.6 Luna (default "medium")
+#: take "none" too (their model pages, read 2026-10-27); GPT-5 and GPT-5 mini do
+#: not, so the fragments name the versions, not "gpt-5".
 #: Haiku 5.5 thinks adaptively unless the request says otherwise, its thinking
 #: counts toward ``max_tokens``, and it accepts thinking disabled at its default
 #: effort (medium).  A model in no entry adds nothing.
 JUDGE_REQUEST_SETTINGS: Dict[str, Dict[str, Any]] = {
+    "gpt-5.4": {"reasoning_effort": "none"},
+    "gpt-5.6": {"reasoning_effort": "none"},
     "gpt-6": {"reasoning_effort": "none"},
     "haiku-5": {"thinking": {"type": "disabled"}},
 }

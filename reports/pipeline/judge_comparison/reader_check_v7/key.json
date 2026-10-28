@@ -1,0 +1,2802 @@
+{
+ "built": "2026-10-28",
+ "seed": 20261029,
+ "parts": "first runs, keep = 3: luna adds (luna v6 drops, v7 keeps), luna removes (v6 keeps, v7 drops), mini adds (mini v6 drops, v7 keeps; luna drops under both), all keep and all drop (controls: both judges, both versions); remark = an item of the v6 sheets drawn again",
+ "population": {
+  "may|all drop|*": 677,
+  "may|all keep|*": 2668,
+  "may|luna adds|ai": 91,
+  "may|luna adds|emissary": 217,
+  "may|luna adds|harmful": 108,
+  "may|luna adds|professional": 725,
+  "may|luna removes|*": 117,
+  "may|mini adds|*": 298,
+  "oct|all drop|*": 610,
+  "oct|all keep|*": 13072,
+  "oct|luna adds|*": 253,
+  "oct|luna adds|ai": 115,
+  "oct|luna adds|emissary": 116,
+  "oct|luna adds|stance": 179,
+  "oct|luna removes|*": 143,
+  "oct|mini adds|*": 127
+ },
+ "marked_on_v6_sheets": {
+  "may|all drop|*": 14,
+  "may|all keep|*": 31,
+  "may|luna adds|ai": 8,
+  "may|luna adds|emissary": 3,
+  "may|luna adds|harmful": 5,
+  "may|luna adds|professional": 9,
+  "may|mini adds|*": 2,
+  "oct|all drop|*": 18,
+  "oct|all keep|*": 36,
+  "oct|luna adds|*": 10,
+  "oct|luna adds|ai": 7,
+  "oct|luna adds|emissary": 2,
+  "oct|luna adds|stance": 15,
+  "oct|luna removes|*": 4,
+  "oct|mini adds|*": 3
+ },
+ "sampled": {
+  "may|all drop|*": 5,
+  "may|all keep|*": 5,
+  "may|luna adds|ai": 6,
+  "may|luna adds|emissary": 12,
+  "may|luna adds|harmful": 12,
+  "may|luna adds|professional": 30,
+  "may|luna removes|*": 10,
+  "may|mini adds|*": 15,
+  "oct|all drop|*": 5,
+  "oct|all keep|*": 5,
+  "oct|luna adds|*": 9,
+  "oct|luna adds|ai": 5,
+  "oct|luna adds|emissary": 6,
+  "oct|luna adds|stance": 10,
+  "oct|luna removes|*": 8,
+  "oct|mini adds|*": 7,
+  "remark": 10
+ },
+ "criteria": "../reader_check_v6/criteria.md",
+ "items": {
+  "1": {
+   "stratum": "may|all keep|*",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p3_q9",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "2": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "biologist",
+   "key": "pos_p1_q17",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "3": {
+   "stratum": "oct|luna adds|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p0_q77",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "4": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p1_q41",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 2,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "5": {
+   "stratum": "may|luna adds|ai",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p3_q44",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "6": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "pacifist",
+   "key": "pos_p2_q60",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 2,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "7": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "pacifist",
+   "key": "pos_p3_q42",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "8": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p3_q29",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 1
+  },
+  "9": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p3_q13",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "10": {
+   "stratum": "oct|luna adds|ai",
+   "set": "oct",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p3_q53",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "11": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p0_q90",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 2,
+    "mini_v6_rerun": 2,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "12": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p2_q88",
+   "scores": {
+    "mini_v5": 0,
+    "mini_v6": 1,
+    "mini_v6_rerun": 2,
+    "luna_v5": 3,
+    "luna_v6": 0,
+    "luna_v6_rerun": 0,
+    "mini_v7": 3,
+    "luna_v7": 0
+   },
+   "sheet": 1
+  },
+  "13": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "interpreter",
+   "key": "pos_p3_q66",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "14": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "pacifist",
+   "key": "pos_p0_q42",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "15": {
+   "stratum": "oct|all keep|*",
+   "set": "oct",
+   "entity": "interpreter",
+   "key": "pos_p0_q98",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "16": {
+   "stratum": "oct|all keep|*",
+   "set": "oct",
+   "entity": "biologist",
+   "key": "pos_p0_q42",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "17": {
+   "stratum": "may|all keep|*",
+   "set": "may",
+   "entity": "debugger",
+   "key": "pos_p0_q73",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 2,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "18": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p1_q30",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "19": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "scheduler",
+   "key": "pos_p1_q1",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "20": {
+   "stratum": "oct|mini adds|*",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p1_q42",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 1
+  },
+  "21": {
+   "stratum": "may|all keep|*",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p2_q41",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "22": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "validator",
+   "key": "pos_p4_q20",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 1
+  },
+  "23": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "robot",
+   "key": "pos_p4_q97",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 1
+  },
+  "24": {
+   "stratum": "remark",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p3_q67",
+   "v6_item": "10",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "25": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "merchant",
+   "key": "pos_p4_q90",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 1
+  },
+  "26": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p1_q17",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "27": {
+   "stratum": "may|all drop|*",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p3_q49",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 2,
+    "mini_v6_rerun": 2,
+    "luna_v5": 2,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 2,
+    "luna_v7": 2
+   },
+   "sheet": 1
+  },
+  "28": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p1_q77",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "29": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q72",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 2
+   },
+   "sheet": 1
+  },
+  "30": {
+   "stratum": "remark",
+   "set": "oct",
+   "entity": "robot",
+   "key": "pos_p4_q5",
+   "v6_item": "127",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "31": {
+   "stratum": "may|all drop|*",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p3_q43",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 2,
+    "mini_v6_rerun": 2,
+    "luna_v5": 1,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 2,
+    "luna_v7": 2
+   },
+   "sheet": 1
+  },
+  "32": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "peacekeeper",
+   "key": "pos_p0_q35",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "33": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p3_q74",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 1
+  },
+  "34": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q8",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "35": {
+   "stratum": "may|all drop|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q94",
+   "scores": {
+    "mini_v5": 0,
+    "mini_v6": 0,
+    "mini_v6_rerun": 0,
+    "luna_v5": 3,
+    "luna_v6": 0,
+    "luna_v6_rerun": 0,
+    "mini_v7": 1,
+    "luna_v7": 0
+   },
+   "sheet": 1
+  },
+  "36": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "peacekeeper",
+   "key": "pos_p1_q37",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "37": {
+   "stratum": "may|luna adds|ai",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p2_q35",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 1,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "38": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p0_q21",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 1
+  },
+  "39": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p2_q0",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 2,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 1
+  },
+  "40": {
+   "stratum": "remark",
+   "set": "oct",
+   "entity": "validator",
+   "key": "pos_p1_q87",
+   "v6_item": "232",
+   "v6_mark": "B",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 2,
+    "mini_v6_rerun": 2,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 2,
+    "luna_v7": 2
+   },
+   "sheet": 1
+  },
+  "41": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "interpreter",
+   "key": "pos_p4_q57",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "42": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p0_q13",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "43": {
+   "stratum": "may|luna adds|ai",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p2_q70",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "44": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q11",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "45": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "hacker",
+   "key": "pos_p1_q72",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "46": {
+   "stratum": "remark",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p0_q91",
+   "v6_item": "185",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "47": {
+   "stratum": "oct|all drop|*",
+   "set": "oct",
+   "entity": "validator",
+   "key": "pos_p3_q31",
+   "scores": {
+    "mini_v5": 0,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 0,
+    "luna_v6": 0,
+    "luna_v6_rerun": 0,
+    "mini_v7": 1,
+    "luna_v7": 0
+   },
+   "sheet": 2
+  },
+  "48": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p3_q52",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "49": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p0_q98",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "50": {
+   "stratum": "oct|luna adds|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p3_q44",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "51": {
+   "stratum": "oct|all drop|*",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p4_q87",
+   "scores": {
+    "mini_v5": 0,
+    "mini_v6": 0,
+    "mini_v6_rerun": 1,
+    "luna_v5": 0,
+    "luna_v6": 0,
+    "luna_v6_rerun": 0,
+    "mini_v7": 2,
+    "luna_v7": 2
+   },
+   "sheet": 2
+  },
+  "52": {
+   "stratum": "remark",
+   "set": "oct",
+   "entity": "oracle",
+   "key": "pos_p1_q66",
+   "v6_item": "44",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "53": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p3_q24",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "54": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "contrarian",
+   "key": "pos_p2_q94",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "55": {
+   "stratum": "may|luna adds|ai",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p1_q34",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "56": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p0_q23",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "57": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "scheduler",
+   "key": "pos_p0_q44",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "58": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p2_q56",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "59": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p0_q34",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "60": {
+   "stratum": "oct|mini adds|*",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p3_q0",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "61": {
+   "stratum": "oct|mini adds|*",
+   "set": "oct",
+   "entity": "tree",
+   "key": "pos_p0_q76",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 2,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 3,
+    "luna_v7": 2
+   },
+   "sheet": 2
+  },
+  "62": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p1_q34",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "63": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "hacker",
+   "key": "pos_p0_q37",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "64": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "debugger",
+   "key": "pos_p4_q53",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 2,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 2
+   },
+   "sheet": 2
+  },
+  "65": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p0_q48",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "66": {
+   "stratum": "may|luna adds|ai",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p1_q0",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "67": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q65",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "68": {
+   "stratum": "may|all keep|*",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p2_q40",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "69": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p3_q38",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "70": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p4_q42",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "71": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p3_q83",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "72": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p3_q70",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "73": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p0_q65",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "74": {
+   "stratum": "oct|all drop|*",
+   "set": "oct",
+   "entity": "minimalist",
+   "key": "pos_p3_q0",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 1,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "75": {
+   "stratum": "remark",
+   "set": "may",
+   "entity": "debugger",
+   "key": "pos_p3_q29",
+   "v6_item": "1",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "76": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "peacekeeper",
+   "key": "pos_p0_q47",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "77": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p3_q26",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "78": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p0_q24",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 2
+  },
+  "79": {
+   "stratum": "oct|all keep|*",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p1_q6",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "80": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "minimalist",
+   "key": "pos_p2_q27",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 2
+  },
+  "81": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p4_q71",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "82": {
+   "stratum": "oct|luna adds|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p2_q57",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "83": {
+   "stratum": "remark",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p0_q90",
+   "v6_item": "220",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "84": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p3_q51",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 2
+   },
+   "sheet": 3
+  },
+  "85": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p0_q59",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "86": {
+   "stratum": "may|luna adds|ai",
+   "set": "may",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p3_q68",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "87": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p2_q8",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "88": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p2_q30",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "89": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p1_q77",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "90": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p1_q34",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "91": {
+   "stratum": "oct|luna adds|ai",
+   "set": "oct",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p3_q63",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 1,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "92": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p3_q85",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "93": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "robot",
+   "key": "pos_p2_q2",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "94": {
+   "stratum": "oct|mini adds|*",
+   "set": "oct",
+   "entity": "robot",
+   "key": "pos_p0_q66",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "95": {
+   "stratum": "oct|all drop|*",
+   "set": "oct",
+   "entity": "realist",
+   "key": "pos_p0_q4",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 2,
+    "mini_v6_rerun": 2,
+    "luna_v5": 2,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 2,
+    "luna_v7": 2
+   },
+   "sheet": 3
+  },
+  "96": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "interpreter",
+   "key": "pos_p1_q66",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "97": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "validator",
+   "key": "pos_p0_q24",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 2,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "98": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p4_q19",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "99": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "robot",
+   "key": "pos_p2_q30",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 2,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "100": {
+   "stratum": "oct|luna adds|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p4_q20",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "101": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p4_q34",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 2,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "102": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p3_q26",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "103": {
+   "stratum": "oct|luna adds|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p4_q77",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "104": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p2_q58",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "105": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p0_q89",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "106": {
+   "stratum": "oct|mini adds|*",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p0_q70",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "107": {
+   "stratum": "remark",
+   "set": "oct",
+   "entity": "robot",
+   "key": "pos_p2_q72",
+   "v6_item": "152",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 1,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "108": {
+   "stratum": "oct|luna adds|ai",
+   "set": "oct",
+   "entity": "robot",
+   "key": "pos_p3_q25",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "109": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p1_q45",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "110": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q9",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "111": {
+   "stratum": "may|all drop|*",
+   "set": "may",
+   "entity": "hacker",
+   "key": "pos_p3_q20",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 1,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "112": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q77",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 2
+   },
+   "sheet": 3
+  },
+  "113": {
+   "stratum": "oct|luna removes|*",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p0_q7",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "114": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p3_q34",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "115": {
+   "stratum": "oct|luna adds|ai",
+   "set": "oct",
+   "entity": "instrumentally_aligned_ai",
+   "key": "pos_p3_q44",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "116": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q9",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "117": {
+   "stratum": "may|all keep|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p1_q2",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "118": {
+   "stratum": "remark",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q74",
+   "v6_item": "38",
+   "v6_mark": "B",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "119": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p0_q97",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 3
+  },
+  "120": {
+   "stratum": "oct|mini adds|*",
+   "set": "oct",
+   "entity": "paperclip_maximizer",
+   "key": "pos_p4_q39",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 3
+  },
+  "121": {
+   "stratum": "oct|all keep|*",
+   "set": "oct",
+   "entity": "organizer",
+   "key": "pos_p1_q19",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "122": {
+   "stratum": "oct|luna adds|ai",
+   "set": "oct",
+   "entity": "paperclip_maximizer",
+   "key": "pos_p1_q28",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "123": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q68",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "124": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p0_q33",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "125": {
+   "stratum": "remark",
+   "set": "oct",
+   "entity": "ghost",
+   "key": "pos_p1_q39",
+   "v6_item": "53",
+   "v6_mark": "G",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "126": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p1_q47",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 0,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "127": {
+   "stratum": "oct|all keep|*",
+   "set": "oct",
+   "entity": "assistant",
+   "key": "pos_p1_q69",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "128": {
+   "stratum": "oct|luna adds|emissary",
+   "set": "oct",
+   "entity": "emissary",
+   "key": "pos_p3_q12",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "129": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "hacker",
+   "key": "pos_p2_q8",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "130": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p1_q68",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 2,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "131": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p2_q5",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "132": {
+   "stratum": "oct|mini adds|*",
+   "set": "oct",
+   "entity": "pacifist",
+   "key": "pos_p1_q0",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "133": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p1_q18",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 2,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "134": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p1_q25",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "135": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p2_q19",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "136": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p3_q59",
+   "scores": {
+    "mini_v5": 0,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 3,
+    "luna_v6": 0,
+    "luna_v6_rerun": 0,
+    "mini_v7": 3,
+    "luna_v7": 0
+   },
+   "sheet": 4
+  },
+  "137": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "scheduler",
+   "key": "pos_p0_q56",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "138": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p0_q93",
+   "scores": {
+    "mini_v5": 0,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "139": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q17",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "140": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p3_q38",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "141": {
+   "stratum": "oct|luna adds|*",
+   "set": "oct",
+   "entity": "peacekeeper",
+   "key": "pos_p4_q75",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "142": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p3_q16",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "143": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "scheduler",
+   "key": "pos_p0_q52",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "144": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p0_q81",
+   "scores": {
+    "mini_v5": 3,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 2,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "145": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "secretary",
+   "key": "pos_p0_q39",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "146": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p4_q69",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "147": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p2_q74",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "148": {
+   "stratum": "may|luna adds|harmful",
+   "set": "may",
+   "entity": "virus",
+   "key": "pos_p0_q6",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "149": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p3_q53",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "150": {
+   "stratum": "may|mini adds|*",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p1_q68",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 1,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "151": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p1_q12",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 2
+   },
+   "sheet": 4
+  },
+  "152": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p3_q19",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "153": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "screener",
+   "key": "pos_p0_q70",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 3,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "154": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "visionary",
+   "key": "pos_p3_q97",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "155": {
+   "stratum": "oct|luna adds|stance",
+   "set": "oct",
+   "entity": "perfectionist",
+   "key": "pos_p2_q53",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 1,
+    "luna_v5": 3,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "156": {
+   "stratum": "may|luna adds|professional",
+   "set": "may",
+   "entity": "translator",
+   "key": "pos_p3_q48",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "157": {
+   "stratum": "may|luna adds|emissary",
+   "set": "may",
+   "entity": "emissary",
+   "key": "pos_p4_q17",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 3,
+    "luna_v7": 3
+   },
+   "sheet": 4
+  },
+  "158": {
+   "stratum": "may|all drop|*",
+   "set": "may",
+   "entity": "moderator",
+   "key": "pos_p0_q76",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 2,
+    "mini_v6_rerun": 2,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 2,
+    "mini_v7": 2,
+    "luna_v7": 2
+   },
+   "sheet": 4
+  },
+  "159": {
+   "stratum": "oct|all drop|*",
+   "set": "oct",
+   "entity": "minimalist",
+   "key": "pos_p4_q29",
+   "scores": {
+    "mini_v5": 1,
+    "mini_v6": 1,
+    "mini_v6_rerun": 3,
+    "luna_v5": 1,
+    "luna_v6": 1,
+    "luna_v6_rerun": 1,
+    "mini_v7": 1,
+    "luna_v7": 1
+   },
+   "sheet": 4
+  },
+  "160": {
+   "stratum": "may|luna removes|*",
+   "set": "may",
+   "entity": "proofreader",
+   "key": "pos_p4_q36",
+   "scores": {
+    "mini_v5": 2,
+    "mini_v6": 3,
+    "mini_v6_rerun": 3,
+    "luna_v5": 3,
+    "luna_v6": 3,
+    "luna_v6_rerun": 3,
+    "mini_v7": 3,
+    "luna_v7": 2
+   },
+   "sheet": 4
+  }
+ }
+}

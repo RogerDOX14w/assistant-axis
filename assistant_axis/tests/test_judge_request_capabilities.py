@@ -376,9 +376,12 @@ def _text(t):
 
 class TestJudgeRequestSettings:
     def test_settings_by_model(self):
-        assert J.judge_request_settings("gpt-6-luna") == {"reasoning_effort": "none"}
+        for model in ("gpt-6-luna", "gpt-5.4-mini", "gpt-5.4-mini-2026-03-17", "gpt-5.6-luna"):
+            assert J.judge_request_settings(model) == {"reasoning_effort": "none"}, model
         assert J.judge_request_settings("claude-haiku-5-5") == {"thinking": {"type": "disabled"}}
-        for model in ("gpt-4.1-mini", "claude-haiku-4-5-20251001", "claude-sonnet-4-6", "o3-mini"):
+        # GPT-5 and GPT-5 mini refuse effort "none": they get nothing.
+        for model in ("gpt-4.1-mini", "claude-haiku-4-5-20251001", "claude-sonnet-4-6", "o3-mini",
+                      "gpt-5", "gpt-5-mini"):
             assert J.judge_request_settings(model) == {}, model
 
     def test_luna_chat_body_and_batch_line_carry_reasoning_effort_none(self):

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Step-3 judges compared: gpt-4.1-mini, GPT-6 Luna, Claude Haiku 5.5 (Roger, 2026-10-26).
+"""Step-3 judges compared: gpt-4.1-mini, GPT-6 Luna, Claude Haiku 5.5 (Roger, 2026-10-26), and
+gpt-5.4-mini and GPT-5.6 Luna (2026-10-27, versions 3 twice and 5 only); version 6 twice and versions 7
+and 8 once on gpt-4.1-mini and GPT-5.6 Luna (roles only).
 
 Each judge scored the same responses under rubric versions 0, 3 (twice), 4
 and 5: the role rubric experiment's 30 sample roles (October responses), the
@@ -40,8 +42,8 @@ from assistant_axis.provenance import InputSpec, current_file_input, current_fil
 
 R = REPO / "runpod_workspace" / "rubric_exp"
 REPORTS = REPO / "reports" / "pipeline" / "role_rubric_experiment"
-JUDGES = ("gpt-4.1-mini", "gpt-6-luna", "claude-haiku-5-5")
-VERSIONS = ("v0", "v3", "v3_rerun", "v4", "v5")
+JUDGES = ("gpt-4.1-mini", "gpt-6-luna", "claude-haiku-5-5", "gpt-5.4-mini", "gpt-5.6-luna")
+VERSIONS = ("v0", "v3", "v3_rerun", "v4", "v5", "v6", "v6_rerun", "v7", "v8", "v9")
 SETS = ("oct", "may", "traits")
 #: gpt-4.1-mini's cells judged before the comparison, where they were written.
 LEGACY = {("gpt-4.1-mini", "oct", "v3"): R / "versions/v3/scores",
@@ -52,7 +54,8 @@ LEGACY = {("gpt-4.1-mini", "oct", "v3"): R / "versions/v3/scores",
           ("gpt-4.1-mini", "may", "v4_rerun"): R / "may_target/scores_v4_rerun",
           ("gpt-4.1-mini", "may", "v5"): R / "may_target/scores_v5"}
 #: Version pairs whose flips are counted (the second of each judged twice is noise).
-PAIRS = (("v3", "v3_rerun"), ("v4", "v4_rerun"), ("v0", "v3"), ("v3", "v4"), ("v3", "v5"), ("v4", "v5"))
+PAIRS = (("v3", "v3_rerun"), ("v4", "v4_rerun"), ("v6", "v6_rerun"), ("v0", "v3"), ("v3", "v4"), ("v3", "v5"),
+         ("v4", "v5"), ("v5", "v6"), ("v6", "v7"), ("v7", "v8"), ("v8", "v9"))
 
 
 def score_dir(judge: str, set_: str, ver: str) -> Path:

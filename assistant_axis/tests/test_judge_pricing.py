@@ -86,6 +86,14 @@ class TestPriceForModel:
         assert price_for_model("claude-haiku-4-5-20251001") == (HAIKU_RATE_IN, HAIKU_RATE_OUT)
         assert price_for_model("claude-haiku-4-5") == (HAIKU_RATE_IN, HAIKU_RATE_OUT)
 
+    def test_gpt_5_4_mini_and_gpt_5_6_luna(self):
+        """The candidates to replace gpt-4.1-mini (2026-10-27): batch and Flex at half."""
+        assert price_for_model("gpt-5.4-mini") == (0.75, 4.50)
+        assert price_for_model("gpt-5.4-mini-2026-03-17") == (0.75, 4.50)
+        assert price_for_model("gpt-5.4-mini:batch") == (0.375, 2.25)
+        assert price_for_model("gpt-5.6-luna") == (0.20, 1.20)
+        assert price_for_model("gpt-5.6-luna:flex") == (0.10, 0.60)
+
     def test_haiku_5_5_usage_records(self):
         """A usage record of both Haikus prices each at its own rates (and a merge recomputes them so)."""
         u = MultiModelUsage()
