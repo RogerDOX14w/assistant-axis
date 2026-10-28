@@ -32,7 +32,8 @@ with the numbers in a ``.json`` beside it) with the plan's measurements:
 
 **Decision rule** (fixed in the plan, before the pilot): keep 512 if, over
 the stratum means (roles, traits, combinations; the outliers do not decide),
-the slot-0 cosine between 512 and 1024 is >= 0.99 and the score-3 share moves
+the slot-0 cosine between 512 and 1024 is >= 0.995 (Roger, 2026-10-28; 0.99 until
+then) and the score-3 share moves
 by less than 2 points; otherwise take the smallest cap that meets both (768,
 else 1024; 256 shows the slope and is not a candidate).
 
@@ -67,7 +68,7 @@ DEFAULT_OUTPUT = REPO / "reports" / "pipeline" / "cap_pilot_readout.md"
 CAPS = (256, 512, 768, 1024)
 REFERENCE_CAP = 1024
 CANDIDATE_CAPS = (512, 768, 1024)
-COSINE_MIN = 0.99
+COSINE_MIN = 0.995                # about cos(0.1 rad); 0.99 until 2026-10-28
 SCORE3_SHIFT_MAX = 0.02           # "less than 2 points"
 DECIDING_STRATA = ("roles", "traits", "combinations")
 OUTLIER_STRATA = ("traits_outliers", "combinations_outliers")
@@ -309,7 +310,7 @@ def render(result: dict, *, trees: Dict[int, Path], entities_file: Path, entitie
     d = result["decision"]
     L.append("## Decision\n")
     L.append("Rule (fixed in the plan before the pilot): keep 512 if, over the stratum means "
-             "(roles, traits, combinations), the slot-0 cosine between 512 and 1024 is >= 0.99 and "
+             f"(roles, traits, combinations), the slot-0 cosine between 512 and 1024 is >= {COSINE_MIN} and "
              "the score-3 share moves by less than 2 points; otherwise the smallest cap that meets "
              "both.  The outliers are reported, not counted.  Cosines here are **centred** (each "
              "cap's vectors minus their mean over the entities of the deciding strata); the raw ones are in the "

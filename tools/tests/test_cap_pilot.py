@@ -145,7 +145,7 @@ def test_keep_512_when_it_meets_the_rule(tmp_path):
     assert "**Cap: 512.**" in text and "512: meets the rule" in text
     s = data["summaries"]["traits"]
     assert s["512"]["truncation"] == pytest.approx(0.7) and s["512"]["d_share3"] == pytest.approx(-0.01)
-    assert s["256"]["cos0_centred"] < 0.99 < s["512"]["cos0_centred"]
+    assert s["256"]["cos0_centred"] < cmp.COSINE_MIN < s["512"]["cos0_centred"]
     # raw cosines are near 1 at every cap (the shared direction): why the rule uses centred ones
     assert s["256"]["cos0_raw"] > 0.999
     assert "| verbose / concise |" in text                     # the pair axis
