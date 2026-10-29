@@ -112,6 +112,26 @@ Then the judge-noise run, the 512 tree's responses scored again into `cap512/sco
 - **Judge:** 64 × 5 × 500 = 160,000 calls for the five trees plus 32,000 for the rejudge, the role calls at gpt-5.6-luna's rates ($0.20 / $1.20 per million tokens, half of gpt-4.1-mini's input rate, with longer A/B/C replies) and the rest at gpt-4.1-mini's, all at Flex (batch) prices, ≈ **$38**; per-entity rejudges about $0.40 each.
 - Disk: ≈ 830 GB of activations on the volume (1 TB, about $70 a month while it exists); about 2 GB returned.
 
+- **The extraction's cost by cap, from the pilot's measurements** (2026-10-29, Roger asked for it per cap: not linear, since step 2 and step 4 change little with the cap and most responses end before 768).  Per entity, in GPU-seconds on roger-aa-7 (2× A100 SXM, one worker per GPU, the activations written to the network volume as the extraction's per-pod volumes will be), step 1's two-minute model load taken out; step 3 in dollars from `usage.json`:
+
+  | Cap | Step 1, role | Step 1, trait or combination | Step 2 | Step 3, role | trait | combination |
+  |---|---|---|---|---|---|---|
+  | 256 | 70 | 60 | 115 | $0.056 | $0.051 | $0.089 |
+  | 512 | 138 | 119 | 181 (157 and 205, two trees) | $0.064 | $0.058 | $0.101 |
+  | 768 | 197 | 162 | about 190 (batch size 4) | $0.069 | $0.061 | $0.106 |
+  | 1024 | 233 | 183 | 200 (batch size 4) | $0.071 | $0.062 | $0.108 |
+
+  Scaled to the October corpus (339 roles, 932 traits, 1,800 combinations; [pipeline/README.md](../../pipeline/README.md)) at $1.79 per GPU-hour (roger-aa-7's rate):
+
+  | Cap | Steps 1–2, GPU-hours | GPU | Judging | Fixed | **Total** | Against 512 |
+  |---|---|---|---|---|---|---|
+  | 256 | 150 | $269 | $226 | about $90 | **about $585** | −$224 |
+  | 512 | 258 | $461 | $258 | about $90 | **about $810** | |
+  | 768 | 304 | $544 | $272 | about $90 | **about $905** | +$97 (+12%) |
+  | 1024 | 332 | $594 | $277 | about $90 | **about $960** | +$152 (+19%) |
+
+  *Fixed*, the same at every cap: step 4, about 27 s of pod time an entity, bound by the volume's read rate (about 23 pod-hours, $82 on 2-GPU pods, which sit idle through it; a CPU pod on the same volume would do it for less), and each pod's setup (the model mirrored into `/dev/shm`, model loads, the smoke test; about $7).  Not counted: storage (about 8 TB of activations, the same at every cap), reruns and rejudges.  The combinations are priced as judged here, by gpt-4.1-mini through the Batch API under version 3's text; their new rubric may come with luna, at about the traits' rate (about $110 rather than $180 at 512).  Step 1's figures are from trees of 20 to 44 entities, so they carry the tail of two workers finishing apart (within about 5–10%); step 2's two 512 trees differ by 30%, the volume's variance.  Wall time for the largest pod (traits, 932 entities, 2 GPUs): about 46 h at 512, 53 h at 768, 57 h at 1024.
+
 ## 7. What comes out
 
 The readout, the entity list and the five small trees under `roger/cap_pilot/`; one line in the October plan naming the cap and citing the readout; and `finish_reason` on every October response, so the question stays answerable later.  Beside the cap decision, the pilot leaves three numbers the extraction's analyses need anyway: the generation-plus-judge noise floor of an entity vector at 500 responses, its judge-only part, and the share of slot 0's movement that is content rather than selection.
