@@ -56,6 +56,7 @@ def _run_full(tmp_path: Path, fail_on: str | None, *extra: str, scan: bool = Fal
     fake_uv.write_text(
         "#!/bin/bash\n"
         'echo "$*" >> "$UV_LOG"\n'
+        'echo "OMP=${OMP_NUM_THREADS-} MKL=${MKL_NUM_THREADS-} $*" >> "$UV_LOG.env"\n'
         + (f'case "$*" in *"{emit_on}"*) echo "{emit}" >&2;; esac\n' if emit_on else "")
         + (f'case "$*" in *"{print_on}"*) echo "{print_text}";; esac\n' if print_on else "")
         + (f'case "$*" in *"{fail_on}"*) echo "{fail_on} failed" >&2; exit {fail_rc};; esac\n'
@@ -557,3 +558,146 @@ def test_christina_mode_from_step_3_with_a_version(tmp_path):
     assert any(f"--vectors_dir {out / 'vectors_v0'} --output {out / 'axis_v0.pt'}" in c
                for c in calls if "5_axis.py" in c)
     assert os.readlink(out / "vectors_v0" / "default.pt") == "../default/vectors/default.pt"
+
+
+# ---------------------------------------------------------------------------
+# Response cap, step 2's batch size, step 4's threads and --to-step (2026-10-29)
+# ---------------------------------------------------------------------------
+
+def _env_calls(tmp_path: Path) -> list[str]:
+    """The fake uv's calls with the thread variables it saw, "OMP=.. MKL=.. <args>"."""
+    return (tmp_path / "uv.log.env").read_text().splitlines()
+
+
+def test_roger_mode_generates_at_1024_tokens_and_extracts_at_batch_4(tmp_path):
+    """Roger, 2026-10-29: the extraction runs at --max_tokens 1024 (until then the driver passed
+    no cap, so step 1's 512 applied); step 2's batch of 8 ran out of memory at 768 in the pilot."""
+    proc, calls = _run_full(tmp_path, None, types="roles traits r_combinations")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    gen = [c for c in calls if "1_generate.py" in c]
+    acts = [c for c in calls if "2_activations.py" in c]
+    assert len(gen) == 4 and len(acts) == 4        # the default and three types
+    assert all("--max_tokens 1024" in c for c in gen)
+    assert all("--batch_size 4" in c for c in acts)
+    assert "Cap:    1024 response tokens (step 1); step 2 batch size 4" in proc.stdout
+
+
+def test_christina_mode_keeps_step_1s_cap(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina",
+                            "--roles_dir", "../data/traits/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    gen = [c for c in calls if "1_generate.py" in c]
+    acts = [c for c in calls if "2_activations.py" in c]
+    assert len(gen) == 2 and all("--max_tokens 512" in c for c in gen)     # default and traits
+    assert len(acts) == 2 and all("--batch_size 8" in c for c in acts)
+
+
+@pytest.mark.parametrize("args, cap, batch", [
+    (("--max_tokens", "512"), 512, 8),
+    (("--max_tokens", "768"), 768, 4),
+    (("--max_tokens", "1024", "--step2-batch-size", "2"), 1024, 2),
+    (("--step2-batch-size", "8"), 1024, 8),
+])
+def test_the_cap_and_batch_size_flags(tmp_path, args, cap, batch):
+    proc, calls = _run_full(tmp_path, None, *args)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert all(f"--max_tokens {cap} " in c for c in calls if "1_generate.py" in c)
+    assert all(c.endswith(f"--batch_size {batch}") for c in calls if "2_activations.py" in c)
+
+
+def test_the_drivers_cap_default_for_christina_mode_is_step_1s():
+    import re
+    m = re.search(r'add_argument\("--max_tokens", type=int, default=(\d+)',
+                  (SCRIPT.parent / "1_generate.py").read_text())
+    assert m and f"GENERATE_MAX_TOKENS_DEFAULT={m.group(1)}\n" in SCRIPT.read_text()
+
+
+def test_step_4_runs_with_its_thread_cap(tmp_path):
+    """The cap pilot's pod: torch's 128 default threads on a 54-CPU quota, step 4 spinning."""
+    proc, _ = _run_full(tmp_path, None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    env = _env_calls(tmp_path)
+    step4 = [c for c in env if "4_vectors.py" in c]
+    assert len(step4) == 2                          # the default's and the type's
+    assert all(c.startswith("OMP=8 MKL=8 ") for c in step4)
+    assert all(c.startswith("OMP= MKL= ") for c in env if "4_vectors.py" not in c)
+    proc, _ = _run_full(tmp_path / "five", None, "--step4-threads", "5")
+    assert all(c.startswith("OMP=5 MKL=5 ") for c in _env_calls(tmp_path / "five") if "4_vectors.py" in c)
+    proc, _ = _run_full(tmp_path / "none", None, "--step4-threads", "0")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert all(c.startswith("OMP= MKL= ") for c in _env_calls(tmp_path / "none"))
+
+
+def test_to_step_2_runs_steps_1_and_2_only(tmp_path):
+    """Roger, 2026-10-29: the combination pods stop after step 2 until their rubric is settled.
+    No Flex check either (step 3's default judge, which OpenAI refuses Flex, would stop the
+    run); the default's vector is still computed, since --from-step 3 needs it."""
+    proc, calls = _run_full(tmp_path, "accepts_flex", "--to-step", "2", scan=True,
+                            types="r_combinations")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert any("1_generate.py" in c and "--combos_only_r" in c for c in calls)
+    assert any("2_activations.py" in c and "--name_prefix r_" in c for c in calls)
+    assert not any(s in c for c in calls
+                   for s in ("3_judge.py", "accepts_flex", "scan_missing_vectors.py", "5_axis.py"))
+    [step4] = [c for c in calls if "4_vectors.py" in c]
+    assert "/default/activations" in step4
+    assert "Judge:  not run (--to-step 2)" in proc.stdout
+    assert "=== Stopped after step 2 (--to-step 2) ===" in proc.stdout
+    assert "--from-step 3" in proc.stdout
+    assert "Pipeline complete" not in proc.stdout
+
+
+def test_to_step_2_stops_at_a_failed_type(tmp_path):
+    """Step 2 alone runs in the background and is waited for: run on the left of ||, its
+    function's set -e would be ignored and the next type would still be extracted."""
+    proc, calls = _run_full(tmp_path, "--name_prefix r_", "--to-step", "2",
+                            types="r_combinations t_combinations")
+    assert proc.returncode == 1
+    assert any("--name_prefix r_" in c for c in calls)
+    assert not any("--name_prefix t_" in c for c in calls)
+    assert "Pipeline aborted: Step 2 failed" in proc.stdout
+
+
+def test_to_step_2_in_christina_mode(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina", "--to-step", "2",
+                            "--roles_dir", "../data/roles/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert any("2_activations.py" in c for c in calls)
+    assert not any(s in c for c in calls for s in ("3_judge.py", "4_vectors.py", "5_axis.py"))
+    assert "Stopped after step 2" in proc.stdout
+
+
+@pytest.mark.parametrize("to_step, runs", [
+    ("3", ["1_generate.py", "2_activations.py", "3_judge.py"]),
+    ("4", ["1_generate.py", "2_activations.py", "3_judge.py", "4_vectors.py"]),
+])
+def test_to_step_3_or_4(tmp_path, to_step, runs):
+    proc, calls = _run_full(tmp_path, None, "--to-step", to_step, scan=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    type_calls = [c for c in calls if "/default/" not in c]
+    assert [s for s in STEP_SCRIPTS if any(s in c for c in type_calls)] == runs
+    assert not any("scan_missing_vectors.py" in c for c in calls)
+    assert f"Stopped after step {to_step}" in proc.stdout
+
+
+def test_from_step_3_to_step_3_judges_only(tmp_path):
+    _default_vector(tmp_path)
+    proc, calls = _run_full(tmp_path, None, "--from-step", "3", "--to-step", "3")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert [s for s in STEP_SCRIPTS if any(s in c for c in calls)] == ["3_judge.py"]
+
+
+@pytest.mark.parametrize("args,message", [
+    (("--to-step", "1"), "Invalid --to-step"),
+    (("--to-step", "6"), "Invalid --to-step"),
+    (("--from-step", "4", "--to-step", "3"), "comes before --from-step 4"),
+    (("--max_tokens", "0"), "Invalid --max_tokens"),
+    (("--max_tokens", "1k"), "Invalid --max_tokens"),
+    (("--step2-batch-size", "four"), "Invalid --step2-batch-size"),
+    (("--step4-threads", "-1"), "Invalid --step4-threads"),
+])
+def test_bad_cap_and_step_values_are_refused_before_any_step(tmp_path, args, message):
+    proc, calls = _run_full(tmp_path, None, *args)
+    assert proc.returncode == 1 and message in proc.stderr and calls == []

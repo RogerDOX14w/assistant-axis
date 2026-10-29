@@ -42,6 +42,17 @@
 #   ./run_pipeline.sh --types roles --judge-model gpt-5.6-luna --judge-save-replies
 #                                                     # the October judging (roles and traits
 #                                                     # need gpt-5.6-luna under version 13)
+#   ./run_pipeline.sh --types r_combinations --to-step 2
+#                                                     # steps 1 and 2 only; judge later
+#                                                     # with --from-step 3
+#
+# Response cap, step 2's batch size and step 4's threads (2026-10-29):
+# step 1 generates at --max_tokens 1024 in roger mode, the October
+# extraction's cap (Roger, 2026-10-29: "1024 it is";
+# reports/pipeline/plan_max_tokens_pilot.md), and at step 1's own default,
+# 512, in christina mode.  Step 2's batch size follows the cap unless
+# --step2-batch-size says otherwise: 8 up to 512 tokens, 4 above.  Step 4
+# runs with --step4-threads (8) torch threads.
 #
 # Rubric versions (--judge-prompt-version N, 2026-10-23): step 3 judges under
 # version N of its rubrics (3_judge.py --prompt_version; 0 the original
@@ -207,6 +218,36 @@ JUDGE_PROMPT_VERSION=""
 # the model, so the GPU check and the model mirror are skipped too, and the
 # default entity's vector must already exist.
 FROM_STEP=1
+# Last step to run: 5 (everything, the default), or 2, 3 or 4 to stop after
+# that step.  --to-step 2 runs steps 1 and 2 only: the combination pods of the
+# October extraction, until the combination rubric is settled (Roger,
+# 2026-10-29), are judged later on the same output directory with
+# --from-step 3.  Step 0 still computes the default entity's vector, which
+# needs no judging and which --from-step 3 requires.
+TO_STEP=5
+
+# Step 1's response cap (1_generate.py --max_tokens), set with --max_tokens.
+# Roger mode: 1024, the October extraction's cap (Roger, 2026-10-29: "1024 it
+# is"; reports/pipeline/plan_max_tokens_pilot.md); christina mode: step 1's
+# own default, 512, the paper's.  Until 2026-10-29 the driver passed none, so
+# every run was at 512.
+MAX_TOKENS=""
+ROGER_MAX_TOKENS_DEFAULT=1024
+# 1_generate.py's default --max_tokens (a test pins the two together).
+GENERATE_MAX_TOKENS_DEFAULT=512
+# Step 2's batch size (2_activations.py --batch_size), set with
+# --step2-batch-size; by default 8 for a cap up to 512 tokens and 4 above.
+# At a 768-token cap, 8 ran out of GPU memory on 12 of the cap pilot's 64
+# entities (8 stacked conversations beside the 64-GB model on one 80-GB GPU);
+# 4 ran 768 and 1024 cleanly (2026-10-29).  The batch size changes which
+# conversations pass together, not the activations.
+STEP2_BATCH_SIZE=""
+# torch threads for each step-4 process (OMP_NUM_THREADS and MKL_NUM_THREADS
+# for 4_vectors.py), set with --step4-threads; 0 leaves torch's default, one
+# thread per host core.  On the cap pilot's pod that was 128 threads against
+# a container quota of 54 CPUs, and two step-4 processes ran at 138 s an
+# entity, each spending about 20 cores spinning (2026-10-29).
+STEP4_THREADS=8
 
 # Run pipeline/scan_missing_vectors.py between step 4 and step 5 to verify
 # every activation produced a healthy vector; re-run candidates stop the run.  Cheap when nothing went wrong
@@ -281,6 +322,15 @@ while [[ $# -gt 0 ]]; do
             JUDGE_ARGS+=(--no_mark_truncated); shift ;;
         --from-step)
             FROM_STEP="$2"; shift 2 ;;
+        --to-step)
+            TO_STEP="$2"; shift 2 ;;
+        --max_tokens)
+            # step 1's --max_tokens (roger mode 1024, christina mode 512)
+            MAX_TOKENS="$2"; shift 2 ;;
+        --step2-batch-size)
+            STEP2_BATCH_SIZE="$2"; shift 2 ;;
+        --step4-threads)
+            STEP4_THREADS="$2"; shift 2 ;;
         --no-scan)
             RUN_SCAN=false; shift ;;
         --types)
@@ -319,6 +369,33 @@ case "$FROM_STEP" in
     1|3|4|5) ;;
     *) echo "Invalid --from-step: $FROM_STEP (must be 1, 3, 4 or 5)" >&2; exit 1 ;;
 esac
+case "$TO_STEP" in
+    2|3|4|5) ;;
+    *) echo "Invalid --to-step: $TO_STEP (must be 2, 3, 4 or 5)" >&2; exit 1 ;;
+esac
+if [ "$TO_STEP" -lt "$FROM_STEP" ]; then
+    echo "Invalid --to-step $TO_STEP: it comes before --from-step $FROM_STEP" >&2
+    exit 1
+fi
+if [ -n "$MAX_TOKENS" ] && ! [[ "$MAX_TOKENS" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Invalid --max_tokens: $MAX_TOKENS (a positive number of tokens)" >&2; exit 1
+fi
+if [ -n "$STEP2_BATCH_SIZE" ] && ! [[ "$STEP2_BATCH_SIZE" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Invalid --step2-batch-size: $STEP2_BATCH_SIZE (a positive number)" >&2; exit 1
+fi
+if ! [[ "$STEP4_THREADS" =~ ^[0-9]+$ ]]; then
+    echo "Invalid --step4-threads: $STEP4_THREADS (a number; 0 for torch's default)" >&2; exit 1
+fi
+if [ -z "$MAX_TOKENS" ]; then
+    if [ "$MODE" = "christina" ]; then
+        MAX_TOKENS="$GENERATE_MAX_TOKENS_DEFAULT"
+    else
+        MAX_TOKENS="$ROGER_MAX_TOKENS_DEFAULT"
+    fi
+fi
+if [ -z "$STEP2_BATCH_SIZE" ]; then
+    if [ "$MAX_TOKENS" -gt 512 ]; then STEP2_BATCH_SIZE=4; else STEP2_BATCH_SIZE=8; fi
+fi
 # How step 3 reaches the judge: Flex in roger mode (Roger, 2026-10-30), the
 # Batch API in christina mode, unless a --judge-flex / --judge-batch /
 # --judge-realtime flag said otherwise.  The mode's arguments go first, so
@@ -379,8 +456,8 @@ echo "Log: $LOG_FILE"
 # with HTTP 400; judge.MODEL_CAPABILITIES records which, an untested model
 # passing); checked here, after the arguments and before any GPU work,
 # rather than at step 3, hours in.  Not when step 3 is not run (--from-step
-# 4 or 5).
-if [ "$JUDGE_MODE" = "flex" ] && [ "$FROM_STEP" -le 3 ]; then
+# 4 or 5, or --to-step 2).
+if [ "$JUDGE_MODE" = "flex" ] && [ "$FROM_STEP" -le 3 ] && [ "$TO_STEP" -ge 3 ]; then
     FLEX_JUDGE="${JUDGE_MODEL:-$JUDGE_MODEL_DEFAULT}"
     if ! uv run python -c "import sys; from assistant_axis.judge import accepts_flex; sys.exit(1 if accepts_flex('${FLEX_JUDGE}') is False else 0)" 2>/dev/null; then
         echo "run_pipeline.sh: --judge-flex (roger mode's default), but OpenAI refuses Flex processing for" >&2
@@ -401,9 +478,23 @@ case "$JUDGE_MODE" in
     batch)    JUDGE_MODE_TEXT="the Batch API (--judge-flex / --judge-realtime for the others)" ;;
     realtime) JUDGE_MODE_TEXT="real time on the standard tier (--judge-flex / --judge-batch for the others)" ;;
 esac
-echo "Judge:  ${JUDGE_MODEL:-the default model}, prompt version ${JUDGE_PROMPT_VERSION:-$JUDGE_PROMPT_VERSION_DEFAULT} (into $SCORES_SUB/, $VECTORS_SUB/, $AXIS_NAME), by $JUDGE_MODE_TEXT"
+if [ "$TO_STEP" -lt 3 ]; then
+    echo "Judge:  not run (--to-step $TO_STEP)"
+else
+    echo "Judge:  ${JUDGE_MODEL:-the default model}, prompt version ${JUDGE_PROMPT_VERSION:-$JUDGE_PROMPT_VERSION_DEFAULT} (into $SCORES_SUB/, $VECTORS_SUB/, $AXIS_NAME), by $JUDGE_MODE_TEXT"
+fi
+if [ "$FROM_STEP" -le 2 ]; then
+    echo "Cap:    $MAX_TOKENS response tokens (step 1); step 2 batch size $STEP2_BATCH_SIZE"
+fi
+# step 4 for the types, or step 0's for the default vector
+if { [ "$FROM_STEP" -le 4 ] && [ "$TO_STEP" -ge 4 ]; } || [ "$FROM_STEP" -eq 1 ]; then
+    echo "Step 4: $([ "$STEP4_THREADS" -gt 0 ] && echo "$STEP4_THREADS torch threads" || echo "torch's default threads") (--step4-threads)"
+fi
 if [ "$FROM_STEP" -gt 1 ]; then
     echo "From:   step $FROM_STEP (earlier steps not run)"
+fi
+if [ "$TO_STEP" -lt 5 ]; then
+    echo "To:     step $TO_STEP (later steps not run; continue with --from-step $((TO_STEP + 1)))"
 fi
 if [ "$MODE" = "christina" ]; then
     echo "Roles:  $ROLES_DIR"
@@ -610,6 +701,25 @@ step_failed() {
     exit 1
 }
 
+# ---- Helper: step 4 with its thread cap ------------------------------------
+# Usage: run_step4 <4_vectors.py arguments>.  OMP_NUM_THREADS and
+# MKL_NUM_THREADS from --step4-threads, for this process only; 0 leaves
+# torch's default.
+run_step4() {
+    if [ "$STEP4_THREADS" -gt 0 ]; then
+        OMP_NUM_THREADS="$STEP4_THREADS" MKL_NUM_THREADS="$STEP4_THREADS" uv run 4_vectors.py "$@"
+    else
+        uv run 4_vectors.py "$@"
+    fi
+}
+
+# ---- Helper: stop after --to-step ------------------------------------------
+stopped_at_to_step() {
+    echo ""
+    echo "=== Stopped after step $TO_STEP (--to-step $TO_STEP) ==="
+    echo "Continue with the same command and --from-step $((TO_STEP + 1)) in place of --to-step."
+}
+
 # ---- Helper: the scan between step 4 and step 5 ---------------------------
 # Walks every activation/vector pair under $OUTPUT_DIR and classifies any
 # misses or corruptions (corrupt-on-write activation .pt, missing scores,
@@ -703,6 +813,7 @@ run_step0_default() {
             "$@" \
             --roles default \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+            --max_tokens "$MAX_TOKENS" \
             --output_dir "$DEFAULT_RESP"
     else
         echo "  default.jsonl already exists, skipping generation."
@@ -715,14 +826,15 @@ run_step0_default() {
             --responses_dir "$DEFAULT_RESP" \
             --output_dir "$DEFAULT_ACT" \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-            --batch_size 8
+            --batch_size "$STEP2_BATCH_SIZE"
     else
         echo "  default.pt already exists, skipping extraction."
     fi
 
+    # (also with --to-step 2: no judging needed, and --from-step 3 requires it)
     if [ ! -f "$DEFAULT_VEC/default.pt" ]; then
         echo "  Computing default vector..."
-        uv run 4_vectors.py \
+        run_step4 \
             --activations_dir "$DEFAULT_ACT" \
             --scores_dir "$DEFAULT_DIR/scores" \
             --output_dir "$DEFAULT_VEC" \
@@ -770,6 +882,7 @@ if [ "$MODE" = "christina" ]; then
             --model "$MODEL" \
             --roles_dir "$ROLES_DIR" \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+            --max_tokens "$MAX_TOKENS" \
             --output_dir "$OUTPUT_DIR/responses"
 
         echo ""
@@ -794,7 +907,7 @@ if [ "$MODE" = "christina" ]; then
             --responses_dir "$OUTPUT_DIR/responses" \
             --output_dir "$OUTPUT_DIR/activations" \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-            --batch_size 8
+            --batch_size "$STEP2_BATCH_SIZE"
     }
     christina_step3() {
         set -e
@@ -811,6 +924,12 @@ if [ "$MODE" = "christina" ]; then
         christina_step3 || step_failed "Step 3" "3_judge.py exited non-zero (see above)"
     elif [ "$FROM_STEP" -ge 4 ]; then
         :   # steps 2 and 3 not run
+    elif [ "$TO_STEP" -eq 2 ]; then
+        # step 2 alone, in the background and waited for as the parallel steps
+        # are (see the roger-mode branch below)
+        christina_step2 &
+        PID2=$!
+        wait $PID2 || step_failed "Step 2" "2_activations.py exited non-zero (see above)"
     elif [ "$STEPS23_PARALLEL" = "true" ]; then
         echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
         echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
@@ -836,13 +955,13 @@ if [ "$MODE" = "christina" ]; then
     fi
     echo ""
 
-    if [ "$FROM_STEP" -le 4 ]; then
+    if [ "$FROM_STEP" -le 4 ] && [ "$TO_STEP" -ge 4 ]; then
         echo "=== Step 4: Computing vectors ==="
         # --min_count passed explicitly (it was the script default, 50, while the
         # scan below was given MIN_COUNT=30, so entities with 30-49 score=3
         # samples were reported as re-run candidates that step 4 would skip
         # again).
-        uv run 4_vectors.py \
+        run_step4 \
             --activations_dir "$OUTPUT_DIR/activations" \
             --scores_dir "$OUTPUT_DIR/$SCORES_SUB" \
             --output_dir "$OUTPUT_DIR/$VECTORS_SUB" \
@@ -850,18 +969,22 @@ if [ "$MODE" = "christina" ]; then
             || step_failed "Step 4" "4_vectors.py exited non-zero; see its [ERROR] lines above"
     fi
 
-    scan_before_axis
+    if [ "$TO_STEP" -lt 5 ]; then
+        stopped_at_to_step
+    else
+        scan_before_axis
 
-    echo ""
-    echo "=== Step 5: Computing axis ==="
-    uv run 5_axis.py \
-        --vectors_dir "$OUTPUT_DIR/$VECTORS_SUB" \
-        --output "$OUTPUT_DIR/$AXIS_NAME" \
-        || step_failed "Step 5" "5_axis.py exited non-zero (see above)"
+        echo ""
+        echo "=== Step 5: Computing axis ==="
+        uv run 5_axis.py \
+            --vectors_dir "$OUTPUT_DIR/$VECTORS_SUB" \
+            --output "$OUTPUT_DIR/$AXIS_NAME" \
+            || step_failed "Step 5" "5_axis.py exited non-zero (see above)"
 
-    echo ""
-    echo "=== Pipeline complete ==="
-    echo "Axis saved to: $OUTPUT_DIR/$AXIS_NAME"
+        echo ""
+        echo "=== Pipeline complete ==="
+        echo "Axis saved to: $OUTPUT_DIR/$AXIS_NAME"
+    fi
 
 # ---- Roger mode (types-aware) ---------------------------------------------
 else
@@ -902,6 +1025,7 @@ else
                         --reduce_questions "$REDUCE_QUESTIONS" \
                         --no_traits $subset_flag \
                         --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+                        --max_tokens "$MAX_TOKENS" \
                         --output_dir "$TYPE_DIR/responses"
                     ;;
                 roles)
@@ -911,6 +1035,7 @@ else
                         --reduce_questions "$REDUCE_QUESTIONS" \
                         --roles_only \
                         --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+                        --max_tokens "$MAX_TOKENS" \
                         --output_dir "$TYPE_DIR/responses"
                     ;;
                 traits)
@@ -920,6 +1045,7 @@ else
                         --reduce_questions "$REDUCE_QUESTIONS" \
                         --traits_only \
                         --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+                        --max_tokens "$MAX_TOKENS" \
                         --output_dir "$TYPE_DIR/responses"
                     ;;
             esac
@@ -979,7 +1105,7 @@ else
                 --responses_dir "$TYPE_DIR/responses" \
                 --output_dir "$TYPE_DIR/activations" \
                 --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-                --batch_size 8 $prefix_flag
+                --batch_size "$STEP2_BATCH_SIZE" $prefix_flag
         done
     }
 
@@ -1011,6 +1137,14 @@ else
         run_step3_loop || step_failed "Step 3" "3_judge.py exited non-zero (see above)"
     elif [ "$FROM_STEP" -ge 4 ]; then
         :   # steps 2 and 3 not run
+    elif [ "$TO_STEP" -eq 2 ]; then
+        # Step 2 alone, in the background and waited for, as the parallel steps
+        # are: called as `run_step2_loop || step_failed ...`, its set -e would
+        # be ignored (bash ignores -e in a function run on the left of ||), and
+        # a type that failed would not stop the loop over the next ones.
+        run_step2_loop &
+        PID2=$!
+        wait $PID2 || step_failed "Step 2" "2_activations.py exited non-zero (see above)"
     elif [ "$STEPS23_PARALLEL" = "true" ]; then
         echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
         echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
@@ -1035,14 +1169,14 @@ else
     echo ""
 
     # -- Step 4: Compute vectors ----------------------------------------------
-    if [ "$FROM_STEP" -le 4 ]; then
+    if [ "$FROM_STEP" -le 4 ] && [ "$TO_STEP" -ge 4 ]; then
         echo "=== Step 4: Computing vectors ==="
         for type in $DEDUP_TYPES; do
             echo "--- Step 4 [$type] ---"
             TYPE_DIR="$OUTPUT_DIR/$type"
             symlink_default vectors pt "$VECTORS_SUB"
 
-            uv run 4_vectors.py \
+            run_step4 \
                 --activations_dir "$TYPE_DIR/activations" \
                 --scores_dir "$TYPE_DIR/$SCORES_SUB" \
                 --output_dir "$TYPE_DIR/$VECTORS_SUB" \
@@ -1052,25 +1186,29 @@ else
         echo ""
     fi
 
-    scan_before_axis
+    if [ "$TO_STEP" -lt 5 ]; then
+        stopped_at_to_step
+    else
+        scan_before_axis
 
-    # -- Step 5: Compute axis -------------------------------------------------
-    echo "=== Step 5: Computing axis ==="
-    for type in $DEDUP_TYPES; do
-        echo "--- Step 5 [$type] ---"
-        TYPE_DIR="$OUTPUT_DIR/$type"
+        # -- Step 5: Compute axis ---------------------------------------------
+        echo "=== Step 5: Computing axis ==="
+        for type in $DEDUP_TYPES; do
+            echo "--- Step 5 [$type] ---"
+            TYPE_DIR="$OUTPUT_DIR/$type"
 
-        uv run 5_axis.py \
-            --vectors_dir "$TYPE_DIR/$VECTORS_SUB" \
-            --output "$TYPE_DIR/$AXIS_NAME" \
-            || step_failed "Step 5 [$type]" "5_axis.py exited non-zero (see above)"
-    done
-    echo ""
+            uv run 5_axis.py \
+                --vectors_dir "$TYPE_DIR/$VECTORS_SUB" \
+                --output "$TYPE_DIR/$AXIS_NAME" \
+                || step_failed "Step 5 [$type]" "5_axis.py exited non-zero (see above)"
+        done
+        echo ""
 
-    echo "=== Pipeline complete ==="
-    for type in $DEDUP_TYPES; do
-        echo "  $type axis: $OUTPUT_DIR/$type/$AXIS_NAME"
-    done
+        echo "=== Pipeline complete ==="
+        for type in $DEDUP_TYPES; do
+            echo "  $type axis: $OUTPUT_DIR/$type/$AXIS_NAME"
+        done
+    fi
 
 fi
 
