@@ -54,15 +54,20 @@ uv run 1_generate.py --model Qwen/Qwen3-32B --mode roger --non_goal_count 54 \
     --roles $(jq -r '.by_type.trait[], .by_type.combination[]' $E) \
     --max_tokens <CAP> --output_dir $OUT/responses
 uv run 2_activations.py --model Qwen/Qwen3-32B --responses_dir $OUT/responses \
-    --output_dir $OUT/activations --max_length 2048 \
+    --output_dir $OUT/activations --max_length 2048 --batch_size <8, or 4 at 768 and 1024> \
     $([ <CAP> = 1024 ] && echo --prefix_token_means 256,512,768 --prefix_token_layers 25)
+# 2026-10-29: cap768 at --batch_size 8 ran out of GPU memory on 12 of its 64 entities (the
+# stacked activations of 8 conversations of up to 768 response tokens, about 4.3 GB, beside the
+# 64-GB model on one A100); those 12 and cap1024 run at 4 (cap_pilot/cap_pilot_acts_rest.sh).
+# The batch size changes which conversations pass together, not the activations (bf16 rounding).
 uv run 3_judge.py --entity_type role --roles $(jq -r '.by_type.role[]' $E) \
     --judge_model gpt-5.6-luna --save_replies --mark_truncated --no_batch --service_tier flex \
     --responses_dir $OUT/responses --output_dir $OUT/judged/scores/role
-for T in trait combination; do
-  uv run 3_judge.py --entity_type $T --roles $(jq -r ".by_type.$T[]" $E) --mark_truncated \
-      --responses_dir $OUT/responses --output_dir $OUT/judged/scores/$T
-done
+uv run 3_judge.py --entity_type trait --roles $(jq -r '.by_type.trait[]' $E) --prompt_version 12 \
+    --judge_model gpt-5.6-luna --save_replies --mark_truncated --no_batch --service_tier flex \
+    --responses_dir $OUT/responses --output_dir $OUT/judged/scores/trait
+uv run 3_judge.py --entity_type combination --roles $(jq -r '.by_type.combination[]' $E) --mark_truncated \
+    --responses_dir $OUT/responses --output_dir $OUT/judged/scores/combination
 # then the per-entity files of judged/scores/*/ gathered into $OUT/scores/
 uv run 4_vectors.py --activations_dir $OUT/activations --scores_dir $OUT/scores \
     --output_dir $OUT/vectors --min_count 30
