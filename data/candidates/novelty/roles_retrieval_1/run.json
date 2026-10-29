@@ -1,0 +1,93 @@
+{
+  "batch_id": "roles_retrieval_1",
+  "command": "retrieval-check",
+  "git_sha": "5918f32f",
+  "argv": [
+    "retrieval-check",
+    "--batch-id",
+    "roles_retrieval_1",
+    "--budget-usd",
+    "1"
+  ],
+  "n_roles": 339,
+  "forms": [
+    "role_gloss_w14",
+    "label_gloss",
+    "role_gloss_w20"
+  ],
+  "spaces": [
+    "centred",
+    "raw"
+  ],
+  "estimate_usd": 0.0437,
+  "budget_usd": 1.0,
+  "cap_usd": 1.0,
+  "allow_dirty": false,
+  "model": "claude-haiku-5-5",
+  "step_versions": {
+    "role_gloss": 1,
+    "role_kind": 1
+  },
+  "prompt_sha256": {
+    "role_gloss": "dfa7646f08c156cac49724ffc0065932d76df70da7b616f9aacfd33e645be0f2",
+    "role_kind": "11b559f0cff501891620ca6aeeabcfd48567589f47a852b4cf4818cba7eefe29"
+  },
+  "started_at": "2026-10-29T16:31:24+00:00",
+  "chosen": {
+    "query_form": "role_gloss_w14",
+    "variant": "centred",
+    "recall_at_k": 0.9794,
+    "mrr": 0.8748,
+    "changed": false,
+    "reached_target": true
+  },
+  "production": {
+    "n": 339,
+    "k": 10,
+    "recall_at_k": 0.9794,
+    "mrr": 0.8748,
+    "n_missed": 7,
+    "by_kind": {
+      "circumstance": {
+        "n": 24,
+        "recall_at_k": 0.9583
+      },
+      "non_human": {
+        "n": 44,
+        "recall_at_k": 1.0
+      },
+      "occupation": {
+        "n": 162,
+        "recall_at_k": 0.9815
+      },
+      "other": {
+        "n": 3,
+        "recall_at_k": 1.0
+      },
+      "pastime": {
+        "n": 8,
+        "recall_at_k": 1.0
+      },
+      "relationship": {
+        "n": 20,
+        "recall_at_k": 0.95
+      },
+      "stance": {
+        "n": 47,
+        "recall_at_k": 0.9787
+      },
+      "status": {
+        "n": 9,
+        "recall_at_k": 1.0
+      },
+      "temperament": {
+        "n": 22,
+        "recall_at_k": 0.9545
+      }
+    }
+  },
+  "below_target": false,
+  "finished_at": "2026-10-29T16:34:15+00:00",
+  "cost_usd": 0.0378,
+  "status": 0
+}
