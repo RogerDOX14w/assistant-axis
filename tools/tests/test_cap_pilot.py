@@ -331,7 +331,7 @@ def test_the_share_table_lists_each_type_lowest_first(tmp_path):
     rows = [line.split(" | ")[0].lstrip("| ") for line in traits.splitlines() if line.startswith("| ")][1:]
     assert rows == ["t2", "verbose *(outlier)*", "t3", "concise *(outlier)*", "t1"]
     assert "| t2 | 80.0% | 25.0% | 80.0% | 30.0% | +50.0 | -5.0 | +50.0 |" in traits
-    assert "**Roles**" in section and "| r1 |" in section
+    assert "**Roles**" in section and section.count("| r1 |") == 1   # narrative roles once
 
 
 def test_entity_links_are_relative_to_the_readout():
@@ -341,6 +341,9 @@ def test_entity_links_are_relative_to_the_readout():
     assert cmp.linked_entity("r_angel__verbose", out) == (
         "r_[angel](../../data/roles/instructions/angel.json)__"
         "[verbose](../../data/traits/instructions/verbose.json)")
+    assert cmp.linked_entity("t_mechanic__greedy", out) == (       # t_<role>__<trait> too
+        "t_[mechanic](../../data/roles/instructions/mechanic.json)__"
+        "[greedy](../../data/traits/instructions/greedy.json)")
     assert cmp.linked_entity("no_such_entity", out) == "no_such_entity"
     assert cmp.linked_entity("bold", Path("/elsewhere/readout.md")) == "bold"
 
