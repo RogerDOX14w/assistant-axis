@@ -96,15 +96,19 @@ def test_settled_versions_are_never_edited():
             3: {"role": "15d953a9bce06828", "trait": "9b9adda764fe6d86", "combination": "bee3d69ad7a814a8"},
             # settled 2026-10-28; its role text is version 8's, whose hash the experiment's
             # version 8 directories record (522fae510e0dd298)
-            10: {"role": "c19e859a53c91d5e", "trait": "9b9adda764fe6d86", "combination": "bee3d69ad7a814a8"}}
+            10: {"role": "c19e859a53c91d5e", "trait": "9b9adda764fe6d86", "combination": "bee3d69ad7a814a8"},
+            # settled 2026-10-30: version 10's role text and reading, the trait rubric review's
+            # trait rubric (the hash its two test runs record), version 3's combination rubric
+            13: {"role": "c19e859a53c91d5e", "trait": "4a0f22d96414d97b", "combination": "bee3d69ad7a814a8"}}
     for v, by_type in pins.items():
         assert {k: jr.PROMPT_VERSIONS[v].sha256(k) for k in by_type} == by_type
     assert jr.PROMPT_VERSIONS[4].draft and not jr.PROMPT_VERSIONS[3].draft
     assert not jr.PROMPT_VERSIONS[10].draft and jr.PROMPT_VERSIONS[8].sha256("role") == "522fae510e0dd298"
+    assert not jr.PROMPT_VERSIONS[13].draft
 
 
 def test_versions_and_their_reading():
-    assert jr.DEFAULT_PROMPT_VERSION == 10                    # 3 until 2026-10-28
+    assert jr.DEFAULT_PROMPT_VERSION == 13                    # 10 from 2026-10-28, 3 before
     assert (jr.PROMPT_VERSIONS[0].reply_format, jr.PROMPT_VERSIONS[0].max_tokens) == ("first_integer", 10)
     for v in (3, 4):
         assert (jr.PROMPT_VERSIONS[v].reply_format, jr.PROMPT_VERSIONS[v].max_tokens) == ("score_marker", 200)
@@ -316,6 +320,93 @@ def test_abc_score_is_the_rubrics_table():
     assert "- 0 if A, and not C.\n- 1 if not A, and not C.\n- 2 if C, and A or B.\n" \
            "- 3 if C, and neither A nor B." in jr.PROMPT_VERSIONS[10].role
     assert jr.abc_pattern({"A": False, "B": True, "C": False}) == "AnByCn"
+
+
+def test_versions_11_to_13_change_the_trait_rubric_only():
+    """The trait rubric review's arms (Roger, 2026-10-28 and 2026-10-30; 11 and 12
+    drafts, 13 settled as the default): roles and combinations as version 10 in
+    text and reading, so a roles directory judged under 10 takes any of them; the
+    trait rubric differs, and between them.  Version 13's trait rubric was settled
+    for gpt-5.6-luna, as version 10's role reading was; the drafts, tested on three
+    judges, name none; no version names a judge for combinations."""
+    v3, v10, v11, v12, v13 = (jr.PROMPT_VERSIONS[v] for v in (3, 10, 11, 12, 13))
+    for v in (v11, v12, v13):
+        assert v.draft == (v.number != 13) and v.differs_from(v10) == ("trait",)
+        assert v.same_text(v10, "role") and v.same_text(v10, "combination")
+        assert v.reply_format_for("role") == "abc_answers" and v.judges == v10.judges
+        assert jr.may_share_directory(10, v.number, "role") and not jr.may_share_directory(3, v.number, "trait")
+        assert jr.may_share_directory(3, v.number, "combination")
+        assert v.judges_for("role") == v10.judges_for("role") == ("gpt-5.6-luna",)
+        assert v.judges_for("combination") == () and v.judges_for("trait") == v.trait_judges
+    assert v13.trait_judges == ("gpt-5.6-luna",) and v11.trait_judges == v12.trait_judges == ()
+    assert v10.judges_for("trait") == v3.judges_for("role") == ()
+    with pytest.raises(ValueError, match="Unknown entity_type"):
+        v13.judges_for("axis")
+    assert v11.differs_from(v12) == v12.differs_from(v13) == v11.differs_from(v13) == ("trait",)
+    assert (v11.reply_format_for("trait"), v11.max_tokens) == ("abc_answers", 300)
+    for v in (v12, v13):
+        assert (v.reply_format_for("trait"), v.max_tokens) == ("score_marker", 200)
+    assert v10.reply_format_for("trait") == "score_marker" and v10.trait_reply_format is None
+    assert len({v.sha256("trait") for v in (v3, v11, v12, v13)}) == 4
+
+
+def test_version_11_is_the_decision_procedure_for_traits():
+    v3, v11 = jr.PROMPT_VERSIONS[3], jr.PROMPT_VERSIONS[11]
+    # the head (trait, description, question, answer) is version 3's
+    assert v11.trait.split(jr.V11_PREAMBLE)[0] == v3.trait.split("Focus only on")[0]
+    paragraphs = v11.trait.split("\n\n")
+    starts = [p[:2] for p in paragraphs]
+    assert starts.index("A.") < starts.index("B.") < starts.index("C.")
+    assert paragraphs[starts.index("A.")] == jr.V11_A
+    assert paragraphs[starts.index("B.")] == jr.V11_B and "Qwen" in jr.V11_B
+    assert paragraphs[starts.index("C.")] == jr.V11_C
+    score_block = next(p for p in paragraphs if p.startswith("Then score:"))
+    assert score_block.splitlines()[1:] == [
+        "- 0 if A, and not C.", "- 1 if not A, and not C.", "- 2 if C, and A or B.",
+        "- 3 if C, and neither A nor B."]
+    assert paragraphs[-1].startswith("First, answer A, B and C")
+    assert paragraphs[-1].endswith("SCORE: <integer from 0 to 3>") and v11.trait.count("SCORE:") == 1
+    # the rulings
+    assert "A single sentence or framing is enough" in jr.V11_C
+    assert "in the trait's manner is not A; it counts as C" in jr.V11_A
+    assert "in a way the trait does not absorb" in jr.V11_B
+    assert "at odds with being helpful, careful and even-handed" in jr.V11_C
+    assert '"…" was cut at a length limit' in jr.V11_PREAMBLE and '"…" was cut' in jr.V12_CLAUSES
+
+
+def test_version_12_is_version_3s_trait_rubric_with_the_clauses_and_two_levels():
+    v3, v12 = jr.PROMPT_VERSIONS[3], jr.PROMPT_VERSIONS[12]
+    assert v12.trait == jr.apply_edits(v3.trait, jr._V12_EDITS, what="t")
+    back = v12.trait.replace("\n\n" + jr.V12_CLAUSES, "", 1)
+    back = back.replace(jr.V12_TRAIT_LEVEL2, jr.V3_TRAIT_LEVEL2).replace(jr.V12_TRAIT_LEVEL3, jr.V3_TRAIT_LEVEL3)
+    assert back == v3.trait
+    paragraphs = v12.trait.split("\n\n")
+    assert paragraphs[paragraphs.index(jr.V3_TRAIT_FOCUS) + 1] == jr.V12_CLAUSES
+    assert "fully exhibiting" not in v12.trait and "a little is enough" in v12.trait
+    assert v12.trait.count("SCORE:") == 1 and paragraphs[-1].startswith("First, briefly reason")
+
+
+def test_version_13_is_version_12_with_version_11s_b_treatment_in_the_levels():
+    """Roger, 2026-10-30: only levels 2 and 3 change from version 12, and what
+    they gain is version 11's B: its list of the model's disclaimers, "stands
+    apart or displaces" against "woven into an answer in which the trait runs
+    throughout", the remark that steps out or names the instruction."""
+    import re
+    v3, v12, v13 = (jr.PROMPT_VERSIONS[v] for v in (3, 12, 13))
+    assert v13.trait == jr.apply_edits(v3.trait, jr._V13_EDITS, what="t")
+    back = v13.trait.replace(jr.V13_TRAIT_LEVEL2, jr.V12_TRAIT_LEVEL2).replace(jr.V13_TRAIT_LEVEL3, jr.V12_TRAIT_LEVEL3)
+    assert back == v12.trait
+    paragraphs = v13.trait.split("\n\n")
+    assert paragraphs[paragraphs.index(jr.V3_TRAIT_FOCUS) + 1] == jr.V12_CLAUSES
+    disclaimers = re.search(r"\(naming itself Qwen.*?knowledge cutoff\)", jr.V11_B, re.S).group(0)
+    assert disclaimers in jr.V13_TRAIT_LEVEL2
+    for phrase in ("stands apart from the trait or displaces it", '"I have no feelings, but I can offer a perspective"',
+                   "steps out of the trait to disclaim it", "names the instruction to show it"):
+        assert phrase in jr.V11_B and phrase in jr.V13_TRAIT_LEVEL2
+    assert "woven into an answer in which the trait runs throughout" in jr.V11_B
+    assert "woven into an answer in which the trait runs throughout" in jr.V13_TRAIT_LEVEL3
+    assert "identifies as itself" not in v13.trait.split("- 2 if")[1]      # levels 0 and 1 keep version 3's words
+    assert v13.trait.count("SCORE:") == 1 and paragraphs[-1].startswith("First, briefly reason")
 
 
 def test_versions_that_send_the_same_rubric_may_share_a_directory():

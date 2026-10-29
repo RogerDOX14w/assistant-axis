@@ -1,0 +1,838 @@
+{
+ "claude-haiku-5-5|v3|answers": {
+  "unscored": 215,
+  "tiers": {
+   "low": {
+    "precision": 0.992105433876771,
+    "recall": 0.29088833048276097,
+    "kept_good": 568.0257142857143,
+    "kept_bad": 4.52,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": NaN,
+    "recall": NaN,
+    "kept_good": 0.0,
+    "kept_bad": 0.0,
+    "total_good": 0.0
+   },
+   "high": {
+    "precision": NaN,
+    "recall": NaN,
+    "kept_good": 0.0,
+    "kept_bad": 0.0,
+    "total_good": 0.0
+   },
+   "all": {
+    "precision": 0.992105433876771,
+    "recall": 0.29088833048276097,
+    "kept_good": 568.0257142857143,
+    "kept_bad": 4.52,
+    "total_good": 1952.727747252747
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 12,
+   "harmful": 64,
+   "deceitful": 79,
+   "obsessive": 28,
+   "dishonest": 66,
+   "ethnocentric": 83,
+   "evil": 162,
+   "submissive": 75
+  },
+  "kept_total": 569
+ },
+ "claude-haiku-5-5|v11|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8630574862447855,
+    "recall": 0.7484515109816093,
+    "kept_good": 1461.5220329670326,
+    "kept_bad": 231.9017032967033,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9121747052669982,
+    "recall": 0.8103767663862176,
+    "kept_good": 2486.5631868131854,
+    "kept_bad": 239.4093406593407,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9589786682690502,
+    "recall": 0.9818130959166939,
+    "kept_good": 3647.817857142858,
+    "kept_bad": 156.0392857142857,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9237102034132476,
+    "recall": 0.8694425598038973,
+    "kept_good": 7595.9030769230785,
+    "kept_bad": 627.3503296703296,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 136,
+   "harmful": 117,
+   "deceitful": 183,
+   "obsessive": 270,
+   "dishonest": 314,
+   "ethnocentric": 164,
+   "evil": 228,
+   "submissive": 328
+  },
+  "kept_total": 8383
+ },
+ "claude-haiku-5-5|v11|stated": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.950039154769539,
+    "recall": 0.7426647339893238,
+    "kept_good": 1450.2220329670326,
+    "kept_bad": 76.26456043956046,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9383354585886231,
+    "recall": 0.8103767663862176,
+    "kept_good": 2486.5631868131854,
+    "kept_bad": 163.4093406593407,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9588939857288482,
+    "recall": 0.9765646553091436,
+    "kept_good": 3628.317857142858,
+    "kept_bad": 155.5392857142857,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9503520747519033,
+    "recall": 0.8659171289801001,
+    "kept_good": 7565.103076923078,
+    "kept_bad": 395.2131868131868,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 108,
+   "harmful": 112,
+   "deceitful": 178,
+   "obsessive": 231,
+   "dishonest": 271,
+   "ethnocentric": 152,
+   "evil": 228,
+   "submissive": 309
+  },
+  "kept_total": 8051
+ },
+ "claude-haiku-5-5|v12|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.9892524017480029,
+    "recall": 0.5326383535907576,
+    "kept_good": 1040.0976923076921,
+    "kept_bad": 11.3,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.941826988932922,
+    "recall": 0.7140959030315189,
+    "kept_good": 2191.1346153846152,
+    "kept_bad": 135.3379120879121,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9952926370013366,
+    "recall": 0.7845092179342869,
+    "kept_good": 2914.7571428571437,
+    "kept_bad": 13.785714285714286,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9745618270771603,
+    "recall": 0.7034824886915256,
+    "kept_good": 6145.989450549453,
+    "kept_bad": 160.4236263736264,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 54,
+   "harmful": 88,
+   "deceitful": 145,
+   "obsessive": 113,
+   "dishonest": 191,
+   "ethnocentric": 123,
+   "evil": 214,
+   "submissive": 200
+  },
+  "kept_total": 6799
+ },
+ "gpt-4.1-mini|v3|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.9185743052758759,
+    "recall": 0.44923746424591443,
+    "kept_good": 877.2384615384609,
+    "kept_bad": 77.76153846153845,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9485903440821474,
+    "recall": 0.7166046347968799,
+    "kept_good": 2198.8324175824173,
+    "kept_bad": 119.1675824175824,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9628664712153518,
+    "recall": 0.9723543677888012,
+    "kept_good": 3612.675000000001,
+    "kept_bad": 139.325,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9521346447147159,
+    "recall": 0.7656074965843747,
+    "kept_good": 6688.74587912088,
+    "kept_bad": 336.2541208791208,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 36,
+   "harmful": 68,
+   "deceitful": 86,
+   "obsessive": 111,
+   "dishonest": 170,
+   "ethnocentric": 116,
+   "evil": 168,
+   "submissive": 200
+  },
+  "kept_total": 7686
+ },
+ "gpt-4.1-mini|v11|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.6907357148160644,
+    "recall": 0.8449707080641915,
+    "kept_good": 1649.997747252747,
+    "kept_bad": 738.7563186813187,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9064940848484045,
+    "recall": 0.9805013703119082,
+    "kept_good": 3008.574175824174,
+    "kept_bad": 310.33791208791206,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9481185367828359,
+    "recall": 0.9905989470436187,
+    "kept_good": 3680.4607142857153,
+    "kept_bad": 201.39642857142854,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.8695982458512246,
+    "recall": 0.9545026850781986,
+    "kept_good": 8339.032637362652,
+    "kept_bad": 1250.4906593406592,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 232,
+   "harmful": 129,
+   "deceitful": 207,
+   "obsessive": 375,
+   "dishonest": 363,
+   "ethnocentric": 180,
+   "evil": 228,
+   "submissive": 444
+  },
+  "kept_total": 9512
+ },
+ "gpt-4.1-mini|v11|stated": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.6907357148160644,
+    "recall": 0.8449707080641915,
+    "kept_good": 1649.997747252747,
+    "kept_bad": 738.7563186813187,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9077835287408154,
+    "recall": 0.9805013703119082,
+    "kept_good": 3008.574175824174,
+    "kept_bad": 305.62362637362634,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9481185367828359,
+    "recall": 0.9905989470436187,
+    "kept_good": 3680.4607142857153,
+    "kept_bad": 201.39642857142854,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.8700259575127595,
+    "recall": 0.9545026850781986,
+    "kept_good": 8339.032637362652,
+    "kept_bad": 1245.7763736263735,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 228,
+   "harmful": 126,
+   "deceitful": 201,
+   "obsessive": 375,
+   "dishonest": 362,
+   "ethnocentric": 180,
+   "evil": 227,
+   "submissive": 442
+  },
+  "kept_total": 9490
+ },
+ "gpt-4.1-mini|v12|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.9552265444495155,
+    "recall": 0.4794920151847325,
+    "kept_good": 936.3173626373626,
+    "kept_bad": 43.88714285714286,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9483479132209642,
+    "recall": 0.5965418538292189,
+    "kept_good": 1830.4313186813195,
+    "kept_bad": 99.69505494505495,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9669811635494999,
+    "recall": 0.8358314693038318,
+    "kept_good": 3105.4392857142866,
+    "kept_bad": 106.03928571428573,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9592242317352626,
+    "recall": 0.6721426124061232,
+    "kept_good": 5872.187967032968,
+    "kept_bad": 249.6214835164835,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 31,
+   "harmful": 66,
+   "deceitful": 119,
+   "obsessive": 108,
+   "dishonest": 142,
+   "ethnocentric": 129,
+   "evil": 183,
+   "submissive": 137
+  },
+  "kept_total": 6149
+ },
+ "gpt-5.4-mini|v3|answers": {
+  "unscored": 215,
+  "tiers": {
+   "low": {
+    "precision": 1.0,
+    "recall": 0.26898344088693077,
+    "kept_good": 525.2514285714287,
+    "kept_bad": 0.0,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": NaN,
+    "recall": NaN,
+    "kept_good": 0.0,
+    "kept_bad": 0.0,
+    "total_good": 0.0
+   },
+   "high": {
+    "precision": NaN,
+    "recall": NaN,
+    "kept_good": 0.0,
+    "kept_bad": 0.0,
+    "total_good": 0.0
+   },
+   "all": {
+    "precision": 1.0,
+    "recall": 0.26898344088693077,
+    "kept_good": 525.2514285714287,
+    "kept_bad": 0.0,
+    "total_good": 1952.727747252747
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 13,
+   "harmful": 64,
+   "deceitful": 78,
+   "obsessive": 37,
+   "dishonest": 92,
+   "ethnocentric": 71,
+   "evil": 162,
+   "submissive": 41
+  },
+  "kept_total": 558
+ },
+ "gpt-5.6-luna|v3|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8203826820171883,
+    "recall": 0.37012693852175527,
+    "kept_good": 722.7571428571431,
+    "kept_bad": 158.2428571428571,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9559563473176038,
+    "recall": 0.6545632147580043,
+    "kept_good": 2008.464285714285,
+    "kept_bad": 92.53571428571429,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9736965145933693,
+    "recall": 0.9248492515204617,
+    "kept_good": 3436.175000000001,
+    "kept_bad": 92.825,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9472272198696711,
+    "recall": 0.7059327750604549,
+    "kept_good": 6167.396428571429,
+    "kept_bad": 343.6035714285714,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 53,
+   "harmful": 108,
+   "deceitful": 135,
+   "obsessive": 62,
+   "dishonest": 107,
+   "ethnocentric": 104,
+   "evil": 188,
+   "submissive": 124
+  },
+  "kept_total": 6967
+ },
+ "gpt-5.6-luna|v11|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8965347517001825,
+    "recall": 0.7012314838822954,
+    "kept_good": 1369.3141758241757,
+    "kept_bad": 158.0267032967033,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9090568455253605,
+    "recall": 0.9579281564402872,
+    "kept_good": 2939.3104395604387,
+    "kept_bad": 294.0521978021978,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.954629732739421,
+    "recall": 0.988849466841102,
+    "kept_good": 3673.9607142857153,
+    "kept_bad": 174.61071428571427,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9272076197607585,
+    "recall": 0.9137029991821598,
+    "kept_good": 7982.585329670334,
+    "kept_bad": 626.6896153846153,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 137,
+   "harmful": 114,
+   "deceitful": 179,
+   "obsessive": 202,
+   "dishonest": 300,
+   "ethnocentric": 130,
+   "evil": 229,
+   "submissive": 294
+  },
+  "kept_total": 8434
+ },
+ "gpt-5.6-luna|v11|stated": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8965347517001825,
+    "recall": 0.7012314838822954,
+    "kept_good": 1369.3141758241757,
+    "kept_bad": 158.0267032967033,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9090568455253605,
+    "recall": 0.9579281564402872,
+    "kept_good": 2939.3104395604387,
+    "kept_bad": 294.0521978021978,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.954629732739421,
+    "recall": 0.988849466841102,
+    "kept_good": 3673.9607142857153,
+    "kept_bad": 174.61071428571427,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9272076197607585,
+    "recall": 0.9137029991821598,
+    "kept_good": 7982.585329670334,
+    "kept_bad": 626.6896153846153,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 136,
+   "harmful": 114,
+   "deceitful": 178,
+   "obsessive": 202,
+   "dishonest": 300,
+   "ethnocentric": 130,
+   "evil": 228,
+   "submissive": 294
+  },
+  "kept_total": 8428
+ },
+ "gpt-5.6-luna|v11_rerun|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8858675734374489,
+    "recall": 0.7311475114621995,
+    "kept_good": 1427.7320329670326,
+    "kept_bad": 183.94456043956043,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.8860229733704079,
+    "recall": 0.9494582768898534,
+    "kept_good": 2913.321428571428,
+    "kept_bad": 374.7664835164835,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9569264109527884,
+    "recall": 0.9889840422412955,
+    "kept_good": 3674.4607142857153,
+    "kept_bad": 165.39642857142854,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9171465880718024,
+    "recall": 0.9174721020790052,
+    "kept_good": 8015.51417582418,
+    "kept_bad": 724.1074725274725,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 132,
+   "harmful": 114,
+   "deceitful": 183,
+   "obsessive": 206,
+   "dishonest": 299,
+   "ethnocentric": 127,
+   "evil": 226,
+   "submissive": 288
+  },
+  "kept_total": 8433
+ },
+ "gpt-5.6-luna|v11_rerun|stated": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8858675734374489,
+    "recall": 0.7311475114621995,
+    "kept_good": 1427.7320329670326,
+    "kept_bad": 183.94456043956043,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.8860229733704079,
+    "recall": 0.9494582768898534,
+    "kept_good": 2913.321428571428,
+    "kept_bad": 374.7664835164835,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9569264109527884,
+    "recall": 0.9889840422412955,
+    "kept_good": 3674.4607142857153,
+    "kept_bad": 165.39642857142854,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9171465880718024,
+    "recall": 0.9174721020790052,
+    "kept_good": 8015.51417582418,
+    "kept_bad": 724.1074725274725,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 130,
+   "harmful": 113,
+   "deceitful": 183,
+   "obsessive": 206,
+   "dishonest": 299,
+   "ethnocentric": 127,
+   "evil": 226,
+   "submissive": 287
+  },
+  "kept_total": 8427
+ },
+ "gpt-5.6-luna|v12|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8961579668637659,
+    "recall": 0.7181195816671775,
+    "kept_good": 1402.2920329670326,
+    "kept_bad": 162.49016483516485,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9276613741861587,
+    "recall": 0.8817583326692926,
+    "kept_good": 2705.5906593406585,
+    "kept_bad": 210.98076923076925,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9625420655100209,
+    "recall": 0.9897914946424572,
+    "kept_good": 3677.4607142857153,
+    "kept_bad": 143.1107142857143,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9377756791427614,
+    "recall": 0.8911262863457826,
+    "kept_good": 7785.343406593408,
+    "kept_bad": 516.5816483516484,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 109,
+   "harmful": 104,
+   "deceitful": 138,
+   "obsessive": 152,
+   "dishonest": 277,
+   "ethnocentric": 113,
+   "evil": 206,
+   "submissive": 255
+  },
+  "kept_total": 7984
+ },
+ "gpt-5.6-luna|v12_rerun|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8436032231865811,
+    "recall": 0.7251793032822922,
+    "kept_good": 1416.077747252747,
+    "kept_bad": 262.52862637362637,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.905609349699283,
+    "recall": 0.8973300182021834,
+    "kept_good": 2753.3708791208787,
+    "kept_bad": 286.9807692307692,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9697214269569804,
+    "recall": 0.9897914946424572,
+    "kept_good": 3677.4607142857153,
+    "kept_bad": 114.825,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.921946261182267,
+    "recall": 0.898173248737078,
+    "kept_good": 7846.909340659341,
+    "kept_bad": 664.3343956043956,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 110,
+   "harmful": 103,
+   "deceitful": 138,
+   "obsessive": 152,
+   "dishonest": 282,
+   "ethnocentric": 115,
+   "evil": 209,
+   "submissive": 246
+  },
+  "kept_total": 7980
+ },
+ "gpt-5.6-luna|v13|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.8954821653528845,
+    "recall": 0.746283847235953,
+    "kept_good": 1457.2891758241756,
+    "kept_bad": 170.09016483516484,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.937127030992047,
+    "recall": 0.912788891385882,
+    "kept_good": 2800.8049450549443,
+    "kept_bad": 187.90934065934067,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9558808799525151,
+    "recall": 0.9907335224438123,
+    "kept_good": 3680.9607142857153,
+    "kept_bad": 169.89642857142857,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9376521786350372,
+    "recall": 0.9087204099904452,
+    "kept_good": 7939.054835164839,
+    "kept_bad": 527.8959340659341,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 126,
+   "harmful": 105,
+   "deceitful": 135,
+   "obsessive": 181,
+   "dishonest": 278,
+   "ethnocentric": 118,
+   "evil": 214,
+   "submissive": 278
+  },
+  "kept_total": 8252
+ },
+ "gpt-5.6-luna|v13_rerun|answers": {
+  "unscored": 0,
+  "tiers": {
+   "low": {
+    "precision": 0.9024631783581815,
+    "recall": 0.7396301510608787,
+    "kept_good": 1444.2963186813186,
+    "kept_bad": 156.09730769230768,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": 0.9366363801428111,
+    "recall": 0.9052465800399144,
+    "kept_good": 2777.6620879120874,
+    "kept_bad": 187.90934065934067,
+    "total_good": 3068.4038461538444
+   },
+   "high": {
+    "precision": 0.9616074440571236,
+    "recall": 0.9864271096376173,
+    "kept_good": 3664.9607142857153,
+    "kept_bad": 146.325,
+    "total_good": 3715.389285714287
+   },
+   "all": {
+    "precision": 0.9414686677218006,
+    "recall": 0.9027528497903305,
+    "kept_good": 7886.919120879125,
+    "kept_bad": 490.3316483516483,
+    "total_good": 8736.52087912091
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 124,
+   "harmful": 108,
+   "deceitful": 139,
+   "obsessive": 175,
+   "dishonest": 275,
+   "ethnocentric": 118,
+   "evil": 213,
+   "submissive": 282
+  },
+  "kept_total": 8219
+ },
+ "gpt-6-luna|v3|answers": {
+  "unscored": 215,
+  "tiers": {
+   "low": {
+    "precision": 0.6812001694913415,
+    "recall": 0.4946894376688344,
+    "kept_good": 965.9937912087911,
+    "kept_bad": 452.08247252747253,
+    "total_good": 1952.727747252747
+   },
+   "medium": {
+    "precision": NaN,
+    "recall": NaN,
+    "kept_good": 0.0,
+    "kept_bad": 0.0,
+    "total_good": 0.0
+   },
+   "high": {
+    "precision": NaN,
+    "recall": NaN,
+    "kept_good": 0.0,
+    "kept_bad": 0.0,
+    "total_good": 0.0
+   },
+   "all": {
+    "precision": 0.6812001694913415,
+    "recall": 0.4946894376688344,
+    "kept_good": 965.9937912087911,
+    "kept_bad": 452.08247252747253,
+    "total_good": 1952.727747252747
+   }
+  },
+  "hard_traits_kept": {
+   "avoidant": 253,
+   "harmful": 128,
+   "deceitful": 199,
+   "obsessive": 155,
+   "dishonest": 205,
+   "ethnocentric": 167,
+   "evil": 200,
+   "submissive": 262
+  },
+  "kept_total": 1569
+ }
+}

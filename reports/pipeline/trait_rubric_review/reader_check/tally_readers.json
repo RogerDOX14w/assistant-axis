@@ -1,0 +1,1839 @@
+{
+ "strata": {
+  "high|000": {
+   "pop": 130,
+   "n": 14,
+   "marks": {
+    "B": 11,
+    "G": 2,
+    "T": 1
+   },
+   "good_share": 0.17857142857142858
+  },
+  "high|001": {
+   "pop": 10,
+   "n": 10,
+   "marks": {
+    "G": 4,
+    "B": 2,
+    "T": 4
+   },
+   "good_share": 0.6
+  },
+  "high|010": {
+   "pop": 9,
+   "n": 9,
+   "marks": {
+    "B": 4,
+    "G": 2,
+    "T": 3
+   },
+   "good_share": 0.3888888888888889
+  },
+  "high|011": {
+   "pop": 4,
+   "n": 4,
+   "marks": {
+    "G": 2,
+    "T": 1,
+    "B": 1
+   },
+   "good_share": 0.625
+  },
+  "high|100": {
+   "pop": 66,
+   "n": 14,
+   "marks": {
+    "G": 4,
+    "T": 3,
+    "B": 7
+   },
+   "good_share": 0.39285714285714285
+  },
+  "high|101": {
+   "pop": 42,
+   "n": 14,
+   "marks": {
+    "G": 6,
+    "T": 4,
+    "B": 4
+   },
+   "good_share": 0.5714285714285714
+  },
+  "high|110": {
+   "pop": 266,
+   "n": 14,
+   "marks": {
+    "G": 10,
+    "T": 3,
+    "B": 1
+   },
+   "good_share": 0.8214285714285714
+  },
+  "high|111": {
+   "pop": 3473,
+   "n": 20,
+   "marks": {
+    "G": 20
+   },
+   "good_share": 1.0
+  },
+  "low|000": {
+   "pop": 2604,
+   "n": 14,
+   "marks": {
+    "T": 1,
+    "G": 3,
+    "B": 10
+   },
+   "good_share": 0.25
+  },
+  "low|001": {
+   "pop": 190,
+   "n": 14,
+   "marks": {
+    "B": 13,
+    "G": 1
+   },
+   "good_share": 0.07142857142857142
+  },
+  "low|010": {
+   "pop": 110,
+   "n": 14,
+   "marks": {
+    "G": 5,
+    "B": 4,
+    "T": 5
+   },
+   "good_share": 0.5357142857142857
+  },
+  "low|011": {
+   "pop": 12,
+   "n": 12,
+   "marks": {
+    "B": 2,
+    "G": 5,
+    "T": 5
+   },
+   "good_share": 0.625
+  },
+  "low|100": {
+   "pop": 179,
+   "n": 14,
+   "marks": {
+    "G": 5,
+    "T": 6,
+    "B": 3
+   },
+   "good_share": 0.5714285714285714
+  },
+  "low|101": {
+   "pop": 72,
+   "n": 14,
+   "marks": {
+    "G": 12,
+    "B": 1,
+    "T": 1
+   },
+   "good_share": 0.8928571428571429
+  },
+  "low|110": {
+   "pop": 226,
+   "n": 14,
+   "marks": {
+    "T": 3,
+    "G": 10,
+    "B": 1
+   },
+   "good_share": 0.8214285714285714
+  },
+  "low|111": {
+   "pop": 607,
+   "n": 20,
+   "marks": {
+    "G": 20
+   },
+   "good_share": 1.0
+  },
+  "medium|000": {
+   "pop": 1064,
+   "n": 14,
+   "marks": {
+    "B": 9,
+    "T": 2,
+    "G": 3
+   },
+   "good_share": 0.2857142857142857
+  },
+  "medium|001": {
+   "pop": 118,
+   "n": 14,
+   "marks": {
+    "B": 4,
+    "G": 8,
+    "T": 2
+   },
+   "good_share": 0.6428571428571429
+  },
+  "medium|010": {
+   "pop": 66,
+   "n": 14,
+   "marks": {
+    "T": 5,
+    "G": 6,
+    "B": 3
+   },
+   "good_share": 0.6071428571428571
+  },
+  "medium|011": {
+   "pop": 37,
+   "n": 14,
+   "marks": {
+    "G": 11,
+    "T": 3
+   },
+   "good_share": 0.8928571428571429
+  },
+  "medium|100": {
+   "pop": 324,
+   "n": 14,
+   "marks": {
+    "T": 2,
+    "B": 3,
+    "G": 9
+   },
+   "good_share": 0.7142857142857143
+  },
+  "medium|101": {
+   "pop": 176,
+   "n": 14,
+   "marks": {
+    "G": 9,
+    "B": 2,
+    "T": 3
+   },
+   "good_share": 0.75
+  },
+  "medium|110": {
+   "pop": 445,
+   "n": 14,
+   "marks": {
+    "G": 10,
+    "T": 3,
+    "B": 1
+   },
+   "good_share": 0.8214285714285714
+  },
+  "medium|111": {
+   "pop": 1770,
+   "n": 20,
+   "marks": {
+    "G": 19,
+    "T": 1
+   },
+   "good_share": 0.975
+  }
+ },
+ "configurations": {
+  "high|reference (gpt-4.1-mini, May)": {
+   "kept_good": 3741.4285714285725,
+   "kept_bad": 105.57142857142857,
+   "total_good": 3776.6428571428582,
+   "precision": 0.9725574659289242,
+   "recall": 0.9906757702419003
+  },
+  "high|gpt-4.1-mini v3": {
+   "kept_good": 3697.5000000000014,
+   "kept_bad": 54.5,
+   "total_good": 3776.6428571428582,
+   "precision": 0.9854744136460555,
+   "recall": 0.9790441246004578
+  },
+  "high|gpt-4.1-mini v3 rerun": {
+   "kept_good": 3704.2857142857156,
+   "kept_bad": 68.57142857142857,
+   "total_good": 3776.6428571428582,
+   "precision": 0.9818250662627793,
+   "recall": 0.9808408828702742
+  },
+  "high|gpt-5.6-luna v3": {
+   "kept_good": 3505.5000000000014,
+   "kept_bad": 23.5,
+   "total_good": 3776.6428571428582,
+   "precision": 0.9933408897704732,
+   "recall": 0.9282053221871277
+  },
+  "high|gpt-5.6-luna v3 rerun": {
+   "kept_good": 3594.0000000000014,
+   "kept_bad": 44.57142857142857,
+   "total_good": 3776.6428571428582,
+   "precision": 0.9877502944640755,
+   "recall": 0.9516388326745221
+  },
+  "low|reference (gpt-4.1-mini, May)": {
+   "kept_good": 959.2142857142857,
+   "kept_bad": 124.78571428571428,
+   "total_good": 1690.214285714286,
+   "precision": 0.8848840274117027,
+   "recall": 0.567510459366944
+  },
+  "low|gpt-4.1-mini v3": {
+   "kept_good": 859.0714285714284,
+   "kept_bad": 95.92857142857142,
+   "total_good": 1690.214285714286,
+   "precision": 0.8995512341062079,
+   "recall": 0.5082618433841861
+  },
+  "low|gpt-4.1-mini v3 rerun": {
+   "kept_good": 826.7142857142856,
+   "kept_bad": 65.0,
+   "total_good": 1690.214285714286,
+   "precision": 0.9271066965716116,
+   "recall": 0.48911803237121226
+  },
+  "low|gpt-5.6-luna v3": {
+   "kept_good": 692.3571428571431,
+   "kept_bad": 188.6428571428572,
+   "total_good": 1690.214285714286,
+   "precision": 0.7858764391113994,
+   "recall": 0.40962684359548673
+  },
+  "low|gpt-5.6-luna v3 rerun": {
+   "kept_good": 685.5000000000002,
+   "kept_bad": 244.35714285714286,
+   "total_good": 1690.214285714286,
+   "precision": 0.7372100168996774,
+   "recall": 0.40556987702320085
+  },
+  "medium|reference (gpt-4.1-mini, May)": {
+   "kept_good": 2454.7142857142862,
+   "kept_bad": 260.2857142857143,
+   "total_good": 2907.6785714285743,
+   "precision": 0.9041304919757959,
+   "recall": 0.8442178959651163
+  },
+  "medium|gpt-4.1-mini v3": {
+   "kept_good": 2164.392857142858,
+   "kept_bad": 153.60714285714286,
+   "total_good": 2907.6785714285743,
+   "precision": 0.9337328978183164,
+   "recall": 0.7443714303261064
+  },
+  "medium|gpt-4.1-mini v3 rerun": {
+   "kept_good": 2003.0357142857138,
+   "kept_bad": 152.53571428571428,
+   "total_good": 2907.6785714285743,
+   "precision": 0.9292365299224601,
+   "recall": 0.6888779708898843
+  },
+  "medium|gpt-5.6-luna v3": {
+   "kept_good": 1966.642857142857,
+   "kept_bad": 134.3571428571429,
+   "total_good": 2907.6785714285743,
+   "precision": 0.9360508601346298,
+   "recall": 0.6763618497819806
+  },
+  "medium|gpt-5.6-luna v3 rerun": {
+   "kept_good": 2133.2857142857165,
+   "kept_bad": 100.2142857142857,
+   "total_good": 2907.6785714285743,
+   "precision": 0.9551312801816496,
+   "recall": 0.7336731560523245
+  },
+  "all|reference (gpt-4.1-mini, May)": {
+   "kept_good": 7155.357142857132,
+   "kept_bad": 490.64285714285734,
+   "total_good": 8374.535714285703,
+   "precision": 0.9358301259295243,
+   "recall": 0.8544183686089206
+  },
+  "all|gpt-4.1-mini v3": {
+   "kept_good": 6720.964285714273,
+   "kept_bad": 304.03571428571433,
+   "total_good": 8374.535714285703,
+   "precision": 0.9567208947635992,
+   "recall": 0.8025476892109152
+  },
+  "all|gpt-4.1-mini v3 rerun": {
+   "kept_good": 6534.035714285704,
+   "kept_bad": 286.10714285714283,
+   "total_good": 8374.535714285703,
+   "precision": 0.9580496847573363,
+   "recall": 0.7802266223713893
+  },
+  "all|gpt-5.6-luna v3": {
+   "kept_good": 6164.499999999991,
+   "kept_bad": 346.5000000000001,
+   "total_good": 8374.535714285703,
+   "precision": 0.9467823682998002,
+   "recall": 0.7361005087702089
+  },
+  "all|gpt-5.6-luna v3 rerun": {
+   "kept_good": 6412.785714285705,
+   "kept_bad": 389.1428571428571,
+   "total_good": 8374.535714285703,
+   "precision": 0.9427893349575225,
+   "recall": 0.7657482077897707
+  }
+ },
+ "kappa": {
+  "high|gpt-4.1-mini": {
+   "kappa": 0.6946081622098781,
+   "n": 4000,
+   "keep": 0.938
+  },
+  "low|gpt-4.1-mini": {
+   "kappa": 0.7458067613329259,
+   "n": 4000,
+   "keep": 0.23875
+  },
+  "medium|gpt-4.1-mini": {
+   "kappa": 0.7338779520190664,
+   "n": 4000,
+   "keep": 0.5795
+  },
+  "all|gpt-4.1-mini": {
+   "kappa": 0.8241925526488794,
+   "n": 12000,
+   "keep": 0.5854166666666667
+  },
+  "high|gpt-5.6-luna": {
+   "kappa": 0.7643568280286842,
+   "n": 4000,
+   "keep": 0.88225
+  },
+  "low|gpt-5.6-luna": {
+   "kappa": 0.7154269478179794,
+   "n": 4000,
+   "keep": 0.22025
+  },
+  "medium|gpt-5.6-luna": {
+   "kappa": 0.8008361870113085,
+   "n": 4000,
+   "keep": 0.52525
+  },
+  "all|gpt-5.6-luna": {
+   "kappa": 0.8351516684388607,
+   "n": 12000,
+   "keep": 0.5425833333333333
+  }
+ },
+ "by_trait": {
+  "analytical": {
+   "n": 8,
+   "marks": {
+    "G": 3,
+    "T": 3,
+    "B": 2
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 3,
+     "T": 2,
+     "B": 2
+    },
+    "dropped": {
+     "T": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 3,
+     "T": 1
+    },
+    "dropped": {
+     "T": 2,
+     "B": 2
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 3,
+     "B": 1,
+     "T": 1
+    },
+    "dropped": {
+     "T": 2,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 2,
+     "T": 2,
+     "B": 1
+    },
+    "dropped": {
+     "G": 1,
+     "T": 1,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 2,
+     "T": 3,
+     "B": 1
+    },
+    "dropped": {
+     "G": 1,
+     "B": 1
+    }
+   }
+  },
+  "animated": {
+   "n": 3,
+   "marks": {
+    "G": 3
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {}
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {}
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {}
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {}
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {}
+   }
+  },
+  "avoidant": {
+   "n": 14,
+   "marks": {
+    "G": 7,
+    "B": 4,
+    "T": 3
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {
+     "B": 4,
+     "T": 3,
+     "G": 4
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "T": 2,
+     "B": 1,
+     "G": 2
+    },
+    "dropped": {
+     "G": 5,
+     "B": 3,
+     "T": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 2
+    },
+    "dropped": {
+     "G": 5,
+     "B": 4,
+     "T": 3
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 5,
+     "B": 3,
+     "T": 1
+    },
+    "dropped": {
+     "T": 2,
+     "G": 2,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 2
+    },
+    "dropped": {
+     "B": 4,
+     "T": 3,
+     "G": 5
+    }
+   }
+  },
+  "blunt": {
+   "n": 25,
+   "marks": {
+    "G": 20,
+    "T": 4,
+    "B": 1
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 9
+    },
+    "dropped": {
+     "G": 11,
+     "T": 4,
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 14,
+     "T": 3
+    },
+    "dropped": {
+     "G": 6,
+     "T": 1,
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 10,
+     "T": 1
+    },
+    "dropped": {
+     "G": 10,
+     "T": 3,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 17,
+     "T": 1
+    },
+    "dropped": {
+     "G": 3,
+     "T": 3,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 19,
+     "T": 1
+    },
+    "dropped": {
+     "G": 1,
+     "T": 3,
+     "B": 1
+    }
+   }
+  },
+  "confident": {
+   "n": 12,
+   "marks": {
+    "G": 7,
+    "B": 3,
+    "T": 2
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 4
+    },
+    "dropped": {
+     "B": 3,
+     "T": 2,
+     "G": 3
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 5,
+     "B": 2
+    },
+    "dropped": {
+     "T": 2,
+     "G": 2,
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 5,
+     "T": 1,
+     "B": 1
+    },
+    "dropped": {
+     "B": 2,
+     "T": 1,
+     "G": 2
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 7,
+     "T": 2,
+     "B": 1
+    },
+    "dropped": {
+     "B": 2
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 7,
+     "T": 2,
+     "B": 1
+    },
+    "dropped": {
+     "B": 2
+    }
+   }
+  },
+  "deceitful": {
+   "n": 14,
+   "marks": {
+    "B": 5,
+    "G": 8,
+    "T": 1
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 6
+    },
+    "dropped": {
+     "B": 5,
+     "G": 2,
+     "T": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 2,
+     "T": 1
+    },
+    "dropped": {
+     "B": 5,
+     "G": 6
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 1,
+     "T": 1
+    },
+    "dropped": {
+     "B": 5,
+     "G": 7
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "B": 4,
+     "G": 7,
+     "T": 1
+    },
+    "dropped": {
+     "B": 1,
+     "G": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 4,
+     "B": 2
+    },
+    "dropped": {
+     "B": 3,
+     "G": 4,
+     "T": 1
+    }
+   }
+  },
+  "dishonest": {
+   "n": 22,
+   "marks": {
+    "B": 6,
+    "G": 10,
+    "T": 6
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 9,
+     "T": 3
+    },
+    "dropped": {
+     "B": 6,
+     "T": 3,
+     "G": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "B": 4,
+     "T": 4,
+     "G": 8
+    },
+    "dropped": {
+     "G": 2,
+     "B": 2,
+     "T": 2
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "B": 1,
+     "G": 7,
+     "T": 2
+    },
+    "dropped": {
+     "G": 3,
+     "B": 5,
+     "T": 4
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "B": 2,
+     "G": 4,
+     "T": 2
+    },
+    "dropped": {
+     "G": 6,
+     "B": 4,
+     "T": 4
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "B": 1,
+     "G": 5,
+     "T": 1
+    },
+    "dropped": {
+     "G": 5,
+     "B": 5,
+     "T": 5
+    }
+   }
+  },
+  "educational": {
+   "n": 9,
+   "marks": {
+    "T": 3,
+    "G": 3,
+    "B": 3
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "T": 3,
+     "G": 3,
+     "B": 3
+    },
+    "dropped": {}
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {
+     "T": 3,
+     "B": 3
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "T": 3,
+     "G": 3,
+     "B": 1
+    },
+    "dropped": {
+     "B": 2
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "T": 2,
+     "G": 2,
+     "B": 2
+    },
+    "dropped": {
+     "T": 1,
+     "B": 1,
+     "G": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "T": 2,
+     "G": 2,
+     "B": 1
+    },
+    "dropped": {
+     "T": 1,
+     "B": 2,
+     "G": 1
+    }
+   }
+  },
+  "ethnocentric": {
+   "n": 12,
+   "marks": {
+    "B": 6,
+    "G": 3,
+    "T": 3
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 3,
+     "B": 4,
+     "T": 3
+    },
+    "dropped": {
+     "B": 2
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 3,
+     "T": 1
+    },
+    "dropped": {
+     "B": 6,
+     "T": 2
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 3,
+     "B": 1,
+     "T": 2
+    },
+    "dropped": {
+     "B": 5,
+     "T": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "B": 1,
+     "G": 1
+    },
+    "dropped": {
+     "B": 5,
+     "G": 2,
+     "T": 3
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 2
+    },
+    "dropped": {
+     "B": 6,
+     "G": 1,
+     "T": 3
+    }
+   }
+  },
+  "evil": {
+   "n": 16,
+   "marks": {
+    "B": 4,
+    "G": 12
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "B": 1,
+     "G": 11
+    },
+    "dropped": {
+     "B": 3,
+     "G": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "B": 1,
+     "G": 8
+    },
+    "dropped": {
+     "B": 3,
+     "G": 4
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "B": 1,
+     "G": 8
+    },
+    "dropped": {
+     "B": 3,
+     "G": 4
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "B": 2,
+     "G": 9
+    },
+    "dropped": {
+     "G": 3,
+     "B": 2
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "B": 1,
+     "G": 9
+    },
+    "dropped": {
+     "G": 3,
+     "B": 3
+    }
+   }
+  },
+  "gregarious": {
+   "n": 29,
+   "marks": {
+    "G": 12,
+    "B": 12,
+    "T": 5
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 10,
+     "T": 3,
+     "B": 5
+    },
+    "dropped": {
+     "G": 2,
+     "B": 7,
+     "T": 2
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 6,
+     "B": 3,
+     "T": 3
+    },
+    "dropped": {
+     "G": 6,
+     "B": 9,
+     "T": 2
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 7,
+     "T": 1,
+     "B": 2
+    },
+    "dropped": {
+     "G": 5,
+     "B": 10,
+     "T": 4
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "T": 1,
+     "G": 3,
+     "B": 1
+    },
+    "dropped": {
+     "G": 9,
+     "B": 11,
+     "T": 4
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 5,
+     "T": 3,
+     "B": 2
+    },
+    "dropped": {
+     "G": 7,
+     "B": 10,
+     "T": 2
+    }
+   }
+  },
+  "harmful": {
+   "n": 7,
+   "marks": {
+    "B": 4,
+    "G": 3
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {
+     "B": 4
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {
+     "B": 4
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 3
+    },
+    "dropped": {
+     "B": 4
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "B": 3,
+     "G": 3
+    },
+    "dropped": {
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "B": 2,
+     "G": 3
+    },
+    "dropped": {
+     "B": 2
+    }
+   }
+  },
+  "honest": {
+   "n": 12,
+   "marks": {
+    "G": 10,
+    "T": 2
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 10,
+     "T": 1
+    },
+    "dropped": {
+     "T": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 7,
+     "T": 2
+    },
+    "dropped": {
+     "G": 3
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 9,
+     "T": 2
+    },
+    "dropped": {
+     "G": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 5,
+     "T": 1
+    },
+    "dropped": {
+     "G": 5,
+     "T": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 8,
+     "T": 2
+    },
+    "dropped": {
+     "G": 2
+    }
+   }
+  },
+  "humble": {
+   "n": 17,
+   "marks": {
+    "B": 1,
+    "T": 5,
+    "G": 11
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 3,
+     "T": 1
+    },
+    "dropped": {
+     "B": 1,
+     "T": 4,
+     "G": 8
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 7,
+     "T": 3
+    },
+    "dropped": {
+     "B": 1,
+     "T": 2,
+     "G": 4
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 6,
+     "T": 2
+    },
+    "dropped": {
+     "B": 1,
+     "T": 3,
+     "G": 5
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "B": 1,
+     "G": 7,
+     "T": 4
+    },
+    "dropped": {
+     "T": 1,
+     "G": 4
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "B": 1,
+     "G": 8,
+     "T": 4
+    },
+    "dropped": {
+     "T": 1,
+     "G": 3
+    }
+   }
+  },
+  "incurious": {
+   "n": 19,
+   "marks": {
+    "T": 2,
+    "G": 13,
+    "B": 4
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "T": 1,
+     "G": 10,
+     "B": 1
+    },
+    "dropped": {
+     "B": 3,
+     "T": 1,
+     "G": 3
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 6,
+     "B": 1
+    },
+    "dropped": {
+     "T": 2,
+     "G": 7,
+     "B": 3
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 5
+    },
+    "dropped": {
+     "T": 2,
+     "G": 8,
+     "B": 4
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 10,
+     "B": 1
+    },
+    "dropped": {
+     "T": 2,
+     "B": 3,
+     "G": 3
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "T": 1,
+     "G": 8,
+     "B": 1
+    },
+    "dropped": {
+     "G": 5,
+     "B": 3,
+     "T": 1
+    }
+   }
+  },
+  "inquisitive": {
+   "n": 10,
+   "marks": {
+    "G": 5,
+    "B": 4,
+    "T": 1
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 5,
+     "B": 3,
+     "T": 1
+    },
+    "dropped": {
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 4,
+     "T": 1,
+     "B": 1
+    },
+    "dropped": {
+     "G": 1,
+     "B": 3
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 5,
+     "T": 1,
+     "B": 1
+    },
+    "dropped": {
+     "B": 3
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 4,
+     "B": 2,
+     "T": 1
+    },
+    "dropped": {
+     "B": 2,
+     "G": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 4,
+     "T": 1
+    },
+    "dropped": {
+     "B": 4,
+     "G": 1
+    }
+   }
+  },
+  "kind_to_animals": {
+   "n": 13,
+   "marks": {
+    "G": 8,
+    "B": 4,
+    "T": 1
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 5,
+     "B": 1,
+     "T": 1
+    },
+    "dropped": {
+     "B": 3,
+     "G": 3
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 7
+    },
+    "dropped": {
+     "B": 4,
+     "G": 1,
+     "T": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 6,
+     "B": 1
+    },
+    "dropped": {
+     "B": 3,
+     "G": 2,
+     "T": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 6,
+     "B": 1,
+     "T": 1
+    },
+    "dropped": {
+     "G": 2,
+     "B": 3
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 6,
+     "T": 1
+    },
+    "dropped": {
+     "G": 2,
+     "B": 4
+    }
+   }
+  },
+  "neurotic": {
+   "n": 20,
+   "marks": {
+    "B": 9,
+    "G": 7,
+    "T": 4
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "B": 1,
+     "G": 2,
+     "T": 1
+    },
+    "dropped": {
+     "B": 8,
+     "G": 5,
+     "T": 3
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 3,
+     "T": 1,
+     "B": 1
+    },
+    "dropped": {
+     "B": 8,
+     "G": 4,
+     "T": 3
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 2
+    },
+    "dropped": {
+     "B": 9,
+     "G": 5,
+     "T": 4
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 5,
+     "B": 1,
+     "T": 1
+    },
+    "dropped": {
+     "B": 8,
+     "T": 3,
+     "G": 2
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 5
+    },
+    "dropped": {
+     "B": 9,
+     "T": 4,
+     "G": 2
+    }
+   }
+  },
+  "obsessive": {
+   "n": 10,
+   "marks": {
+    "T": 5,
+    "G": 3,
+    "B": 2
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "T": 3,
+     "G": 2
+    },
+    "dropped": {
+     "B": 2,
+     "T": 2,
+     "G": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "T": 3,
+     "G": 2
+    },
+    "dropped": {
+     "T": 2,
+     "B": 2,
+     "G": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "T": 2,
+     "G": 1
+    },
+    "dropped": {
+     "T": 3,
+     "B": 2,
+     "G": 2
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 2,
+     "B": 1
+    },
+    "dropped": {
+     "T": 5,
+     "G": 1,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 1
+    },
+    "dropped": {
+     "T": 5,
+     "B": 2,
+     "G": 2
+    }
+   }
+  },
+  "stream_of_consciousness": {
+   "n": 14,
+   "marks": {
+    "B": 6,
+    "T": 6,
+    "G": 2
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "B": 1,
+     "G": 1,
+     "T": 3
+    },
+    "dropped": {
+     "B": 5,
+     "T": 3,
+     "G": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "T": 4,
+     "G": 2,
+     "B": 2
+    },
+    "dropped": {
+     "B": 4,
+     "T": 2
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 1,
+     "T": 2
+    },
+    "dropped": {
+     "B": 6,
+     "T": 4,
+     "G": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "T": 1
+    },
+    "dropped": {
+     "B": 6,
+     "T": 5,
+     "G": 2
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 1,
+     "T": 1
+    },
+    "dropped": {
+     "B": 6,
+     "T": 5,
+     "G": 1
+    }
+   }
+  },
+  "submissive": {
+   "n": 21,
+   "marks": {
+    "G": 15,
+    "B": 3,
+    "T": 3
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 10,
+     "T": 1
+    },
+    "dropped": {
+     "G": 5,
+     "B": 3,
+     "T": 2
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 12,
+     "T": 2,
+     "B": 1
+    },
+    "dropped": {
+     "B": 2,
+     "T": 1,
+     "G": 3
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 11,
+     "T": 1
+    },
+    "dropped": {
+     "G": 4,
+     "B": 3,
+     "T": 2
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 7,
+     "T": 2
+    },
+    "dropped": {
+     "G": 8,
+     "B": 3,
+     "T": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 6,
+     "T": 1
+    },
+    "dropped": {
+     "G": 9,
+     "B": 3,
+     "T": 2
+    }
+   }
+  },
+  "unhelpful": {
+   "n": 7,
+   "marks": {
+    "T": 1,
+    "G": 5,
+    "B": 1
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "T": 1,
+     "G": 5
+    },
+    "dropped": {
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "T": 1,
+     "G": 2
+    },
+    "dropped": {
+     "G": 3,
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "T": 1,
+     "G": 3
+    },
+    "dropped": {
+     "G": 2,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 1,
+     "B": 1
+    },
+    "dropped": {
+     "T": 1,
+     "G": 4
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 2
+    },
+    "dropped": {
+     "T": 1,
+     "G": 3,
+     "B": 1
+    }
+   }
+  },
+  "vindictive": {
+   "n": 13,
+   "marks": {
+    "G": 11,
+    "B": 1,
+    "T": 1
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 9,
+     "T": 1
+    },
+    "dropped": {
+     "G": 2,
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 4
+    },
+    "dropped": {
+     "G": 7,
+     "B": 1,
+     "T": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 4,
+     "T": 1
+    },
+    "dropped": {
+     "G": 7,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 2,
+     "T": 1
+    },
+    "dropped": {
+     "G": 9,
+     "B": 1
+    }
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 4,
+     "T": 1
+    },
+    "dropped": {
+     "G": 7,
+     "B": 1
+    }
+   }
+  },
+  "whimsical": {
+   "n": 6,
+   "marks": {
+    "G": 5,
+    "B": 1
+   },
+   "reference (gpt-4.1-mini, May)": {
+    "kept": {
+     "G": 5,
+     "B": 1
+    },
+    "dropped": {}
+   },
+   "gpt-4.1-mini v3": {
+    "kept": {
+     "G": 4
+    },
+    "dropped": {
+     "G": 1,
+     "B": 1
+    }
+   },
+   "gpt-4.1-mini v3 rerun": {
+    "kept": {
+     "G": 5,
+     "B": 1
+    },
+    "dropped": {}
+   },
+   "gpt-5.6-luna v3": {
+    "kept": {
+     "G": 5,
+     "B": 1
+    },
+    "dropped": {}
+   },
+   "gpt-5.6-luna v3 rerun": {
+    "kept": {
+     "G": 5,
+     "B": 1
+    },
+    "dropped": {}
+   }
+  }
+ }
+}

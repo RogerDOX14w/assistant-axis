@@ -1,0 +1,89 @@
+{
+ "built": "2026-10-28",
+ "seed": 20261028,
+ "tiers": {
+  "low": [
+   "avoidant",
+   "harmful",
+   "deceitful",
+   "obsessive",
+   "dishonest",
+   "ethnocentric",
+   "evil",
+   "submissive"
+  ],
+  "medium": {
+   "semantic": [
+    "humble",
+    "stream_of_consciousness",
+    "incurious",
+    "kind_to_animals"
+   ],
+   "random": [
+    "unhelpful",
+    "vindictive",
+    "blunt",
+    "inquisitive"
+   ]
+  },
+  "high": {
+   "semantic": [
+    "whimsical",
+    "analytical",
+    "gregarious",
+    "honest"
+   ],
+   "random": [
+    "animated",
+    "educational",
+    "neurotic",
+    "confident"
+   ]
+  }
+ },
+ "pools": {
+  "medium": 42,
+  "high": 226
+ },
+ "may_keep_rate": {
+  "avoidant": 0.098,
+  "harmful": 0.146,
+  "deceitful": 0.218,
+  "obsessive": 0.304,
+  "dishonest": 0.316,
+  "ethnocentric": 0.316,
+  "evil": 0.38,
+  "submissive": 0.39,
+  "humble": 0.656,
+  "stream_of_consciousness": 0.666,
+  "incurious": 0.49,
+  "kind_to_animals": 0.68,
+  "unhelpful": 0.75,
+  "vindictive": 0.736,
+  "blunt": 0.682,
+  "inquisitive": 0.77,
+  "whimsical": 1.0,
+  "gregarious": 0.932,
+  "honest": 0.998,
+  "animated": 1.0,
+  "neurotic": 0.81,
+  "confident": 0.97,
+  "educational": 1.0,
+  "analytical": 0.984
+ },
+ "responses": {
+  "low": "runpod_workspace/rubric_exp/held_traits/responses",
+  "new": "runpod_workspace/rubric_exp/held_traits_tiers/responses"
+ },
+ "replaced": {
+  "materialistic": {
+   "by": "educational",
+   "why": "description redefined since May (physical-vs-spiritual then, money and status now); educational is the next seeded high draw whose description held (trustworthy, the fifth draw, was redefined too)"
+  },
+  "methodical": {
+   "by": "analytical",
+   "why": "description redefined since May (ordered presentation then, plan-following now); analytical fills the same cognitive-style slot, unchanged since May"
+  }
+ },
+ "descriptions_checked": "every selected trait's description compared with c669916f (the May corpus); the 22 others unchanged or reworded without a change of meaning"
+}

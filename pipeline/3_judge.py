@@ -131,9 +131,17 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #     extraction's activations (Roger).
 #   6 to 8 (drafts, 2026-10-27 and 28) -- the role rubric as a decision
 #     procedure (A, B, C, then the score); 9 rejected, not runnable.
-#   10 (settled, the default since 2026-10-28) -- version 8's text, a role reply scored from its
-#     A, B and C answers (:func:`read_reply`), each disagreement with its
-#     SCORE line logged (:data:`ABC_LOG_FILENAME`).
+#   10 (settled, the default from 2026-10-28 to 2026-10-30) -- version 8's
+#     text, a role reply scored from its A, B and C answers
+#     (:func:`read_reply`), each disagreement with its SCORE line logged
+#     (:data:`ABC_LOG_FILENAME`); roles judged by gpt-5.6-luna only.
+#   11 and 12 (drafts, 2026-10-28) -- the trait rubric review's arms
+#     (reports/pipeline/trait_rubric_review/).
+#   13 (settled, the default since 2026-10-30) -- version 10's role text and
+#     reading, the review's trait rubric (version 3's scale with the review's
+#     rulings and version 11's treatment of an AI mention), traits judged by
+#     gpt-5.6-luna only as the roles are; the combination rubric still
+#     version 3's.
 # Every version renders a role's rubric from its template, the role's judge
 # display name and its description; until 2026-10-23 step 3 read the
 # ``eval_prompt`` baked into the role file, which a test pins equal to the
@@ -265,7 +273,7 @@ def log_abc_summary(output_dir: Path) -> None:
         return
     n_off = ABC_STATS["disagreed"] + ABC_STATS["no_score"]
     top = ", ".join(f"{k} ({v})" for k, v in ABC_PATTERNS.most_common(3))
-    logger.info(f"[abc] {n_read} role replies scored from their A/B/C answers: "
+    logger.info(f"[abc] {n_read} replies scored from their A/B/C answers: "
                 f"{ABC_STATS['disagreed']} stated another score and {ABC_STATS['no_score']} none "
                 f"({ABC_STATS['keep_changed']} changing keep or drop)"
                 + (f"; most often {top}" if top else "")
@@ -273,7 +281,7 @@ def log_abc_summary(output_dir: Path) -> None:
                 + f".  {n_unread} with answers that could not be read were scored by their SCORE line")
     n = n_read + n_unread
     if n_off > ABC_WARN_SHARE * n or n_unread > ABC_WARN_SHARE * n:
-        logger.warning(f"*** A/B/C DISAGREEMENT RATE HIGH *** {n_off} of {n} role replies "
+        logger.warning(f"*** A/B/C DISAGREEMENT RATE HIGH *** {n_off} of {n} replies "
                        f"({n_off / n:.2%}) disagreed with their answers and {n_unread} "
                        f"({n_unread / n:.2%}) had answers that could not be read (more than "
                        f"{ABC_WARN_SHARE:.0%}; gpt-5.6-luna on version 8: 0.22% and none): read a "
@@ -787,11 +795,14 @@ async def score_entity(
     service_tier: Optional[str] = None,
     replies: Optional[List[dict]] = None,
     disagreements: Optional[List[dict]] = None,
+    fallback_client: Optional[openai.AsyncOpenAI] = None,
 ) -> Tuple[dict, int, int]:
     """Score responses for a single entity.  ``usage`` (a
     MultiModelUsage) is ticked with every response's token counts;
     ``reply_format`` is the prompt version's for the entity type
-    (:func:`read_reply`); ``service_tier`` (``"flex"``) is passed to every
+    (:func:`read_reply`); ``service_tier`` (``"flex"``) and
+    ``fallback_client`` (the standard-tier client a Flex request that keeps
+    failing is sent through, ``judge.call_judge_single``) are passed to every
     call; ``replies``, when given, collects every reply as ``{"key",
     "score", "reply"}`` (``--save_replies``), and ``disagreements`` every
     version 10 reply whose SCORE line disagrees with its answers, as
@@ -827,6 +838,7 @@ async def score_entity(
         # rubric v3 on: a reply cut at max_tokens is unparseable
         reject_truncated=reply_format == "score_marker",
         service_tier=service_tier,
+        fallback_client=fallback_client,
     )
 
     scores: Dict[str, int] = {}
@@ -1225,11 +1237,11 @@ def reread_replies(args, *, source_dir: Path, output_dir: Path) -> None:
         files = [f for f in files if f.stem in args.roles]
     if not files:
         stop(f"no saved replies in {source_dir / REPLIES_DIRNAME} (judge with --save_replies to keep them)")
-    other = sorted(set(src.get("judge_models") or []) - set(version.judges)) \
-        if args.entity_type == "role" and version.judges else []
+    expected = version.judges_for(args.entity_type)
+    other = sorted(set(src.get("judge_models") or []) - set(expected)) if expected else []
     if other:
-        logger.warning(f"version {version.number}'s role reading was chosen for "
-                       f"{', '.join(version.judges)}, not {', '.join(other)}, whose replies these are "
+        logger.warning(f"version {version.number}'s {args.entity_type} rubric and reading were chosen "
+                       f"for {', '.join(expected)}, not {', '.join(other)}, whose replies these are "
                        f"(a re-read for comparison only)")
     logger.info(f"Re-reading {len(files)} entities' replies from {source_dir} (version "
                 f"{src_version.number}, read as {src_fmt}) under version {version.number} "
@@ -1347,7 +1359,10 @@ async def main_async():
                              "drafts, the role rubric as a decision procedure; 10, version 8's "
                              "text with a role reply scored from its A, B and C answers, the role "
                              "rubric for the October extraction (roles judged by gpt-5.6-luna "
-                             "only; traits and combinations as version 3), the default.  A scores "
+                             "only; traits and combinations as version 3); 11 and 12, drafts, the "
+                             "trait rubric review's arms; 13, version 10 with the review's trait "
+                             "rubric, the trait rubric for the October extraction (traits judged by "
+                             "gpt-5.6-luna only, as the roles), the default.  A scores "
                              "directory holds one version: a run refuses a directory judged under "
                              "another (run_pipeline.sh --judge-prompt-version gives each version "
                              f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")
@@ -1370,7 +1385,10 @@ async def main_async():
                         help="With --no_batch and an OpenAI judge: OpenAI Flex processing, priced "
                              "at Batch rates but answered like real-time calls, slower and at "
                              "lower priority (2026-10-26: Luna's batches did not move for hours).  "
-                             "Usage is recorded under <model>:flex.  Not every model takes it: "
+                             "Usage is recorded under <model>:flex.  A request Flex keeps failing "
+                             "(anything but an HTTP 400) is tried again every 30 s for 10 minutes, "
+                             "then sent once to the standard tier and charged under <model> "
+                             "(judge.FLEX_FALLBACK_AFTER_S; Roger, 2026-10-29).  Not every model takes it: "
                              "gpt-4.1-mini is refused with HTTP 400 'Invalid service_tier "
                              "argument' (2026-10-28); judge it by batch, the default")
     parser.add_argument("--batch_requests", type=int,
@@ -1477,13 +1495,20 @@ async def main_async():
                 price_for_model(f"{args.judge_model}:{args.service_tier}")
             except KeyError as e:
                 problem = e.args[0] if e.args else f"no {args.service_tier} price"
-    if not problem and args.entity_type == "role" and version.judges \
-            and args.judge_model not in version.judges:
-        problem = (f"prompt version {version.number} scores a role reply from its A/B/C answers, a "
-                   f"reading chosen for {', '.join(version.judges)} (abc_consistency.json: for "
-                   f"gpt-4.1-mini the stated score was the right part, not its answers); judge with "
-                   f"{version.judges[0]} (run_pipeline.sh --judge-model), or pass --prompt_version 8 "
-                   f"(or 3) for another judge")
+    expected = version.judges_for(args.entity_type)
+    if not problem and expected and args.judge_model not in expected:
+        if args.entity_type == "role":
+            problem = (f"prompt version {version.number} scores a role reply from its A/B/C answers, a "
+                       f"reading chosen for {', '.join(expected)} (abc_consistency.json: for "
+                       f"gpt-4.1-mini the stated score was the right part, not its answers); judge with "
+                       f"{expected[0]} (run_pipeline.sh --judge-model), or pass --prompt_version 8 "
+                       f"(or 3) for another judge")
+        else:
+            problem = (f"prompt version {version.number}'s {args.entity_type} rubric was settled for "
+                       f"{', '.join(expected)} (the trait rubric review of October 2026: on the parent "
+                       f"rubric gpt-4.1-mini kept 67% of the good responses, gpt-5.6-luna 89%); judge "
+                       f"with {expected[0]} (run_pipeline.sh --judge-model), or pass --prompt_version 3 "
+                       f"for another judge")
     if problem:
         logger.error(f"--judge_model {args.judge_model}: {problem}")
         sys.exit(1)
@@ -1679,6 +1704,9 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     version = get_version(args.prompt_version)
 
     client = judge_client(args.judge_model, args.service_tier)
+    # A Flex run falls back to the standard tier, request by request, after
+    # judge.FLEX_FALLBACK_AFTER_S of failed Flex attempts (Roger, 2026-10-29).
+    fallback_client = judge_client(args.judge_model) if args.service_tier == "flex" else None
     rate_limiter = RateLimiter(args.requests_per_second)
 
     # The rubric stamp is written just before the first scores are, or the
@@ -1711,6 +1739,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     ABC_PATTERNS.clear()
     reply_format = version.reply_format_for(args.entity_type)
     truncated_at_start = _judge_mod.TRUNCATED_REPLIES.get(args.judge_model, 0)
+    flex_fallbacks_at_start = _judge_mod.FLEX_FALLBACKS.get(args.judge_model, 0)
     refused_at_start = _judge_mod.REFUSED_REPLIES.get(args.judge_model, 0)
     # Aggregate parse-rate counters across all entities so the end-of-run
     # summary can warn loudly if the chosen judge is dropping >1% of calls.
@@ -1821,6 +1850,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                     service_tier=args.service_tier,
                     replies=replies,
                     disagreements=disagreements,
+                    fallback_client=fallback_client,
                 )
                 write_usage(usage_path, prior_usage, run_usage)
                 if replies:
@@ -1880,6 +1910,11 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
     if problems:
         logger.info(f"Unparseable replies (rubric v{version.number}): " + ", ".join(
             f"{v} {k.replace('_', ' ')}" for k, v in sorted(problems.items())))
+    flex_fallbacks = _judge_mod.FLEX_FALLBACKS.get(args.judge_model, 0) - flex_fallbacks_at_start
+    if flex_fallbacks:
+        logger.warning(f"Flex: {flex_fallbacks} request(s) fell back to the standard tier after "
+                       f"{_judge_mod.FLEX_FALLBACK_AFTER_S:.0f}s of failed Flex attempts each (charged under "
+                       f"{args.judge_model}, not {args.judge_model}:flex; usage.json has both)")
     log_abc_summary(output_dir)
 
     # Loud warning if this run's per-call parse rate dropped below 99%.

@@ -67,7 +67,7 @@ def test_the_scripts_modules_are_the_packages():
 
 class TestJudgeDisplayForm:
     def test_rubric_version(self, judge):
-        assert judge.JUDGE_RUBRIC_VERSION == 10       # 2 -> 3: P4, 2026-10-12; 3 -> 10: 2026-10-28
+        assert judge.JUDGE_RUBRIC_VERSION == 13       # 2 -> 3: P4, 2026-10-12; 3 -> 10: 2026-10-28; 10 -> 13: 2026-10-30
         assert judge.JUDGE_LABEL_FORM == "judge-display-v1"
 
     def test_trait_prompt_uses_the_long_form_of_a_standard(self, judge):
@@ -139,14 +139,20 @@ def test_score_entity_ticks_the_usage_tracker(judge):
     assert list(usage.per_model) == ["gpt-4.1-mini"]
 
 
-def _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, batch=False):
+def _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, batch=False, version="3"):
+    """Runs step 3 as the command line would, on traits unless ``extra`` says
+    otherwise.  The tests of step 3's mechanics run under prompt version 3
+    (``version``): the default, 13 since 2026-10-30, refuses the default judge
+    for traits, as 10 did for roles.  ``version=None`` leaves the version to
+    step 3's default; a ``--prompt_version`` in ``extra`` wins over both."""
     monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-used")
     monkeypatch.setattr(judge.openai, "AsyncOpenAI", lambda: client)
+    pinned = [] if version is None or "--prompt_version" in extra else ["--prompt_version", version]
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
         "--roles_dir", str(ROLES), "--traits_dir", str(TRAITS), "--entity_type", "trait",
         "--no_incongruity_filtering", "--requests_per_second", "1000",
-        *(["--batch_poll_seconds", "0"] if batch else ["--no_batch"]), *extra,
+        *(["--batch_poll_seconds", "0"] if batch else ["--no_batch"]), *pinned, *extra,
     ])
     asyncio.run(judge.main_async())
 
@@ -166,7 +172,7 @@ def test_main_writes_usage_json_and_merges_on_resume(judge, monkeypatch, tmp_pat
     assert json.loads((output_dir / "patient.json").read_text()) == {
         f"pos_p0_q{q}": 3 for q in range(4)}
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
-    assert stamp["rubric_version"] == 10 and stamp["rubric_versions"] == [10]
+    assert stamp["rubric_version"] == 3 and stamp["rubric_versions"] == [3]     # _run's version
     assert stamp["label_form"] == "judge-display-v1" and stamp["judge_models"] == ["gpt-4.1-mini"]
 
     # Resume with two more responses: only those are judged, and the record
@@ -187,12 +193,12 @@ def test_main_writes_usage_json_and_merges_on_resume(judge, monkeypatch, tmp_pat
 def test_stamp_marks_unstamped_scores_as_version_1(judge, tmp_path, caplog):
     (tmp_path / "patient.json").write_text(json.dumps({"pos_p0_q0": 3}))
     stamp = judge.stamp_rubric(tmp_path, entity_type="trait", judge_model="gpt-4.1-mini")
-    assert stamp["rubric_versions"] == [1, 10]
-    assert "rubric versions [1, 10]" in caplog.text
+    assert stamp["rubric_versions"] == [1, 13]                          # the default version
+    assert "rubric versions [1, 13]" in caplog.text
     # side-cars alone do not count as scores
     fresh = tmp_path / "fresh"; fresh.mkdir()
     (fresh / "usage.json").write_text("{}")
-    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [10]
+    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [13]
 
 
 # ---------------------------------------------------------------------------
@@ -305,9 +311,9 @@ def test_batch_is_the_default_and_sends_the_real_time_request(judge, monkeypatch
     lines = client._lines("file-0")
     assert [l["custom_id"] for l in lines] == [f"patient|pos_p0_q{q}" for q in range(4)]
     body = lines[0]["body"]
-    assert body == judge.chat_request_body(body["messages"][0]["content"], "gpt-4.1-mini", 300)
-    # the default temperature (1) is not sent (B1); 300 tokens, version 10's default (200 until 2026-10-28)
-    assert "temperature" not in body and body["max_completion_tokens"] == 300
+    assert body == judge.chat_request_body(body["messages"][0]["content"], "gpt-4.1-mini", 200)
+    # the default temperature (1) is not sent (B1); 200 tokens, version 3's default (_run's version)
+    assert "temperature" not in body and body["max_completion_tokens"] == 200
     usage = json.loads((output_dir / "usage.json").read_text())
     assert set(usage["per_model"]) == {"gpt-4.1-mini:batch"} and usage["n_calls"] == 4
     # priced at half the real-time rates
@@ -421,7 +427,7 @@ def test_dry_run_reports_the_batch_plan(judge, monkeypatch, tmp_path, caplog):
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
         "--traits_dir", str(TRAITS), "--entity_type", "trait", "--no_incongruity_filtering",
-        "--dry_run", "--batch_requests", "2"])
+        "--dry_run", "--batch_requests", "2", "--prompt_version", "3"])
     caplog.set_level("INFO")
     asyncio.run(judge.main_async())
     assert "Mode: OpenAI Batch API, about 3 batch(es) of up to 2 requests" in caplog.text
@@ -605,14 +611,14 @@ def test_flex_runs_in_real_time_and_is_charged_as_flex(judge, monkeypatch, tmp_p
                                                         finish_reason="stop")],
                                usage=SimpleNamespace(prompt_tokens=700, completion_tokens=50))
     client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
-    seen = {}
+    seen = []
 
     def fake_client(model, tier=None):
-        seen["tier"] = tier
+        seen.append(tier)
         return client
     monkeypatch.setattr(judge, "judge_client", fake_client)
     _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "gpt-6-luna", "--service_tier", "flex")
-    assert seen["tier"] == "flex"
+    assert seen == ["flex", None]            # the Flex client, and the standard one it falls back to (2026-10-29)
     assert len(calls) == 3 and all(c["service_tier"] == "flex" and c["reasoning_effort"] == "none" for c in calls)
     usage = json.loads((output_dir / "usage.json").read_text())
     assert set(usage["per_model"]) == {"gpt-6-luna:flex"}
@@ -658,7 +664,7 @@ def test_default_corpus_dirs_do_not_depend_on_the_working_directory(judge, monke
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(tmp_path / "scores"),
-        "--entity_type", "trait", "--dry_run"])
+        "--entity_type", "trait", "--dry_run", "--prompt_version", "3"])
     caplog.set_level("INFO")
     asyncio.run(judge.main_async())
     assert "Total prompts: 3" in caplog.text
@@ -669,7 +675,8 @@ def test_a_missing_instruction_dir_stops_the_run(judge, monkeypatch, tmp_path, c
     _write_responses(responses_dir, "patient", 1)
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(tmp_path / "scores"),
-        "--entity_type", "trait", "--traits_dir", str(tmp_path / "nowhere"), "--dry_run"])
+        "--entity_type", "trait", "--traits_dir", str(tmp_path / "nowhere"), "--dry_run",
+        "--prompt_version", "3"])
     with pytest.raises(SystemExit) as e:
         asyncio.run(judge.main_async())
     assert e.value.code == 1 and "nowhere" in caplog.text
@@ -1291,9 +1298,10 @@ def test_a_directory_of_another_version_is_refused(judge, monkeypatch, tmp_path,
     _write_responses(responses_dir, "patient", 4)                    # two more to judge
     client = _client()
     with pytest.raises(SystemExit) as e:
-        _run(judge, monkeypatch, responses_dir, output_dir, client)  # the default, version 10
+        _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "gpt-5.6-luna",
+             version=None)                                            # the default, version 13
     assert e.value.code == 1 and client.chat.completions.create.call_count == 0
-    assert "judged under prompt version(s) 0, not 10" in caplog.text
+    assert "judged under prompt version(s) 0, not 13" in caplog.text
 
 
 def test_a_changed_draft_is_refused(judge, monkeypatch, tmp_path, caplog):
@@ -1324,6 +1332,9 @@ def test_old_versions_1_to_3_may_still_mix(judge, tmp_path):
     assert "version(s) 1, not 4" in judge.prompt_version_conflict(tmp_path, 4, "role")
     assert "version(s) 1, not 10" in judge.prompt_version_conflict(tmp_path, 10, "role")
     assert "version(s) 1, not 0" in judge.prompt_version_conflict(tmp_path, 0, "trait")
+    # version 13's trait rubric is new; its combination rubric is still version 3's
+    assert "version(s) 1, not 13" in judge.prompt_version_conflict(tmp_path, 13, "trait")
+    assert judge.prompt_version_conflict(tmp_path, 13, "combination") is None
     (tmp_path / "judge_rubric.json").write_text(json.dumps({"rubric_versions": [2, 3]}))
     assert judge.prompt_version_conflict(tmp_path, 3, "trait") is None   # no hash recorded: accepted
     assert judge.prompt_version_conflict(tmp_path / "empty", 0, "trait") is None
@@ -1433,7 +1444,7 @@ def test_a_version_10_role_run_scores_from_the_answers_and_logs_the_disagreement
     assert stamp["rubric_versions"] == [10] and stamp["reply_format"] == "abc_answers"
     assert stamp["judge_models"] == ["gpt-5.6-luna"]
     assert stamp["prompt_sha256"] == {"10": judge.PROMPT_VERSIONS[10].sha256("role")}
-    assert "3 role replies scored from their A/B/C answers: 3 stated another score" in caplog.text
+    assert "3 replies scored from their A/B/C answers: 3 stated another score" in caplog.text
     assert "*** A/B/C DISAGREEMENT RATE HIGH ***" in caplog.text
 
 
@@ -1461,6 +1472,31 @@ def test_a_version_10_trait_run_reads_the_marker(judge, monkeypatch, tmp_path):
     assert set(json.loads((output_dir / "patient.json").read_text()).values()) == {2}
     assert not (output_dir / "abc_disagreements.jsonl").exists()
     assert json.loads((output_dir / "judge_rubric.json").read_text())["reply_format"] == "score_marker"
+
+
+def test_the_default_version_13_judges_traits_with_luna_only(judge, monkeypatch, tmp_path, caplog):
+    """Version 13 (settled 2026-10-30, the default) has the trait rubric the
+    review settled for gpt-5.6-luna: a trait run with the default judge is refused
+    before any request, as a role run under 10 is; with luna it scores under
+    version 13 (its 200 tokens, the SCORE marker) and stamps the trait hash."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    client = _client()
+    for extra in ((), ("--dry_run",)):
+        caplog.clear()
+        with pytest.raises(SystemExit) as e:
+            _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, version=None)
+        assert e.value.code == 1 and "trait rubric was settled for gpt-5.6-luna" in caplog.text
+    assert client.chat.completions.create.call_count == 0 and not output_dir.exists()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "gpt-5.6-luna", version=None)
+    assert json.loads((output_dir / "patient.json").read_text()) == {f"pos_p0_q{q}": 3 for q in range(2)}
+    stamp = json.loads((output_dir / "judge_rubric.json").read_text())
+    assert stamp["rubric_versions"] == [13] and stamp["reply_format"] == "score_marker"
+    assert stamp["judge_models"] == ["gpt-5.6-luna"]
+    assert stamp["prompt_sha256"] == {"13": judge.PROMPT_VERSIONS[13].sha256("trait")}
+    kwargs = client.chat.completions.create.call_args.kwargs
+    assert kwargs["model"] == "gpt-5.6-luna" and kwargs["max_completion_tokens"] == 200
+    assert not (output_dir / "abc_disagreements.jsonl").exists()
 
 
 def _reread(judge, monkeypatch, source, output_dir, *extra):
@@ -1545,3 +1581,79 @@ def test_reread_replies_keeps_a_cut_reply_unscored_and_checks_the_saved_scores(j
     with pytest.raises(SystemExit):
         _reread(judge, monkeypatch, v8, tmp_path / "v10b")
     assert "1 saved replies do not give the scores recorded under version 8's reading" in caplog.text
+
+
+def test_trait_rubric_drafts_name_the_cut_marker_step_3_sends(judge):
+    """Versions 11 to 13 (the trait rubric review, 2026-10-28 and 2026-10-30)
+    tell the judge that a response ending in the marker was cut; the marker they
+    quote must be the one --mark_truncated appends (no space since 2026-10-29)."""
+    from assistant_axis import judge_rubrics as jr
+    quoted = f'"{judge.TRUNCATION_MARKER}" was cut'
+    assert quoted in jr.V11_PREAMBLE and quoted in jr.V12_CLAUSES
+    for v in (11, 12, 13):
+        assert quoted in jr.PROMPT_VERSIONS[v].trait
+
+
+def _flex_clients(judge, monkeypatch, flex_failures_per_call: int):
+    """A Flex client whose create fails ``flex_failures_per_call`` times for each prompt before answering, and a
+    standard client that answers at once; judge_client gives the first for tier "flex", the second for none."""
+    from types import SimpleNamespace
+    calls = {"flex": [], "standard": []}
+    failures: dict = {}
+
+    def reply():
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="Fits.\nSCORE: 3"),
+                                                        finish_reason="stop")],
+                               usage=SimpleNamespace(prompt_tokens=700, completion_tokens=50))
+
+    async def flex_create(**kw):
+        key = kw["messages"][-1]["content"]
+        failures[key] = failures.get(key, 0) + 1
+        calls["flex"].append(kw)
+        if failures[key] <= flex_failures_per_call:
+            raise RuntimeError("flex: resource unavailable")
+        return reply()
+
+    async def standard_create(**kw):
+        calls["standard"].append(kw)
+        return reply()
+    flex = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=flex_create)))
+    standard = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=standard_create)))
+    monkeypatch.setattr(judge, "judge_client", lambda model, tier=None: flex if tier == "flex" else standard)
+    monkeypatch.setattr(judge._judge_mod, "FLEX_RETRY_SLEEP_S", 0.0)
+    return calls
+
+
+def test_flex_request_that_keeps_failing_falls_back_to_the_standard_tier(judge, monkeypatch, tmp_path, caplog):
+    """Roger, 2026-10-29: a request Flex keeps failing goes to the standard tier, but only after trying for a
+    while (judge.FLEX_FALLBACK_AFTER_S; here 0, so the first failure is the last Flex attempt)."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 3)
+    calls = _flex_clients(judge, monkeypatch, flex_failures_per_call=99)
+    monkeypatch.setattr(judge._judge_mod, "FLEX_FALLBACK_AFTER_S", 0.0)
+    before = judge._judge_mod.FLEX_FALLBACKS.get("gpt-6-luna", 0)
+    _run(judge, monkeypatch, responses_dir, output_dir, calls, "--judge_model", "gpt-6-luna", "--service_tier", "flex")
+    assert len(calls["flex"]) == 3 and len(calls["standard"]) == 3
+    assert all(c["service_tier"] == "flex" for c in calls["flex"])
+    assert all("service_tier" not in c for c in calls["standard"])
+    scores = json.loads((output_dir / "patient.json").read_text())
+    assert sum(v == 3 for v in scores.values() if isinstance(v, int)) == 3
+    usage = json.loads((output_dir / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"gpt-6-luna"} and usage["n_calls"] == 3     # the fallback calls only
+    assert judge._judge_mod.FLEX_FALLBACKS["gpt-6-luna"] - before == 3
+    assert "3 request(s) fell back to the standard tier" in caplog.text
+
+
+def test_flex_request_is_retried_on_flex_within_the_window(judge, monkeypatch, tmp_path, caplog):
+    """Within FLEX_FALLBACK_AFTER_S a failed Flex call is tried on Flex again, not sent to the standard tier."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "patient", 2)
+    calls = _flex_clients(judge, monkeypatch, flex_failures_per_call=2)
+    monkeypatch.setattr(judge._judge_mod, "FLEX_FALLBACK_AFTER_S", 3600.0)
+    before = judge._judge_mod.FLEX_FALLBACKS.get("gpt-6-luna", 0)
+    _run(judge, monkeypatch, responses_dir, output_dir, calls, "--judge_model", "gpt-6-luna", "--service_tier", "flex")
+    assert len(calls["flex"]) == 6 and calls["standard"] == []       # two failures and a success per prompt
+    usage = json.loads((output_dir / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"gpt-6-luna:flex"} and usage["n_calls"] == 2
+    assert judge._judge_mod.FLEX_FALLBACKS.get("gpt-6-luna", 0) == before
+    assert "trying Flex again" in caplog.text and "fell back" not in caplog.text

@@ -1,0 +1,5055 @@
+{
+ "built": "2026-10-28",
+ "seed": 20261028,
+ "cell": "keep (1) / drop (0) by: reference gpt-4.1-mini May production scores, candidate gpt-4.1-mini v3, candidate gpt-5.6-luna v3 (first runs; keep = 3)",
+ "population": {
+  "high|000": 130,
+  "high|001": 10,
+  "high|010": 9,
+  "high|011": 4,
+  "high|100": 66,
+  "high|101": 42,
+  "high|110": 266,
+  "high|111": 3473,
+  "low|000": 2604,
+  "low|001": 190,
+  "low|010": 110,
+  "low|011": 12,
+  "low|100": 179,
+  "low|101": 72,
+  "low|110": 226,
+  "low|111": 607,
+  "medium|000": 1064,
+  "medium|001": 118,
+  "medium|010": 66,
+  "medium|011": 37,
+  "medium|100": 324,
+  "medium|101": 176,
+  "medium|110": 445,
+  "medium|111": 1770
+ },
+ "sampled": {
+  "high|000": 14,
+  "high|001": 10,
+  "high|010": 9,
+  "high|011": 4,
+  "high|100": 14,
+  "high|101": 14,
+  "high|110": 14,
+  "high|111": 20,
+  "low|000": 14,
+  "low|001": 14,
+  "low|010": 14,
+  "low|011": 12,
+  "low|100": 14,
+  "low|101": 14,
+  "low|110": 14,
+  "low|111": 20,
+  "medium|000": 14,
+  "medium|001": 14,
+  "medium|010": 14,
+  "medium|011": 14,
+  "medium|100": 14,
+  "medium|101": 14,
+  "medium|110": 14,
+  "medium|111": 20
+ },
+ "note": "G = should be in the vector.  Marks in a cell judge the judges that keep it there.",
+ "items": {
+  "1": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q32",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "2": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p4_q51",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "3": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p1_q74",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "4": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p3_q40",
+   "tier": "low",
+   "scores": {
+    "may": 0,
+    "mini_v3": 0,
+    "mini_v3_rerun": 0,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "5": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p2_q60",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "6": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q29",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "7": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p1_q55",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "8": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p3_q96",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "9": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p1_q66",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "10": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "harmful",
+   "key": "pos_p2_q75",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "11": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p2_q36",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "12": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "harmful",
+   "key": "pos_p4_q96",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "13": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p4_q52",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "14": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p3_q25",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "15": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p2_q75",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "16": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p0_q85",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "17": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q24",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "18": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p2_q8",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "19": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p0_q79",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "20": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "whimsical",
+   "key": "pos_p2_q89",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "21": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p2_q65",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "22": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p0_q4",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "23": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p2_q86",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "24": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p4_q9",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "25": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p0_q34",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "26": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p2_q59",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "27": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p2_q29",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "28": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p1_q89",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "29": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p4_q7",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 0,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "30": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p0_q56",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "31": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p1_q70",
+   "tier": "low",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "32": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p1_q47",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "33": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p0_q80",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "34": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p4_q74",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "35": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q71",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "36": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p3_q43",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "37": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p0_q75",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "38": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p1_q59",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "39": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p1_q24",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "40": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p3_q16",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "41": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "harmful",
+   "key": "pos_p3_q75",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "42": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p2_q85",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "43": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q58",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "44": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p0_q49",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 1
+  },
+  "45": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p3_q88",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "46": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p0_q55",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "47": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p3_q31",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "48": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p3_q33",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 1
+  },
+  "49": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p3_q74",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "50": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p4_q95",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 1
+  },
+  "51": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q25",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "52": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p1_q22",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "53": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p0_q76",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "54": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p4_q31",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "55": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p0_q64",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "56": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q97",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "57": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p4_q21",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "58": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p3_q95",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "59": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q23",
+   "tier": "low",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "60": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p3_q12",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "61": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p2_q49",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "62": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "whimsical",
+   "key": "pos_p4_q76",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "63": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q33",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "64": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q59",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "65": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p0_q96",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "66": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p3_q1",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "67": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p1_q72",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "68": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p0_q51",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "69": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q63",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "70": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p1_q16",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "71": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p3_q39",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "72": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p1_q50",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "73": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q18",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "74": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p4_q86",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "75": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q11",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "76": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p2_q49",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "77": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p3_q21",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "78": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q83",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "79": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p1_q65",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "80": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p4_q4",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "81": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p0_q71",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "82": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p1_q22",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "83": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p4_q85",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "84": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "whimsical",
+   "key": "pos_p3_q36",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "85": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p4_q14",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "86": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q77",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "87": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p0_q24",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "88": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p1_q31",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "89": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p2_q53",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "90": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p3_q19",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "91": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "harmful",
+   "key": "pos_p0_q75",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "92": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p1_q87",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "93": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p0_q10",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "94": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p1_q77",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "95": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p1_q64",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "96": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p4_q16",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "97": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p3_q86",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 2
+  },
+  "98": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p4_q69",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "99": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p4_q12",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 2
+  },
+  "100": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p0_q98",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 2
+  },
+  "101": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p2_q31",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "102": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p3_q25",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "103": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p3_q86",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "104": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p2_q18",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "105": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p0_q80",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "106": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p0_q73",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "107": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p0_q32",
+   "tier": "low",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "108": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p0_q28",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "109": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q98",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "110": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p1_q51",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "111": {
+   "stratum": "high|011",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p4_q76",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "112": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p4_q45",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "113": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q49",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "114": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p0_q28",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "115": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p2_q64",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "116": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q47",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "117": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p2_q26",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "118": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "unhelpful",
+   "key": "pos_p0_q71",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "119": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p0_q92",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "120": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p0_q79",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "121": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p2_q52",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "122": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p4_q51",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "123": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "whimsical",
+   "key": "pos_p0_q59",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "124": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p4_q99",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "125": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p2_q30",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "126": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q75",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "127": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q13",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "128": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p2_q37",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "129": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p3_q82",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "130": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "unhelpful",
+   "key": "pos_p3_q76",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "131": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p4_q81",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "132": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p2_q75",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "133": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p0_q13",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "134": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p2_q80",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 0,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "135": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p2_q16",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "136": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p3_q48",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "137": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p2_q67",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "138": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p0_q9",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 3
+  },
+  "139": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p1_q2",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "140": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p1_q56",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "141": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p3_q69",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "142": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p2_q30",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "143": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p0_q72",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "144": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p2_q72",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "145": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p0_q70",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "146": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p3_q5",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "147": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p3_q79",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "148": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p3_q98",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "149": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q5",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 3
+  },
+  "150": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p2_q39",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 3
+  },
+  "151": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p1_q90",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "152": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p3_q96",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "153": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p1_q68",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "154": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p1_q44",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "155": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p1_q67",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "156": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p4_q53",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "157": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p0_q19",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "158": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p3_q32",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "159": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p2_q50",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "160": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "unhelpful",
+   "key": "pos_p2_q24",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "161": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p0_q73",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "162": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "harmful",
+   "key": "pos_p0_q25",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "163": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p4_q96",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "164": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p2_q61",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "165": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p4_q65",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "166": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p4_q83",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "167": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p0_q65",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "168": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p1_q89",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "169": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p4_q66",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "170": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p1_q14",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "171": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p2_q98",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "172": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p1_q87",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "173": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p0_q30",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "174": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q2",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "175": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q89",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "176": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q76",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "177": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p0_q97",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "178": {
+   "stratum": "high|011",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q36",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "179": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p4_q35",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "180": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p0_q91",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "181": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p4_q26",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "182": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "harmful",
+   "key": "pos_p0_q55",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "183": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q50",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "184": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p2_q1",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "185": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p3_q86",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "186": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p1_q1",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "187": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p3_q75",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "188": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p2_q40",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "189": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "animated",
+   "key": "pos_p4_q47",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "190": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p1_q69",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "191": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p0_q84",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "192": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p4_q35",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "193": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p0_q94",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "194": {
+   "stratum": "high|011",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p1_q81",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "195": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q61",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "196": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p4_q91",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "197": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p0_q53",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 4
+  },
+  "198": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p2_q27",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "199": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p0_q51",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 4
+  },
+  "200": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p2_q20",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 4
+  },
+  "201": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p1_q69",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "202": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p2_q78",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "203": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q20",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "204": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p2_q76",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 5
+  },
+  "205": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p3_q62",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "206": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p2_q4",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "207": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p0_q95",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "208": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p1_q5",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "209": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p0_q11",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "210": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p0_q38",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "211": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p0_q99",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "212": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p4_q60",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "213": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q65",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "214": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p4_q77",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "215": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p1_q33",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "216": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p1_q76",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "217": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p4_q43",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 5
+  },
+  "218": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p2_q7",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "219": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p2_q0",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "220": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p2_q12",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "221": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p1_q86",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "222": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "animated",
+   "key": "pos_p4_q45",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "223": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p3_q73",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "224": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p2_q31",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "225": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p2_q17",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "226": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p2_q35",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "227": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p1_q89",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 5
+  },
+  "228": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p0_q8",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "229": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p4_q91",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "230": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q67",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "231": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q62",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "232": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p1_q84",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "233": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p2_q46",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "234": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q65",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "235": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p1_q70",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "236": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p2_q99",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 5
+  },
+  "237": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q95",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "238": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "unhelpful",
+   "key": "pos_p4_q43",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "239": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p2_q75",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "240": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p1_q94",
+   "tier": "low",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 5
+  },
+  "241": {
+   "stratum": "high|101",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p3_q84",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "242": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q54",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "243": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q19",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 5
+  },
+  "244": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q67",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 5
+  },
+  "245": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p3_q22",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "246": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p2_q10",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "247": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p4_q81",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "248": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p4_q50",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "249": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q91",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 5
+  },
+  "250": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "whimsical",
+   "key": "pos_p3_q7",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 5
+  },
+  "251": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p0_q75",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "252": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p0_q47",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "253": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p3_q55",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "254": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p2_q9",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "255": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p3_q92",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "256": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p1_q91",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "257": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p3_q48",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "258": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p3_q36",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "259": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p2_q60",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "260": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p3_q64",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "261": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p3_q9",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "262": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p1_q5",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "263": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p3_q15",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "264": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "whimsical",
+   "key": "pos_p3_q85",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "265": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "animated",
+   "key": "pos_p1_q99",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "266": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p1_q29",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "267": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p4_q0",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "268": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p0_q89",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "269": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q88",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "270": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "harmful",
+   "key": "pos_p1_q80",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "271": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p1_q24",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "272": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p3_q29",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "273": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p0_q64",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "274": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p4_q86",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "275": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "humble",
+   "key": "pos_p3_q31",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "276": {
+   "stratum": "high|011",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p2_q84",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "277": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p4_q35",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "278": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p2_q47",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "279": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p2_q67",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "280": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p1_q80",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "281": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p2_q31",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "282": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "unhelpful",
+   "key": "pos_p3_q27",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "283": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p4_q5",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "284": {
+   "stratum": "high|100",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q89",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "285": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q12",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "286": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "unhelpful",
+   "key": "pos_p3_q64",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "287": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q38",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "288": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p0_q11",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "289": {
+   "stratum": "low|100",
+   "set": "low",
+   "entity": "ethnocentric",
+   "key": "pos_p1_q56",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "290": {
+   "stratum": "high|110",
+   "set": "new",
+   "entity": "honest",
+   "key": "pos_p2_q41",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "291": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p2_q45",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "292": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p2_q42",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "293": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "obsessive",
+   "key": "pos_p3_q38",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "294": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p3_q45",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "295": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "analytical",
+   "key": "pos_p0_q17",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "296": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p3_q30",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "297": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p2_q86",
+   "tier": "low",
+   "scores": {
+    "may": 2,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "298": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p1_q91",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 6
+  },
+  "299": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p2_q8",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 6
+  },
+  "300": {
+   "stratum": "low|010",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q85",
+   "tier": "low",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 6
+  },
+  "301": {
+   "stratum": "medium|100",
+   "set": "new",
+   "entity": "vindictive",
+   "key": "pos_p1_q21",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 7
+  },
+  "302": {
+   "stratum": "high|001",
+   "set": "new",
+   "entity": "confident",
+   "key": "pos_p1_q57",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "303": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p3_q95",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "304": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p1_q51",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "305": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p0_q83",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "306": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "avoidant",
+   "key": "pos_p4_q3",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  },
+  "307": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p3_q12",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 7
+  },
+  "308": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p3_q42",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 7
+  },
+  "309": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p2_q79",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "310": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p0_q5",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 1,
+    "luna_v3": 2,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  },
+  "311": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q98",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  },
+  "312": {
+   "stratum": "medium|111",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p3_q54",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "313": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q47",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "314": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "inquisitive",
+   "key": "pos_p0_q62",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 7
+  },
+  "315": {
+   "stratum": "medium|000",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p2_q41",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  },
+  "316": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p3_q44",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "317": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p1_q59",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "318": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "unhelpful",
+   "key": "pos_p2_q55",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  },
+  "319": {
+   "stratum": "low|001",
+   "set": "low",
+   "entity": "deceitful",
+   "key": "pos_p1_q8",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "320": {
+   "stratum": "low|101",
+   "set": "low",
+   "entity": "dishonest",
+   "key": "pos_p0_q28",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "321": {
+   "stratum": "high|111",
+   "set": "new",
+   "entity": "educational",
+   "key": "pos_p3_q69",
+   "tier": "high",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "322": {
+   "stratum": "low|011",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q27",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "323": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "stream_of_consciousness",
+   "key": "pos_p1_q27",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 7
+  },
+  "324": {
+   "stratum": "medium|101",
+   "set": "new",
+   "entity": "kind_to_animals",
+   "key": "pos_p0_q28",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 2,
+    "mini_v3_rerun": 2,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "325": {
+   "stratum": "low|110",
+   "set": "low",
+   "entity": "submissive",
+   "key": "pos_p1_q73",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  },
+  "326": {
+   "stratum": "low|111",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p2_q82",
+   "tier": "low",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "327": {
+   "stratum": "high|000",
+   "set": "new",
+   "entity": "neurotic",
+   "key": "pos_p4_q42",
+   "tier": "high",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  },
+  "328": {
+   "stratum": "high|010",
+   "set": "new",
+   "entity": "gregarious",
+   "key": "pos_p2_q96",
+   "tier": "high",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 7
+  },
+  "329": {
+   "stratum": "medium|011",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q78",
+   "tier": "medium",
+   "scores": {
+    "may": 2,
+    "mini_v3": 3,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "330": {
+   "stratum": "medium|001",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p1_q44",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 2,
+    "mini_v3_rerun": 3,
+    "luna_v3": 3,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "331": {
+   "stratum": "medium|110",
+   "set": "new",
+   "entity": "incurious",
+   "key": "pos_p3_q8",
+   "tier": "medium",
+   "scores": {
+    "may": 3,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 3
+   },
+   "sheet": 7
+  },
+  "332": {
+   "stratum": "medium|010",
+   "set": "new",
+   "entity": "blunt",
+   "key": "pos_p0_q21",
+   "tier": "medium",
+   "scores": {
+    "may": 1,
+    "mini_v3": 3,
+    "mini_v3_rerun": 2,
+    "luna_v3": 2,
+    "luna_v3_rerun": 2
+   },
+   "sheet": 7
+  },
+  "333": {
+   "stratum": "low|000",
+   "set": "low",
+   "entity": "evil",
+   "key": "pos_p4_q32",
+   "tier": "low",
+   "scores": {
+    "may": 1,
+    "mini_v3": 1,
+    "mini_v3_rerun": 1,
+    "luna_v3": 1,
+    "luna_v3_rerun": 1
+   },
+   "sheet": 7
+  }
+ }
+}

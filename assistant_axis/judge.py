@@ -623,6 +623,19 @@ def parse_batch_scores_json(
 #: (developers.openai.com Flex processing guide, read 2026-10-26).
 SERVICE_TIERS = ("flex",)
 
+#: Flex processing (pipeline step 3's ``--service_tier flex``) is tried for this
+#: long before a request falls back to the standard tier (Roger, 2026-10-29:
+#: "if flex keeps failing, it should eventually fall back to an actual
+#: real-time query, but only after trying for a while").  Each Flex attempt is
+#: the client's own retries (step 3's Flex client: 8, with a 900 s timeout);
+#: between attempts :func:`call_judge_single` sleeps :data:`FLEX_RETRY_SLEEP_S`.
+#: The fallback call goes through the standard client with no tier and is
+#: charged under the plain model name, so ``usage.json`` records how much went
+#: each way; :data:`FLEX_FALLBACKS` counts the fallbacks by model.
+FLEX_FALLBACK_AFTER_S = 600.0
+FLEX_RETRY_SLEEP_S = 30.0
+FLEX_FALLBACKS: Dict[str, int] = {}
+
 
 def usage_key(model: str, service_tier: Optional[str] = None) -> str:
     """The name a call's tokens are charged under: ``<model>:flex`` for a Flex
@@ -671,6 +684,7 @@ async def call_judge_single(
     temperature: Optional[float] = DEFAULT_TEMPERATURE,
     reject_truncated: bool = False,
     service_tier: Optional[str] = None,
+    fallback_client: Optional[openai.AsyncOpenAI] = None,
 ) -> Optional[str]:
     """Call the judge model with a single prompt.
 
@@ -692,14 +706,47 @@ async def call_judge_single(
         reject_truncated: return None for a reply cut at ``max_tokens``
             (``finish_reason == "length"``), counted in
             :data:`TRUNCATED_REPLIES` (the usage is charged all the same).
+        fallback_client: a standard-tier client for a Flex call (step 3
+            passes one with ``--service_tier flex``).  A Flex call that keeps
+            failing with anything but an HTTP 400 is tried again every
+            :data:`FLEX_RETRY_SLEEP_S` until :data:`FLEX_FALLBACK_AFTER_S` has
+            passed since the first attempt, then sent once through this client
+            with no tier and charged under the plain model name
+            (:data:`FLEX_FALLBACKS`).  Without one, a failed Flex call gives
+            None as any other failed call does.
     """
     body = chat_request_body(prompt, model, max_tokens, temperature=temperature,
                              service_tier=service_tier)
-    await rate_limiter.acquire()
+    started = time.monotonic()
+    while True:
+        await rate_limiter.acquire()
+        try:
+            response = await client.chat.completions.create(**body)
+            break
+        except Exception as e:
+            if _is_bad_request(e):
+                flag = content_flag(e)
+                if flag is None:
+                    raise _bad_request_error(model, e) from e
+                _note_content_flag(model, flag, e)
+                return None
+            if service_tier == "flex" and fallback_client is not None:
+                waited = time.monotonic() - started
+                if waited < FLEX_FALLBACK_AFTER_S:
+                    logger.warning(f"Flex call to {model} failed after {waited:.0f}s ({e}); trying Flex "
+                                   f"again in {FLEX_RETRY_SLEEP_S:.0f}s")
+                    await asyncio.sleep(FLEX_RETRY_SLEEP_S)
+                    continue
+                logger.warning(f"Flex call to {model} failed for {waited:.0f}s ({e}); sending it to the "
+                               f"standard tier")
+                FLEX_FALLBACKS[model] = FLEX_FALLBACKS.get(model, 0) + 1
+                client, service_tier = fallback_client, None
+                body = chat_request_body(prompt, model, max_tokens, temperature=temperature)
+                continue
+            logger.error(f"Error calling judge model: {e}")
+            return None
 
     try:
-        response = await client.chat.completions.create(**body)
-
         if usage is not None:
             # Lazy import to avoid a hard dep cycle (judge_pricing imports
             # nothing from judge but judge.py is imported from many places).
@@ -716,13 +763,7 @@ async def call_judge_single(
         return None
 
     except Exception as e:
-        if _is_bad_request(e):
-            flag = content_flag(e)
-            if flag is None:
-                raise _bad_request_error(model, e) from e
-            _note_content_flag(model, flag, e)
-            return None
-        logger.error(f"Error calling judge model: {e}")
+        logger.error(f"Error reading the judge model's reply: {e}")
         return None
 
 
@@ -737,10 +778,13 @@ async def call_judge_batch(
     *,
     reject_truncated: bool = False,
     service_tier: Optional[str] = None,
+    fallback_client: Optional[openai.AsyncOpenAI] = None,
 ) -> List[Optional[str]]:
     """Call the judge model with multiple prompts concurrently.
 
-    ``service_tier`` (``"flex"``, OpenAI models only) is passed to every call.
+    ``service_tier`` (``"flex"``, OpenAI models only) and ``fallback_client``
+    (the standard-tier client a Flex call falls back to, :func:`call_judge_single`)
+    are passed to every call.
 
     ``client`` is the provider's async client for ``model``
     (:func:`provider_for_model`): an ``openai.AsyncOpenAI`` for a GPT model,
@@ -773,7 +817,8 @@ async def call_judge_batch(
         else:
             tasks = [
                 call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
-                                  reject_truncated=reject_truncated, service_tier=service_tier)
+                                  reject_truncated=reject_truncated, service_tier=service_tier,
+                                  fallback_client=fallback_client)
                 for prompt in batch
             ]
 

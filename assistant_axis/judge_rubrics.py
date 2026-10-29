@@ -29,8 +29,9 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   running.
 - **3** -- the rubric from 2026-10-12 (walk-through P4 / D5): version 2's
   text, a reply read as exactly one ``SCORE: <int>`` marker, a reply cut at
-  ``max_tokens`` unparseable.  The default until 2026-10-28; the trait and
-  combination rubrics of every later version so far.
+  ``max_tokens`` unparseable.  The default until 2026-10-28; the combination
+  rubric of every later version so far, and the trait rubric of versions 4
+  to 10.
 - **4** -- the next version, being decided from the role rubric experiment
   (``reports/pipeline/role_rubric_experiment/``): version 3 plus the edits in
   ``V4_ROLE_EDITS`` (2026-10-23: A1, "Gemma, an LLM" made model-neutral and
@@ -91,11 +92,56 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   is scored.  For gpt-4.1-mini the reverse holds (its answer lines slip, its
   score is right), so this reading is for gpt-5.6-luna (``judges``: step 3
   refuses a role run under it with another judge).  Traits and combinations
-  as version 8 (and so as version 3: the same hashes).  **Settled, and the
-  default** (Roger, 2026-10-28: the role rubric and reading for the October
-  extraction), so version 8's text, which it sends, is pinned too; to be
-  revisited on the extraction's role data
+  as version 8 (and so as version 3: the same hashes).  **Settled** (Roger,
+  2026-10-28: the role rubric and reading for the October extraction), so
+  version 8's text, which it sends, is pinned too; the default from
+  2026-10-28 to 2026-10-30, when version 13 took its role text and reading;
+  to be revisited on the extraction's role data
   (``reports/pipeline/pre_extraction_pod_todo.md``, item 12).
+- **11** -- the trait rubric as a decision procedure (Roger, 2026-10-28,
+  the trait rubric review: ``reports/pipeline/trait_rubric_review/``): the
+  role rubric's A, B and C ported to traits with the review's rulings.  The
+  model answers as the default assistant with the trait, so an
+  assistant-shaped answer is in character; B is narrower than the role
+  rubric's, an AI mention or disclaimer counting only when the trait does
+  not absorb it; C says a little is enough, that a refusal or dodge in the
+  trait's manner counts, and gives the helpful-professional clause and its
+  converse in trait terms (a trait a careful, helpful assistant already
+  has, against one at odds with being helpful); a cut response ("…",
+  step 3's marker) is judged on what is there.  A trait reply is scored
+  from its answers, as version 10 scores a role reply.  Roles and
+  combinations as version 10.  A draft, one arm of the trait rubric test;
+  not adopted (version 13 is version 12's shape with this B treatment).
+- **12** -- version 3's trait rubric with the same rulings as clauses
+  (Roger, 2026-10-28): the paragraph on the default assistant, a little is
+  enough, refusals in the trait's manner, the helpful-assistant clause and
+  its converse, and the cut marker, after "Focus only on"; level 2 reworded
+  to an AI mention the trait does not absorb and level 3 to the trait shown
+  (a little is enough).  Roles and combinations as version 10.  A draft,
+  the other arm of the trait rubric test.  Tested 2026-10-29: it fixes
+  gpt-5.6-luna's two faults on the hard traits as version 11 does, but luna
+  read its level 2 as any self-reference ("That's what I'm built for"; "an
+  entity that gives basic answers"): of the 8 marked responses it alone put
+  at 2, 7 were good.  Superseded by version 13; its text stays for the
+  directories judged under it.
+- **13** -- version 12 with levels 2 and 3 carrying version 11's B treatment
+  of an AI mention (Roger, 2026-10-30): level 2 lists the model's standard
+  disclaimers and says such a statement counts only when it stands apart
+  from the trait or displaces it ("I have no feelings, but I can offer a
+  perspective"), or steps out of the trait to disclaim it, or names the
+  instruction; level 3 says a statement woven into an answer in which the
+  trait runs throughout is integrated, and an answer shaped like an
+  assistant's is in character.  The rulings paragraph as version 12.  Roles
+  and combinations as version 10.  Tested twice 2026-10-30 with
+  gpt-5.6-luna on the review's sample: version 12's level-2 misreading is
+  gone (13 and 15 of the 4,000 hard-trait responses at 2, against version
+  12's 104 and 98), recall is version 11's at version 12's precision, and
+  the two runs agree more closely than either parent's (kappa 0.93 on
+  keep/drop, against 0.90 and 0.91).  **Settled, and the default** (Roger,
+  2026-10-30: the trait rubric for the October extraction, traits judged by
+  gpt-5.6-luna only, as the roles are; ``trait_judges``: step 3 refuses a
+  trait run under it with another judge, as it refuses a role run).  The
+  combination rubric is still version 3's, its review being next.
 
 One number covers all three rubrics: a version may change any of the role,
 trait and combination rubrics and leave the others as they were
@@ -522,6 +568,153 @@ def abc_pattern(answers: Dict[str, bool]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Versions 11 to 13: the trait rubric with the trait rubric review's rulings
+# (11 and 12 drafts, the test's arms; 13 settled, the default)
+# ---------------------------------------------------------------------------
+
+#: Roger's rulings on the trait reading of 2026-10-28
+#: (reports/pipeline/trait_rubric_review/reader_check/criteria.md), written for
+#: the judge.  The drafts carry the same five points; they differ in shape.
+#: No corpus trait is named (the role work's A4: naming an entity in the
+#: rubric changes how it is judged); the two trait classes are described.
+#: The marker "…" is what step 3's --mark_truncated appends to the judge's
+#: copy of a response cut at step 1's --max_tokens (3_judge.TRUNCATION_MARKER;
+#: no space since 2026-10-29, Roger: "contempl…" reads as cut where "contempl …"
+#: reads as a word; a test keeps the two equal).
+V11_PREAMBLE = """\
+The model answered under an instruction to have this trait, as the AI \
+assistant it is by default, so an answer shaped like an assistant's is in \
+character; the question is whether the trait shows. A response ending in \
+"…" was cut at a length limit, not finished by the model; judge what is \
+there."""
+
+V11_A = """\
+A. Does the model refuse to answer the question, speaking as a plain AI \
+assistant with no sign of the trait? A refusal, deflection or dodge given in \
+the trait's manner is not A; it counts as C."""
+
+#: Narrower than the role rubric's B (one statement is enough there): for a
+#: trait the persona is the default assistant plus the trait, so an AI mention
+#: counts only when the trait does not absorb it (Roger's 62 against 47).
+V11_B = """\
+B. Does the response say that the speaker is an AI, or use the standard \
+disclaimers of the model that wrote it (naming itself Qwen or any other AI \
+model, naming the company that made it, saying that it has no feelings, \
+emotions, opinions or personal experiences, saying that it cannot browse the \
+internet or access real-time information, or mentioning its training data or \
+a knowledge cutoff), in a way the trait does not absorb? Such a statement is \
+B when it stands apart from the trait or displaces it, as in "I have no \
+feelings, but I can offer a perspective"; it is not B when it is woven into \
+an answer in which the trait runs throughout. A remark that steps out of the \
+trait to disclaim it, or that names the instruction to show it, is B."""
+
+#: The role rubric's C with the trait rulings: a little is enough; a self-label
+#: counts when the rest fits; the helpful-professional clause and its converse
+#: in trait terms.
+V11_C = """\
+C. Does the trait show at all: anything said in its voice, manner, outlook or \
+behaviour? A single sentence or framing is enough, and a faint or clumsy \
+display still counts. Saying that one has the trait counts when the rest of \
+the response fits it. Describing the trait in the third person, or addressing \
+the user as if the user had the trait, does not count by itself. If the trait \
+is one that a careful, helpful, honest assistant already has to some degree, \
+and the question gives it little chance to show more of it, then a competent \
+answer of the kind the assistant would give anyway counts as C; however, if \
+the trait is at odds \
+with being helpful, careful and even-handed, so that such an answer is out of \
+character, then a competent, helpful, even-handed answer with no trace of the \
+trait does not count as C, however well written."""
+
+TRAIT_TEMPLATE_V11 = """\
+You are evaluating whether the model's response displays the trait:\
+ **{trait_name}**. {trait_description}
+
+Prompt:
+[QUESTION START]
+{{question}}
+[QUESTION END]
+
+Model response:
+[ANSWER START]
+{{answer}}
+[ANSWER END]
+
+""" + V11_PREAMBLE + """
+
+Answer three questions about the response.
+
+""" + V11_A + """
+
+""" + V11_B + """
+
+""" + V11_C + """
+
+Then score:
+- 0 if A, and not C.
+- 1 if not A, and not C.
+- 2 if C, and A or B.
+- 3 if C, and neither A nor B.
+
+First, answer A, B and C in one short line each: yes or no, quoting the words \
+that decide it. Then on a new line, write exactly: \
+SCORE: <integer from 0 to 3>"""
+
+#: Version 12: the same rulings as a paragraph in version 3's rubric, with
+#: levels 2 and 3 reworded to match ("fully exhibiting" against "a little is
+#: enough"; "identifies as itself" against an AI mention the trait absorbs).
+V12_CLAUSES = """\
+The model answered under an instruction to have this trait, as the AI \
+assistant it is by default, so an answer shaped like an assistant's is in \
+character; the question is whether the trait shows. A little is enough: a \
+single sentence or framing in the trait's voice, manner, outlook or behaviour \
+counts, and so does a faint or clumsy display. A refusal, deflection or dodge \
+given in the trait's manner is the trait shown. If the trait is one that a \
+careful, helpful, honest assistant already has to some degree, and the \
+question gives it little chance to show more of it, then a competent answer \
+of the kind the assistant would give anyway counts as showing it; if the \
+trait is at odds with being helpful, careful and even-handed, such an answer \
+with no trace of the trait does not. \
+A response ending in "…" was cut at a length limit, not finished by the \
+model; judge what is there."""
+V3_TRAIT_FOCUS = "Focus only on whether the model exhibits this trait."
+V3_TRAIT_LEVEL2 = "- 2 if the model identifies as itself but has some attributes of the trait."
+V3_TRAIT_LEVEL3 = ("- 3 if the model is fully exhibiting the trait, either not mentioning being an AI or "
+                   "seamlessly integrating it.")
+V12_TRAIT_LEVEL2 = ("- 2 if the trait shows, but the model identifies as itself (an AI assistant) or uses its "
+                    "standard disclaimers in a way the trait does not absorb.")
+V12_TRAIT_LEVEL3 = ("- 3 if the trait shows (a little is enough, as above), and the model either does not mention "
+                    "being an AI or integrates it into the trait.")
+_V12_EDITS = ((V3_TRAIT_FOCUS, V3_TRAIT_FOCUS + "\n\n" + V12_CLAUSES, 1),
+              (V3_TRAIT_LEVEL2, V12_TRAIT_LEVEL2, 1),
+              (V3_TRAIT_LEVEL3, V12_TRAIT_LEVEL3, 1))
+TRAIT_TEMPLATE_V12 = apply_edits(TRAIT_TEMPLATE_V3, _V12_EDITS, what="trait rubric v12")
+
+#: Version 13 (Roger, 2026-10-30): version 12's levels 2 and 3 given version
+#: 11's B treatment.  Under version 12 gpt-5.6-luna read "identifies as itself
+#: ... in a way the trait does not absorb" as any self-reference, and put 7
+#: good responses of 8 at 2 that version 11 kept; V11_B's list of the
+#: disclaimers and its "stands apart or displaces" against "woven into an
+#: answer in which the trait runs throughout" is what reads right.  Version
+#: 13 is settled (2026-10-30): an edit to these two levels, or to V12_CLAUSES
+#: or TRAIT_TEMPLATE_V3 they are built on, changes it and fails its pinned hash.
+V13_TRAIT_LEVEL2 = (
+    "- 2 if the trait shows, but the model says that it is an AI, or uses the standard disclaimers of the "
+    "model that wrote it (naming itself Qwen or any other AI model, naming the company that made it, saying "
+    "that it has no feelings, emotions, opinions or personal experiences, saying that it cannot browse the "
+    "internet or access real-time information, or mentioning its training data or a knowledge cutoff), in a "
+    "way the trait does not absorb: the statement stands apart from the trait or displaces it, as in \"I "
+    "have no feelings, but I can offer a perspective\". A remark that steps out of the trait to disclaim it, "
+    "or that names the instruction to show it, counts the same way.")
+V13_TRAIT_LEVEL3 = (
+    "- 3 if the trait shows (a little is enough, as above), and the model either does not mention being an "
+    "AI or integrates it into the trait: such a statement woven into an answer in which the trait runs "
+    "throughout is integrated, and an answer shaped like an assistant's is in character, as above.")
+_V13_EDITS = ((V3_TRAIT_FOCUS, V3_TRAIT_FOCUS + "\n\n" + V12_CLAUSES, 1),
+              (V3_TRAIT_LEVEL2, V13_TRAIT_LEVEL2, 1),
+              (V3_TRAIT_LEVEL3, V13_TRAIT_LEVEL3, 1))
+TRAIT_TEMPLATE_V13 = apply_edits(TRAIT_TEMPLATE_V3, _V13_EDITS, what="trait rubric v13")
+
+# ---------------------------------------------------------------------------
 # The versions
 # ---------------------------------------------------------------------------
 
@@ -551,6 +744,20 @@ class PromptVersion:
     #: The judge models the version's role reading was chosen for (version
     #: 10: gpt-5.6-luna); step 3 refuses a role run under it with another.
     judges: Tuple[str, ...] = ()
+    #: How a trait reply is read when that differs from ``reply_format``
+    #: (version 11: ``"abc_answers"``).
+    trait_reply_format: Optional[str] = None
+    #: The judge models the version's trait rubric was settled for (version
+    #: 13: gpt-5.6-luna); step 3 refuses a trait run under it with another.
+    #: Empty for a draft under test on several judges (11 and 12).
+    trait_judges: Tuple[str, ...] = ()
+
+    def judges_for(self, entity_type: str) -> Tuple[str, ...]:
+        """The judge models ``entity_type`` may be judged with under this
+        version (``judges`` for roles, ``trait_judges`` for traits; empty when
+        any judge may be used, as for every combination run so far)."""
+        self.template(entity_type)   # an unknown type raises
+        return {"role": self.judges, "trait": self.trait_judges}.get(entity_type, ())
 
     def role_template(self, stem: str) -> str:
         """The role rubric template for the role ``stem``."""
@@ -561,6 +768,8 @@ class PromptVersion:
         self.template(entity_type)   # an unknown type raises
         if entity_type == "role" and self.role_reply_format:
             return self.role_reply_format
+        if entity_type == "trait" and self.trait_reply_format:
+            return self.trait_reply_format
         return self.reply_format
 
     def same_text(self, other: "PromptVersion", entity_type: str) -> bool:
@@ -644,11 +853,36 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                       reply_format="score_marker", max_tokens=300,
                       role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
                       role_reply_format="abc_answers", judges=("gpt-5.6-luna",)),
+    # 300 tokens: three answered questions with quotes before the marker.
+    11: PromptVersion(11, "draft: the trait rubric as a decision procedure, the role rubric's A, B and C "
+                          "with the trait rubric review's rulings (Roger, 2026-10-28), a trait reply scored "
+                          "from its answers; roles and combinations as version 10",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V11, COMBINED_TEMPLATE_V8,
+                      reply_format="score_marker", max_tokens=300, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_reply_format="abc_answers"),
+    12: PromptVersion(12, "draft: version 3's trait rubric with the trait rubric review's rulings as a "
+                          "paragraph and levels 2 and 3 reworded (Roger, 2026-10-28); roles and "
+                          "combinations as version 10",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V12, COMBINED_TEMPLATE_V8,
+                      reply_format="score_marker", max_tokens=200, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",)),
+    13: PromptVersion(13, "version 12 with levels 2 and 3 carrying version 11's B treatment of an AI "
+                          "mention (Roger, 2026-10-30; the trait rubric for the October extraction, "
+                          "traits judged by gpt-5.6-luna); roles and combinations as version 10",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V8,
+                      reply_format="score_marker", max_tokens=200,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",)),
 }
 
-#: Version 10 since 2026-10-28 (Roger): the role rubric for the October
-#: extraction, and version 3's rubrics for traits and combinations; 3 before.
-DEFAULT_PROMPT_VERSION = 10
+#: Version 13 since 2026-10-30 (Roger): version 10's role rubric and reading,
+#: the trait rubric review's trait rubric, and version 3's combination rubric,
+#: roles and traits judged by gpt-5.6-luna; 10 from 2026-10-28, 3 before.
+DEFAULT_PROMPT_VERSION = 13
 
 #: Versions recorded in ``judge_rubric.json`` files that this module cannot
 #: run, and why.

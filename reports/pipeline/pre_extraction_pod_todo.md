@@ -323,6 +323,14 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
     ([judge_rubrics.py](../../assistant_axis/judge_rubrics.py); step 3's default version since that day, so
     `run_pipeline.sh --types roles --judge-model gpt-5.6-luna --judge-save-replies`; a roles run without
     `--judge-model gpt-5.6-luna` is refused).  To be revisited on the extraction's data: item 12.
+    **Traits decided 2026-10-30** (Roger), after the trait rubric review
+    ([trait_rubric_review/](./trait_rubric_review/); the reader check with his marks, the three arms tested
+    on the review's 12,000-response sample): traits are judged by gpt-5.6-luna under **prompt version
+    13**, version 10's role text and reading with the review's trait rubric (version 3's scale, the
+    review's rulings as a paragraph, version 11's treatment of an AI mention in levels 2 and 3), step 3's
+    default since that day, so `run_pipeline.sh --types traits --judge-model gpt-5.6-luna
+    --judge-save-replies`; a traits run without `--judge-model gpt-5.6-luna` is refused.  Combinations
+    stay under version 3's text until their rubric is reviewed (next).
 
 12. **Revisit version 10's "answers win" reading on the full role run** (Roger, 2026-10-28).  Where luna's
     stated score and its A/B/C answers disagree, version 10 takes the answers.  That was decided on the

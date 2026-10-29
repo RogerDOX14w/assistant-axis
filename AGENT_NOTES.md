@@ -1111,14 +1111,21 @@ as the first integer, 3 the rubrics from 2026-10-12 and the default until
 the philanthropist level-2 example, A8-A11 having shown that every other
 example costs the other roles data; 5 version 4 and
 a clause for helpful professional roles, a draft; 6 to 8 the role rubric
-as a decision procedure, drafts; 9 rejected; **10 the default since
-2026-10-28** (Roger): version 8's role text with a reply scored from its
-A/B/C answers, the role rubric for the October extraction, roles judged by
-gpt-5.6-luna only (step 3 refuses another judge; `run_pipeline.sh
---judge-model gpt-5.6-luna`), and version 3's rubrics for traits and
-combinations; revisit on the extraction's role data,
+as a decision procedure, drafts; 9 rejected; 10 settled 2026-10-28
+(Roger): version 8's role text with a reply scored from its A/B/C answers,
+the role rubric for the October extraction, roles judged by gpt-5.6-luna
+only (step 3 refuses another judge; `run_pipeline.sh --judge-model
+gpt-5.6-luna`), the default until 2026-10-30, to be revisited on the
+extraction's role data,
 [`pre_extraction_pod_todo.md`](reports/pipeline/pre_extraction_pod_todo.md)
-item 12), and
+item 12; 11 and 12 drafts, the arms of the trait rubric review
+([`reports/pipeline/trait_rubric_review/`](reports/pipeline/trait_rubric_review/));
+**13 the default since 2026-10-30** (Roger): version 10's role text and
+reading, the review's trait rubric (version 3's scale with the review's
+rulings as a paragraph and version 11's treatment of an AI mention in
+levels 2 and 3), traits judged by gpt-5.6-luna only as the roles are (step
+3 refuses another judge for either), and version 3's combination rubric,
+whose review is next), and
 `run_pipeline.sh --from-step 3 --judge-prompt-version N` reruns steps 3 to
 5 into `scores_v<N>/`, `vectors_v<N>/`, `axis_v<N>.pt` to compare a
 rubric's vectors on the same activations.  A change to a step-3 rubric
