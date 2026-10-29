@@ -1,7 +1,7 @@
 # Gap-filling platform: status board
 
 Every generator, platform component and evaluation item, with its stage and what (if anything) blocks it.
-Kept current by the coordinator; last updated 2026-10-22.  Roger's decision list, with the detail of each
+Kept current by the coordinator; last updated 2026-10-29.  Roger's decision list, with the detail of each
 question, is [open_items.md](../../roger/open_items.md), which carries a copy of this board.
 
 **Stages** (the order a workstream moves through):
@@ -39,7 +39,7 @@ rows: 5,795 kept awaiting review, 211 reviewed.
 | — | antonym-check seeds | **8** | 139 / 1 | nothing |
 | — | states and physical passes | **8** | 159 / 8 | nothing |
 | — | noun relabel | **8** | 90 / 5 | nothing |
-| 16 | [Role generators](./16_role_generators.md) | **6** (steps 1-2 built, reviewed ([review_role_path.md](./review_role_path.md)) and merged 2026-10-23: the shared role path and generator B; no paid step run yet) | | Roger: the reviewer's five questions, the downloads and `openpyxl`; then the retrieval check ($0.05), the 40-pair sheet to mark, the rubric check ($0.50), the pilot on the held role rows ($2-4 batched), B's lay call |
+| 16 | [Role generators](./16_role_generators.md) | **6** (steps 1-2 built, reviewed ([review_role_path.md](./review_role_path.md)) and merged 2026-10-23; the reviewer's five questions decided 2026-10-29) | | the retrieval check ($0.05, queued behind another session's check-in) and the regenerated 40-pair sheet; then Roger: the pairs to mark (20 min), the O*NET and BLS downloads, `openpyxl`; then the rubric check ($0.50), the pilot on the held role rows ($2-4 batched), B's lay call |
 
 ## Platform: filters, scorers, review
 
@@ -66,4 +66,4 @@ rows: 5,795 kept awaiting review, 211 reviewed.
 | 13 | [Generator testing and saturation](./coding_plan_13_generator_testing.md) | **8** (pooled harness; recall at equal N computed 2026-10-17: the base model strongest unseeded, the censuses' total mostly volume) | nothing; the dashboard rebuild after the sample review hour |
 | — | trait corpus target | **about 1,800, provisional** (2026-10-16); plan 13's estimates at Roger's grain suggest 3,000+ reachable | revisit once review has grouped the kept candidates |
 | — | role-judge rubric experiment ([plan](../pipeline/plan_role_rubric_experiment.md)) | **approved**, all eight arms (about $50 batched) | runs on the pod after the extraction's step 3 |
-| — | **review itself** | ongoing | Roger: the blind sample review hour (`serve --batch-id review_traits_all_2 --order sample --blind`; the split action is in); 5,795 kept candidates awaiting review, 211 settled |
+| — | **review itself** | ongoing | the blind sample review hour moves to `review_traits_new_3` (Roger, 2026-10-29: the 17 M3 batches since 2026-10-16, 2,287 candidates, $12.79 batched; building once another session's check-in lands); `review_traits_all_2` (census-era rows, 7% stale) stays for later sessions; 5,795 kept candidates awaiting review, 211 settled |
