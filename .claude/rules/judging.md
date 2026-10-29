@@ -543,7 +543,15 @@ A non-default temperature is checked against `judge.MODEL_CAPABILITIES`, the
 table of the non-default cases, before any call, and a model listed there as
 refusing one raises `JudgeRequestError` at once (the message says to drop the
 temperature or choose another model).  **Add a model to that table before
-switching a judge to it.**  Any HTTP 400 raises `JudgeRequestError`: a wrong
+switching a judge to it.**  Since 2026-10-30 the table also records whether
+OpenAI takes Flex processing for a model (`"flex"`: gpt-4.1-mini refused with
+HTTP 400 on 2026-10-28, gpt-5.6-luna taken since the cap pilot; a model with
+no entry is untested, `judge.accepts_flex` gives None, and its first Flex
+request tells); a Flex call to a model listed as refused raises
+`JudgeRequestError` before anything is sent, step 3 refuses the run, and
+`run_pipeline.sh --judge-flex` stops before any GPU work.  The pricing table
+cannot tell, since it prices every OpenAI model's `:flex`.  Any HTTP 400
+raises `JudgeRequestError`: a wrong
 parameter is a bug in the call, not a per-item failure to swallow.  The one
 exception is a 400 whose error code says one prompt's content was flagged
 (`CONTENT_FLAG_CODES`): that item gives `None` with a WARNING naming the

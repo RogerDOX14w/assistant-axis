@@ -101,7 +101,14 @@ DEFAULT_TEMPERATURE = 1.0
 #: 2026-10-07: test before use).  judge.py sends no reasoning-effort setting,
 #: so a reasoning model would bill its reasoning at the default effort; add
 #: that capability here with the first switch to one.
-MODEL_CAPABILITIES: Dict[str, Dict[str, bool]] = {
+#: ``"flex"`` (since 2026-10-30, with run_pipeline.sh judging by Flex by
+#: default): whether OpenAI takes ``service_tier="flex"`` for the model.
+#: False for gpt-4.1-mini (HTTP 400 "Invalid service_tier argument",
+#: 2026-10-28), True for gpt-5.6-luna (the cap pilot's judging, 2026-10-28
+#: on); a model in no ``"flex"`` entry is untested (``accepts_flex`` gives
+#: None), and its first Flex request tells: a 400 raises JudgeRequestError.
+#: The pricing table cannot tell (it prices every OpenAI model's ``:flex``).
+MODEL_CAPABILITIES: Dict[str, Dict[str, Optional[bool]]] = {
     # Anthropic
     "sonnet-5": {"temperature": False},
     "opus-5": {"temperature": False},
@@ -116,6 +123,9 @@ MODEL_CAPABILITIES: Dict[str, Dict[str, bool]] = {
     "o4": {"temperature": False},
     "gpt-5": {"temperature": False},
     "gpt-6": {"temperature": False},
+    # OpenAI Flex processing
+    "gpt-4.1-mini": {"flex": False},
+    "gpt-5.6-luna": {"flex": True},
 }
 
 #: Fields a judge request adds for a model, by model-id fragment (matched as in
@@ -154,11 +164,12 @@ class JudgeRequestError(ValueError):
     swallowed, because every further call would fail the same way."""
 
 
-def model_capabilities(model: str) -> Dict[str, bool]:
+def model_capabilities(model: str) -> Dict[str, Optional[bool]]:
     """What ``model`` takes, by :data:`MODEL_CAPABILITIES`: ``{"temperature":
-    bool}``.  A model no entry names takes everything."""
+    bool, "flex": bool or None}``.  A model no entry names takes a temperature,
+    and its Flex support is untested (None)."""
     m = str(model).lower()
-    caps: Dict[str, bool] = {"temperature": True}
+    caps: Dict[str, Optional[bool]] = {"temperature": True, "flex": None}
     for fragment, entry in MODEL_CAPABILITIES.items():
         if m.startswith(fragment) or f"-{fragment}" in m:
             caps.update(entry)
@@ -167,7 +178,16 @@ def model_capabilities(model: str) -> Dict[str, bool]:
 
 def accepts_temperature(model: str) -> bool:
     """False for a model that refuses a ``temperature`` (:data:`MODEL_CAPABILITIES`)."""
-    return model_capabilities(model)["temperature"]
+    return bool(model_capabilities(model)["temperature"])
+
+
+def accepts_flex(model: str) -> Optional[bool]:
+    """Whether OpenAI takes ``service_tier="flex"`` for ``model``
+    (:data:`MODEL_CAPABILITIES`): False for one it refuses with HTTP 400
+    (gpt-4.1-mini), True for one it has taken (gpt-5.6-luna), None when
+    untested.  A Flex call to a model listed False raises
+    :class:`JudgeRequestError` before anything is sent."""
+    return model_capabilities(model)["flex"]
 
 
 def request_temperature(model: str, temperature: Optional[float]) -> Optional[float]:
@@ -717,6 +737,10 @@ async def call_judge_single(
     """
     body = chat_request_body(prompt, model, max_tokens, temperature=temperature,
                              service_tier=service_tier)
+    if service_tier == "flex" and accepts_flex(model) is False:
+        raise JudgeRequestError(
+            f"OpenAI refuses Flex processing for {model} (HTTP 400; judge.MODEL_CAPABILITIES): "
+            f"judge it through the Batch API or in real time without a service tier")
     started = time.monotonic()
     while True:
         await rate_limiter.acquire()

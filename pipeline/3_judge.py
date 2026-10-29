@@ -152,6 +152,12 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 # a model for a new rubric.
 JUDGE_RUBRIC_VERSION = DEFAULT_PROMPT_VERSION
 
+#: The default ``--judge_model`` (run_pipeline.sh's JUDGE_MODEL_DEFAULT is
+#: pinned to it).  gpt-4.1-mini still judges the combinations, whose rubric
+#: is under review; roles and traits need gpt-5.6-luna under the default
+#: prompt version.  OpenAI retires gpt-4.1-mini on 2027-01-14.
+DEFAULT_JUDGE_MODEL = "gpt-4.1-mini"
+
 # Version 3's templates under their old names.
 COMBINED_EVAL_TEMPLATE = PROMPT_VERSIONS[3].combination
 TRAIT_EVAL_TEMPLATE = PROMPT_VERSIONS[3].trait
@@ -1348,8 +1354,9 @@ async def main_async():
                         help="Trait instruction JSON directory (default: the repository's)")
     parser.add_argument("--output_dir", type=str, required=True,
                         help="Output directory for score JSON files")
-    parser.add_argument("--judge_model", type=str, default="gpt-4.1-mini",
-                        help="Judge model to use")
+    parser.add_argument("--judge_model", type=str, default=DEFAULT_JUDGE_MODEL,
+                        help=f"Judge model to use (default {DEFAULT_JUDGE_MODEL}; roles and traits under "
+                             "the default prompt version need gpt-5.6-luna)")
     parser.add_argument("--prompt_version", type=int, default=DEFAULT_PROMPT_VERSION,
                         help="Rubric version (assistant_axis/judge_rubrics.py): 0, the original "
                              "number-only rubrics read as the first integer in the reply; 3, the "
@@ -1490,6 +1497,10 @@ async def main_async():
             problem = "--service_tier applies to real-time calls: pass --no_batch with it"
         elif provider_for_model(args.judge_model) != "openai":
             problem = "--service_tier flex is OpenAI's Flex processing"
+        elif _judge_mod.accepts_flex(args.judge_model) is False:
+            problem = (f"OpenAI refuses Flex processing for {args.judge_model} (HTTP 400; "
+                       f"judge.MODEL_CAPABILITIES); judge it through the Batch API (the default) or in "
+                       f"real time (--no_batch alone), or judge with gpt-5.6-luna")
         else:
             try:
                 price_for_model(f"{args.judge_model}:{args.service_tier}")

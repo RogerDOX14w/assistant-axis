@@ -25,6 +25,7 @@ from assistant_axis.judge import (
     MODEL_CAPABILITIES,
     JudgeRequestError,
     RateLimiter,
+    accepts_flex,
     accepts_temperature,
     call_anthropic_judge_single,
     call_judge_batch,
@@ -94,7 +95,7 @@ class TestModelCapabilities:
     ])
     def test_models_that_take_a_temperature(self, model):
         assert accepts_temperature(model)
-        assert model_capabilities(model) == {"temperature": True}
+        assert model_capabilities(model)["temperature"] is True
 
     @pytest.mark.parametrize("model", [
         "claude-haiku-5-5", "CLAUDE-HAIKU-5-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-4-7",
@@ -112,6 +113,30 @@ class TestModelCapabilities:
         for model in ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-4-7",
                       "claude-opus-4-8", "claude-haiku-4-5-20251001", "claude-sonnet-4-6", "claude-opus-4-6"):
             assert accepts_temperature(model) == platform_accepts(model), model
+
+
+class TestFlex:
+    """``"flex"`` in the table (2026-10-30, with run_pipeline.sh judging by Flex
+    by default): OpenAI refused gpt-4.1-mini Flex with HTTP 400 on 2026-10-28 and
+    has taken gpt-5.6-luna's since the cap pilot; any other model is untested."""
+
+    def test_the_table_says_which_models_take_flex(self):
+        assert accepts_flex("gpt-4.1-mini") is False
+        assert accepts_flex("gpt-5.6-luna") is True
+        assert accepts_flex("gpt-4.1") is None and accepts_flex("gpt-6-luna") is None
+        assert model_capabilities("gpt-4.1-mini") == {"temperature": True, "flex": False}
+        assert model_capabilities("gpt-5.6-luna") == {"temperature": False, "flex": True}
+
+    def test_a_flex_call_to_a_refused_model_raises_before_sending(self):
+        client = FakeOpenAI()
+        with pytest.raises(JudgeRequestError, match="refuses Flex processing for gpt-4.1-mini"):
+            _run(call_judge_single(client, "p", "gpt-4.1-mini", 50, RateLimiter(1000), service_tier="flex"))
+        assert client.calls == []
+        # the same model without the tier, and an untested model on Flex, are sent
+        assert _run(call_judge_single(client, "p", "gpt-4.1-mini", 50, RateLimiter(1000))) == "SCORE: 2"
+        assert _run(call_judge_single(client, "p", "gpt-4.1", 50, RateLimiter(1000),
+                                      service_tier="flex")) == "SCORE: 2"
+        assert [c.get("service_tier") for c in client.calls] == [None, "flex"]
 
 
 class TestRequestTemperature:

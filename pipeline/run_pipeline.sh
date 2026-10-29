@@ -33,7 +33,8 @@
 #   ./run_pipeline.sh --skip-gpu-check                # bypass pre-flight
 #   ./run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
 #   ./run_pipeline.sh --no-scan                       # skip the scan before step 5
-#   ./run_pipeline.sh --types roles --judge-batch-requests 3000   # one of several pods
+#   ./run_pipeline.sh --types r_combinations --judge-batch --judge-batch-requests 3000
+#                                                     # a Batch API pod (several on one key)
 #   ./run_pipeline.sh --tmpfs-method cp               # model mirror: auto (default),
 #                                                     # rsync or cp (assistant_axis/tmpfs.py)
 #   ./run_pipeline.sh --types roles --from-step 3 --judge-prompt-version 4
@@ -84,12 +85,20 @@
 # (e.g. for debugging) pass --steps23serial.  The script waits for both to
 # finish (and surfaces failures of either) before moving on to step 4.
 #
-# Step 3 judges through the OpenAI Batch API by default (since 2026-10-10,
-# Roger): half the real-time price, results within 24 hours, usually much
-# sooner, and step 2 runs for longer anyway.  Pass --judge-realtime to judge
-# in real time (3_judge.py --no_batch).  A batch-mode step 3 that leaves
-# requests unanswered exits 1 and stops the pipeline before step 4; run it
-# again to submit the rest (it collects batches already submitted).
+# Step 3 judges by OpenAI Flex processing by default in roger mode (Roger,
+# 2026-10-30; 3_judge.py --no_batch --service_tier flex): Batch API prices,
+# answered like real-time calls at lower priority, and a request Flex keeps
+# failing goes once to the standard tier after 10 minutes of attempts
+# (judge.FLEX_FALLBACK_AFTER_S).  The Batch API (--judge-batch; the default
+# from 2026-10-10 to 2026-10-30, and christina mode's) was half the real-time
+# price too, but a gpt-5.6-luna batch sat unprocessed for hours on
+# 2026-10-26 and the cap pilot's Flex runs with retries went better.
+# --judge-realtime judges on the standard tier (3_judge.py --no_batch).  Not
+# every judge takes Flex (gpt-4.1-mini is refused with HTTP 400), so a Flex
+# run asks judge.MODEL_CAPABILITIES before any GPU work and stops with a
+# message naming --judge-batch for a judge listed as refused.  A batch-mode step 3 that
+# leaves requests unanswered exits 1 and stops the pipeline before step 4; run
+# it again to submit the rest (it collects batches already submitted).
 #
 # Pre-flight check:
 #   Before any GPU work, the script checks every visible GPU and aborts if
@@ -175,7 +184,14 @@ GPU_BUSY_THRESHOLD_MIB=2048
 # Disable with --steps23serial if you want the historical sequential behaviour
 # (cleaner per-step logs; useful for debugging).
 STEPS23_PARALLEL=true
-JUDGE_ARGS=()                   # --judge-realtime adds --no_batch for step 3
+JUDGE_ARGS=()                   # step 3's arguments from the --judge-* flags
+# How step 3 reaches the judge: flex (roger mode's default, Roger 2026-10-30),
+# batch (christina mode's default) or realtime; set by --judge-flex,
+# --judge-batch, --judge-realtime, resolved after the flags are read.
+JUDGE_MODE=""
+# Step 3's default --judge_model (its DEFAULT_JUDGE_MODEL; a test pins the two
+# together), for the Flex check when --judge-model is not given.
+JUDGE_MODEL_DEFAULT=gpt-4.1-mini
 
 # Step 3's rubric version (3_judge.py --prompt_version; versions in
 # assistant_axis/judge_rubrics.py).  Any version other than the default
@@ -231,11 +247,21 @@ while [[ $# -gt 0 ]]; do
             GPU_BUSY_THRESHOLD_MIB="$2"; shift 2 ;;
         --steps23serial)
             STEPS23_PARALLEL=false; shift ;;
+        --judge-flex)
+            # step 3 by OpenAI Flex processing with the standard-tier fallback
+            # (--no_batch --service_tier flex); roger mode's default
+            JUDGE_MODE="flex"; shift ;;
+        --judge-batch)
+            # step 3 through the OpenAI Batch API (its own default, and
+            # christina mode's)
+            JUDGE_MODE="batch"; shift ;;
         --judge-realtime)
-            JUDGE_ARGS+=(--no_batch); shift ;;
+            # step 3 in real time on the standard tier (--no_batch)
+            JUDGE_MODE="realtime"; shift ;;
         --judge-batch-requests)
             # step 3's --batch_requests, sized from the organisation's queue
-            # limit when several pods share one API key (pipeline/README.md)
+            # limit when several pods share one API key (pipeline/README.md);
+            # batch mode only
             JUDGE_ARGS+=(--batch_requests "$2"); shift 2 ;;
         --judge-prompt-version)
             JUDGE_PROMPT_VERSION="$2"; shift 2 ;;
@@ -293,6 +319,18 @@ case "$FROM_STEP" in
     1|3|4|5) ;;
     *) echo "Invalid --from-step: $FROM_STEP (must be 1, 3, 4 or 5)" >&2; exit 1 ;;
 esac
+# How step 3 reaches the judge: Flex in roger mode (Roger, 2026-10-30), the
+# Batch API in christina mode, unless a --judge-flex / --judge-batch /
+# --judge-realtime flag said otherwise.  The mode's arguments go first, so
+# that the flags' own arguments keep their order (tests read the tail).
+if [ -z "$JUDGE_MODE" ]; then
+    if [ "$MODE" = "christina" ]; then JUDGE_MODE="batch"; else JUDGE_MODE="flex"; fi
+fi
+case "$JUDGE_MODE" in
+    flex)     JUDGE_ARGS=(--no_batch --service_tier flex "${JUDGE_ARGS[@]}") ;;
+    realtime) JUDGE_ARGS=(--no_batch "${JUDGE_ARGS[@]}") ;;
+    batch)    ;;
+esac
 # Directory names of the scores, vectors and axis for the prompt version.
 VERSION_SUFFIX=""
 if [ -n "$JUDGE_PROMPT_VERSION" ]; then
@@ -337,6 +375,20 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=== Assistant Axis Pipeline ==="
 echo "Log: $LOG_FILE"
+# A Flex run needs a judge OpenAI takes Flex for (gpt-4.1-mini is refused
+# with HTTP 400; judge.MODEL_CAPABILITIES records which, an untested model
+# passing); checked here, after the arguments and before any GPU work,
+# rather than at step 3, hours in.  Not when step 3 is not run (--from-step
+# 4 or 5).
+if [ "$JUDGE_MODE" = "flex" ] && [ "$FROM_STEP" -le 3 ]; then
+    FLEX_JUDGE="${JUDGE_MODEL:-$JUDGE_MODEL_DEFAULT}"
+    if ! uv run python -c "import sys; from assistant_axis.judge import accepts_flex; sys.exit(1 if accepts_flex('${FLEX_JUDGE}') is False else 0)" 2>/dev/null; then
+        echo "run_pipeline.sh: --judge-flex (roger mode's default), but OpenAI refuses Flex processing for" >&2
+        echo "  $FLEX_JUDGE (HTTP 400; assistant_axis/judge.py MODEL_CAPABILITIES).  Pass --judge-batch (the" >&2
+        echo "  Batch API) or --judge-realtime for this judge, or --judge-model gpt-5.6-luna." >&2
+        exit 1
+    fi
+fi
 echo "Model:  $MODEL"
 echo "Mode:   $MODE"
 echo "Output: $OUTPUT_DIR"
@@ -344,7 +396,12 @@ echo "TP size:$TENSOR_PARALLEL_SIZE"
 echo "Tmpfs:  $USE_TMPFS"
 echo "Steps 2+3: $([ "$STEPS23_PARALLEL" = "true" ] && echo "parallel (GPU+judge concurrent)" || echo "serial (--steps23serial)")"
 echo "Scan:   $([ "$RUN_SCAN" = "true" ] && echo "yes (before step 5; re-run candidates stop the run; --no-scan to skip)" || echo "no (--no-scan)")"
-echo "Judge:  ${JUDGE_MODEL:-the default model}, prompt version ${JUDGE_PROMPT_VERSION:-$JUDGE_PROMPT_VERSION_DEFAULT} (into $SCORES_SUB/, $VECTORS_SUB/, $AXIS_NAME)"
+case "$JUDGE_MODE" in
+    flex)     JUDGE_MODE_TEXT="Flex with the standard-tier fallback (--judge-batch / --judge-realtime for the others)" ;;
+    batch)    JUDGE_MODE_TEXT="the Batch API (--judge-flex / --judge-realtime for the others)" ;;
+    realtime) JUDGE_MODE_TEXT="real time on the standard tier (--judge-flex / --judge-batch for the others)" ;;
+esac
+echo "Judge:  ${JUDGE_MODEL:-the default model}, prompt version ${JUDGE_PROMPT_VERSION:-$JUDGE_PROMPT_VERSION_DEFAULT} (into $SCORES_SUB/, $VECTORS_SUB/, $AXIS_NAME), by $JUDGE_MODE_TEXT"
 if [ "$FROM_STEP" -gt 1 ]; then
     echo "From:   step $FROM_STEP (earlier steps not run)"
 fi

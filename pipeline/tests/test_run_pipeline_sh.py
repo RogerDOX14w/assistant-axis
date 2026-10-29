@@ -334,7 +334,7 @@ def test_every_parallel_step_sets_pipefail():
 def test_judge_batch_requests_reaches_step_3(tmp_path):
     """Several pods on one API key size step 3's chunks from the queue limit
     (walk-through P1, 2026-10-12)."""
-    proc, calls = _run_full(tmp_path, None, "--judge-batch-requests", "3000")
+    proc, calls = _run_full(tmp_path, None, "--judge-batch", "--judge-batch-requests", "3000")
     assert proc.returncode == 0, proc.stdout + proc.stderr
     judge = [c for c in calls if "3_judge.py" in c]
     assert judge and all(c.endswith("--batch_requests 3000") for c in judge)
@@ -348,6 +348,81 @@ def test_judge_model_and_save_replies_reach_step_3(tmp_path):
     judge = [c for c in calls if "3_judge.py" in c]
     assert judge and all(c.endswith("--judge_model gpt-5.6-luna --save_replies") for c in judge)
     assert "Judge:  gpt-5.6-luna, prompt version 13" in proc.stdout
+
+
+def test_roger_mode_judges_by_flex_with_the_fallback_by_default(tmp_path):
+    """Roger, 2026-10-30: the extraction's step 3 goes by OpenAI Flex processing,
+    each request falling back to the standard tier after enough failed Flex
+    attempts (3_judge.py --no_batch --service_tier flex; the fallback is step 3's).
+    The mode's arguments come first, so the flags' own keep their order; whether
+    OpenAI takes Flex for the judge (judge.MODEL_CAPABILITIES) is checked before
+    step 1."""
+    proc, calls = _run_full(tmp_path, None, "--judge-model", "gpt-5.6-luna")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    out = tmp_path / "out" / "traits"
+    [judge] = [c for c in calls if "3_judge.py" in c]
+    assert judge.endswith(f"--output_dir {out / 'scores'} --no_batch --service_tier flex "
+                          "--judge_model gpt-5.6-luna")
+    assert "by Flex with the standard-tier fallback" in proc.stdout
+    check = [i for i, c in enumerate(calls) if "accepts_flex('gpt-5.6-luna')" in c]
+    step1 = [i for i, c in enumerate(calls) if "1_generate.py" in c]
+    assert check and step1 and check[0] < step1[0]
+
+
+@pytest.mark.parametrize("flag, mode_args, text", [
+    ("--judge-batch", "", "by the Batch API"),
+    ("--judge-realtime", "--no_batch ", "by real time on the standard tier"),
+    ("--judge-flex", "--no_batch --service_tier flex ", "by Flex with the standard-tier fallback"),
+])
+def test_the_judge_mode_flags(tmp_path, flag, mode_args, text):
+    proc, calls = _run_full(tmp_path, None, flag, "--judge-model", "gpt-5.6-luna")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    out = tmp_path / "out" / "traits"
+    [judge] = [c for c in calls if "3_judge.py" in c]
+    assert judge.endswith(f"--output_dir {out / 'scores'} {mode_args}--judge_model gpt-5.6-luna")
+    assert text in proc.stdout
+    assert any("accepts_flex" in c for c in calls) == (flag == "--judge-flex")
+
+
+def test_a_flex_run_with_a_judge_that_takes_no_flex_stops_before_step_1(tmp_path):
+    """OpenAI refuses Flex for gpt-4.1-mini, step 3's default judge: the driver
+    asks judge.accepts_flex before any GPU work and names --judge-batch; here
+    the fake uv fails that check, as the real one does for gpt-4.1-mini."""
+    proc, calls = _run_full(tmp_path, "accepts_flex")
+    assert proc.returncode == 1
+    assert "OpenAI refuses Flex processing for" in proc.stderr and "gpt-4.1-mini (HTTP 400" in proc.stderr
+    assert "--judge-batch" in proc.stderr
+    assert not any("1_generate.py" in c or "3_judge.py" in c for c in calls)
+    proc, calls = _run_full(tmp_path / "batch", "accepts_flex", "--judge-batch")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert any("3_judge.py" in c for c in calls) and not any("accepts_flex" in c for c in calls)
+
+
+def test_christina_mode_keeps_the_batch_api_by_default(tmp_path):
+    """Christina mode reproduces the paper's method with step 3's default judge,
+    which OpenAI refuses Flex: it keeps the Batch API unless a mode flag says
+    otherwise, and runs no Flex check."""
+    proc, calls = _run_full(tmp_path, "accepts_flex", "--mode", "christina",
+                            "--roles_dir", "../data/roles/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and not any("--no_batch" in c or "--service_tier" in c for c in judge)
+    assert "by the Batch API" in proc.stdout and not any("accepts_flex" in c for c in calls)
+    proc, calls = _run_full(tmp_path / "flex", None, "--mode", "christina",
+                            "--roles_dir", "../data/roles/instructions", "--judge-flex",
+                            "--judge-model", "gpt-5.6-luna", workdir=_corpus(tmp_path / "flex"), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    judge = [c for c in calls if "3_judge.py" in c]
+    assert judge and all("--no_batch --service_tier flex " in c for c in judge)
+
+
+def test_the_drivers_judge_model_default_is_step_3s():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_step3_for_the_driver_test", SCRIPT.parent / "3_judge.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert f"JUDGE_MODEL_DEFAULT={mod.DEFAULT_JUDGE_MODEL}\n" in SCRIPT.read_text()
 
 
 def test_roger_mode_leaves_the_cut_off_marker_to_step_3s_default(tmp_path):

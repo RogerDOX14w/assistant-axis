@@ -254,7 +254,19 @@ older context, or differs from the documented current default.
   which 635,500 for traits and roles) through the OpenAI Batch API
   ([`assistant_axis/openai_batch.py`](./assistant_axis/openai_batch.py));
   `--no_batch`, or `run_pipeline.sh --judge-realtime`, judges in real
-  time (details in [`pipeline/README.md`](./pipeline/README.md)).  So
+  time (details in [`pipeline/README.md`](./pipeline/README.md)).
+  **Since 2026-10-30 `run_pipeline.sh` in roger mode (the extraction)
+  judges by OpenAI Flex processing instead** (Roger; a gpt-5.6-luna batch
+  sat unprocessed for hours on 2026-10-26, and the cap pilot's Flex runs
+  with retries went better): Batch API prices, answered like real-time
+  calls at lower priority, and a request Flex keeps failing is sent once
+  to the standard tier after 10 minutes of attempts
+  (`judge.FLEX_FALLBACK_AFTER_S`, Roger, 2026-10-29: "only after trying for
+  a while").  `--judge-batch` restores the Batch API, which christina mode
+  and a direct step 3 call still default to; a judge OpenAI refuses Flex
+  (gpt-4.1-mini; `judge.MODEL_CAPABILITIES`, which since the same day
+  records which models take Flex) stops a Flex run before any GPU work,
+  naming `--judge-batch`.  So
   does [`score_combinations.py`](./data_analysis/score_combinations.py)
   (same day, Roger: "That should also be run batch"): two Message
   Batches, the first stage and the escalations; `--no_batch`, and
@@ -1700,7 +1712,15 @@ A non-default temperature is checked against `judge.MODEL_CAPABILITIES`, the
 table of the non-default cases, before any call, and a model listed there as
 refusing one raises `JudgeRequestError` at once (the message says to drop the
 temperature or choose another model).  **Add a model to that table before
-switching a judge to it.**  Any HTTP 400 raises `JudgeRequestError`: a wrong
+switching a judge to it.**  Since 2026-10-30 the table also records whether
+OpenAI takes Flex processing for a model (`"flex"`: gpt-4.1-mini refused with
+HTTP 400 on 2026-10-28, gpt-5.6-luna taken since the cap pilot; a model with
+no entry is untested, `judge.accepts_flex` gives None, and its first Flex
+request tells); a Flex call to a model listed as refused raises
+`JudgeRequestError` before anything is sent, step 3 refuses the run, and
+`run_pipeline.sh --judge-flex` stops before any GPU work.  The pricing table
+cannot tell, since it prices every OpenAI model's `:flex`.  Any HTTP 400
+raises `JudgeRequestError`: a wrong
 parameter is a bug in the call, not a per-item failure to swallow.  The one
 exception is a 400 whose error code says one prompt's content was flagged
 (`CONTENT_FLAG_CODES`): that item gives `None` with a WARNING naming the

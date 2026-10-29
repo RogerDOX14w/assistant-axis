@@ -102,7 +102,10 @@ parameters at launch.
    2026-10-12, P1; the procedure is pipeline/README.md "Several pods: one type each, then a merge").
    Check the queue limit against the sizing before step 3 starts on the second pod: read `Q` on the
    organisation's limits page and pass `--judge-batch-requests N` to each pod's driver (the formula is
-   in the README's step 3).  What the 2026-10-12 canary (30 requests from the Mac) confirmed: the
+   in the README's step 3).  Since 2026-10-30 (Roger) the roles and traits pods judge by OpenAI Flex
+   processing with the standard-tier fallback, the driver's default, so the queue sizing applies to
+   the batch pods only: the combination pods while their judge is gpt-4.1-mini (`--judge-batch
+   --judge-batch-requests N`).  What the 2026-10-12 canary (30 requests from the Mac) confirmed: the
    `custom_id` form, the result body and `batches.list` newest first; not observable then:
    `token_limit_exceeded`, so the first `queue limit reached` line in a pod's log is its first real
    sighting (since P1 a run refused while other pods' batches fill the queue waits and resends; it

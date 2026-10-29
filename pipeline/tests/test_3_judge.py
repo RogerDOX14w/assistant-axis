@@ -627,6 +627,9 @@ def test_flex_runs_in_real_time_and_is_charged_as_flex(judge, monkeypatch, tmp_p
 @pytest.mark.parametrize("extra, reason", [
     ((), "pass --no_batch"),
     (("--no_batch", "--judge_model", "claude-haiku-5-5"), "OpenAI's Flex"),
+    # OpenAI refuses Flex for gpt-4.1-mini (HTTP 400, 2026-10-28): refused before any request
+    (("--no_batch", "--judge_model", "gpt-4.1-mini"), "OpenAI refuses Flex processing for gpt-4.1-mini"),
+    (("--no_batch", "--judge_model", "gpt-4.1-mini", "--dry_run"), "OpenAI refuses Flex processing"),
 ])
 def test_flex_is_refused_outside_real_time_openai(judge, monkeypatch, tmp_path, caplog, extra, reason):
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
