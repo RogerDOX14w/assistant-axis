@@ -350,6 +350,22 @@ def test_versions_11_to_13_change_the_trait_rubric_only():
     assert len({v.sha256("trait") for v in (v3, v11, v12, v13)}) == 4
 
 
+def test_the_default_max_tokens_follow_the_reading():
+    """A reply read from its A, B and C answers needs 300 tokens whatever the
+    version's max_tokens says (found 2026-10-30, when version 13, max_tokens 200
+    for its trait replies, became the default and would have cut role replies)."""
+    v = jr.PROMPT_VERSIONS
+    assert jr.ABC_MAX_TOKENS == 300
+    assert [v[13].max_tokens_for(k) for k in ("role", "trait", "combination")] == [300, 200, 200]
+    assert [v[12].max_tokens_for(k) for k in ("role", "trait", "combination")] == [300, 200, 200]
+    assert [v[11].max_tokens_for(k) for k in ("role", "trait", "combination")] == [300, 300, 300]
+    assert [v[10].max_tokens_for(k) for k in ("role", "trait", "combination")] == [300, 300, 300]
+    assert [v[3].max_tokens_for(k) for k in ("role", "trait", "combination")] == [200, 200, 200]
+    assert [v[0].max_tokens_for(k) for k in ("role", "trait", "combination")] == [10, 10, 10]
+    with pytest.raises(ValueError, match="Unknown entity_type"):
+        v[13].max_tokens_for("axis")
+
+
 def test_version_11_is_the_decision_procedure_for_traits():
     v3, v11 = jr.PROMPT_VERSIONS[3], jr.PROMPT_VERSIONS[11]
     # the head (trait, description, question, answer) is version 3's

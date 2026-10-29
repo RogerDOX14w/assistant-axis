@@ -1502,6 +1502,20 @@ def test_the_default_version_13_judges_traits_with_luna_only(judge, monkeypatch,
     assert not (output_dir / "abc_disagreements.jsonl").exists()
 
 
+def test_a_role_run_under_the_default_version_sends_300_tokens(judge, monkeypatch, tmp_path):
+    """Version 13's max_tokens, 200, is for its trait replies; a role reply is read
+    from its A, B and C answers and needs 300 (found 2026-10-30, the day 13 became
+    the default: the extraction's roles pod would have cut every reply)."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "robot", 1)
+    client = _client(text=IN_ROLE_REFUSAL)
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "role",
+         "--judge_model", "gpt-5.6-luna", version=None)
+    kwargs = client.chat.completions.create.call_args.kwargs
+    assert kwargs["max_completion_tokens"] == 300
+    assert json.loads((output_dir / "judge_rubric.json").read_text())["rubric_versions"] == [13]
+
+
 def _reread(judge, monkeypatch, source, output_dir, *extra):
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--entity_type", "role", "--prompt_version", "10",

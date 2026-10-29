@@ -1374,7 +1374,9 @@ async def main_async():
                              "another (run_pipeline.sh --judge-prompt-version gives each version "
                              f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")
     parser.add_argument("--max_tokens", type=int, default=None,
-                        help="Max tokens for judge response (default: the prompt version's, 200 "
+                        help="Max tokens for judge response (default: the prompt version's, or 300 "
+                             "for a reply read from its A, B and C answers whatever the version "
+                             "says, such as a role reply under version 13; 200 "
                              "for versions 3 and 4, which must fit 2-3 sentences of reasoning + "
                              "the SCORE: line, and the fork's 10 for version 0, whose replies "
                              "are a number; 10 under a reasoning-first version would truncate "
@@ -1468,7 +1470,9 @@ async def main_async():
     except ValueError as e:
         parser.error(f"--prompt_version: {e}")
     if args.max_tokens is None:
-        args.max_tokens = version.max_tokens
+        # the version's, except 300 for a reply read from its A/B/C answers (a role
+        # run under 13, whose 200 is for traits and combinations; 2026-10-30)
+        args.max_tokens = version.max_tokens_for(args.entity_type)
 
     if args.reread_replies:
         output_dir = Path(args.output_dir)

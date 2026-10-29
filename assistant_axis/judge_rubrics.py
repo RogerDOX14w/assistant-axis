@@ -724,6 +724,11 @@ TRAIT_TEMPLATE_V13 = apply_edits(TRAIT_TEMPLATE_V3, _V13_EDITS, what="trait rubr
 #: answers give, else the marker).
 REPLY_FORMATS = ("first_integer", "score_marker", "abc_answers")
 
+#: Step 3's default ``--max_tokens`` for a reply read from its A, B and C
+#: answers (versions 6 to 13 for roles, 11 for traits): three answered
+#: questions with quotes before the SCORE marker.
+ABC_MAX_TOKENS = 300
+
 
 @dataclass(frozen=True)
 class PromptVersion:
@@ -771,6 +776,14 @@ class PromptVersion:
         if entity_type == "trait" and self.trait_reply_format:
             return self.trait_reply_format
         return self.reply_format
+
+    def max_tokens_for(self, entity_type: str) -> int:
+        """Step 3's default ``--max_tokens`` for ``entity_type``: a reply read
+        from its A, B and C answers needs :data:`ABC_MAX_TOKENS` (three answered
+        questions with quotes before the marker), one read from its SCORE marker
+        the version's ``max_tokens``.  Since 2026-10-30: version 13's 200 is for
+        its trait and combination replies; its role reading is version 10's."""
+        return ABC_MAX_TOKENS if self.reply_format_for(entity_type) == "abc_answers" else self.max_tokens
 
     def same_text(self, other: "PromptVersion", entity_type: str) -> bool:
         """Whether ``other`` sends ``entity_type`` the same rubric (a role's
