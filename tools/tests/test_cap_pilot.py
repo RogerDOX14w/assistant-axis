@@ -319,6 +319,32 @@ def test_four_sigma_flags_one_entity_and_not_another(tmp_path):
     assert "without `--repeat` there is no σ" in out.read_text()
 
 
+def test_the_share_table_lists_each_type_lowest_first(tmp_path):
+    shares = {c: {n: 0.8 for n in NAMES} for c in cmp.CAPS}
+    shares[1024].update({"t1": 0.9, "t2": 0.3, "t3": 0.6, "verbose": 0.5})
+    shares[512].update({"t2": 0.25})
+    trees = _trees(tmp_path, noise=QUIET, share3=shares, trunc={c: 0.1 for c in cmp.CAPS})
+    rc, out = _run(tmp_path, trees)
+    text = out.read_text()
+    section = text.split("## Score-3 share per entity, lowest first")[1].split("\n## ")[0]
+    traits = section.split("**Traits**")[1].split("**Combinations**")[0]
+    rows = [line.split(" | ")[0].lstrip("| ") for line in traits.splitlines() if line.startswith("| ")][1:]
+    assert rows == ["t2", "verbose *(outlier)*", "t3", "concise *(outlier)*", "t1"]
+    assert "| t2 | 80.0% | 25.0% | 80.0% | 30.0% | +50.0 | -5.0 | +50.0 |" in traits
+    assert "**Roles**" in section and "| r1 |" in section
+
+
+def test_entity_links_are_relative_to_the_readout():
+    out = cmp.REPO / "reports" / "pipeline" / "readout.md"      # not written
+    assert cmp.linked_entity("bold", out) == "[bold](../../data/traits/instructions/bold.json)"
+    assert cmp.linked_entity("actor", out) == "[actor](../../data/roles/instructions/actor.json)"
+    assert cmp.linked_entity("r_angel__verbose", out) == (
+        "r_[angel](../../data/roles/instructions/angel.json)__"
+        "[verbose](../../data/traits/instructions/verbose.json)")
+    assert cmp.linked_entity("no_such_entity", out) == "no_such_entity"
+    assert cmp.linked_entity("bold", Path("/elsewhere/readout.md")) == "bold"
+
+
 def test_extra_scores_average_the_judgings_and_give_the_judge_only_floor(tmp_path):
     trees = _trees(tmp_path, noise=QUIET, share3={c: 0.8 for c in cmp.CAPS},
                    trunc={c: 0.1 for c in cmp.CAPS})

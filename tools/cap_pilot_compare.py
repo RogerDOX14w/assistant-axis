@@ -598,6 +598,28 @@ STRATUM_ORDER = ("roles", "roles_narrative", "traits", "combinations", "traits_o
                  "combinations_outliers")
 
 
+def linked_entity(n: str, output: Path) -> str:
+    """The entity's name linked, relative to ``output``, to its instruction
+    file (a combination ``r_<role>__<trait>`` / ``t_<trait>__<trait>`` to both
+    parts); the plain name where a file is missing or the readout is outside
+    the repository."""
+    try:
+        output.resolve().relative_to(REPO)
+    except ValueError:
+        return n
+
+    def one(stem: str, kind: str) -> Optional[str]:
+        f = REPO / "data" / kind / "instructions" / f"{stem}.json"
+        return f"[{stem}]({os.path.relpath(f, output.resolve().parent)})" if f.exists() else None
+
+    head, sep, tail = n[2:].partition("__")
+    if n[:2] in ("r_", "t_") and sep:
+        a, b = one(head, "roles" if n[0] == "r" else "traits"), one(tail, "traits")
+        if a and b:
+            return f"{n[:2]}{a}__{b}"
+    return one(n, "roles") or one(n, "traits") or n
+
+
 def render(result: dict, *, trees: Dict[int, Path], entities_file: Path, entities: dict,
            output: Path) -> str:
     caps = result["caps"]
@@ -615,6 +637,9 @@ def render(result: dict, *, trees: Dict[int, Path], entities_file: Path, entitie
         except ValueError:
             return f"`{in_repo}`"          # repository-relative, no home path
         return f"[{p.name}]({os.path.relpath(p.resolve(), output.resolve().parent)})"
+
+    def entity_link(n: str) -> str:
+        return linked_entity(n, output)
 
     L = []
     L.append("# Cap pilot readout\n")
@@ -823,8 +848,35 @@ def render(result: dict, *, trees: Dict[int, Path], entities_file: Path, entitie
         L.append("No pair of pilot entities.")
     L.append("")
 
-    # Per-entity detail
+    # Keep share per entity and cap, lowest at the reference first (Roger,
+    # 2026-10-29: recall matters most for the lowest-keep traits).
     others = [c for c in caps if c != REFERENCE_CAP]
+    L.append("## Score-3 share per entity, lowest first\n")
+    L.append(f"Per entity type, sorted by the score-3 share at {REFERENCE_CAP}: the share at each "
+             f"cap (the mean over its judgings where a cap has more than one) and the paired change, "
+             f"cap minus {REFERENCE_CAP}, in points.  *(outlier)*: not in a deciding stratum.\n")
+    for t, ks in (("Roles", ("roles_narrative", "roles")), ("Traits", ("traits", "traits_outliers")),
+                  ("Combinations", ("combinations", "combinations_outliers"))):
+        members = [(n, k) for k in ks for n in result["strata"].get(k, [])]
+        if not members:
+            continue
+        L.append(f"**{t}**\n")
+        L.append("| entity | " + " | ".join(f"{c}" for c in caps) + " | "
+                 + " | ".join(f"Δ {c}" for c in others) + " |")
+        L.append("|---|" + "---|" * (len(caps) + len(others)))
+
+        def share(n, c):
+            return (result["per_entity"][n][c]["scores"] or {}).get("share3")
+
+        members.sort(key=lambda m: (share(m[0], REFERENCE_CAP) is None, share(m[0], REFERENCE_CAP) or 0))
+        for n, k in members:
+            r = result["per_entity"][n]
+            L.append(f"| {entity_link(n)}{' *(outlier)*' if k.endswith('_outliers') else ''} | "
+                     + " | ".join(_pct(share(n, c)) for c in caps) + " | "
+                     + " | ".join(_pts(r[c].get("d_share3")) for c in others) + " |")
+        L.append("")
+
+    # Per-entity detail
     L.append("## Per entity\n")
     L.append(f"Columns per cap in the order {' / '.join(str(c) for c in others)} (against "
              f"{REFERENCE_CAP}); judgings in the order {' / '.join(str(c) for c in caps)}; the "
