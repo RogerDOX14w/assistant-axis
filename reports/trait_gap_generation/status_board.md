@@ -39,7 +39,7 @@ rows: 5,795 kept awaiting review, 211 reviewed.
 | — | antonym-check seeds | **8** | 139 / 1 | nothing |
 | — | states and physical passes | **8** | 159 / 8 | nothing |
 | — | noun relabel | **8** | 90 / 5 | nothing |
-| 16 | [Role generators](./16_role_generators.md) | **6** (steps 1-2 built, reviewed ([review_role_path.md](./review_role_path.md)) and merged 2026-10-23; the reviewer's five questions decided 2026-10-29) | | Roger: the 40 pairs to mark (20 min) and the BLS OEWS file by hand (bls.gov refuses scripts; the O*NET job titles were fetched and `openpyxl` added 2026-10-29, after the retrieval check and the 40-pair sheet the same day); then the rubric check ($0.50), the pilot on the held role rows ($2-4 batched), B's lay call |
+| 16 | [Role generators](./16_role_generators.md) | **6** (steps 1-2 built, reviewed ([review_role_path.md](./review_role_path.md)) and merged 2026-10-23; the reviewer's five questions decided 2026-10-29) | | Roger: the 40 pairs to mark (20 min); then the rubric check ($0.50), the pilot on the held role rows ($2-4 batched), B's lay call ($0.61 batched; its table is built, run `2026-10-29-wave1`, 459 SOC broad groups and 300 job titles, after the O*NET and BLS downloads and `openpyxl` of 2026-10-29) |
 
 ## Platform: filters, scorers, review
 

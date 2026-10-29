@@ -1,0 +1,350 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-10-29-wave1",
+  "n_occupations": 1016,
+  "n_broad": 459,
+  "n_job_titles": 300,
+  "cut": {
+    "n_titles": 54269,
+    "dropped": {
+      "parentheses": 4562,
+      "abbreviation": 205,
+      "words": 20518,
+      "zipf": 11068,
+      "corpus_role": 406,
+      "occupation_title": 111,
+      "duplicate": 4518
+    },
+    "n_passed": 12881,
+    "n_kept": 300,
+    "n": 300,
+    "min_zipf": 3.0,
+    "max_words": 2,
+    "examples": {
+      "words": [
+        "Aeronautics Commission Director",
+        "Agricultural Services Director",
+        "Arts and Humanities Council Director",
+        "Business Enterprise Officer",
+        "Consumer Affairs Director"
+      ],
+      "parentheses": [
+        "Business Development Executive (BD Executive)",
+        "Business Development Officer (BD Officer)",
+        "CEO (Chief Executive Officer)",
+        "Chief Administrative Officer (CAO)",
+        "Chief Diversity Officer (CDO)"
+      ],
+      "abbreviation": [
+        "Energy, Sustainability, and Infrastructure Manager",
+        "Crop, Grain, or Livestock Farm Manager",
+        "911 Communications Manager",
+        "Health, Wellness, and Nutrition Coordinator",
+        "Sports, Fitness, and Wellness Director"
+      ],
+      "zipf": [
+        "Offshoring Manager",
+        "Substation Superintendent",
+        "Assemblyman",
+        "Assemblywoman",
+        "Congresswoman"
+      ],
+      "occupation_title": [
+        "Legislator",
+        "Sales Manager",
+        "Fundraising Manager",
+        "Facilities Manager",
+        "Security Manager"
+      ],
+      "duplicate": [
+        "Account Manager",
+        "Business Developer",
+        "Channel Manager",
+        "Commercial Director",
+        "District Manager"
+      ],
+      "corpus_role": [
+        "Farmer",
+        "Trainer",
+        "Publisher",
+        "Merchant",
+        "Examiner"
+      ]
+    }
+  },
+  "job_title_columns": {
+    "code": "O*NET-SOC Code",
+    "title": "Job Title",
+    "short_title": "Short Title",
+    "sources": "Source(s)"
+  },
+  "oews": "/Users/roger/Documents/GitHub/assistant-axis/data/external/bls/oesm25nat.zip",
+  "source_keys": [
+    "onet_occupations",
+    "bls_oews_national",
+    "onet_job_titles"
+  ],
+  "sources": [
+    {
+      "key": "onet",
+      "file": "data/external/onet/occupation_data.csv",
+      "url": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/occupation_data.csv",
+      "repo_id": null,
+      "revision": null,
+      "size_bytes": 268030,
+      "size_bytes_published": 268030,
+      "sha256": "a09eae1d6609686e44e05b7290993a1c8b523d8ca224bc0eedc194c855c3ee02",
+      "sha256_published": null,
+      "checksum_verified": false,
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "licence_verified": true,
+      "licence_checked_on": "https://www.onetcenter.org/license_db.html",
+      "attribution": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+      "citation": "O*NET 31.0 Database, U.S. Department of Labor, Employment and Training Administration",
+      "version": "31.0",
+      "note": "licence verified 2026-10-10 at https://www.onetcenter.org/license_db.html (plan 03 said public domain)",
+      "approved_by": "Roger, 2026-10-10 (coding_plan_03_base_model.md section 5a: first three downloads approved)",
+      "downloaded_at": "2026-10-10T18:34:46+00:00",
+      "tool": "base_model_generator.py fetch",
+      "git_sha": "c2d5f73+dirty"
+    },
+    {
+      "key": "bls_oews_national",
+      "file": "data/external/bls/oesm25nat.zip",
+      "url": "https://www.bls.gov/oes/special-requests/oesm25nat.zip",
+      "repo_id": null,
+      "revision": null,
+      "size_bytes": 279525,
+      "size_bytes_published": null,
+      "sha256": "b5855a37f3e03e779f6fbf173d3bbc94aeeff33426aef32fa95ce6d025bab1af",
+      "sha256_published": null,
+      "checksum_verified": false,
+      "licence": "public domain",
+      "licence_url": "https://www.bls.gov/bls/linksite.htm",
+      "licence_verified": false,
+      "licence_checked_on": "https://www.bls.gov/bls/linksite.htm could not be read (RuntimeError)",
+      "attribution": "Employment figures: U.S. Bureau of Labor Statistics, Occupational Employment and Wage Statistics (OEWS), May 2025 national estimates, https://www.bls.gov/oes/ (public domain; cited as BLS asks).",
+      "citation": "U.S. Bureau of Labor Statistics, Occupational Employment and Wage Statistics (OEWS), May 2025 national occupational employment and wage estimates",
+      "version": "May 2025",
+      "note": "an xlsx in a zip; columns OCC_CODE, OCC_TITLE, O_GROUP, TOT_EMP at the major, minor, broad and detailed tiers, so it also supplies the broad titles.  bls.gov answers automated requests with 403: a refused fetch is downloaded by hand and recorded with fetch --hand",
+      "approved_by": "Roger, 2026-10-29",
+      "downloaded_at": "2026-10-29T19:26:48+00:00",
+      "tool": "professions_generator.py fetch",
+      "git_sha": "7ec2ba50+dirty",
+      "downloaded_by": "hand"
+    },
+    {
+      "key": "onet_job_titles",
+      "file": "data/external/onet/job_titles.csv",
+      "url": "https://www.onetcenter.org/dl_files/database/db_31_0_csv/job_titles.csv",
+      "repo_id": null,
+      "revision": null,
+      "size_bytes": 4504432,
+      "size_bytes_published": 4504432,
+      "sha256": "75a3b46d6edc5996117c10c9ed488c9a06f7495d02969e9d12873ab14a21540c",
+      "sha256_published": null,
+      "checksum_verified": false,
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "licence_verified": true,
+      "licence_checked_on": "https://www.onetcenter.org/license_db.html",
+      "attribution": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+      "citation": "O*NET 31.0 Database (Job Titles), U.S. Department of Labor, Employment and Training Administration",
+      "version": "31.0",
+      "note": "the table formerly 'Alternate Titles': lay titles by O*NET-SOC code; 4,504,432 bytes by HEAD on 2026-10-21.  LOAD-BEARING from the first candidate: this generator puts O*NET occupation titles, job titles and lay roles derived from them into candidates.jsonl, the registry, seed-queue entries and readouts by design, so the attribution travels with every run (ATTRIBUTION.md, run.json, each promoted entry's source).  The base-model generator's note said when this would happen: licence verified 2026-10-10 at https://www.onetcenter.org/license_db.html (plan 03 said public domain). Titles are used only as prompt words and no occupation title reaches a tracked artefact, so this attribution is a courtesy, not something we rely on. It becomes LOAD-BEARING the moment a title does reach a tracked artefact - an occupation word surviving as a candidate label in candidate_table*.jsonl, candidates.jsonl, the registry or a readout - and then the attribution above must travel with that artefact (Roger, QUESTIONS 60, 2026-10-11)",
+      "approved_by": "Roger, 2026-10-29",
+      "downloaded_at": "2026-10-29T19:12:19+00:00",
+      "tool": "professions_generator.py fetch",
+      "git_sha": "bb76dc22+dirty",
+      "downloaded_by": "fetch"
+    }
+  ],
+  "recovery_source_titles": {
+    "n": 162,
+    "n_recovered": 69,
+    "share": 0.4259,
+    "missed": [
+      "advocate",
+      "ambassador",
+      "archaeologist",
+      "artisan",
+      "assistant",
+      "auctioneer",
+      "bard",
+      "blogger",
+      "builder",
+      "bureaucrat",
+      "caregiver",
+      "caveman",
+      "comedian",
+      "consultant",
+      "coordinator",
+      "critic",
+      "debugger",
+      "destroyer",
+      "devils_advocate",
+      "doctor",
+      "emissary",
+      "entrepreneur",
+      "evaluator",
+      "facilitator",
+      "fisher",
+      "fixer",
+      "fool",
+      "forecaster",
+      "freelancer",
+      "futurist",
+      "generalist",
+      "guardian",
+      "guide",
+      "guru",
+      "healer",
+      "herder",
+      "homemaker",
+      "hunter_gatherer",
+      "improviser",
+      "influencer",
+      "intern",
+      "jester",
+      "linguist",
+      "lobbyist",
+      "marketer",
+      "mentor",
+      "merchant",
+      "moderator",
+      "narrator",
+      "naturalist",
+      "navigator",
+      "negotiator",
+      "networker",
+      "novelist",
+      "observer",
+      "oracle",
+      "organizer",
+      "peacekeeper",
+      "philosopher",
+      "pilot",
+      "planner",
+      "playwright",
+      "podcaster",
+      "politician",
+      "presenter",
+      "priest",
+      "professor",
+      "prophet",
+      "publisher",
+      "recruiter",
+      "researcher",
+      "reviewer",
+      "sage",
+      "scheduler",
+      "scholar",
+      "scientist",
+      "screener",
+      "shaman",
+      "soldier",
+      "sommelier",
+      "strategist",
+      "subordinate",
+      "summarizer",
+      "supervisor",
+      "synthesizer",
+      "theorist",
+      "trainer",
+      "validator",
+      "virtuoso",
+      "volunteer",
+      "voter",
+      "warrior",
+      "witness"
+    ],
+    "partial": {
+      "assistant": [
+        "administrative_assistant",
+        "anesthesiologist_assistant",
+        "dental_assistant",
+        "executive_administrative_assistant",
+        "executive_secretaries_and_executive_administrative_assistant"
+      ],
+      "builder": [
+        "tire_builder"
+      ],
+      "coordinator": [
+        "clinical_research_coordinator",
+        "fitness_and_wellness_coordinator",
+        "instructional_coordinator",
+        "recycling_coordinator",
+        "wellness_coordinator"
+      ],
+      "doctor": [
+        "baby_doctor",
+        "heart_doctor"
+      ],
+      "guide": [
+        "tour_and_travel_guide",
+        "tour_guide",
+        "travel_guide"
+      ],
+      "merchant": [
+        "online_merchant"
+      ],
+      "naturalist": [
+        "park_naturalist"
+      ],
+      "pilot": [
+        "aircraft_pilot",
+        "airline_pilot",
+        "commercial_pilot"
+      ],
+      "planner": [
+        "and_event_planner",
+        "business_continuity_planner",
+        "environmental_restoration_planner",
+        "meeting_convention_and_event_planner",
+        "regional_planner"
+      ],
+      "professor": [
+        "art_professor",
+        "business_professor",
+        "college_professor",
+        "education_professor",
+        "government_professor"
+      ],
+      "publisher": [
+        "desktop_publisher"
+      ],
+      "researcher": [
+        "survey_researcher"
+      ],
+      "scientist": [
+        "agricultural_and_food_scientist",
+        "animal_scientist",
+        "atmospheric_and_space_scientist",
+        "bioinformatics_scientist",
+        "biological_scientist"
+      ],
+      "screener": [
+        "transportation_security_screener"
+      ],
+      "strategist": [
+        "search_marketing_strategist"
+      ],
+      "supervisor": [
+        "aircraft_cargo_handling_supervisor",
+        "miscellaneous_first_line_supervisor"
+      ],
+      "trainer": [
+        "animal_trainer",
+        "athletic_trainer",
+        "exercise_trainer"
+      ]
+    }
+  },
+  "attribution": {
+    "onet_occupations": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+    "onet_job_titles": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+    "bls_oews_national": "Employment figures: U.S. Bureau of Labor Statistics, Occupational Employment and Wage Statistics (OEWS), May 2025 national estimates, https://www.bls.gov/oes/ (public domain; cited as BLS asks).",
+    "onet_changes": "Changes: the lay role names and one-sentence descriptions in this run were derived from O*NET occupation titles, descriptions and job titles by a language model (Claude Haiku 5.5), and the occupations were grouped by their 2018 SOC broad codes.  USDOL/ETA has not approved, endorsed, or tested these modifications."
+  }
+}

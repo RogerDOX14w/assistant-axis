@@ -1,0 +1,71 @@
+{
+  "generator": "professions",
+  "run_id": "2026-10-29-wave1",
+  "git_sha": "7ec2ba50+dirty",
+  "args": {
+    "step": "build",
+    "source": [
+      "onet"
+    ],
+    "n_titles": 300,
+    "min_zipf": 3.0,
+    "max_words": 2,
+    "no_oews": false,
+    "source_keys": [
+      "onet_occupations",
+      "bls_oews_national",
+      "onet_job_titles"
+    ],
+    "attribution": {
+      "onet_occupations": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+      "onet_job_titles": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+      "bls_oews_national": "Employment figures: U.S. Bureau of Labor Statistics, Occupational Employment and Wage Statistics (OEWS), May 2025 national estimates, https://www.bls.gov/oes/ (public domain; cited as BLS asks).",
+      "onet_changes": "Changes: the lay role names and one-sentence descriptions in this run were derived from O*NET occupation titles, descriptions and job titles by a language model (Claude Haiku 5.5), and the occupations were grouped by their 2018 SOC broad codes.  USDOL/ETA has not approved, endorsed, or tested these modifications."
+    }
+  },
+  "n_emitted": 0,
+  "started_at": "2026-10-29T19:27:51+00:00",
+  "finished_at": "2026-10-29T19:27:51+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "8da0f5926576",
+      "started_at": "2026-10-29T19:27:51+00:00",
+      "finished_at": "2026-10-29T19:27:51+00:00",
+      "git_sha": "7ec2ba50+dirty",
+      "args": {
+        "step": "build",
+        "source": [
+          "onet"
+        ],
+        "n_titles": 300,
+        "min_zipf": 3.0,
+        "max_words": 2,
+        "no_oews": false,
+        "source_keys": [
+          "onet_occupations",
+          "bls_oews_national",
+          "onet_job_titles"
+        ],
+        "attribution": {
+          "onet_occupations": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+          "onet_job_titles": "This work uses information from the O*NET 31.0 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET(R) is a trademark of USDOL/ETA.",
+          "bls_oews_national": "Employment figures: U.S. Bureau of Labor Statistics, Occupational Employment and Wage Statistics (OEWS), May 2025 national estimates, https://www.bls.gov/oes/ (public domain; cited as BLS asks).",
+          "onet_changes": "Changes: the lay role names and one-sentence descriptions in this run were derived from O*NET occupation titles, descriptions and job titles by a language model (Claude Haiku 5.5), and the occupations were grouped by their 2018 SOC broad codes.  USDOL/ETA has not approved, endorsed, or tested these modifications."
+        }
+      },
+      "n_emitted": 0,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}
