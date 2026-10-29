@@ -1,0 +1,108 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "2026-10-15-w1_base_model,2026-10-17-pilot_llm_entropy,2026-10-20-humanize_alignment_sweep,2026-10-20-humanize_alignment_sweep_rejudge,2026-10-21-grid_llm_entropy,2026-10-20-v2_structural,2026-10-14-wave1_masked_lm,2026-10-18-pilot_corpus_frames,2026-10-14-pilot_masked_lm,2026-10-14-pilot_structural,llm-2026-10-15,repairs-2026-10-15_censuses,backlog-2026-10-14,roles-2026-10-14,2026-10-11-full_roget,2026-10-21-humanize-hand_alignment_sweep,states_gg5_1_names"
+        },
+        "fingerprint": "v1:2026-10-22T00:11:44+00:00@420610142",
+        "kind": "file",
+        "last_modified_at": "2026-10-22T00:11:44+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "2026-10-15-w1_base_model,2026-10-17-pilot_llm_entropy,2026-10-20-humanize_alignment_sweep,2026-10-20-humanize_alignment_sweep_rejudge,2026-10-21-grid_llm_entropy,2026-10-20-v2_structural,2026-10-14-wave1_masked_lm,2026-10-18-pilot_corpus_frames,2026-10-14-pilot_masked_lm,2026-10-14-pilot_structural,llm-2026-10-15,repairs-2026-10-15_censuses,backlog-2026-10-14,roles-2026-10-14,2026-10-11-full_roget,2026-10-21-humanize-hand_alignment_sweep,states_gg5_1_names"
+        },
+        "fingerprint": "v1:multi:2579199792f6",
+        "kind": "multi",
+        "last_modified_at": "2026-10-22T00:11:44+00:00",
+        "member_paths": [
+          "data/candidates/novelty/2026-10-11-full_roget/run.json",
+          "data/candidates/novelty/2026-10-14-pilot_masked_lm/run.json",
+          "data/candidates/novelty/2026-10-14-pilot_structural/run.json",
+          "data/candidates/novelty/2026-10-14-wave1_masked_lm/run.json",
+          "data/candidates/novelty/2026-10-15-w1_base_model/run.json",
+          "data/candidates/novelty/2026-10-17-pilot_llm_entropy/run.json",
+          "data/candidates/novelty/2026-10-18-pilot_corpus_frames/run.json",
+          "data/candidates/novelty/2026-10-20-humanize_alignment_sweep/run.json",
+          "data/candidates/novelty/2026-10-20-humanize_alignment_sweep_rejudge/run.json",
+          "data/candidates/novelty/2026-10-20-v2_structural/run.json",
+          "data/candidates/novelty/2026-10-21-grid_llm_entropy/run.json",
+          "data/candidates/novelty/2026-10-21-humanize-hand_alignment_sweep/run.json",
+          "data/candidates/novelty/backlog-2026-10-14/run.json",
+          "data/candidates/novelty/llm-2026-10-15/run.json",
+          "data/candidates/novelty/repairs-2026-10-15_censuses/run.json",
+          "data/candidates/novelty/roles-2026-10-14/run.json",
+          "data/candidates/novelty/states_gg5_1_names/run.json"
+        ],
+        "path": "data/candidates/novelty"
+      }
+    ],
+    "inputs_sha256": "cd99b14298c605e052597c8b9fa9b83b64ce35fdc700cbb0f446cd679423876a",
+    "produced_at": "2026-10-29T16:57:08+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_traits_new_3 --from-batches 2026-10-15-w1_base_model 2026-10-17-pilot_llm_entropy 2026-10-20-humanize_alignment_sweep 2026-10-20-humanize_alignment_sweep_rejudge 2026-10-21-grid_llm_entropy 2026-10-20-v2_structural 2026-10-14-wave1_masked_lm 2026-10-18-pilot_corpus_frames 2026-10-14-pilot_masked_lm 2026-10-14-pilot_structural llm-2026-10-15 repairs-2026-10-15_censuses backlog-2026-10-14 roles-2026-10-14 2026-10-11-full_roget 2026-10-21-humanize-hand_alignment_sweep states_gg5_1_names --calibrate-from review_traits_all_2 --transport batches --budget-usd 20",
+      "git_sha": "c883ebcb+dirty",
+      "title": "review_graph build review_traits_new_3"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 14982,
+  "per_model": {
+    "claude-haiku-5-5:batch": {
+      "completion_tokens": 2032770,
+      "cost_usd": 0.6558,
+      "model": "claude-haiku-5-5:batch",
+      "n_calls": 2301,
+      "prompt_tokens": 2952221
+    },
+    "claude-opus-5-5:batch": {
+      "completion_tokens": 356127,
+      "cost_usd": 5.1705,
+      "model": "claude-opus-5-5:batch",
+      "n_calls": 3466,
+      "prompt_tokens": 804612
+    },
+    "claude-sonnet-5-5:batch": {
+      "completion_tokens": 736388,
+      "cost_usd": 5.5638,
+      "model": "claude-sonnet-5-5:batch",
+      "n_calls": 9215,
+      "prompt_tokens": 1881822
+    }
+  },
+  "total_completion_tokens": 3125285,
+  "total_cost_usd": 11.3901,
+  "total_prompt_tokens": 5638655
+}
