@@ -14,7 +14,10 @@
 #
 # TYPES (default "role trait combination") names the entity types to judge: the trait rubric for
 # the extraction is being settled (Roger, 2026-10-29), so the traits and combinations wait for it
-# (TYPES=role now, TYPES="trait combination" with the settled rubric later).  TREES (default all
+# (TYPES=role now, TYPES=trait with the settled rubric later).  Combinations are judged under
+# version 3's text for now (Roger, 2026-10-29: a new combination rubric is coming, not yet
+# due), so TYPES="role combination", and again once that rubric is settled.  Watchers for
+# different types can run side by side.  TREES (default all
 # five) names the trees.  Run from the repo root:
 #   TYPES=role reports/pipeline/cap_pilot/cap_pilot_judge_watch.sh > roger/cap_pilot/judge_watch.log 2>&1
 set -uo pipefail
@@ -67,8 +70,13 @@ for t in $TREES; do
         sleep 300
     done
     stamp "$t: 64 response files on the pod; copying"
-    mkdir -p "$out/responses"
-    "${SCP[@]}" "pod:$REMOTE/$t/responses/*" "$out/responses/" || { stamp "$t: copy failed"; exit 1; }
+    # copied beside the directory and renamed in, file by file, so that another watcher (one per
+    # entity type) reading these files never sees one half-written
+    tmp="$out/.incoming.$$"
+    mkdir -p "$tmp" "$out/responses"
+    "${SCP[@]}" "pod:$REMOTE/$t/responses/*" "$tmp/" || { stamp "$t: copy failed"; exit 1; }
+    for f in "$tmp"/*; do mv -f "$f" "$out/responses/"; done
+    rmdir "$tmp"
     judge "$t" scores || { stamp "$t: judging FAILED"; exit 1; }
     if [ "$t" = cap512 ]; then
         judge "$t" scores_rejudge || { stamp "$t: rejudge FAILED"; exit 1; }
