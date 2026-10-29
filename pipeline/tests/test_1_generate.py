@@ -451,6 +451,19 @@ def test_responses_without_a_record_are_refused(mod, monkeypatch, data, caplog):
     assert not (data / "out" / "generation_config.json").exists()
 
 
+def test_the_drivers_default_symlink_is_not_a_response_made_here(mod, monkeypatch, data):
+    """run_pipeline.sh links default/responses/default.jsonl into a fresh
+    type's responses directory before step 1; step 1 refused that tree as
+    "made before 2026-10-12" on the October extraction's first pod."""
+    (data / "default").mkdir()
+    (data / "default" / "default.jsonl").write_text("{}\n")
+    (data / "out").mkdir()
+    (data / "out" / "default.jsonl").symlink_to("../default/default.jsonl")
+    code, saved = _run_main(mod, monkeypatch, data)
+    assert code == 0 and sorted(saved) == ["patient", "x", "y"]
+    assert len(_config(data)["runs"]) == 1
+
+
 def test_changed_instructions_are_named_not_refused(mod, monkeypatch, data, caplog):
     _run_main(mod, monkeypatch, data, bad={"y"})
     doc = json.loads((data / "traits" / "x.json").read_text())

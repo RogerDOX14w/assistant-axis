@@ -630,7 +630,11 @@ def check_and_record_generation_config(args, output_dir: Path, all_items: List[D
     fresh_hint = ("every extraction runs into a fresh output directory (pipeline/README.md); "
                   "use one, or pass --allow_mixed_settings to add to this one anyway")
     if previous is None:
-        n_existing = len(list(output_dir.glob("*.jsonl")))
+        # A symlink is not a response made here: run_pipeline.sh links the
+        # default's responses (recorded under default/responses/) into every
+        # type's tree before step 1, so a fresh roger-mode tree holds one
+        # (found on the October extraction's first pod, 2026-10-29).
+        n_existing = sum(1 for p in output_dir.glob("*.jsonl") if not p.is_symlink())
         if n_existing:
             msg = (f"{output_dir} holds {n_existing} response file(s) and no "
                    f"{GENERATION_CONFIG_NAME}: they were made before 2026-10-12, under "
