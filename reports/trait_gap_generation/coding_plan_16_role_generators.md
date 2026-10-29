@@ -58,6 +58,16 @@ R1, R2 and promotion then run as for the pilot.  Nothing in those four generator
    today); the alternative is a hand-made CSV.  **Recommend** `uv add openpyxl`, asked for with the downloads.
    **Decided (Roger, 2026-10-22): (a)**, `uv add openpyxl`, asked for with the downloads.
 
+## The reviewer's questions (decided by Roger, 2026-10-29)
+
+From [review_role_path.md](./review_role_path.md) § 12:
+
+1. **The 40-pair sheet is regenerated from the retrieval check's glosses before Roger marks it**: yes (the review's blocking finding; `retrieval-check` first, then `rubric-check --make-sheet --glosses ... --overwrite`).
+2. **R1 for roles keeps the trait rule**: two candidates that read 4 against each other form a merged group, a 3 a proposed group; nothing merges without Roger's key.  As built.
+3. **The lay call's cap stays at three lay roles a reading.**
+4. **Label-fit is skipped for B's wave 1** (the rubric is written for traits); a role version is written only if Roger's sample of B's output shows naming problems.
+5. **B's `submit` prices and prints the follow-up M1 and M3 with `--transport batches` by default**, as built; `--transport live` on request.
+
 ## 1. Decisions already made
 
 Each from [16_role_generators.md](./16_role_generators.md) § 12 ("Decided (Roger, 2026-10-21)") unless noted;
