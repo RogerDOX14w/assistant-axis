@@ -39,7 +39,7 @@ rows: 5,795 kept awaiting review, 211 reviewed.
 | — | antonym-check seeds | **8** | 139 / 1 | nothing |
 | — | states and physical passes | **8** | 159 / 8 | nothing |
 | — | noun relabel | **8** | 90 / 5 | nothing |
-| 16 | [Role generators](./16_role_generators.md) | **6** (steps 1-2 built, reviewed ([review_role_path.md](./review_role_path.md)) and merged 2026-10-23; the reviewer's five questions decided 2026-10-29) | | the retrieval check ($0.05, queued behind another session's check-in) and the regenerated 40-pair sheet; then Roger: the pairs to mark (20 min), the O*NET and BLS downloads, `openpyxl`; then the rubric check ($0.50), the pilot on the held role rows ($2-4 batched), B's lay call |
+| 16 | [Role generators](./16_role_generators.md) | **6** (steps 1-2 built, reviewed ([review_role_path.md](./review_role_path.md)) and merged 2026-10-23; the reviewer's five questions decided 2026-10-29) | | Roger: the 40 pairs to mark (20 min) and the BLS OEWS file by hand (bls.gov refuses scripts; the O*NET job titles were fetched and `openpyxl` added 2026-10-29, after the retrieval check and the 40-pair sheet the same day); then the rubric check ($0.50), the pilot on the held role rows ($2-4 batched), B's lay call |
 
 ## Platform: filters, scorers, review
 
@@ -57,7 +57,7 @@ rows: 5,795 kept awaiting review, 211 reviewed.
 | — | Marking sheets show the review tool's neighbours ([QUESTIONS 208](./QUESTIONS.md#L338)) | **8, finished** (2026-10-20: the llm_entropy, structural and corpus_frames sheets) | nothing |
 | — | [Noun normalization](./coding_plan_noun_normalization.md), gzip-aware records, role kinds | **8, finished** | nothing |
 | — | Embedding cache layout: appends or shards instead of a 2 GB rewrite on every save (the [README](./README.md) TODO) | **1** (Roger, 2026-10-22: build it) | queued after the plan 16 build |
-| — | Promotion and arrangements (the [README](./README.md) TODO) | **1** | this week (Roger, 2026-10-14) |
+| — | Promotion and arrangements (the [README](./README.md) TODO) | **1** | the blind sample hour: Fable writes the brainstorm after it, against real review outcomes (Roger, 2026-10-29) |
 
 ## Evaluation
 
