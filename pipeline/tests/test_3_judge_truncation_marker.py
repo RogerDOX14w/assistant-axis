@@ -87,13 +87,17 @@ def _client(prompts):
 
 
 def _run(judge, monkeypatch, responses_dir, output_dir, client, *extra):
+    """Runs step 3 on traits under prompt version 3 unless ``extra`` names one:
+    the marker is the same under every version, and the default, 13 since
+    2026-10-30, refuses the default judge for traits."""
     monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-used")
     monkeypatch.setattr(judge.openai, "AsyncOpenAI", lambda **kw: client)
     monkeypatch.setattr(judge, "judge_client", lambda model, tier=None: client)
+    pinned = [] if "--prompt_version" in extra else ["--prompt_version", "3"]
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
         "--roles_dir", str(ROLES), "--traits_dir", str(TRAITS), "--entity_type", "trait",
-        "--no_incongruity_filtering", "--requests_per_second", "1000", "--no_batch", *extra])
+        "--no_incongruity_filtering", "--requests_per_second", "1000", "--no_batch", *pinned, *extra])
     asyncio.run(judge.main_async())
 
 
@@ -145,7 +149,7 @@ def test_a_directory_judged_before_the_default_needs_the_flag_off(judge, monkeyp
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
     _write(responses_dir, ["length", "stop"])
     output_dir.mkdir()
-    judge.stamp_rubric(output_dir, entity_type="trait", judge_model="gpt-4.1-mini")
+    judge.stamp_rubric(output_dir, entity_type="trait", judge_model="gpt-4.1-mini", prompt_version=3)   # _run's version
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
     stamp.pop("truncation_marker", None)
     (output_dir / "judge_rubric.json").write_text(json.dumps(stamp))
