@@ -642,7 +642,7 @@ def response_key(resp: dict) -> str:
 # --mark_truncated (Roger, 2026-10-28, after the steering runner's sentinel,
 # steering_runner._decode_with_truncation_marker): a response step 1 cut at
 # --max_tokens (finish_reason "length") is shown to the judge with this
-# appended, so that the judge sees it was cut off rather than ended.  Only the
+# appended directly, so that the judge sees it was cut off rather than ended.  Only the
 # judge's copy is marked: the stored text is what step 2 runs through the
 # model, and a marker there would put tokens the model never wrote into slot
 # 0's mean.  Recorded in judge_rubric.json ("truncation_marker"); a scores
@@ -651,7 +651,12 @@ def response_key(resp: dict) -> str:
 # --no_mark_truncated turns it off, and run_pipeline.sh passes that in christina
 # mode.  A stamp written before then has no field and reads as no marker, so a
 # rerun into such a directory needs --no_mark_truncated.
-TRUNCATION_MARKER = " …"
+# No space before the ellipsis (Roger, 2026-10-29): about one cut in nine falls
+# mid-word ("for contempl"), and "contempl…" reads as cut where "contempl …"
+# reads as a word; Qwen never ends a response with "…" itself (0 of 16,500
+# October and smoke responses), so the marker is not mistaken for its own
+# ellipsis, which was the steering runner's reason for its " …".
+TRUNCATION_MARKER = "…"
 
 
 def mark_truncated_responses(responses: List[dict],

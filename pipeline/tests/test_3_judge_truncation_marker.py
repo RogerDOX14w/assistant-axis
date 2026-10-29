@@ -1,6 +1,6 @@
 """Tests for pipeline/3_judge.py --mark_truncated (Roger, 2026-10-28): a
 response step 1 cut at --max_tokens (finish_reason "length") is shown to the
-judge with " …" appended, as the steering judges see it; only the judge's copy
+judge with "…" appended (no space; the steering judges see " …"); only the judge's copy
 is marked, the setting is recorded in judge_rubric.json, and a scores
 directory judged with the other setting is refused.
 
@@ -49,7 +49,7 @@ def test_only_responses_cut_at_the_cap_are_marked(judge):
     rs = _responses(["length", "stop", None])
     marked, n = judge.mark_truncated_responses(rs)
     assert n == 1
-    assert [r["conversation"][-1]["content"] for r in marked] == ["answer 0 …", "answer 1", "answer 2"]
+    assert [r["conversation"][-1]["content"] for r in marked] == ["answer 0…", "answer 1", "answer 2"]
     assert marked[0]["conversation"][0] == rs[0]["conversation"][0]   # system and user turns untouched
     assert rs[0]["conversation"][-1]["content"] == "answer 0"          # the input is not changed
 
@@ -57,7 +57,7 @@ def test_only_responses_cut_at_the_cap_are_marked(judge):
 def test_the_judge_prompt_carries_the_marker(judge):
     marked, _ = judge.mark_truncated_responses(_responses(["length", "stop"]))
     prompts = dict(judge.pending_prompts(marked, "Q: {question}\nA: {answer}\nEND", {}))
-    assert prompts["pos_p0_q0"] == "Q: q0\nA: answer 0 …\nEND"
+    assert prompts["pos_p0_q0"] == "Q: q0\nA: answer 0…\nEND"
     assert prompts["pos_p0_q1"] == "Q: q1\nA: answer 1\nEND"
 
 
@@ -111,8 +111,8 @@ def test_by_default_a_run_marks_stamps_and_refuses_the_other_setting(judge, monk
     _write(responses_dir, ["length", "stop", "length"])
     prompts = []
     _run(judge, monkeypatch, responses_dir, output_dir, _client(prompts))
-    assert sum("answer 0 …" in p for p in prompts) == 1 and sum("answer 2 …" in p for p in prompts) == 1
-    assert not any("answer 1 …" in p for p in prompts)
+    assert sum("answer 0…" in p for p in prompts) == 1 and sum("answer 2…" in p for p in prompts) == 1
+    assert not any("answer 1…" in p for p in prompts)
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
     assert stamp["truncation_marker"] == judge.TRUNCATION_MARKER
     assert "Marked as cut off" in caplog.text and "2 of 3 responses read" in caplog.text

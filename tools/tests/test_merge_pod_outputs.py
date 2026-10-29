@@ -194,15 +194,15 @@ def test_the_truncation_marker_is_carried_and_must_agree(tmp_path, pods, capsys)
     """Step 3's --mark_truncated (2026-10-28): the merged stamp keeps the setting, and pods
     judged with and without it refuse the merge (a stamp without the field: no marker)."""
     p = pods["rcomb"] / "combinations" / "scores" / "judge_rubric.json"
-    p.write_text(json.dumps({**json.loads(p.read_text()), "truncation_marker": " …"}))
+    p.write_text(json.dumps({**json.loads(p.read_text()), "truncation_marker": "…"}))
     assert _merge(tmp_path, pods) == 1 and not (tmp_path / "merged").exists()
     assert "with and without step 3's --mark_truncated" in capsys.readouterr().err
     q = pods["tcomb"] / "combinations" / "scores" / "judge_rubric.json"
-    q.write_text(json.dumps({**json.loads(q.read_text()), "truncation_marker": " …"}))
+    q.write_text(json.dumps({**json.loads(q.read_text()), "truncation_marker": "…"}))
     assert _merge(tmp_path, pods) == 0
     m = tmp_path / "merged"
     assert json.loads((m / "combinations" / "scores" / "judge_rubric.json").read_text())[
-        "truncation_marker"] == " …"
+        "truncation_marker"] == "…"
     assert json.loads((m / "roles" / "scores" / "judge_rubric.json").read_text())[
         "truncation_marker"] is None
 

@@ -3,7 +3,7 @@
 # 64 response files, copy them to roger/cap_pilot/<tree>/responses, judge them (roles by
 # gpt-5.6-luna on OpenAI Flex with --save_replies; traits and combinations by gpt-4.1-mini through
 # the Batch API, since Flex refuses gpt-4.1-mini; every judging with --mark_truncated, a
-# response cut at the cap shown to the judge with " …"), one directory per type under
+# response cut at the cap shown to the judge with "…"; cap256 was judged with " …" first, 2026-10-28), one directory per type under
 # judged/<scores>/<type>/ (step 3 stamps one rubric record per directory, and version 10's role and
 # trait rubrics differ), gather the per-entity score files into <tree>/<scores>/ for step 4 and the
 # compare tool, and copy them back to the pod.  cap512 is judged twice (scores/ and

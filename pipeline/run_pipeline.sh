@@ -247,7 +247,7 @@ while [[ $# -gt 0 ]]; do
             JUDGE_ARGS+=(--save_replies); shift ;;
         --judge-no-mark-truncated)
             # step 3's --no_mark_truncated: show the judge a response cut at
-            # --max_tokens as stored, without the " …" step 3 appends by default
+            # --max_tokens as stored, without the "…" step 3 appends by default
             # (Roger, 2026-10-28; christina mode passes it on its own)
             JUDGE_ARGS+=(--no_mark_truncated); shift ;;
         --from-step)
