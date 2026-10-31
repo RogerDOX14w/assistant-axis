@@ -1,0 +1,19 @@
+2026-10-30 21:24:06,500 - INFO - Found 1 response files
+2026-10-30 21:24:06,500 - INFO - Processing 1 entities
+2026-10-30 21:24:06,644 - INFO - Rubric version 13: version 12 with levels 2 and 3 carrying version 11's B treatment of an AI mention (Roger, 2026-10-30; the trait rubric for the October extraction, traits judged by gpt-5.6-luna); roles and combinations as version 10 (names in the judge-display-v1 form; --max_tokens 300)
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 21:24:06,876 - INFO - Scoring 60 new responses for prey...
+2026-10-30 21:24:12,134 - INFO - Saved 60 scores for prey (60 new)
+Scoring: 100%|██████████| 1/1 [00:05<00:00,  5.48s/it]Scoring: 100%|██████████| 1/1 [00:05<00:00,  5.48s/it]
+2026-10-30 21:24:12,137 - INFO - [usage] this run total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=57,142 out=3,197 n=60]
+2026-10-30 21:24:12,137 - INFO - [usage] cumulative (runpod_workspace/combo_recheck/role/r_prey__intuitive/scores/usage.json) total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=57,142 out=3,197 n=60]
+2026-10-30 21:24:12,137 - INFO - 
+========================================
+2026-10-30 21:24:12,137 - INFO - SUMMARY
+2026-10-30 21:24:12,137 - INFO - ========================================
+2026-10-30 21:24:12,137 - INFO - Successful: 1
+2026-10-30 21:24:12,137 - INFO - Skipped:    0
+2026-10-30 21:24:12,137 - INFO - Failed:     0
+2026-10-30 21:24:12,137 - INFO - Marked as cut off ('…' shown to the judge): 0 of 60 responses read
+2026-10-30 21:24:12,137 - INFO - [abc] 60 replies scored from their A/B/C answers: 1 stated another score and 0 none (0 changing keep or drop); most often AnByCn stated 2 (1); listed in runpod_workspace/combo_recheck/role/r_prey__intuitive/scores/abc_disagreements.jsonl.  0 with answers that could not be read were scored by their SCORE line
+2026-10-30 21:24:12,137 - WARNING - *** A/B/C DISAGREEMENT RATE HIGH *** 1 of 60 replies (1.67%) disagreed with their answers and 0 (0.00%) had answers that could not be read (more than 1%; gpt-5.6-luna on version 8: 0.22% and none): read a sample of runpod_workspace/combo_recheck/role/r_prey__intuitive/scores/abc_disagreements.jsonl, the rows that change keep or drop first, and of the replies (--save_replies)
+2026-10-30 21:24:12,138 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

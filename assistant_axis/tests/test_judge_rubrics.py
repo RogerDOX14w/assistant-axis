@@ -99,16 +99,48 @@ def test_settled_versions_are_never_edited():
             10: {"role": "c19e859a53c91d5e", "trait": "9b9adda764fe6d86", "combination": "bee3d69ad7a814a8"},
             # settled 2026-10-30: version 10's role text and reading, the trait rubric review's
             # trait rubric (the hash its two test runs record), version 3's combination rubric
-            13: {"role": "c19e859a53c91d5e", "trait": "4a0f22d96414d97b", "combination": "bee3d69ad7a814a8"}}
+            13: {"role": "c19e859a53c91d5e", "trait": "4a0f22d96414d97b", "combination": "bee3d69ad7a814a8"},
+            # settled 2026-10-31: version 13's roles and traits, the two-sided combination rule
+            # (versions 16 and 17; the hash covers both sides' texts and readings)
+            20: {"role": "c19e859a53c91d5e", "trait": "4a0f22d96414d97b", "combination": "a1bce358ade70fa5"}}
     for v, by_type in pins.items():
         assert {k: jr.PROMPT_VERSIONS[v].sha256(k) for k in by_type} == by_type
     assert jr.PROMPT_VERSIONS[4].draft and not jr.PROMPT_VERSIONS[3].draft
     assert not jr.PROMPT_VERSIONS[10].draft and jr.PROMPT_VERSIONS[8].sha256("role") == "522fae510e0dd298"
-    assert not jr.PROMPT_VERSIONS[13].draft
+    assert not jr.PROMPT_VERSIONS[13].draft and not jr.PROMPT_VERSIONS[20].draft
+
+
+def test_version_20_is_the_two_sided_combination_rule():
+    """Version 20 (settled 2026-10-31, Roger: "16+17 on the basis of
+    precision"): roles and traits exactly as version 13 (same hashes, so their
+    directories are shared), and a combination judged on two sides, by version
+    16 and by version 17, read as "two_sides"; the hash covers the sides, so an
+    edit to either side's text changes it; gpt-5.6-luna for every type."""
+    v13, v16, v17, v20 = (jr.PROMPT_VERSIONS[v] for v in (13, 16, 17, 20))
+    assert v20.differs_from(v13) == ("combination",)
+    assert jr.may_share_directory(13, 20, "role") and jr.may_share_directory(13, 20, "trait")
+    assert not jr.may_share_directory(13, 20, "combination") and not jr.may_share_directory(16, 20, "combination")
+    assert v20.combination_sides == (("role", 16), ("trait", 17))
+    assert v20.side_versions() == {"role": v16, "trait": v17}
+    assert v20.reply_format_for("combination") == "two_sides" and v20.max_tokens_for("combination") == 300
+    assert v16.max_tokens_for("combination") == 300 and v17.max_tokens_for("combination") == 200
+    assert v20.judges_for("combination") == v20.judges_for("role") == v20.judges_for("trait") == ("gpt-5.6-luna",)
+    assert v16.judges_for("combination") == () and v13.judges_for("combination") == ()
+    assert v20.combination == ("[The role side, prompt version 16]\n\n" + v16.combination
+                               + "\n\n[The trait side, prompt version 17]\n\n" + v17.combination)
+    assert v20.combination_overrides == () and v20.combination_template("robot") == v20.combination
+    assert v20.same_text(v20, "combination") and not v20.same_text(v13, "combination")
+    # the hash follows the sides: the same sides give the same hash, other sides another
+    from dataclasses import replace
+    same = replace(v20, combination=v20.combination + " ")
+    assert same.sha256("combination") != v20.sha256("combination")
+    other = replace(v20, combination_sides=(("role", 16), ("trait", 18)))
+    assert other.sha256("combination") != v20.sha256("combination") and not other.same_text(v20, "combination")
+    assert "two_sides" in jr.REPLY_FORMATS
 
 
 def test_versions_and_their_reading():
-    assert jr.DEFAULT_PROMPT_VERSION == 13                    # 10 from 2026-10-28, 3 before
+    assert jr.DEFAULT_PROMPT_VERSION == 20                    # 13 from 2026-10-30, 10 from 2026-10-28, 3 before
     assert (jr.PROMPT_VERSIONS[0].reply_format, jr.PROMPT_VERSIONS[0].max_tokens) == ("first_integer", 10)
     for v in (3, 4):
         assert (jr.PROMPT_VERSIONS[v].reply_format, jr.PROMPT_VERSIONS[v].max_tokens) == ("score_marker", 200)
@@ -308,6 +340,164 @@ def test_version_10_is_version_8_read_from_the_answers():
 ])
 def test_abc_answers(text, answers):
     assert jr.abc_answers(text) == answers
+
+
+@pytest.mark.parametrize("text,answers", [
+    ("A: no — “Let me”\nB: no — none\nR: yes — “as a chef”\nT: yes — “ruin them”\nSCORE: 3",
+     {"A": False, "B": False, "R": True, "T": True}),
+    ("**A:** No\n**B:** Yes, \"as an AI\"\n**R.** yes\nT) no\nSCORE: 1", {"A": False, "B": True, "R": True, "T": False}),
+    ("A: no\nB: no\nR: yes\nSCORE: 2", None),                   # T unanswered
+    ("A: no\nB: no\nC: yes\nR: yes\nT: no", None),              # a question the rubric did not ask
+    ("A: no\nB: no\nR: yes\nT: yes — so T: no", None),          # answered both ways
+])
+def test_abrt_answers(text, answers):
+    assert jr.abrt_answers(text) == answers
+    assert jr.abc_answers(text) is None                         # four letters are not the role rubric's three
+
+
+def test_abrt_score_tables():
+    import itertools
+    for a, b, r, t in itertools.product((False, True), repeat=4):
+        ans = {"A": a, "B": b, "R": r, "T": t}
+        either, both = jr.abrt_score(ans, "either"), jr.abrt_score(ans, "both")
+        assert either == jr.abc_score({"A": a, "B": b, "C": r or t})
+        assert both == {2: 2 if (a or b) else 3, 1: 1 if (a or b) else 2, 0: 0 if a else 1}[int(r) + int(t)]
+        assert (both == 3) == (r and t and not a and not b)
+        assert (either == 3) == ((r or t) and not a and not b)
+    with pytest.raises(ValueError, match="Unknown combination rule"):
+        jr.abrt_score({"A": False, "B": False, "R": True, "T": True}, "goal")
+    assert jr.answer_pattern({"A": False, "B": True, "R": True, "T": False}) == "AnByRyTn"
+    assert jr.COMBO_TABLE_BOTH in jr.PROMPT_VERSIONS[14].combination
+    assert jr.COMBO_TABLE_EITHER in jr.PROMPT_VERSIONS[15].combination
+
+
+def test_versions_14_and_15_are_the_combination_decision_procedure():
+    """The combination rubric drafts (Roger, 2026-10-30): roles and traits as
+    version 13; four questions, A and B the role rubric's (the AI roles' B for
+    their combinations), R the role rubric's C and T version 11's C relettered;
+    14 needs both, 15 either, and the texts differ in nothing else."""
+    v13, v14, v15 = (jr.PROMPT_VERSIONS[v] for v in (13, 14, 15))
+    for v in (v14, v15):
+        assert v.draft and v.differs_from(v13) == ("combination",)
+        assert v.same_text(v13, "role") and v.same_text(v13, "trait")
+        assert jr.may_share_directory(13, v.number, "role") and jr.may_share_directory(13, v.number, "trait")
+        assert not jr.may_share_directory(3, v.number, "combination")
+        assert [v.max_tokens_for(k) for k in ("role", "trait", "combination")] == [300, 200, 350]
+        assert set(dict(v.combination_overrides)) == set(jr.V6_AI_ROLES)
+        for stem in jr.V6_AI_ROLES:
+            assert jr.COMBO_B_AI_ROLE in v.combination_template(stem) and jr.COMBO_B_GENERAL not in v.combination_template(stem)
+        assert v.combination_template("chef") == v.combination and jr.COMBO_B_GENERAL in v.combination
+        for part in (jr.COMBO_A, jr.COMBO_R, jr.COMBO_T, jr.COMBO_CLOSING, "Answer four questions about the response."):
+            assert part in v.combination
+        assert v.combination.count("SCORE:") == 1
+        text = v.combination.format(role_name="x", role_description="d", trait_name="y", trait_description="e")
+        assert "{question}" in text and "{answer}" in text and "{" not in text.replace("{question}", "").replace("{answer}", "")
+    assert v14.reply_format_for("combination") == "abrt_both" and v15.reply_format_for("combination") == "abrt_either"
+    assert v14.differs_from(v15) == ("combination",) and not v14.same_text(v15, "combination")
+    strip = lambda v, h, p, t: v.combination.replace(h, "H").replace(p, "P").replace(t, "S")   # noqa: E731
+    assert strip(v14, jr.COMBO_HEADER_BOTH, jr.COMBO_PREAMBLE_BOTH, jr.COMBO_TABLE_BOTH) == \
+        strip(v15, jr.COMBO_HEADER_EITHER, jr.COMBO_PREAMBLE_EITHER, jr.COMBO_TABLE_EITHER)
+    # R is the role rubric's C relettered, and T version 11's
+    assert jr.COMBO_R.replace("R. Is there", "C. Is there").replace("as R", "as C") in v13.role
+    assert jr.COMBO_R.startswith("R. Is there any roleplaying of the role") and "counts as R; however" in jr.COMBO_R
+    assert jr.COMBO_T.startswith("T. Does the trait show at all") and "does not count as T, however well written" in jr.COMBO_T
+    assert "in the role's voice or the assistant's, counts as T" in jr.COMBO_T
+    assert "steps out of the role or the trait to disclaim it" in jr.COMBO_B_GENERAL
+    assert "This role is an AI or a machine" in jr.COMBO_B_AI_ROLE
+    assert "it counts as R or T" in jr.COMBO_A
+
+
+def test_versions_16_and_17_are_the_separate_rubrics_with_the_other_half_as_context():
+    """The context-aware drafts (Roger, 2026-10-30: a combination keeps a response
+    only when both show, each judged by its own rubric knowing the other half of
+    the instruction as context): 16 is version 10's role rubric and reading as a
+    combination template with the trait as context, 17 version 13's trait rubric
+    with the role as context; roles and traits as version 13, and the texts change
+    in nothing else."""
+    v13, v16, v17 = (jr.PROMPT_VERSIONS[v] for v in (13, 16, 17))
+    for v in (v16, v17):
+        assert v.draft and v.differs_from(v13) == ("combination",)
+        assert v.same_text(v13, "role") and v.same_text(v13, "trait")
+        assert jr.may_share_directory(13, v.number, "role") and jr.may_share_directory(13, v.number, "trait")
+        assert not jr.may_share_directory(3, v.number, "combination")
+        assert set(dict(v.combination_overrides)) == set(jr.V6_AI_ROLES)
+        assert v.combination_template("chef") == v.combination
+        assert v.judges_for("combination") == ()
+        for tpl in [v.combination] + [t for _, t in v.combination_overrides]:
+            assert tpl.count("SCORE:") == 1
+            text = tpl.format(role_name="x", role_description="d", trait_name="y", trait_description="e")
+            assert "{question}" in text and "{answer}" in text
+            assert "{" not in text.replace("{question}", "").replace("{answer}", "")
+    # 16: the role rubric with the trait as context, read from its A, B and C answers
+    assert v16.reply_format_for("combination") == "abc_answers" and v16.max_tokens_for("combination") == 300
+    assert v16.combination.replace(jr.V16_CONTEXT + "\n\n", "").replace("{role_description}", "{description}") == v13.role
+    assert "Judge the role only." in jr.V16_CONTEXT and "{trait_name}" in jr.V16_CONTEXT
+    assert "the trait showing on its own does not count as the role" in jr.V16_CONTEXT
+    for stem in jr.V6_AI_ROLES:
+        tpl = v16.combination_template(stem)
+        assert jr.V6_B_AI_ROLE in tpl and jr.V6_B_GENERAL not in tpl and jr.V16_CONTEXT in tpl
+        assert tpl.replace(jr.V16_CONTEXT + "\n\n", "").replace("{role_description}", "{description}") == v13.role_template(stem)
+    # 17: the trait rubric with the role as context, read by its SCORE line
+    assert v17.reply_format_for("combination") == "score_marker" and v17.max_tokens_for("combination") == 200
+    assert v17.combination.replace(jr.V17_CONTEXT + "\n\n" + jr.V17_CLAUSES, jr.V12_CLAUSES) == v13.trait
+    assert "Judge the trait only." in jr.V17_CONTEXT and "{role_name}" in jr.V17_CONTEXT
+    assert "the role showing on its own does not count as the trait" in jr.V17_CONTEXT
+    assert jr.V12_DEFAULT_SENTENCE in jr.V12_CLAUSES and jr.V12_HELPFUL_CLAUSE in jr.V12_CLAUSES
+    assert jr.V12_DEFAULT_SENTENCE not in jr.V17_CLAUSES and jr.V17_DEFAULT_SENTENCE in jr.V17_CLAUSES
+    assert jr.V12_HELPFUL_CLAUSE not in jr.V17_CLAUSES and jr.V17_HELPFUL_CLAUSE in jr.V17_CLAUSES
+    assert jr.V13_TRAIT_LEVEL2 in v17.combination and jr.V13_TRAIT_LEVEL3 in v17.combination
+    for stem in jr.V6_AI_ROLES:
+        tpl = v17.combination_template(stem)
+        assert jr.V17_TRAIT_LEVEL2_AI_ROLE in tpl and jr.V13_TRAIT_LEVEL2 not in tpl
+        assert "This role is an AI or a machine" in tpl and jr.V13_TRAIT_LEVEL3 in tpl
+    assert v16.differs_from(v17) == ("combination",)
+    # 18: version 17's trait side in version 11's shape, read from its A, B and C answers
+    v18 = jr.PROMPT_VERSIONS[18]
+    assert v18.draft and v18.differs_from(v13) == ("combination",) and v18.same_text(v13, "trait")
+    assert v18.reply_format_for("combination") == "abc_answers" and v18.max_tokens_for("combination") == 300
+    assert set(dict(v18.combination_overrides)) == set(jr.V6_AI_ROLES) and v18.judges_for("combination") == ()
+    unnamed = v18.combination
+    for old, new, _ in jr._V18_NAMING:
+        assert unnamed.count(new) == 1
+        unnamed = unnamed.replace(new, old)
+    assert unnamed.replace(jr.V18_PREAMBLE, jr.V11_PREAMBLE).replace(jr.V18_HELPFUL_CLAUSE, jr.V11_HELPFUL_CLAUSE) \
+        == jr.TRAIT_TEMPLATE_V11
+    assert jr.V18_PREAMBLE.startswith(jr.V17_CONTEXT + "\n\n" + jr.V17_DEFAULT_SENTENCE)
+    assert jr.V12_DEFAULT_SENTENCE not in v18.combination and jr.V11_HELPFUL_CLAUSE not in v18.combination
+    for part in (jr.V11_B, "C. Does the trait **{trait_name}** show at all", "no sign of the trait **{trait_name}**?",
+                 "Judge the trait **{trait_name}** only.", "Answer three questions about the response."):
+        assert part in v18.combination
+    assert v18.combination.count("SCORE:") == 1
+    for tpl in [v18.combination] + [t for _, t in v18.combination_overrides]:
+        text = tpl.format(role_name="x", role_description="d", trait_name="y", trait_description="e")
+        assert "{" not in text.replace("{question}", "").replace("{answer}", "")
+    for stem in jr.V6_AI_ROLES:
+        tpl = v18.combination_template(stem)
+        assert jr.V18_B_AI_ROLE in tpl and jr.V11_B not in tpl and "This role is an AI or a machine" in tpl
+    assert v18.differs_from(v17) == ("combination",)
+
+
+def test_version_19_is_version_17_with_the_third_person_sentence():
+    """Version 19 (draft, 2026-10-31): version 17's combination rubric with one
+    sentence after its refusal sentence, the trait's outlook in the third person
+    counting as a role's perspective from outside does; the AI roles' overrides
+    carry the same sentence; nothing else changes."""
+    v17, v19 = jr.PROMPT_VERSIONS[17], jr.PROMPT_VERSIONS[19]
+    assert v19.draft and v19.differs_from(v17) == ("combination",)
+    assert v19.same_text(v17, "role") and v19.same_text(v17, "trait")
+    assert (v19.reply_format_for("combination"), v19.max_tokens_for("combination")) == ("score_marker", 200)
+    assert jr.V19_CLAUSES == jr.V17_CLAUSES.replace(jr.V17_REFUSAL_SENTENCE,
+                                                    jr.V17_REFUSAL_SENTENCE + " " + jr.V19_THIRD_PERSON_SENTENCE)
+    assert v19.combination.replace(jr.V19_THIRD_PERSON_SENTENCE, "").replace("  ", " ") \
+        == v17.combination.replace("  ", " ")
+    assert v19.combination.count(jr.V19_THIRD_PERSON_SENTENCE) == 1 and v19.combination.count("SCORE:") == 1
+    assert "third person" not in v17.combination
+    assert set(dict(v19.combination_overrides)) == set(jr.V6_AI_ROLES)
+    for stem in jr.V6_AI_ROLES:
+        tpl = v19.combination_template(stem)
+        assert tpl.count(jr.V19_THIRD_PERSON_SENTENCE) == 1 and jr.V17_TRAIT_LEVEL2_AI_ROLE in tpl
+        assert tpl.replace(jr.V19_THIRD_PERSON_SENTENCE, "").replace("  ", " ") \
+            == v17.combination_template(stem).replace("  ", " ")
 
 
 def test_abc_score_is_the_rubrics_table():

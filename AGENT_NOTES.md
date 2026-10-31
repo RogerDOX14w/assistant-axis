@@ -1132,12 +1132,23 @@ extraction's role data,
 [`pre_extraction_pod_todo.md`](reports/pipeline/pre_extraction_pod_todo.md)
 item 12; 11 and 12 drafts, the arms of the trait rubric review
 ([`reports/pipeline/trait_rubric_review/`](reports/pipeline/trait_rubric_review/));
-**13 the default since 2026-10-30** (Roger): version 10's role text and
-reading, the review's trait rubric (version 3's scale with the review's
-rulings as a paragraph and version 11's treatment of an AI mention in
-levels 2 and 3), traits judged by gpt-5.6-luna only as the roles are (step
-3 refuses another judge for either), and version 3's combination rubric,
-whose review is next), and
+13 settled 2026-10-30 (Roger; the default until 2026-10-31): version 10's
+role text and reading, the review's trait rubric (version 3's scale with
+the review's rulings as a paragraph and version 11's treatment of an AI
+mention in levels 2 and 3), traits judged by gpt-5.6-luna only as the roles
+are (step 3 refuses another judge for either), and version 3's combination
+rubric; 14 to 19 drafts, the arms of the combination rubric review
+([`reports/pipeline/combination_rubric_review/`](reports/pipeline/combination_rubric_review/);
+19 tested and rejected); **20 the default since 2026-10-31** (Roger: "16+17
+on the basis of precision", after a second reading sheet of 162 October
+responses, at his standard precision 0.87 against the one-prompt draft's
+0.76 for recall 0.71 against 0.88): version 13's roles and traits, and the
+two-sided combination rule, each combination response judged by version 16
+(the role rubric with the trait as context) and by version 17 (the trait
+rubric with the role as context) and scored the lower, so kept only when
+both give 3 (`PromptVersion.combination_sides`; the sides' scores in
+`_sides/<entity>.json` beside the combined score file, every type judged
+by gpt-5.6-luna, which is step 3's default judge since the same day), and
 `run_pipeline.sh --from-step 3 --judge-prompt-version N` reruns steps 3 to
 5 into `scores_v<N>/`, `vectors_v<N>/`, `axis_v<N>.pt` to compare a
 rubric's vectors on the same activations.  A change to a step-3 rubric

@@ -1,0 +1,98 @@
+combinations with the smaller standalone keep in [0.2, 0.6) and keep over 0.85:
+  r_ aligned_artificial_intelligence abstract               keep 0.96  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence casual                 keep 0.93  role 0.34  trait 0.98
+  r_ aligned_artificial_intelligence concise                keep 0.91  role 0.34  trait 0.95
+  r_ aligned_artificial_intelligence cryptic                keep 1.00  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence disorganized           keep 0.86  role 0.34  trait 0.85
+  r_ aligned_artificial_intelligence dramatic               keep 0.98  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence erudite                keep 0.92  role 0.34  trait 0.98
+  r_ aligned_artificial_intelligence ethereal               keep 1.00  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence experiential           keep 0.91  role 0.34  trait 0.96
+  r_ aligned_artificial_intelligence historical             keep 0.92  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence introverted            keep 0.87  role 0.34  trait 0.93
+  r_ aligned_artificial_intelligence intuitive              keep 0.93  role 0.34  trait 0.99
+  r_ aligned_artificial_intelligence manic                  keep 0.98  role 0.34  trait 0.96
+  r_ aligned_artificial_intelligence metaphorical           keep 0.98  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence meticulous             keep 0.87  role 0.34  trait 0.99
+  r_ aligned_artificial_intelligence narrative              keep 0.99  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence passionate             keep 0.97  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence pensive                keep 0.90  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence poetic                 keep 0.98  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence quantitative           keep 0.91  role 0.34  trait 0.97
+  r_ aligned_artificial_intelligence reductionist           keep 0.93  role 0.34  trait 0.99
+  r_ aligned_artificial_intelligence structuralist          keep 0.94  role 0.34  trait 1.00
+  r_ aligned_artificial_intelligence systems_thinker        keep 0.94  role 0.34  trait 0.97
+  r_ aligned_artificial_intelligence understated            keep 0.95  role 0.34  trait 0.98
+  r_ aligned_artificial_intelligence visceral               keep 0.95  role 0.34  trait 0.97
+
+goal traits by standalone keep (the trait alone, May, mini number-only rubric), with the mean keep of their
+combinations and the mean standalone keep of the roles they were paired with:
+  harmful              trait alone 0.15  combos  30  mean combo keep 0.24  partner roles alone 0.85  combo/trait-alone 1.67
+  lustful              trait alone 0.50  combos  30  mean combo keep 0.54  partner roles alone 0.85  combo/trait-alone 1.09
+  manipulative         trait alone 0.51  combos  30  mean combo keep 0.64  partner roles alone 0.85  combo/trait-alone 1.26
+  destructive          trait alone 0.62  combos  30  mean combo keep 0.82  partner roles alone 0.85  combo/trait-alone 1.31
+  sociopathic          trait alone 0.68  combos  30  mean combo keep 0.67  partner roles alone 0.85  combo/trait-alone 0.99
+  vindictive           trait alone 0.74  combos  30  mean combo keep 0.73  partner roles alone 0.85  combo/trait-alone 0.99
+  cruel                trait alone 0.74  combos  30  mean combo keep 0.81  partner roles alone 0.85  combo/trait-alone 1.08
+  unhelpful            trait alone 0.75  combos  29  mean combo keep 0.85  partner roles alone 0.85  combo/trait-alone 1.13
+  nationalist          trait alone 0.77  combos  30  mean combo keep 0.79  partner roles alone 0.85  combo/trait-alone 1.03
+  individualistic      trait alone 0.81  combos  30  mean combo keep 0.87  partner roles alone 0.85  combo/trait-alone 1.08
+  nihilistic           trait alone 0.81  combos  30  mean combo keep 0.88  partner roles alone 0.85  combo/trait-alone 1.09
+  elitist              trait alone 0.81  combos  30  mean combo keep 0.83  partner roles alone 0.85  combo/trait-alone 1.02
+  greedy               trait alone 0.82  combos  30  mean combo keep 0.77  partner roles alone 0.85  combo/trait-alone 0.94
+  misanthropic         trait alone 0.84  combos  30  mean combo keep 0.89  partner roles alone 0.85  combo/trait-alone 1.06
+  ecocentric           trait alone 0.85  combos  30  mean combo keep 0.86  partner roles alone 0.85  combo/trait-alone 1.01
+  libertarian          trait alone 0.85  combos  29  mean combo keep 0.83  partner roles alone 0.85  combo/trait-alone 0.98
+  scheming             trait alone 0.86  combos  30  mean combo keep 0.86  partner roles alone 0.85  combo/trait-alone 1.00
+  selfish              trait alone 0.86  combos  30  mean combo keep 0.82  partner roles alone 0.85  combo/trait-alone 0.95
+  fundamentalist       trait alone 0.89  combos  30  mean combo keep 0.80  partner roles alone 0.85  combo/trait-alone 0.89
+  iconoclastic         trait alone 0.90  combos  30  mean combo keep 0.90  partner roles alone 0.85  combo/trait-alone 1.00
+  relativist           trait alone 0.92  combos  30  mean combo keep 0.90  partner roles alone 0.85  combo/trait-alone 0.98
+  hedonistic           trait alone 0.93  combos  29  mean combo keep 0.82  partner roles alone 0.85  combo/trait-alone 0.88
+  deontological        trait alone 0.95  combos  30  mean combo keep 0.84  partner roles alone 0.85  combo/trait-alone 0.88
+  humanitarian         trait alone 0.96  combos  30  mean combo keep 0.91  partner roles alone 0.85  combo/trait-alone 0.95
+  utilitarian          trait alone 0.97  combos  30  mean combo keep 0.87  partner roles alone 0.85  combo/trait-alone 0.90
+  competitive          trait alone 0.97  combos  30  mean combo keep 0.93  partner roles alone 0.85  combo/trait-alone 0.96
+  clannish             trait alone 0.98  combos  30  mean combo keep 0.92  partner roles alone 0.85  combo/trait-alone 0.94
+  nurturing            trait alone 0.99  combos  30  mean combo keep 0.93  partner roles alone 0.85  combo/trait-alone 0.95
+  progressive          trait alone 0.99  combos  30  mean combo keep 0.95  partner roles alone 0.85  combo/trait-alone 0.96
+  idealistic           trait alone 1.00  combos  30  mean combo keep 0.93  partner roles alone 0.85  combo/trait-alone 0.93
+
+goal roles by standalone keep, with the mean keep of their combinations and their partner traits' standalone keep:
+  aligned_artificial_intelligence role alone 0.34  combos  30  mean combo keep 0.92  partner traits alone 0.96  combo/role-alone 2.72
+  altruist                     role alone 0.37  combos  30  mean combo keep 0.96  partner traits alone 0.96  combo/role-alone 2.61
+  pacifist                     role alone 0.55  combos  30  mean combo keep 0.93  partner traits alone 0.96  combo/role-alone 1.68
+  saboteur                     role alone 0.58  combos  30  mean combo keep 0.79  partner traits alone 0.96  combo/role-alone 1.35
+  guardian                     role alone 0.67  combos  30  mean combo keep 0.96  partner traits alone 0.96  combo/role-alone 1.44
+  workaholic                   role alone 0.71  combos  30  mean combo keep 0.85  partner traits alone 0.96  combo/role-alone 1.19
+  symbiont                     role alone 0.73  combos  30  mean combo keep 0.99  partner traits alone 0.96  combo/role-alone 1.36
+  activist                     role alone 0.74  combos  30  mean combo keep 0.93  partner traits alone 0.96  combo/role-alone 1.25
+  destroyer                    role alone 0.75  combos  30  mean combo keep 0.85  partner traits alone 0.96  combo/role-alone 1.14
+  idealist                     role alone 0.76  combos  30  mean combo keep 0.98  partner traits alone 0.96  combo/role-alone 1.30
+  vegan                        role alone 0.79  combos  30  mean combo keep 0.79  partner traits alone 0.96  combo/role-alone 0.99
+  predator                     role alone 0.81  combos  30  mean combo keep 0.83  partner traits alone 0.96  combo/role-alone 1.03
+  daredevil                    role alone 0.84  combos  30  mean combo keep 0.85  partner traits alone 0.96  combo/role-alone 1.01
+  luddite                      role alone 0.85  combos  30  mean combo keep 0.91  partner traits alone 0.96  combo/role-alone 1.07
+  prey                         role alone 0.85  combos  30  mean combo keep 0.76  partner traits alone 0.96  combo/role-alone 0.89
+  paperclip_maximizer          role alone 0.89  combos  30  mean combo keep 0.85  partner traits alone 0.96  combo/role-alone 0.95
+  anarchist                    role alone 0.91  combos  30  mean combo keep 0.94  partner traits alone 0.96  combo/role-alone 1.03
+  competitor                   role alone 0.91  combos  30  mean combo keep 0.88  partner traits alone 0.96  combo/role-alone 0.97
+  traditionalist               role alone 0.92  combos  30  mean combo keep 0.98  partner traits alone 0.96  combo/role-alone 1.07
+  artist                       role alone 0.93  combos  30  mean combo keep 0.98  partner traits alone 0.96  combo/role-alone 1.05
+  zealot                       role alone 0.94  combos  30  mean combo keep 0.86  partner traits alone 0.96  combo/role-alone 0.92
+  ascetic                      role alone 0.95  combos  30  mean combo keep 0.97  partner traits alone 0.96  combo/role-alone 1.02
+  bodhisattva                  role alone 0.95  combos  30  mean combo keep 0.97  partner traits alone 0.96  combo/role-alone 1.01
+  rebel                        role alone 0.96  combos  30  mean combo keep 0.94  partner traits alone 0.96  combo/role-alone 0.98
+  hedonist                     role alone 0.98  combos  30  mean combo keep 0.96  partner traits alone 0.96  combo/role-alone 0.98
+  demon                        role alone 0.98  combos  30  mean combo keep 0.94  partner traits alone 0.96  combo/role-alone 0.96
+  provincial                   role alone 0.99  combos  30  mean combo keep 0.96  partner traits alone 0.96  combo/role-alone 0.97
+  angel                        role alone 0.99  combos  30  mean combo keep 0.98  partner traits alone 0.96  combo/role-alone 0.99
+  vampire                      role alone 0.99  combos  30  mean combo keep 0.91  partner traits alone 0.96  combo/role-alone 0.92
+  familiar                     role alone 1.00  combos  30  mean combo keep 0.98  partner traits alone 0.96  combo/role-alone 0.98
+
+non-goal traits with standalone keep under 0.7, and non-goal roles under 0.7:
+  trait stream_of_consciousness alone 0.67  combos  30  mean combo keep 0.86
+  role  editor                 alone 0.53  combos  30  mean combo keep 0.73
+  role  robot                  alone 0.59  combos  30  mean combo keep 0.70
+  role  generalist             alone 0.67  combos  30  mean combo keep 0.79
+  role  sommelier              alone 0.67  combos  30  mean combo keep 0.69

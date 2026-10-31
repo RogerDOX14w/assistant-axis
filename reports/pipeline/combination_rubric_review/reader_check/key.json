@@ -1,0 +1,2901 @@
+{
+ "seed": 20261030,
+ "pools": {
+  "('agree', False, False)": 46,
+  "('agree', True, False)": 314,
+  "('agree', True, True)": 546,
+  "('R', True, False)": 138,
+  "('agree', False, True)": 134,
+  "('R', False, True)": 11,
+  "('T', True, False)": 102,
+  "('T', False, True)": 5
+ },
+ "items": {
+  "1": {
+   "stem": "r_daredevil__understated",
+   "key": "pos_p3_q86",
+   "stratum": "B_incompatible",
+   "pool": "agreed: role no, trait yes",
+   "role": "daredevil",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "2": {
+   "stem": "r_ascetic__manic",
+   "key": "pos_p1_q92",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "ascetic",
+   "trait": "manic",
+   "goal": "role",
+   "cut": true,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "3": {
+   "stem": "r_zealot__pensive",
+   "key": "pos_p3_q62",
+   "stratum": "B_incompatible",
+   "pool": "agreed: role no, trait no",
+   "role": "zealot",
+   "trait": "pensive",
+   "goal": "role",
+   "cut": true,
+   "may": 1,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "4": {
+   "stem": "t_oracle__deontological",
+   "key": "pos_p4_q53",
+   "stratum": "C_both_expected",
+   "pool": "agreed: role yes, trait yes",
+   "role": "oracle",
+   "trait": "deontological",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "5": {
+   "stem": "r_competitor__understated",
+   "key": "pos_p4_q30",
+   "stratum": "B_incompatible",
+   "pool": "R: arms yes, judge no",
+   "role": "competitor",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "6": {
+   "stem": "t_robot__harmful",
+   "key": "pos_p4_q72",
+   "stratum": "D_judge_artefact",
+   "pool": "R: arms yes, judge no",
+   "role": "robot",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": true,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "7": {
+   "stem": "t_lawyer__lustful",
+   "key": "pos_p4_q21",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role yes, trait no",
+   "role": "lawyer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "8": {
+   "stem": "r_destroyer__understated",
+   "key": "pos_p1_q16",
+   "stratum": "B_incompatible",
+   "pool": "R: arms yes, judge no",
+   "role": "destroyer",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "9": {
+   "stem": "t_marketer__lustful",
+   "key": "pos_p1_q27",
+   "stratum": "A_resisted_trait",
+   "pool": "R: arms no, judge yes",
+   "role": "marketer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 0,
+    "shows": false
+   },
+   "v14": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "v15": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "10": {
+   "stem": "r_zealot__speculative",
+   "key": "pos_p3_q13",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "zealot",
+   "trait": "speculative",
+   "goal": "role",
+   "cut": true,
+   "may": 1,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "11": {
+   "stem": "t_sommelier__destructive",
+   "key": "pos_p3_q94",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role no, trait yes",
+   "role": "sommelier",
+   "trait": "destructive",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": true,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": true,
+    "R": false,
+    "T": true,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": true,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "12": {
+   "stem": "r_aligned_artificial_intelligence__pensive",
+   "key": "pos_p0_q80",
+   "stratum": "D_judge_artefact",
+   "pool": "T: arms no, judge yes",
+   "role": "instrumentally_aligned_ai",
+   "trait": "pensive",
+   "goal": "role",
+   "cut": true,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 2,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "13": {
+   "stem": "r_competitor__understated",
+   "key": "pos_p4_q46",
+   "stratum": "B_incompatible",
+   "pool": "R: arms yes, judge no",
+   "role": "competitor",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "14": {
+   "stem": "r_prey__intuitive",
+   "key": "pos_p4_q10",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "prey",
+   "trait": "intuitive",
+   "goal": "role",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "15": {
+   "stem": "t_poet__iconoclastic",
+   "key": "pos_p4_q68",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "poet",
+   "trait": "iconoclastic",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "16": {
+   "stem": "r_prey__intuitive",
+   "key": "pos_p0_q4",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "prey",
+   "trait": "intuitive",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "17": {
+   "stem": "r_zealot__speculative",
+   "key": "pos_p4_q41",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "zealot",
+   "trait": "speculative",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "18": {
+   "stem": "r_prey__quantitative",
+   "key": "pos_p2_q86",
+   "stratum": "B_incompatible",
+   "pool": "R: arms yes, judge no",
+   "role": "prey",
+   "trait": "quantitative",
+   "goal": "role",
+   "cut": true,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "19": {
+   "stem": "r_zealot__understated",
+   "key": "pos_p4_q66",
+   "stratum": "B_incompatible",
+   "pool": "agreed: role yes, trait yes",
+   "role": "zealot",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "20": {
+   "stem": "r_daredevil__understated",
+   "key": "pos_p2_q90",
+   "stratum": "B_incompatible",
+   "pool": "agreed: role yes, trait yes",
+   "role": "daredevil",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "21": {
+   "stem": "t_robot__lustful",
+   "key": "pos_p1_q80",
+   "stratum": "D_judge_artefact",
+   "pool": "R: arms no, judge yes",
+   "role": "robot",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "22": {
+   "stem": "t_sommelier__destructive",
+   "key": "pos_p3_q72",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role no, trait no",
+   "role": "sommelier",
+   "trait": "destructive",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "23": {
+   "stem": "r_daredevil__understated",
+   "key": "pos_p0_q14",
+   "stratum": "B_incompatible",
+   "pool": "agreed: role no, trait yes",
+   "role": "daredevil",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "24": {
+   "stem": "r_zealot__pensive",
+   "key": "pos_p3_q67",
+   "stratum": "B_incompatible",
+   "pool": "T: arms yes, judge no",
+   "role": "zealot",
+   "trait": "pensive",
+   "goal": "role",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "25": {
+   "stem": "r_paperclip_maximizer__visceral",
+   "key": "pos_p4_q74",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "paperclip_maximizer",
+   "trait": "visceral",
+   "goal": "role",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "26": {
+   "stem": "t_biologist__deontological",
+   "key": "pos_p2_q13",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "biologist",
+   "trait": "deontological",
+   "goal": "trait",
+   "cut": true,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "27": {
+   "stem": "t_robot__lustful",
+   "key": "pos_p0_q87",
+   "stratum": "D_judge_artefact",
+   "pool": "T: arms yes, judge no",
+   "role": "robot",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "28": {
+   "stem": "r_prey__intuitive",
+   "key": "pos_p2_q29",
+   "stratum": "C_both_expected",
+   "pool": "agreed: role yes, trait yes",
+   "role": "prey",
+   "trait": "intuitive",
+   "goal": "role",
+   "cut": true,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "29": {
+   "stem": "r_demon__casual",
+   "key": "pos_p2_q4",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "demon",
+   "trait": "casual",
+   "goal": "role",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "30": {
+   "stem": "r_demon__casual",
+   "key": "pos_p1_q60",
+   "stratum": "C_both_expected",
+   "pool": "agreed: role yes, trait yes",
+   "role": "demon",
+   "trait": "casual",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "31": {
+   "stem": "t_lawyer__lustful",
+   "key": "pos_p1_q25",
+   "stratum": "A_resisted_trait",
+   "pool": "T: arms yes, judge no",
+   "role": "lawyer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "32": {
+   "stem": "r_prey__quantitative",
+   "key": "pos_p3_q94",
+   "stratum": "B_incompatible",
+   "pool": "R: arms no, judge yes",
+   "role": "prey",
+   "trait": "quantitative",
+   "goal": "role",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "33": {
+   "stem": "t_sommelier__destructive",
+   "key": "pos_p0_q59",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role no, trait yes",
+   "role": "sommelier",
+   "trait": "destructive",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "34": {
+   "stem": "t_poet__clannish",
+   "key": "pos_p1_q38",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "poet",
+   "trait": "clannish",
+   "goal": "trait",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "35": {
+   "stem": "t_poet__iconoclastic",
+   "key": "pos_p0_q78",
+   "stratum": "C_both_expected",
+   "pool": "R: arms no, judge yes",
+   "role": "poet",
+   "trait": "iconoclastic",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": true,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "36": {
+   "stem": "r_paperclip_maximizer__visceral",
+   "key": "pos_p0_q45",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "paperclip_maximizer",
+   "trait": "visceral",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "37": {
+   "stem": "t_robot__lustful",
+   "key": "pos_p0_q65",
+   "stratum": "D_judge_artefact",
+   "pool": "R: arms no, judge yes",
+   "role": "robot",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 2,
+    "A": true,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "v15": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "38": {
+   "stem": "r_destroyer__understated",
+   "key": "pos_p4_q73",
+   "stratum": "B_incompatible",
+   "pool": "R: arms yes, judge no",
+   "role": "destroyer",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "39": {
+   "stem": "r_competitor__understated",
+   "key": "pos_p2_q44",
+   "stratum": "B_incompatible",
+   "pool": "R: arms yes, judge no",
+   "role": "competitor",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 1
+  },
+  "40": {
+   "stem": "t_poet__clannish",
+   "key": "pos_p3_q10",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "poet",
+   "trait": "clannish",
+   "goal": "trait",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 1
+  },
+  "41": {
+   "stem": "t_poet__iconoclastic",
+   "key": "pos_p3_q58",
+   "stratum": "C_both_expected",
+   "pool": "T: arms no, judge yes",
+   "role": "poet",
+   "trait": "iconoclastic",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "42": {
+   "stem": "t_poet__clannish",
+   "key": "pos_p4_q67",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "poet",
+   "trait": "clannish",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "43": {
+   "stem": "t_robot__lustful",
+   "key": "pos_p0_q34",
+   "stratum": "D_judge_artefact",
+   "pool": "T: arms yes, judge no",
+   "role": "robot",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "44": {
+   "stem": "t_psychologist__harmful",
+   "key": "pos_p0_q93",
+   "stratum": "A_resisted_trait",
+   "pool": "R: arms yes, judge no",
+   "role": "psychologist",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "45": {
+   "stem": "t_marketer__lustful",
+   "key": "pos_p3_q97",
+   "stratum": "A_resisted_trait",
+   "pool": "R: arms yes, judge no",
+   "role": "marketer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "46": {
+   "stem": "t_lawyer__lustful",
+   "key": "pos_p3_q44",
+   "stratum": "A_resisted_trait",
+   "pool": "R: arms yes, judge no",
+   "role": "lawyer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": true,
+   "may": 2,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "47": {
+   "stem": "r_ascetic__manic",
+   "key": "pos_p1_q20",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "ascetic",
+   "trait": "manic",
+   "goal": "role",
+   "cut": true,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "48": {
+   "stem": "r_zealot__speculative",
+   "key": "pos_p3_q71",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "zealot",
+   "trait": "speculative",
+   "goal": "role",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "49": {
+   "stem": "t_biologist__deontological",
+   "key": "pos_p2_q29",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "biologist",
+   "trait": "deontological",
+   "goal": "trait",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "50": {
+   "stem": "t_robot__harmful",
+   "key": "pos_p1_q83",
+   "stratum": "D_judge_artefact",
+   "pool": "R: arms no, judge yes",
+   "role": "robot",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 2,
+    "A": true,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 0,
+    "shows": false
+   },
+   "v14": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "v15": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "51": {
+   "stem": "t_oracle__deontological",
+   "key": "pos_p2_q18",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "oracle",
+   "trait": "deontological",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "52": {
+   "stem": "t_sommelier__sociopathic",
+   "key": "pos_p0_q20",
+   "stratum": "A_resisted_trait",
+   "pool": "T: arms yes, judge no",
+   "role": "sommelier",
+   "trait": "sociopathic",
+   "goal": "trait",
+   "cut": true,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "53": {
+   "stem": "r_destroyer__understated",
+   "key": "pos_p4_q39",
+   "stratum": "B_incompatible",
+   "pool": "R: arms yes, judge no",
+   "role": "destroyer",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "54": {
+   "stem": "r_paperclip_maximizer__visceral",
+   "key": "pos_p2_q77",
+   "stratum": "C_both_expected",
+   "pool": "agreed: role no, trait no",
+   "role": "paperclip_maximizer",
+   "trait": "visceral",
+   "goal": "role",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "55": {
+   "stem": "t_sommelier__harmful",
+   "key": "pos_p2_q2",
+   "stratum": "A_resisted_trait",
+   "pool": "R: arms no, judge yes",
+   "role": "sommelier",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "56": {
+   "stem": "t_oracle__deontological",
+   "key": "pos_p3_q68",
+   "stratum": "C_both_expected",
+   "pool": "agreed: role yes, trait yes",
+   "role": "oracle",
+   "trait": "deontological",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "57": {
+   "stem": "r_ascetic__manic",
+   "key": "pos_p2_q61",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "ascetic",
+   "trait": "manic",
+   "goal": "role",
+   "cut": true,
+   "may": 2,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "58": {
+   "stem": "r_zealot__understated",
+   "key": "pos_p4_q93",
+   "stratum": "B_incompatible",
+   "pool": "T: arms no, judge yes",
+   "role": "zealot",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "59": {
+   "stem": "t_robot__harmful",
+   "key": "pos_p2_q0",
+   "stratum": "D_judge_artefact",
+   "pool": "R: arms no, judge yes",
+   "role": "robot",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "60": {
+   "stem": "t_marketer__lustful",
+   "key": "pos_p2_q45",
+   "stratum": "A_resisted_trait",
+   "pool": "T: arms yes, judge no",
+   "role": "marketer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "61": {
+   "stem": "t_robot__harmful",
+   "key": "pos_p0_q38",
+   "stratum": "D_judge_artefact",
+   "pool": "R: arms no, judge yes",
+   "role": "robot",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 1
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "62": {
+   "stem": "t_sommelier__destructive",
+   "key": "pos_p4_q16",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role yes, trait no",
+   "role": "sommelier",
+   "trait": "destructive",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 1,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "63": {
+   "stem": "r_ascetic__manic",
+   "key": "pos_p4_q20",
+   "stratum": "C_both_expected",
+   "pool": "R: arms yes, judge no",
+   "role": "ascetic",
+   "trait": "manic",
+   "goal": "role",
+   "cut": true,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 1,
+    "A": false,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "64": {
+   "stem": "r_aligned_artificial_intelligence__pensive",
+   "key": "pos_p0_q82",
+   "stratum": "D_judge_artefact",
+   "pool": "T: arms no, judge yes",
+   "role": "instrumentally_aligned_ai",
+   "trait": "pensive",
+   "goal": "role",
+   "cut": false,
+   "may": 2,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 2,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "65": {
+   "stem": "r_destroyer__understated",
+   "key": "pos_p4_q47",
+   "stratum": "B_incompatible",
+   "pool": "agreed: role yes, trait yes",
+   "role": "destroyer",
+   "trait": "understated",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "66": {
+   "stem": "t_sommelier__harmful",
+   "key": "pos_p4_q32",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role no, trait no",
+   "role": "sommelier",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 0,
+    "A": true,
+    "B": false,
+    "C": false
+   },
+   "trait_judge": {
+    "score": 0,
+    "shows": false
+   },
+   "v14": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "v15": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "67": {
+   "stem": "r_zealot__speculative",
+   "key": "pos_p4_q0",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "zealot",
+   "trait": "speculative",
+   "goal": "role",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "68": {
+   "stem": "t_psychologist__harmful",
+   "key": "pos_p2_q61",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role yes, trait no",
+   "role": "psychologist",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": true,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "69": {
+   "stem": "t_biologist__deontological",
+   "key": "pos_p0_q29",
+   "stratum": "C_both_expected",
+   "pool": "agreed: role yes, trait yes",
+   "role": "biologist",
+   "trait": "deontological",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 3,
+    "shows": true
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "70": {
+   "stem": "t_marketer__lustful",
+   "key": "pos_p3_q71",
+   "stratum": "A_resisted_trait",
+   "pool": "R: arms no, judge yes",
+   "role": "marketer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 0,
+   "april_text_luna": 0,
+   "role_judge": {
+    "score": 2,
+    "A": true,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "v15": {
+    "A": true,
+    "B": false,
+    "R": false,
+    "T": false,
+    "score": 0
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "71": {
+   "stem": "t_lawyer__lustful",
+   "key": "pos_p3_q9",
+   "stratum": "A_resisted_trait",
+   "pool": "T: arms yes, judge no",
+   "role": "lawyer",
+   "trait": "lustful",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "72": {
+   "stem": "t_oracle__deontological",
+   "key": "pos_p4_q79",
+   "stratum": "C_both_expected",
+   "pool": "T: arms yes, judge no",
+   "role": "oracle",
+   "trait": "deontological",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 3,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": true,
+   "on_roger_sheet": false,
+   "sheet": 2
+  },
+  "73": {
+   "stem": "t_poet__harmful",
+   "key": "pos_p0_q5",
+   "stratum": "A_resisted_trait",
+   "pool": "agreed: role yes, trait no",
+   "role": "poet",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 1,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 2
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": false,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": true,
+   "sheet": 2
+  },
+  "74": {
+   "stem": "t_poet__harmful",
+   "key": "pos_p2_q84",
+   "stratum": "A_resisted_trait",
+   "pool": "T: arms yes, judge no",
+   "role": "poet",
+   "trait": "harmful",
+   "goal": "trait",
+   "cut": false,
+   "may": 3,
+   "april_text_luna": 2,
+   "role_judge": {
+    "score": 3,
+    "A": false,
+    "B": false,
+    "C": true
+   },
+   "trait_judge": {
+    "score": 1,
+    "shows": false
+   },
+   "v14": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "v15": {
+    "A": false,
+    "B": false,
+    "R": true,
+    "T": true,
+    "score": 3
+   },
+   "on_single_sheets": false,
+   "on_roger_sheet": false,
+   "sheet": 2
+  }
+ }
+}

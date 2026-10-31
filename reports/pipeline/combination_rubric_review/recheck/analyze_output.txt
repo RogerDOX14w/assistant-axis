@@ -1,0 +1,48 @@
+1620 responses in 27 combinations; 0 with a judgement missing (unscored or not yet run), 1620 complete
+
+per combination: n, cut share, keep under C (version 3's combination text), R (role alone), T (trait alone),
+what each rule keeps, the cells among C's drops (R/T = present, r/t = missing), and May's keep where known:
+  combination                                    n  cut   C    R    T  |   C v3   both either   goal   role | drops: RT Rt rT rt | May
+  r_competitor__understated                     60   0% 0.02 0.33 0.90 |   0.02   0.27   0.97   0.33   0.33 | 15  4 38  2 | 0.18
+  r_daredevil__understated                      60   0% 0.07 0.23 0.70 |   0.07   0.08   0.85   0.23   0.23 |  3  7 37  9 | 0.38
+  r_destroyer__understated                      60   0% 0.17 0.50 0.68 |   0.17   0.23   0.95   0.50   0.50 |  8 12 27  3 | 0.32
+  r_instrumentally_aligned_ai__pensive          60   0% 0.17 0.95 0.92 |   0.17   0.87   1.00   0.95   0.95 | 42  5  3  0 |   - 
+  r_predator__animated                          60   0% 0.27 0.70 1.00 |   0.27   0.70   1.00   0.70   0.70 | 26  0 18  0 |   - 
+  r_predator__concise                           60   0% 0.12 0.45 1.00 |   0.12   0.45   1.00   0.45   0.45 | 20  0 33  0 | 0.81
+  r_predator__concrete                          60   0% 0.33 0.68 0.85 |   0.33   0.60   0.93   0.68   0.68 | 17  4 15  4 |   - 
+  r_predator__effusive                          60   2% 0.07 0.35 0.98 |   0.07   0.33   1.00   0.35   0.35 | 16  1 39  0 |   - 
+  r_predator__eloquent                          60   0% 0.20 0.40 1.00 |   0.20   0.40   1.00   0.40   0.40 | 12  0 36  0 |   - 
+  r_predator__erudite                           60  15% 0.03 0.17 1.00 |   0.03   0.17   1.00   0.17   0.17 |  8  0 50  0 | 0.64
+  r_predator__expository                        60   2% 0.07 0.13 0.95 |   0.07   0.12   0.97   0.13   0.13 |  6  0 49  1 |   - 
+  r_predator__generalist                        60  17% 0.17 0.73 0.72 |   0.17   0.55   0.90   0.73   0.73 | 24 10 10  6 |   - 
+  r_predator__interdisciplinary                 60  20% 0.38 0.68 0.88 |   0.38   0.60   0.97   0.68   0.68 | 16  3 17  1 |   - 
+  r_predator__melodramatic                      60   0% 0.18 0.65 1.00 |   0.18   0.65   1.00   0.65   0.65 | 28  0 21  0 |   - 
+  r_predator__observant                         60   0% 0.45 0.95 0.55 |   0.45   0.55   0.95   0.95   0.95 | 12 18  0  3 |   - 
+  r_predator__pensive                           60   0% 0.22 0.77 0.82 |   0.22   0.62   0.97   0.77   0.77 | 25  8 12  2 | 0.80
+  r_predator__playful                           60   0% 0.13 0.57 0.98 |   0.13   0.57   0.98   0.57   0.57 | 26  0 25  1 |   - 
+  r_predator__poetic                            60   2% 0.10 0.35 0.98 |   0.10   0.35   0.98   0.35   0.35 | 15  0 38  1 | 0.80
+  r_predator__retentive                         60   2% 0.03 0.83 0.13 |   0.03   0.13   0.83   0.83   0.83 |  6 42  0 10 |   - 
+  r_predator__specialist                        60  18% 0.03 0.27 0.95 |   0.03   0.23   0.98   0.27   0.27 | 13  1 43  1 |   - 
+  r_predator__systems_thinker                   60   5% 0.43 0.73 0.93 |   0.43   0.68   0.98   0.73   0.73 | 17  2 14  1 | 0.89
+  r_predator__temperamental                     60   0% 0.08 0.92 0.52 |   0.08   0.48   0.95   0.92   0.92 | 25 25  2  3 |   - 
+  r_predator__unassuming                        60   0% 0.18 0.45 0.52 |   0.18   0.15   0.82   0.45   0.45 |  3 13 22 11 |   - 
+  r_predator__witty                             60   0% 0.23 0.75 0.97 |   0.23   0.72   1.00   0.75   0.75 | 29  2 15  0 | 0.93
+  r_prey__intuitive                             60   0% 0.53 0.72 0.98 |   0.53   0.72   0.98   0.72   0.72 | 11  0 16  1 | 0.89
+  r_zealot__pensive                             60   2% 0.13 0.92 0.57 |   0.13   0.50   0.98   0.92   0.92 | 22 25  4  1 | 0.03
+  r_zealot__understated                         60   0% 0.03 0.60 0.57 |   0.03   0.22   0.95   0.60   0.60 | 11 23 21  3 | 0.18
+
+per kind, mean over its combinations of the keep under each rule (what a vector would be built from):
+  r_ (27 combinations): C v3 0.18  both 0.44  either 0.96  goal 0.58  role 0.58   (lowest under both: 0.08, under goal: 0.13)
+
+which persona is present (R = role shows, T = trait shows; lower case = missing), per kind:
+  r_ all responses   n 1620  RT  44%  Rt  14%  rT  37%  rt   4%
+  r_ among C's drops n 1330  RT  34%  Rt  15%  rT  45%  rt   5%   (one present, the other missing: 61%)
+  r_ among C's keeps n  290  RT  90%  Rt   9%  rT   1%  rt   1%
+
+cut responses: keep under C, R and T among cut and whole, per kind:
+  r_ cut   n   50  C 0.10  R 0.36  T 0.96  both 0.32
+  r_ whole n 1570  C 0.18  R 0.59  T 0.81  both 0.45
+
+the draft combination versions on 1620 responses: keep, and agreement with the separate judges' rules:
+  V14 (both): keeps 0.70  agrees with 'both' 0.71  keeps what the rule drops 0.27  drops what the rule keeps 0.01
+  V15 (either): keeps 0.96  agrees with 'either' 0.95  keeps what the rule drops 0.02  drops what the rule keeps 0.02

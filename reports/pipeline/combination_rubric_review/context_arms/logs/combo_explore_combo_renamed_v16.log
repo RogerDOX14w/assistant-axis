@@ -1,0 +1,16 @@
+2026-10-30 21:23:28,728 - INFO - Found 1 response files
+2026-10-30 21:23:28,728 - INFO - Processing 1 entities
+2026-10-30 21:23:28,935 - INFO - Rubric version 16 (draft): draft: the role rubric (version 10's text and reading) for a combination's responses, with the trait named as context and judged no further (Roger, 2026-10-30: both must show, each judged by its own rubric knowing the other half); roles and traits as version 13 (names in the judge-display-v1 form; --max_tokens 300)
+2026-10-30 21:23:28,936 - INFO - [usage] earlier runs total=$0.009 calls=60 [gpt-5.6-luna:flex: $0.009 in=66,588 out=3,450 n=60]
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 21:23:30,807 - INFO - Skipping r_instrumentally_aligned_ai__pensive: all 60 already scored
+Scoring: 100%|██████████| 1/1 [00:01<00:00,  1.84s/it]Scoring: 100%|██████████| 1/1 [00:01<00:00,  1.84s/it]
+2026-10-30 21:23:30,808 - INFO - [usage] this run (no API calls)
+2026-10-30 21:23:30,808 - INFO - [usage] cumulative (runpod_workspace/combo_explore/combo_renamed_v16/scores/usage.json) total=$0.009 calls=60 [gpt-5.6-luna:flex: $0.009 in=66,588 out=3,450 n=60]
+2026-10-30 21:23:30,808 - INFO - 
+========================================
+2026-10-30 21:23:30,808 - INFO - SUMMARY
+2026-10-30 21:23:30,808 - INFO - ========================================
+2026-10-30 21:23:30,808 - INFO - Successful: 0
+2026-10-30 21:23:30,808 - INFO - Skipped:    1
+2026-10-30 21:23:30,808 - INFO - Failed:     0
+2026-10-30 21:23:30,808 - INFO - Marked as cut off ('…' shown to the judge): 35 of 60 responses read

@@ -343,12 +343,13 @@ def test_judge_batch_requests_reaches_step_3(tmp_path):
 
 def test_judge_model_and_save_replies_reach_step_3(tmp_path):
     """The October judging (Roger, 2026-10-28 and 2026-10-30): the default version
-    (10 then, 13 now) with gpt-5.6-luna, replies saved for a later re-read."""
+    (10 then, 13 next, 20 since 2026-10-31) with gpt-5.6-luna, replies saved for a
+    later re-read."""
     proc, calls = _run_full(tmp_path, None, "--judge-model", "gpt-5.6-luna", "--judge-save-replies")
     assert proc.returncode == 0, proc.stdout + proc.stderr
     judge = [c for c in calls if "3_judge.py" in c]
     assert judge and all(c.endswith("--judge_model gpt-5.6-luna --save_replies") for c in judge)
-    assert "Judge:  gpt-5.6-luna, prompt version 13" in proc.stdout
+    assert "Judge:  gpt-5.6-luna, prompt version 20" in proc.stdout
 
 
 def test_roger_mode_judges_by_flex_with_the_fallback_by_default(tmp_path):
@@ -386,15 +387,16 @@ def test_the_judge_mode_flags(tmp_path, flag, mode_args, text):
 
 
 def test_a_flex_run_with_a_judge_that_takes_no_flex_stops_before_step_1(tmp_path):
-    """OpenAI refuses Flex for gpt-4.1-mini, step 3's default judge: the driver
-    asks judge.accepts_flex before any GPU work and names --judge-batch; here
-    the fake uv fails that check, as the real one does for gpt-4.1-mini."""
-    proc, calls = _run_full(tmp_path, "accepts_flex")
+    """OpenAI refuses Flex for gpt-4.1-mini (step 3's default judge until
+    2026-10-31; gpt-5.6-luna since): the driver asks judge.accepts_flex before
+    any GPU work and names --judge-batch; here the fake uv fails that check, as
+    the real one does for gpt-4.1-mini."""
+    proc, calls = _run_full(tmp_path, "accepts_flex", "--judge-model", "gpt-4.1-mini")
     assert proc.returncode == 1
     assert "OpenAI refuses Flex processing for" in proc.stderr and "gpt-4.1-mini (HTTP 400" in proc.stderr
     assert "--judge-batch" in proc.stderr
     assert not any("1_generate.py" in c or "3_judge.py" in c for c in calls)
-    proc, calls = _run_full(tmp_path / "batch", "accepts_flex", "--judge-batch")
+    proc, calls = _run_full(tmp_path / "batch", "accepts_flex", "--judge-batch", "--judge-model", "gpt-4.1-mini")
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert any("3_judge.py" in c for c in calls) and not any("accepts_flex" in c for c in calls)
 
@@ -491,12 +493,13 @@ def test_a_prompt_version_from_step_3_reruns_steps_3_to_5_into_its_own_dirs(tmp_
 
 
 def test_the_default_version_keeps_the_usual_dirs(tmp_path):
-    # 13 since 2026-10-30 (10 from 2026-10-28, 3 before); version 3 now goes to its own directories
-    proc, calls = _run_full(tmp_path, None, "--judge-prompt-version", "13")
+    # 20 since 2026-10-31 (13 from 2026-10-30, 10 from 2026-10-28, 3 before); version 3 now goes to
+    # its own directories
+    proc, calls = _run_full(tmp_path, None, "--judge-prompt-version", "20")
     assert proc.returncode == 0, proc.stdout + proc.stderr
     out = tmp_path / "out" / "traits"
     [judge] = [c for c in calls if "3_judge.py" in c]
-    assert f"--output_dir {out / 'scores'} " in judge and judge.endswith("--prompt_version 13")
+    assert f"--output_dir {out / 'scores'} " in judge and judge.endswith("--prompt_version 20")
     assert any(f"--output {out / 'axis.pt'}" in c for c in calls if "5_axis.py" in c)
     proc, calls = _run_full(tmp_path / "v3", None, "--judge-prompt-version", "3")
     [judge] = [c for c in calls if "3_judge.py" in c]

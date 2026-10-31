@@ -1,0 +1,17 @@
+2026-10-30 23:29:05,594 - INFO - Found 1 response files
+2026-10-30 23:29:05,594 - INFO - Processing 1 entities
+2026-10-30 23:29:05,687 - INFO - Rubric version 13: version 12 with levels 2 and 3 carrying version 11's B treatment of an AI mention (Roger, 2026-10-30; the trait rubric for the October extraction, traits judged by gpt-5.6-luna); roles and combinations as version 10 (names in the judge-display-v1 form; --max_tokens 200)
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 23:29:05,700 - INFO - Scoring 60 new responses for manipulative...
+2026-10-30 23:29:10,438 - INFO - Saved 60 scores for manipulative (60 new)
+Scoring: 100%|██████████| 1/1 [00:04<00:00,  4.74s/it]Scoring: 100%|██████████| 1/1 [00:04<00:00,  4.74s/it]
+2026-10-30 23:29:10,441 - INFO - [usage] this run total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=56,956 out=3,568 n=60]
+2026-10-30 23:29:10,441 - INFO - [usage] cumulative (runpod_workspace/tcomb_recheck/trait/t_crystalline__manipulative/scores/usage.json) total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=56,956 out=3,568 n=60]
+2026-10-30 23:29:10,441 - INFO - 
+========================================
+2026-10-30 23:29:10,441 - INFO - SUMMARY
+2026-10-30 23:29:10,441 - INFO - ========================================
+2026-10-30 23:29:10,441 - INFO - Successful: 1
+2026-10-30 23:29:10,441 - INFO - Skipped:    0
+2026-10-30 23:29:10,441 - INFO - Failed:     0
+2026-10-30 23:29:10,441 - INFO - Marked as cut off ('…' shown to the judge): 1 of 60 responses read
+2026-10-30 23:29:10,441 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

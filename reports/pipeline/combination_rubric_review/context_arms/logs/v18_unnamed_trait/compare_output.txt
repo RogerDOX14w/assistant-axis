@@ -1,0 +1,75 @@
+1. the sheet's items: each side against the letters, the dedicated judge and draft 14's answer
+  Roger   role (16)  n 48  side vs letters: agree 0.84 on 45; yes/no 1, no/yes 6  |  dedicated judge vs letters: agree 0.73 on 45; yes/no 3, no/yes 9  |  draft 14's answer vs letters: agree 0.84 on 45; yes/no 4, no/yes 3
+                            side vs dedicated judge: agree 0.79 on 48; yes/no 6, no/yes 4
+                            T half good, half bad against Roger's letters: side precision 0.96 recall 0.80; dedicated judge 0.88 / 0.69; draft 14's answer 0.88 / 0.89
+  Roger   trait (17)  n 48  side vs letters: agree 0.71 on 41; yes/no 0, no/yes 12  |  dedicated judge vs letters: agree 0.63 on 41; yes/no 0, no/yes 15  |  draft 14's answer vs letters: agree 0.88 on 41; yes/no 1, no/yes 4
+                            side vs dedicated judge: agree 0.83 on 48; yes/no 6, no/yes 2
+                            T half good, half bad against Roger's letters: side precision 0.97 recall 0.58; dedicated judge 1.00 / 0.47; draft 14's answer 0.90 / 0.87
+  Roger   trait (18)  n 48  side vs letters: agree 0.80 on 41; yes/no 1, no/yes 7  |  dedicated judge vs letters: agree 0.63 on 41; yes/no 0, no/yes 15  |  draft 14's answer vs letters: agree 0.88 on 41; yes/no 1, no/yes 4
+                            side vs dedicated judge: agree 0.71 on 48; yes/no 12, no/yes 2
+                            T half good, half bad against Roger's letters: side precision 0.93 recall 0.73; dedicated judge 1.00 / 0.47; draft 14's answer 0.90 / 0.87
+  readers role (16)  n 74  side vs letters: agree 0.88 on 68; yes/no 3, no/yes 5  |  dedicated judge vs letters: agree 0.84 on 68; yes/no 5, no/yes 6  |  draft 14's answer vs letters: agree 0.78 on 68; yes/no 12, no/yes 3
+                            side vs dedicated judge: agree 0.81 on 74; yes/no 8, no/yes 6
+  readers trait (17)  n 74  side vs letters: agree 0.88 on 67; yes/no 6, no/yes 2  |  dedicated judge vs letters: agree 0.90 on 67; yes/no 2, no/yes 5  |  draft 14's answer vs letters: agree 0.82 on 67; yes/no 11, no/yes 1
+                            side vs dedicated judge: agree 0.85 on 74; yes/no 9, no/yes 2
+  readers trait (18)  n 74  side vs letters: agree 0.84 on 67; yes/no 8, no/yes 3  |  dedicated judge vs letters: agree 0.90 on 67; yes/no 2, no/yes 5  |  draft 14's answer vs letters: agree 0.82 on 67; yes/no 11, no/yes 1
+                            side vs dedicated judge: agree 0.72 on 74; yes/no 16, no/yes 5
+
+  the 'both' rule on Roger's 45 items, his letters as probabilities (expected keep 0.58):
+    context sides 16 and 17, both 3      keeps 0.27  precision 0.96 recall 0.44
+    context sides 16 and 18, both 3      keeps 0.42  precision 0.87 recall 0.63
+    separate judges, both 3              keeps 0.11  precision 1.00 recall 0.19
+    draft 14                             keeps 0.64  precision 0.78 recall 0.88
+
+2. the May exploration sample: 1522 of 1582 responses with every judgement
+  16 (role side) vs the role judge: agree 0.92 on 1522; yes/no 64, no/yes 61
+  17 (trait side) vs the trait judge: agree 0.94 on 1522; yes/no 62, no/yes 33
+  18 (trait side) vs the trait judge: agree 0.82 on 1522; yes/no 114, no/yes 160
+  17 vs 18: agree 0.84 on 1522; yes/no 157, no/yes 82
+  16 and 17 both 3 vs draft 14: agree 0.83 on 1522; yes/no 15, no/yes 247
+  16 and 18 both 3 vs draft 14: agree 0.82 on 1522; yes/no 41, no/yes 237
+  keep: 16&17 0.38  16&18 0.41  separate judges both 3 0.35  role side 16 0.68 (judge 0.68)  trait side 17 0.59  trait side 18 0.54 (judge 0.57)  draft 14 0.53
+  by stratum                                        n  16&17  16&18  bothJ   R16 Rjudge  T17  T18 Tjudge
+  A_resisted_trait                                473  0.33   0.37  0.28  0.79  0.77  0.38  0.43  0.35
+  B_incompatible                                  343  0.26   0.26  0.28  0.31  0.31  0.87  0.58  0.91
+  C_both_expected                                 494  0.53   0.56  0.48  0.79  0.80  0.68  0.69  0.63
+  D_judge_artefact                                212  0.36   0.37  0.32  0.77  0.75  0.42  0.41  0.40
+  score distributions: 16 {0: 31, 1: 420, 2: 40, 3: 1031}  17 {0: 35, 1: 575, 2: 8, 3: 904}  18 {0: 43, 1: 641, 2: 9, 3: 829}
+
+3. the October re-check sample: 1500 of 1500 responses with every judgement
+  16 (role side) vs the role judge: agree 0.91 on 1500; yes/no 61, no/yes 77
+  17 (trait side) vs the trait judge: agree 0.92 on 1500; yes/no 67, no/yes 54
+  18 (trait side) vs the trait judge: agree 0.76 on 1500; yes/no 150, no/yes 215
+  17 vs 18: agree 0.78 on 1500; yes/no 205, no/yes 127
+  16 and 17 both 3 vs draft 14: agree 0.71 on 1500; yes/no 23, no/yes 407
+  16 and 18 both 3 vs draft 14: agree 0.76 on 1500; yes/no 27, no/yes 330
+  keep: 16&17 0.45  16&18 0.50  separate judges both 3 0.44  role side 16 0.58 (judge 0.59)  trait side 17 0.82  trait side 18 0.76 (judge 0.81)  draft 14 0.70
+  by stem                                           n  16&17  16&18  bothJ   R16 Rjudge  T17  T18 Tjudge
+  r_daredevil__understated                         60  0.15   0.23  0.08  0.28  0.23  0.68  0.65  0.70
+  r_destroyer__understated                         60  0.35   0.53  0.23  0.57  0.50  0.75  0.67  0.68
+  r_instrumentally_aligned_ai__pensive             60  0.90   0.90  0.87  0.97  0.95  0.93  0.93  0.92
+  r_predator__animated                             60  0.58   0.58  0.70  0.58  0.70  0.98  0.98  1.00
+  r_predator__concise                              60  0.48   0.43  0.45  0.48  0.45  0.97  0.68  1.00
+  r_predator__concrete                             60  0.60   0.60  0.60  0.63  0.68  0.88  0.72  0.85
+  r_predator__effusive                             60  0.23   0.23  0.33  0.23  0.35  0.98  0.90  0.98
+  r_predator__eloquent                             60  0.38   0.38  0.40  0.38  0.40  1.00  0.83  1.00
+  r_predator__erudite                              60  0.18   0.17  0.17  0.18  0.17  1.00  0.95  1.00
+  r_predator__expository                           60  0.20   0.15  0.12  0.20  0.13  0.92  0.28  0.95
+  r_predator__generalist                           60  0.58   0.72  0.55  0.75  0.73  0.77  0.80  0.72
+  r_predator__interdisciplinary                    60  0.62   0.65  0.60  0.70  0.68  0.88  0.80  0.88
+  r_predator__melodramatic                         60  0.57   0.57  0.65  0.57  0.65  1.00  0.97  1.00
+  r_predator__observant                            60  0.78   0.85  0.55  0.92  0.95  0.80  0.85  0.55
+  r_predator__pensive                              60  0.58   0.67  0.62  0.73  0.77  0.80  0.87  0.82
+  r_predator__playful                              60  0.50   0.50  0.57  0.50  0.57  0.98  0.97  0.98
+  r_predator__poetic                               60  0.32   0.32  0.35  0.32  0.35  0.97  0.98  0.98
+  r_predator__retentive                            60  0.18   0.27  0.13  0.87  0.83  0.18  0.27  0.13
+  r_predator__specialist                           60  0.23   0.18  0.23  0.27  0.27  0.85  0.48  0.95
+  r_predator__systems_thinker                      60  0.73   0.77  0.68  0.77  0.73  0.97  0.93  0.93
+  r_predator__temperamental                        60  0.43   0.58  0.48  0.83  0.92  0.52  0.67  0.52
+  r_predator__unassuming                           60  0.27   0.47  0.15  0.48  0.45  0.60  0.65  0.52
+  r_predator__witty                                60  0.72   0.73  0.72  0.75  0.75  0.97  0.98  0.97
+  r_zealot__pensive                                60  0.30   0.45  0.50  0.85  0.92  0.42  0.57  0.57
+  r_zealot__understated                            60  0.25   0.55  0.22  0.65  0.60  0.58  0.70  0.57
+  score distributions: 16 {0: 5, 1: 599, 2: 28, 3: 868}  17 {0: 4, 1: 271, 2: 2, 3: 1223}  18 {0: 5, 1: 332, 2: 18, 3: 1145}
+
+rows written to reports/pipeline/combination_rubric_review/context_arms/rows.json, examples to reports/pipeline/combination_rubric_review/context_arms/examples.md

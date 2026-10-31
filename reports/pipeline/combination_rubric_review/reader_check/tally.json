@@ -1,0 +1,552 @@
+{
+ "n_items": 74,
+ "agreement": {
+  "role": {
+   "n": 74,
+   "undecided": 4,
+   "judge": 0.7714285714285715,
+   "v14": 0.8142857142857143,
+   "v15": 0.8,
+   "cells": {
+    "False/False": 18,
+    "True/False": 9,
+    "True/True": 36,
+    "False/True": 7
+   },
+   "precision_recall": {
+    "judge": {
+     "precision": 0.8372093023255814,
+     "recall": 0.7741935483870968
+    },
+    "draft 14": {
+     "precision": 0.7916666666666666,
+     "recall": 0.9193548387096774
+    },
+    "draft 15": {
+     "precision": 0.7818181818181819,
+     "recall": 0.9247311827956989
+    }
+   }
+  },
+  "trait": {
+   "n": 74,
+   "undecided": 8,
+   "judge": 0.7575757575757576,
+   "v14": 0.8939393939393939,
+   "v15": 0.8939393939393939,
+   "cells": {
+    "True/True": 33,
+    "True/False": 14,
+    "False/False": 17,
+    "False/True": 2
+   },
+   "precision_recall": {
+    "judge": {
+     "precision": 0.95,
+     "recall": 0.6751269035532995
+    },
+    "draft 14": {
+     "precision": 0.8872549019607843,
+     "recall": 0.9187817258883249
+    },
+    "draft 15": {
+     "precision": 0.8872549019607843,
+     "recall": 0.9187817258883249
+    }
+   }
+  }
+ },
+ "pools": {
+  "R: arms no, judge yes": {
+   "n": 10,
+   "letters": {
+    "B": 7,
+    "G": 3
+   },
+   "with_drafts": 7,
+   "with_judge": 3
+  },
+  "R: arms yes, judge no": {
+   "n": 20,
+   "letters": {
+    "G": 6,
+    "B": 9,
+    "T/B": 1,
+    "T": 2,
+    "G/T": 2
+   },
+   "with_drafts": 8,
+   "with_judge": 10
+  },
+  "T: arms no, judge yes": {
+   "n": 4,
+   "letters": {
+    "G": 3,
+    "B": 1
+   },
+   "with_drafts": 1,
+   "with_judge": 3
+  },
+  "T: arms yes, judge no": {
+   "n": 20,
+   "letters": {
+    "T": 5,
+    "G": 11,
+    "B": 2,
+    "G/T": 2
+   },
+   "with_drafts": 13,
+   "with_judge": 2
+  },
+  "agreed: role no, trait no": {
+   "n": 4,
+   "letters": {
+    "B/G": 1,
+    "T/B": 1,
+    "B/B": 1,
+    "?/?": 1
+   }
+  },
+  "agreed: role no, trait yes": {
+   "n": 4,
+   "letters": {
+    "B/G": 3,
+    "B/Y": 1
+   }
+  },
+  "agreed: role yes, trait no": {
+   "n": 4,
+   "letters": {
+    "G/B": 4
+   }
+  },
+  "agreed: role yes, trait yes": {
+   "n": 8,
+   "letters": {
+    "G/G": 7,
+    "G/T/B": 1
+   }
+  }
+ },
+ "relation": {
+  "all": {
+   "swamped-role": 18,
+   "fused": 25,
+   "none": 7,
+   "refused-trait": 3,
+   "refused-role": 2,
+   "swamped-trait": 12,
+   "no-scope-role": 1,
+   "no-scope-trait": 1,
+   "conflict": 1
+  },
+  "by_pattern": {
+   "role False / trait True": {
+    "swamped-role": 15,
+    "no-scope-role": 1
+   },
+   "role True / trait True": {
+    "fused": 25,
+    "conflict": 1,
+    "swamped-role": 1,
+    "refused-role": 1,
+    "swamped-trait": 1
+   },
+   "role False / trait False": {
+    "none": 6,
+    "refused-role": 1
+   },
+   "role True / trait False": {
+    "refused-trait": 2,
+    "swamped-trait": 7
+   },
+   "role True / trait T": {
+    "swamped-trait": 3,
+    "no-scope-trait": 1
+   },
+   "role T / trait True": {
+    "swamped-role": 1
+   },
+   "role T / trait False": {
+    "none": 1,
+    "swamped-trait": 1
+   },
+   "role False / trait None": {
+    "swamped-role": 1
+   },
+   "role True / trait None": {
+    "refused-trait": 1
+   }
+  },
+  "by_stratum": {
+   "B_incompatible": {
+    "swamped-role": 6,
+    "fused": 8,
+    "no-scope-role": 1,
+    "refused-role": 1
+   },
+   "C_both_expected": {
+    "fused": 12,
+    "none": 4,
+    "swamped-role": 6,
+    "swamped-trait": 5,
+    "no-scope-trait": 1
+   },
+   "D_judge_artefact": {
+    "none": 2,
+    "fused": 2,
+    "swamped-role": 2,
+    "conflict": 1,
+    "swamped-trait": 2,
+    "refused-trait": 1
+   },
+   "A_resisted_trait": {
+    "refused-trait": 2,
+    "refused-role": 1,
+    "swamped-role": 4,
+    "none": 1,
+    "fused": 3,
+    "swamped-trait": 5
+   }
+  },
+  "unknown_tags": [
+   [
+    "42",
+    "clannish"
+   ],
+   [
+    "52",
+    ""
+   ],
+   [
+    "66",
+    "refused"
+   ],
+   [
+    "70",
+    "role-and-trait-refused"
+   ]
+  ]
+ },
+ "rules": {
+  "both": {
+   "n": 63,
+   "readers_keep": 0.47619047619047616,
+   "judges_keep": 0.19047619047619047,
+   "agree": 0.5873015873015873,
+   "rk_jd": 22,
+   "rd_jk": 4
+  },
+  "either": {
+   "n": 63,
+   "readers_keep": 0.873015873015873,
+   "judges_keep": 0.873015873015873,
+   "agree": 0.873015873015873,
+   "rk_jd": 4,
+   "rd_jk": 4
+  },
+  "goal": {
+   "n": 63,
+   "readers_keep": 0.5873015873015873,
+   "judges_keep": 0.38095238095238093,
+   "agree": 0.6984126984126984,
+   "rk_jd": 16,
+   "rd_jk": 3
+  }
+ },
+ "single": {
+  "role": {
+   "n": 30,
+   "agree": 1,
+   "h_yes_s_no": 0,
+   "h_no_s_yes": 0
+  },
+  "trait": {
+   "n": 30,
+   "agree": 1,
+   "h_yes_s_no": 0,
+   "h_no_s_yes": 0
+  }
+ },
+ "rules_weighted": {
+  "both": {
+   "n": 71,
+   "readers_keep": 0.45774647887323944,
+   "judges_keep": 0.16901408450704225,
+   "judges_precision": 0.6875,
+   "judges_recall": 0.25384615384615383,
+   "draft_keep": 0.6197183098591549,
+   "draft_precision": 0.6647727272727273,
+   "draft_recall": 0.9
+  },
+  "either": {
+   "n": 71,
+   "readers_keep": 0.8767605633802817,
+   "judges_keep": 0.8591549295774648,
+   "judges_precision": 0.9344262295081968,
+   "judges_recall": 0.9156626506024096,
+   "draft_keep": 0.8450704225352113,
+   "draft_precision": 0.9625,
+   "draft_recall": 0.927710843373494
+  },
+  "goal": {
+   "n": 71,
+   "readers_keep": 0.5563380281690141,
+   "judges_keep": 0.3380281690140845,
+   "judges_precision": 0.8854166666666666,
+   "judges_recall": 0.5379746835443038
+  }
+ },
+ "roger": {
+  "n": 48,
+  "persona": {
+   "role": {
+    "precision_recall": {
+     "judge": {
+      "precision": 0.8846153846153846,
+      "recall": 0.6865671641791045
+     },
+     "draft 14": {
+      "precision": 0.875,
+      "recall": 0.8880597014925373
+     },
+     "draft 15": {
+      "precision": 0.8571428571428571,
+      "recall": 0.8955223880597015
+     },
+     "readers (yes = keep)": {
+      "precision": 0.8981481481481481,
+      "recall": 0.7238805970149254
+     }
+    },
+    "n": 48,
+    "undecided": 3,
+    "agree_readers": 0.85,
+    "agree_judge": 0.7333333333333333,
+    "agree_v14": 0.8444444444444444,
+    "agree_v15": 0.8222222222222222,
+    "roger_yes_reader_no": [
+     "24",
+     "39",
+     "50",
+     "48"
+    ],
+    "roger_no_reader_yes": [
+     "6",
+     "59"
+    ],
+    "roger_yes_judge_no": [
+     "2",
+     "24",
+     "38",
+     "39",
+     "50",
+     "53",
+     "8",
+     "37",
+     "48"
+    ],
+    "roger_no_judge_yes": [
+     "9",
+     "35",
+     "59"
+    ],
+    "roger_yes_draft_no": [
+     "50",
+     "37",
+     "61"
+    ],
+    "roger_no_draft_yes": [
+     "5",
+     "6",
+     "13",
+     "47"
+    ]
+   },
+   "trait": {
+    "precision_recall": {
+     "judge": {
+      "precision": 1.0,
+      "recall": 0.47244094488188976
+     },
+     "draft 14": {
+      "precision": 0.8951612903225806,
+      "recall": 0.8740157480314961
+     },
+     "draft 15": {
+      "precision": 0.8951612903225806,
+      "recall": 0.8740157480314961
+     },
+     "readers (yes = keep)": {
+      "precision": 1.0,
+      "recall": 0.5354330708661418
+     }
+    },
+    "n": 48,
+    "undecided": 7,
+    "agree_readers": 0.8,
+    "agree_judge": 0.6341463414634146,
+    "agree_v14": 0.8780487804878049,
+    "agree_v15": 0.8780487804878049,
+    "roger_yes_reader_no": [
+     "3",
+     "16",
+     "27",
+     "64",
+     "12",
+     "67",
+     "72"
+    ],
+    "roger_no_reader_yes": [],
+    "roger_yes_judge_no": [
+     "3",
+     "16",
+     "24",
+     "25",
+     "27",
+     "31",
+     "34",
+     "36",
+     "42",
+     "60",
+     "64",
+     "12",
+     "43",
+     "67",
+     "72"
+    ],
+    "roger_no_judge_yes": [],
+    "roger_yes_draft_no": [
+     "3",
+     "64",
+     "12",
+     "58"
+    ],
+    "roger_no_draft_yes": [
+     "17"
+    ]
+   }
+  },
+  "pools": {
+   "R: arms no, judge yes": {
+    "n": 7,
+    "with_drafts": 4,
+    "with_judge": 3,
+    "T": 0,
+    "readers_with_drafts": 4,
+    "readers_with_judge": 2,
+    "readers_T": 1
+   },
+   "R: arms yes, judge no": {
+    "n": 11,
+    "with_drafts": 6,
+    "with_judge": 4,
+    "T": 1,
+    "readers_with_drafts": 3,
+    "readers_with_judge": 5,
+    "readers_T": 3
+   },
+   "T: arms no, judge yes": {
+    "n": 3,
+    "with_drafts": 0,
+    "with_judge": 3,
+    "T": 0,
+    "readers_with_drafts": 2,
+    "readers_with_judge": 1,
+    "readers_T": 0
+   },
+   "T: arms yes, judge no": {
+    "n": 17,
+    "with_drafts": 12,
+    "with_judge": 1,
+    "T": 4,
+    "readers_with_drafts": 4,
+    "readers_with_judge": 9,
+    "readers_T": 4
+   }
+  },
+  "relation": {
+   "same": [
+    "5",
+    "13",
+    "19",
+    "23",
+    "26",
+    "27",
+    "28",
+    "36",
+    "47",
+    "49",
+    "54",
+    "60",
+    "33",
+    "58",
+    "65"
+   ],
+   "secondary": [
+    "9",
+    "15",
+    "17",
+    "52",
+    "66"
+   ],
+   "different": [
+    "2",
+    "3",
+    "6",
+    "16",
+    "22",
+    "24",
+    "25",
+    "31",
+    "34",
+    "35",
+    "38",
+    "39",
+    "42",
+    "45",
+    "59",
+    "64",
+    "4",
+    "8",
+    "12",
+    "37",
+    "43",
+    "48",
+    "61",
+    "67",
+    "70",
+    "72"
+   ]
+  },
+  "rules_weighted": {
+   "both": {
+    "n": 45,
+    "readers_keep": 0.5777777777777777,
+    "judges_keep": 0.1111111111111111,
+    "judges_precision": 1.0,
+    "judges_recall": 0.19230769230769232,
+    "draft_keep": 0.6444444444444445,
+    "draft_precision": 0.7844827586206896,
+    "draft_recall": 0.875
+   },
+   "either": {
+    "n": 45,
+    "readers_keep": 0.85,
+    "judges_keep": 0.8,
+    "judges_precision": 0.9166666666666666,
+    "judges_recall": 0.8627450980392157,
+    "draft_keep": 0.8,
+    "draft_precision": 0.9652777777777778,
+    "draft_recall": 0.9084967320261438
+   },
+   "goal": {
+    "n": 45,
+    "readers_keep": 0.6166666666666667,
+    "judges_keep": 0.26666666666666666,
+    "judges_precision": 1.0,
+    "judges_recall": 0.43243243243243246
+   }
+  }
+ }
+}

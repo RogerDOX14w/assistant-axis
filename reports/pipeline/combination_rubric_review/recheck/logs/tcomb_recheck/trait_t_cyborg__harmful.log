@@ -1,0 +1,16 @@
+2026-10-30 23:29:11,272 - INFO - Found 1 response files
+2026-10-30 23:29:11,272 - INFO - Processing 1 entities
+2026-10-30 23:29:11,366 - INFO - Rubric version 13: version 12 with levels 2 and 3 carrying version 11's B treatment of an AI mention (Roger, 2026-10-30; the trait rubric for the October extraction, traits judged by gpt-5.6-luna); roles and combinations as version 10 (names in the judge-display-v1 form; --max_tokens 200)
+2026-10-30 23:29:11,366 - INFO - [usage] earlier runs total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=56,306 out=3,724 n=60]
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 23:29:11,376 - INFO - Skipping harmful: all 60 already scored
+Scoring: 100%|██████████| 1/1 [00:00<00:00, 632.53it/s]
+2026-10-30 23:29:11,377 - INFO - [usage] this run (no API calls)
+2026-10-30 23:29:11,377 - INFO - [usage] cumulative (runpod_workspace/tcomb_recheck/trait/t_cyborg__harmful/scores/usage.json) total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=56,306 out=3,724 n=60]
+2026-10-30 23:29:11,377 - INFO - 
+========================================
+2026-10-30 23:29:11,377 - INFO - SUMMARY
+2026-10-30 23:29:11,377 - INFO - ========================================
+2026-10-30 23:29:11,377 - INFO - Successful: 0
+2026-10-30 23:29:11,377 - INFO - Skipped:    1
+2026-10-30 23:29:11,377 - INFO - Failed:     0
+2026-10-30 23:29:11,377 - INFO - Marked as cut off ('…' shown to the judge): 0 of 60 responses read

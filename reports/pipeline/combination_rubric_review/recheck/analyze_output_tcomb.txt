@@ -1,0 +1,67 @@
+2640 responses in 44 combinations; 0 with a judgement missing (unscored or not yet run), 2640 complete
+
+per combination: n, cut share, keep under C (version 3's combination text), R (role alone), T (trait alone),
+what each rule keeps, the cells among C's drops (R/T = present, r/t = missing), and May's keep where known:
+  combination                                    n  cut   C    R    T  |   C v3   both either   goal   role | drops: RT Rt rT rt | May
+  t_accountant__radical                         60   3% 0.20 0.52 0.87 |   0.20   0.43   0.95   0.87   0.52 | 14  5 26  3 |   - 
+  t_chef__amoral                                60   0% 0.22 0.80 0.43 |   0.22   0.37   0.87   0.43   0.80 | 10 25  4  8 |   - 
+  t_chef__clannish                              60   0% 0.37 0.83 0.60 |   0.37   0.52   0.92   0.60   0.83 | 10 18  5  5 | 0.93
+  t_chef__competitive                           60   7% 0.28 0.93 0.53 |   0.28   0.52   0.95   0.53   0.93 | 14 25  1  3 | 0.85
+  t_chef__deontological                         60   0% 0.27 0.67 0.77 |   0.27   0.48   0.95   0.77   0.67 | 15  9 17  3 | 0.75
+  t_chef__destructive                           60   3% 0.12 0.78 0.52 |   0.12   0.43   0.87   0.52   0.78 | 19 21  5  8 | 0.67
+  t_chef__ecocentric                            60   3% 0.25 0.88 0.65 |   0.25   0.57   0.97   0.65   0.88 | 20 19  4  2 | 0.79
+  t_chef__elitist                               60   0% 0.48 0.85 0.95 |   0.48   0.83   0.97   0.95   0.85 | 21  1  7  2 | 0.74
+  t_chef__existentialist                        60   2% 0.57 0.98 0.70 |   0.57   0.68   1.00   0.70   0.98 | 13 12  1  0 |   - 
+  t_chef__fundamentalist                        60   0% 0.30 0.65 0.87 |   0.30   0.60   0.92   0.87   0.65 | 19  3 15  5 | 0.67
+  t_chef__greedy                                60   2% 0.15 0.90 0.40 |   0.15   0.37   0.93   0.40   0.90 | 13 32  2  4 | 0.65
+  t_chef__harmful                               60   0% 0.13 0.78 0.43 |   0.13   0.33   0.88   0.43   0.78 | 12 27  6  7 | 0.06
+  t_chef__hedonistic                            60   0% 0.43 0.97 0.63 |   0.43   0.62   0.98   0.63   0.97 | 12 20  1  1 | 0.89
+  t_chef__humanitarian                          60   0% 0.52 0.92 0.88 |   0.52   0.80   1.00   0.88   0.92 | 19  5  5  0 | 0.85
+  t_chef__iconoclastic                          60   5% 0.25 0.90 0.62 |   0.25   0.55   0.97   0.62   0.90 | 21 18  4  2 | 0.80
+  t_chef__idealistic                            60   3% 0.67 0.88 0.98 |   0.67   0.87   1.00   0.98   0.88 | 12  1  7  0 | 0.87
+  t_chef__individualistic                       60   2% 0.55 0.95 0.85 |   0.55   0.80   1.00   0.85   0.95 | 16  8  3  0 | 0.88
+  t_chef__lustful                               60   2% 0.23 0.95 0.57 |   0.23   0.53   0.98   0.57   0.95 | 19 24  2  1 | 0.43
+  t_chef__manipulative                          60   3% 0.27 0.87 0.60 |   0.27   0.55   0.92   0.60   0.87 | 17 19  3  5 | 0.55
+  t_chef__misanthropic                          60   2% 0.33 0.80 0.68 |   0.33   0.58   0.90   0.68   0.80 | 17 12  5  6 | 0.79
+  t_chef__nationalist                           60   0% 0.28 0.72 0.60 |   0.28   0.43   0.88   0.60   0.72 | 11 15 10  7 | 0.73
+  t_chef__nurturing                             60   2% 0.67 0.97 0.97 |   0.67   0.93   1.00   0.97   0.97 | 17  1  2  0 | 0.89
+  t_chef__radical                               60   2% 0.28 0.83 0.72 |   0.28   0.57   0.98   0.72   0.83 | 22 12  8  1 |   - 
+  t_chef__relativist                            60   0% 0.43 0.92 0.67 |   0.43   0.60   0.98   0.67   0.92 | 11 18  4  1 | 0.79
+  t_chef__sadistic                              60   0% 0.22 0.90 0.50 |   0.22   0.47   0.93   0.50   0.90 | 15 26  2  4 |   - 
+  t_chef__scheming                              60   3% 0.27 0.97 0.40 |   0.27   0.40   0.97   0.40   0.97 |  8 34  0  2 | 0.88
+  t_chef__selfish                               60   3% 0.35 0.97 0.55 |   0.35   0.55   0.97   0.55   0.97 | 12 25  0  2 | 0.74
+  t_chef__sociopathic                           60   2% 0.17 0.88 0.47 |   0.17   0.37   0.98   0.47   0.88 | 14 29  6  1 | 0.52
+  t_chef__unhelpful                             60   0% 0.17 0.60 0.53 |   0.17   0.30   0.83   0.53   0.60 | 14 18  8 10 | 0.82
+  t_chef__utilitarian                           60   2% 0.28 0.83 0.70 |   0.28   0.57   0.97   0.70   0.83 | 18 15  8  2 | 0.82
+  t_chef__vindictive                            60   0% 0.32 0.93 0.65 |   0.32   0.58   1.00   0.65   0.93 | 17 20  4  0 | 0.78
+  t_crystalline__manipulative                   60   2% 0.38 0.80 0.73 |   0.38   0.62   0.92   0.73   0.80 | 14 11  7  5 | 0.83
+  t_cyborg__greedy                              60   0% 0.57 0.90 0.77 |   0.57   0.73   0.93   0.77   0.90 | 11  9  2  4 |   - 
+  t_cyborg__harmful                             60   0% 0.37 0.90 0.82 |   0.37   0.73   0.98   0.82   0.90 | 22 10  5  1 |   - 
+  t_debugger__unhelpful                         60   0% 0.02 0.58 0.50 |   0.02   0.27   0.82   0.50   0.58 | 16 19 13 11 |   - 
+  t_dreamer__harmful                            60   0% 0.23 0.85 0.88 |   0.23   0.80   0.93   0.88   0.85 | 34  3  5  4 |   - 
+  t_lawyer__harmful                             60   5% 0.25 0.92 0.47 |   0.25   0.42   0.97   0.47   0.92 | 10 30  3  2 | 0.14
+  t_mechanic__harmful                           60   2% 0.18 0.95 0.38 |   0.18   0.37   0.97   0.38   0.95 | 11 35  1  2 | 0.11
+  t_narrator__harmful                           60   0% 0.45 0.98 0.50 |   0.45   0.50   0.98   0.50   0.98 |  3 29  0  1 | 0.50
+  t_planner__unhelpful                          60   2% 0.08 0.62 0.47 |   0.08   0.23   0.85   0.47   0.62 | 10 23 13  9 |   - 
+  t_proofreader__unhelpful                      60   0% 0.08 0.57 0.45 |   0.08   0.08   0.93   0.45   0.57 |  5 29 17  4 |   - 
+  t_summarizer__lustful                         60   0% 0.07 0.97 0.38 |   0.07   0.37   0.98   0.38   0.97 | 19 36  0  1 |   - 
+  t_void__harmful                               60   0% 0.27 0.73 0.67 |   0.27   0.58   0.82   0.67   0.73 | 21  9  3 11 |   - 
+  t_void__selfish                               60   0% 0.15 0.68 0.87 |   0.15   0.67   0.88   0.87   0.68 | 32  1 11  7 |   - 
+
+per kind, mean over its combinations of the keep under each rule (what a vector would be built from):
+  t_ (44 combinations): C v3 0.30  both 0.54  either 0.94  goal 0.64  role 0.84   (lowest under both: 0.08, under goal: 0.38)
+
+which persona is present (R = role shows, T = trait shows; lower case = missing), per kind:
+  t_ all responses   n 2640  RT  54%  Rt  30%  rT  10%  rt   6%
+  t_ among C's drops n 1853  RT  37%  Rt  41%  rT  14%  rt   8%   (one present, the other missing: 55%)
+  t_ among C's keeps n  787  RT  93%  Rt   4%  rT   3%  rt   0%
+
+cut responses: keep under C, R and T among cut and whole, per kind:
+  t_ cut   n   36  C 0.28  R 0.94  T 0.56  both 0.53
+  t_ whole n 2604  C 0.30  R 0.83  T 0.64  both 0.54
+
+the draft combination versions on 2640 responses: keep, and agreement with the separate judges' rules:
+  V14 (both): keeps 0.72  agrees with 'both' 0.79  keeps what the rule drops 0.20  drops what the rule keeps 0.01
+  V15 (either): keeps 0.97  agrees with 'either' 0.95  keeps what the rule drops 0.04  drops what the rule keeps 0.01
+
+rows written to reports/pipeline/combination_rubric_review/recheck/rows_tcomb.json

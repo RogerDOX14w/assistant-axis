@@ -1,0 +1,16 @@
+2026-10-30 23:28:56,939 - INFO - Found 1 response files
+2026-10-30 23:28:56,939 - INFO - Processing 1 entities
+2026-10-30 23:28:57,034 - INFO - Rubric version 13: version 12 with levels 2 and 3 carrying version 11's B treatment of an AI mention (Roger, 2026-10-30; the trait rubric for the October extraction, traits judged by gpt-5.6-luna); roles and combinations as version 10 (names in the judge-display-v1 form; --max_tokens 200)
+2026-10-30 23:28:57,035 - INFO - [usage] earlier runs total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=59,094 out=3,712 n=60]
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 23:28:57,044 - INFO - Skipping hedonistic: all 60 already scored
+Scoring: 100%|██████████| 1/1 [00:00<00:00, 419.43it/s]
+2026-10-30 23:28:57,044 - INFO - [usage] this run (no API calls)
+2026-10-30 23:28:57,044 - INFO - [usage] cumulative (runpod_workspace/tcomb_recheck/trait/t_chef__hedonistic/scores/usage.json) total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=59,094 out=3,712 n=60]
+2026-10-30 23:28:57,044 - INFO - 
+========================================
+2026-10-30 23:28:57,044 - INFO - SUMMARY
+2026-10-30 23:28:57,044 - INFO - ========================================
+2026-10-30 23:28:57,044 - INFO - Successful: 0
+2026-10-30 23:28:57,044 - INFO - Skipped:    1
+2026-10-30 23:28:57,044 - INFO - Failed:     0
+2026-10-30 23:28:57,044 - INFO - Marked as cut off ('…' shown to the judge): 0 of 60 responses read

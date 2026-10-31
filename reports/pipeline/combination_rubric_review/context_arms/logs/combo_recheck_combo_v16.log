@@ -1,0 +1,45 @@
+2026-10-30 21:23:28,728 - INFO - Found 27 response files
+2026-10-30 21:23:28,728 - INFO - Processing 27 entities
+2026-10-30 21:23:28,934 - INFO - Rubric version 16 (draft): draft: the role rubric (version 10's text and reading) for a combination's responses, with the trait named as context and judged no further (Roger, 2026-10-30: both must show, each judged by its own rubric knowing the other half); roles and traits as version 13 (names in the judge-display-v1 form; --max_tokens 300)
+2026-10-30 21:23:28,935 - INFO - [usage] earlier runs total=$0.203 calls=1,560 [gpt-5.6-luna:flex: $0.203 in=1,542,884 out=81,609 n=1,560]
+Scoring:   0%|          | 0/27 [00:00<?, ?it/s]2026-10-30 21:23:30,802 - INFO - Skipping r_competitor__understated: all 60 already scored
+Scoring:   4%|▎         | 1/27 [00:01<00:47,  1.83s/it]2026-10-30 21:23:30,811 - INFO - Skipping r_daredevil__understated: all 60 already scored
+2026-10-30 21:23:30,817 - INFO - Skipping r_destroyer__understated: all 60 already scored
+2026-10-30 21:23:30,822 - INFO - Skipping r_instrumentally_aligned_ai__pensive: all 60 already scored
+2026-10-30 21:23:30,828 - INFO - Skipping r_predator__animated: all 60 already scored
+2026-10-30 21:23:30,832 - INFO - Skipping r_predator__concise: all 60 already scored
+2026-10-30 21:23:30,835 - INFO - Skipping r_predator__concrete: all 60 already scored
+2026-10-30 21:23:30,840 - INFO - Skipping r_predator__effusive: all 60 already scored
+2026-10-30 21:23:30,844 - INFO - Skipping r_predator__eloquent: all 60 already scored
+2026-10-30 21:23:30,848 - INFO - Skipping r_predator__erudite: all 60 already scored
+2026-10-30 21:23:30,854 - INFO - Skipping r_predator__expository: all 60 already scored
+2026-10-30 21:23:30,860 - INFO - Skipping r_predator__generalist: all 60 already scored
+2026-10-30 21:23:30,867 - INFO - Skipping r_predator__interdisciplinary: all 60 already scored
+2026-10-30 21:23:30,871 - INFO - Skipping r_predator__melodramatic: all 60 already scored
+2026-10-30 21:23:30,875 - INFO - Skipping r_predator__observant: all 60 already scored
+2026-10-30 21:23:30,878 - INFO - Skipping r_predator__pensive: all 60 already scored
+2026-10-30 21:23:30,883 - INFO - Skipping r_predator__playful: all 60 already scored
+2026-10-30 21:23:30,889 - INFO - Skipping r_predator__poetic: all 60 already scored
+2026-10-30 21:23:30,893 - INFO - Skipping r_predator__retentive: all 60 already scored
+2026-10-30 21:23:30,898 - INFO - Skipping r_predator__specialist: all 60 already scored
+2026-10-30 21:23:30,903 - INFO - Skipping r_predator__systems_thinker: all 60 already scored
+Scoring:  78%|███████▊  | 21/27 [00:01<00:00, 14.95it/s]2026-10-30 21:23:30,908 - INFO - Skipping r_predator__temperamental: all 60 already scored
+2026-10-30 21:23:30,913 - INFO - Skipping r_predator__unassuming: all 60 already scored
+2026-10-30 21:23:30,920 - INFO - Skipping r_predator__witty: all 60 already scored
+2026-10-30 21:23:30,928 - INFO - Scoring 60 new responses for r_prey__intuitive...
+2026-10-30 21:23:40,935 - INFO - Saved 60 scores for r_prey__intuitive (60 new)
+2026-10-30 21:23:40,938 - INFO - Skipping r_zealot__pensive: all 60 already scored
+2026-10-30 21:23:40,942 - INFO - Skipping r_zealot__understated: all 60 already scored
+Scoring: 100%|██████████| 27/27 [00:11<00:00,  2.26it/s]
+2026-10-30 21:23:40,947 - INFO - [usage] this run total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=62,962 out=3,259 n=60]
+2026-10-30 21:23:40,947 - INFO - [usage] cumulative (runpod_workspace/combo_recheck/combo_v16/scores/usage.json) total=$0.212 calls=1,620 [gpt-5.6-luna:flex: $0.212 in=1,605,846 out=84,868 n=1,620]
+2026-10-30 21:23:40,947 - INFO - 
+========================================
+2026-10-30 21:23:40,947 - INFO - SUMMARY
+2026-10-30 21:23:40,947 - INFO - ========================================
+2026-10-30 21:23:40,947 - INFO - Successful: 1
+2026-10-30 21:23:40,947 - INFO - Skipped:    26
+2026-10-30 21:23:40,947 - INFO - Failed:     0
+2026-10-30 21:23:40,947 - INFO - Marked as cut off ('…' shown to the judge): 50 of 1620 responses read
+2026-10-30 21:23:40,947 - INFO - [abc] 60 replies scored from their A/B/C answers: 0 stated another score and 0 none (0 changing keep or drop).  0 with answers that could not be read were scored by their SCORE line
+2026-10-30 21:23:40,947 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

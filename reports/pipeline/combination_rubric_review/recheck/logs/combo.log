@@ -1,0 +1,44 @@
+2026-10-30 21:23:28,728 - INFO - Found 27 response files
+2026-10-30 21:23:28,728 - INFO - Processing 27 entities
+2026-10-30 21:23:28,931 - INFO - Rubric version 13: version 12 with levels 2 and 3 carrying version 11's B treatment of an AI mention (Roger, 2026-10-30; the trait rubric for the October extraction, traits judged by gpt-5.6-luna); roles and combinations as version 10 (names in the judge-display-v1 form; --max_tokens 200)
+2026-10-30 21:23:28,933 - INFO - [usage] earlier runs total=$0.166 calls=1,560 [gpt-5.6-luna:flex: $0.166 in=1,039,484 out=104,034 n=1,560]
+Scoring:   0%|          | 0/27 [00:00<?, ?it/s]2026-10-30 21:23:30,802 - INFO - Skipping r_competitor__understated: all 60 already scored
+Scoring:   4%|▎         | 1/27 [00:01<00:47,  1.83s/it]2026-10-30 21:23:30,811 - INFO - Skipping r_daredevil__understated: all 60 already scored
+2026-10-30 21:23:30,817 - INFO - Skipping r_destroyer__understated: all 60 already scored
+2026-10-30 21:23:30,822 - INFO - Skipping r_instrumentally_aligned_ai__pensive: all 60 already scored
+2026-10-30 21:23:30,828 - INFO - Skipping r_predator__animated: all 60 already scored
+2026-10-30 21:23:30,831 - INFO - Skipping r_predator__concise: all 60 already scored
+2026-10-30 21:23:30,835 - INFO - Skipping r_predator__concrete: all 60 already scored
+2026-10-30 21:23:30,840 - INFO - Skipping r_predator__effusive: all 60 already scored
+2026-10-30 21:23:30,844 - INFO - Skipping r_predator__eloquent: all 60 already scored
+2026-10-30 21:23:30,849 - INFO - Skipping r_predator__erudite: all 60 already scored
+2026-10-30 21:23:30,854 - INFO - Skipping r_predator__expository: all 60 already scored
+2026-10-30 21:23:30,859 - INFO - Skipping r_predator__generalist: all 60 already scored
+2026-10-30 21:23:30,865 - INFO - Skipping r_predator__interdisciplinary: all 60 already scored
+2026-10-30 21:23:30,870 - INFO - Skipping r_predator__melodramatic: all 60 already scored
+2026-10-30 21:23:30,873 - INFO - Skipping r_predator__observant: all 60 already scored
+2026-10-30 21:23:30,878 - INFO - Skipping r_predator__pensive: all 60 already scored
+2026-10-30 21:23:30,883 - INFO - Skipping r_predator__playful: all 60 already scored
+2026-10-30 21:23:30,889 - INFO - Skipping r_predator__poetic: all 60 already scored
+2026-10-30 21:23:30,894 - INFO - Skipping r_predator__retentive: all 60 already scored
+2026-10-30 21:23:30,898 - INFO - Skipping r_predator__specialist: all 60 already scored
+2026-10-30 21:23:30,903 - INFO - Skipping r_predator__systems_thinker: all 60 already scored
+Scoring:  78%|███████▊  | 21/27 [00:01<00:00, 14.95it/s]2026-10-30 21:23:30,908 - INFO - Skipping r_predator__temperamental: all 60 already scored
+2026-10-30 21:23:30,913 - INFO - Skipping r_predator__unassuming: all 60 already scored
+2026-10-30 21:23:30,920 - INFO - Skipping r_predator__witty: all 60 already scored
+2026-10-30 21:23:30,930 - INFO - Scoring 60 new responses for r_prey__intuitive...
+2026-10-30 21:23:43,279 - INFO - Saved 60 scores for r_prey__intuitive (60 new)
+2026-10-30 21:23:43,285 - INFO - Skipping r_zealot__pensive: all 60 already scored
+2026-10-30 21:23:43,289 - INFO - Skipping r_zealot__understated: all 60 already scored
+Scoring: 100%|██████████| 27/27 [00:14<00:00,  1.89it/s]
+2026-10-30 21:23:43,294 - INFO - [usage] this run total=$0.007 calls=60 [gpt-5.6-luna:flex: $0.007 in=43,582 out=4,395 n=60]
+2026-10-30 21:23:43,294 - INFO - [usage] cumulative (runpod_workspace/combo_recheck/combo/scores/usage.json) total=$0.173 calls=1,620 [gpt-5.6-luna:flex: $0.173 in=1,083,066 out=108,429 n=1,620]
+2026-10-30 21:23:43,294 - INFO - 
+========================================
+2026-10-30 21:23:43,294 - INFO - SUMMARY
+2026-10-30 21:23:43,294 - INFO - ========================================
+2026-10-30 21:23:43,294 - INFO - Successful: 1
+2026-10-30 21:23:43,294 - INFO - Skipped:    26
+2026-10-30 21:23:43,294 - INFO - Failed:     0
+2026-10-30 21:23:43,294 - INFO - Marked as cut off ('…' shown to the judge): 50 of 1620 responses read
+2026-10-30 21:23:43,295 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

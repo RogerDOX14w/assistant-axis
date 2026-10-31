@@ -1,0 +1,111 @@
+1. the candidates against the sheet's letters adjusted by Roger (letters as probabilities), by kind and by the combination's May keep level
+   (low under 0.25, medium 0.25 to 0.60, high over 0.60; n = items with both letters and every judgement; expected = the letters' expected keep)
+   74 items, 48 with Roger's letters, 26 with the readers' alone
+   cell             n expected                    draft 14                   16 and 17                   16 and 18             separate judges
+                                  keeps  precision  recall    keeps  precision  recall    keeps  precision  recall    keeps  precision  recall
+   all             74     0.44     0.59       0.66    0.90     0.30       0.76    0.52     0.38       0.73    0.63     0.16       0.69    0.25
+   r_              34     0.60     0.74       0.69    0.85     0.32       0.95    0.52     0.35       0.88    0.52     0.21       0.86    0.30
+   t_              40     0.31     0.47       0.63    0.98     0.28       0.57    0.51     0.40       0.62    0.82     0.12       0.45    0.18
+   low keep        21     0.38     0.52       0.61    0.84     0.24       0.70    0.44     0.38       0.66    0.66     0.19       0.50    0.25
+   medium keep     18     0.39     0.44       0.88    1.00     0.33       0.92    0.79     0.39       0.86    0.86     0.17       0.67    0.29
+   high keep       35     0.50     0.71       0.62    0.89     0.31       0.70    0.44     0.37       0.71    0.53     0.14       0.85    0.24
+   r_ low           7     0.57     0.71       0.60    0.75     0.14       1.00    0.25     0.29       1.00    0.50     0.29       1.00    0.50
+   r_ medium        9     0.61     0.67       0.92    1.00     0.56       0.90    0.82     0.56       0.90    0.82     0.33       0.67    0.36
+   r_ high         18     0.60     0.78       0.62    0.81     0.28       1.00    0.47     0.28       0.80    0.37     0.11       1.00    0.19
+   t_ low          14     0.29     0.43       0.62    0.94     0.29       0.62    0.62     0.43       0.54    0.81     0.14       0.00    0.00
+   t_ medium        9     0.17     0.22       0.75    1.00     0.11       1.00    0.67     0.22       0.75    1.00     0.00        nan    0.00
+   t_ high         17     0.40     0.65       0.61    1.00     0.35       0.46    0.41     0.47       0.66    0.78     0.18       0.75    0.33
+
+2. combinations kept under 0.10 and under 0.25 by each rule, per judged sample, against the same combinations' May keep (gpt-4.1-mini, the April text)
+
+   the May exploration sample (May responses): 27 combinations
+   rule                < 0.10  < 0.25   mean keep
+   May                      2       8        0.51
+   April text               8      18        0.18
+   separate judges          1       5        0.36
+   draft 14                 0       1        0.55
+   16 and 17                0       5        0.39
+   16 and 18                0       3        0.42
+   combinations under 0.25 by any rule (19):
+   combination                                               May       April text  separate judges         draft 14        16 and 17        16 and 18
+   r_aligned_artificial_intelligence__pensive               0.90             0.00             0.07             0.27             0.12             0.25
+   r_ascetic__manic                                         0.86             0.14             0.68             0.96             0.66             0.68
+   r_competitor__understated                                0.18             0.08             0.30             0.77             0.30             0.35
+   r_daredevil__understated                                 0.38             0.10             0.27             0.53             0.22             0.25
+   r_destroyer__understated                                 0.32             0.00             0.17             0.33             0.23             0.23
+   r_paperclip_maximizer__visceral                          0.87             0.23             0.42             0.57             0.53             0.47
+   r_prey__quantitative                                     0.35             0.17             0.42             0.53             0.38             0.38
+   r_zealot__pensive                                        0.03             0.02             0.19             0.47             0.12             0.16
+   r_zealot__speculative                                    0.79             0.19             0.39             0.80             0.39             0.43
+   r_zealot__understated                                    0.18             0.07             0.33             0.48             0.28             0.32
+   t_lawyer__lustful                                        0.18             0.08             0.25             0.43             0.32             0.37
+   t_marketer__lustful                                      0.28             0.10             0.27             0.38             0.32             0.35
+   t_poet__harmful                                          0.13             0.27             0.42             0.48             0.38             0.42
+   t_poet__manipulative                                     0.36             0.18             0.27             0.43             0.32             0.40
+   t_psychologist__harmful                                  0.15             0.05             0.22             0.33             0.28             0.30
+   t_robot__lustful                                         0.17             0.12             0.38             0.38             0.38             0.42
+   t_sommelier__destructive                                 0.64             0.17             0.33             0.55             0.40             0.42
+   t_sommelier__harmful                                     0.03             0.08             0.19             0.21             0.19             0.19
+   t_sommelier__sociopathic                                 0.45             0.23             0.32             0.45             0.40             0.43
+
+   the October r_ re-check sample: 27 combinations
+   rule                < 0.10  < 0.25   mean keep
+   May                      1       3        0.60   (on 13)
+   April text               9      21        0.18
+   separate judges          1       8        0.44
+   draft 14                 0       1        0.70
+   16 and 17                0       7        0.45
+   16 and 18                0       5        0.48
+   combinations under 0.25 by any rule (21):
+   combination                                               May       April text  separate judges         draft 14        16 and 17        16 and 18
+   r_competitor__understated                                0.18             0.02             0.27             0.57             0.13             0.17
+   r_daredevil__understated                                 0.38             0.07             0.08             0.57             0.15             0.20
+   r_destroyer__understated                                 0.32             0.17             0.23             0.75             0.35             0.50
+   r_instrumentally_aligned_ai__pensive                     0.90             0.17             0.87             0.87             0.90             0.90
+   r_predator__concise                                      0.81             0.12             0.45             0.63             0.48             0.48
+   r_predator__effusive                                        -             0.07             0.33             0.48             0.23             0.22
+   r_predator__eloquent                                        -             0.20             0.40             0.68             0.38             0.38
+   r_predator__erudite                                      0.64             0.03             0.17             0.47             0.18             0.18
+   r_predator__expository                                      -             0.07             0.12             0.23             0.20             0.20
+   r_predator__generalist                                      -             0.17             0.55             0.88             0.58             0.62
+   r_predator__melodramatic                                    -             0.18             0.65             0.88             0.57             0.57
+   r_predator__pensive                                      0.80             0.22             0.62             0.88             0.58             0.63
+   r_predator__playful                                         -             0.13             0.57             0.70             0.50             0.50
+   r_predator__poetic                                       0.80             0.10             0.35             0.60             0.32             0.32
+   r_predator__retentive                                       -             0.03             0.13             0.47             0.18             0.30
+   r_predator__specialist                                      -             0.03             0.23             0.60             0.23             0.27
+   r_predator__temperamental                                   -             0.08             0.48             0.80             0.43             0.33
+   r_predator__unassuming                                      -             0.18             0.15             0.62             0.27             0.42
+   r_predator__witty                                        0.93             0.23             0.72             0.90             0.72             0.72
+   r_zealot__pensive                                        0.03             0.13             0.50             0.75             0.30             0.43
+   r_zealot__understated                                    0.18             0.03             0.22             0.58             0.25             0.32
+
+   the October t_ sample: 44 combinations
+   rule                < 0.10  < 0.25   mean keep
+   May                      1       3        0.69   (on 30)
+   April text               4      16        0.30
+   separate judges          1       2        0.54
+   draft 14                 0       1        0.72
+   16 and 17                0       2        0.56
+   16 and 18                0       1        0.61
+   combinations under 0.25 by any rule (17):
+   combination                                               May       April text  separate judges         draft 14        16 and 17        16 and 18
+   t_accountant__radical                                       -             0.20             0.43             0.58             0.35             0.35
+   t_chef__amoral                                              -             0.22             0.37             0.57             0.43             0.48
+   t_chef__destructive                                      0.67             0.12             0.43             0.78             0.47             0.58
+   t_chef__greedy                                           0.65             0.15             0.37             0.55             0.35             0.48
+   t_chef__harmful                                          0.06             0.13             0.33             0.50             0.35             0.37
+   t_chef__lustful                                          0.43             0.23             0.53             0.73             0.57             0.67
+   t_chef__sadistic                                            -             0.22             0.47             0.63             0.47             0.52
+   t_chef__sociopathic                                      0.52             0.17             0.37             0.77             0.55             0.67
+   t_chef__unhelpful                                        0.82             0.17             0.30             0.55             0.32             0.37
+   t_debugger__unhelpful                                       -             0.02             0.27             0.47             0.27             0.30
+   t_dreamer__harmful                                          -             0.23             0.80             0.85             0.68             0.67
+   t_lawyer__harmful                                        0.14             0.25             0.42             0.57             0.40             0.45
+   t_mechanic__harmful                                      0.11             0.18             0.37             0.57             0.38             0.38
+   t_planner__unhelpful                                        -             0.08             0.23             0.37             0.23             0.27
+   t_proofreader__unhelpful                                    -             0.08             0.08             0.18             0.13             0.12
+   t_summarizer__lustful                                       -             0.07             0.37             0.43             0.38             0.42
+   t_void__selfish                                             -             0.15             0.67             0.87             0.70             0.68
+
+   May over the whole April grid (1797 combinations): under 0.10 7 (1 r_, 6 t_), under 0.25 22 (3 r_, 19 t_)

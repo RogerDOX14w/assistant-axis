@@ -333,7 +333,14 @@ experiment (item 11), P7's real-tokenizer checks and smoke runs per family (item
     review's rulings as a paragraph, version 11's treatment of an AI mention in levels 2 and 3), step 3's
     default since that day, so `run_pipeline.sh --types traits --judge-model gpt-5.6-luna
     --judge-save-replies`; a traits run without `--judge-model gpt-5.6-luna` is refused.  Combinations
-    stay under version 3's text until their rubric is reviewed (next).
+    stay under version 3's text until their rubric is reviewed (next).  **Combinations decided
+    2026-10-31** (Roger, "16+17 on the basis of precision", after the
+    [combination rubric review](./combination_rubric_review/)'s second reading sheet): **prompt version
+    20**, the two-sided rule (each response judged by version 16, the role rubric with the trait as
+    context, and by version 17, the trait rubric with the role as context, kept only when both give 3),
+    step 3's default since that day, with gpt-5.6-luna as its default judge, so no `--judge-model` flag is
+    needed for any type any more; the combination pods' steps 3 to 5 run under it (two luna calls per
+    response, about $130 per pod).
 
 12. **Revisit version 10's "answers win" reading on the full role run** (Roger, 2026-10-28).  Where luna's
     stated score and its A/B/C answers disagree, version 10 takes the answers.  That was decided on the

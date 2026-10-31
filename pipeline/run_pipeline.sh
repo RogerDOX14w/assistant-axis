@@ -39,9 +39,11 @@
 #                                                     # rsync or cp (assistant_axis/tmpfs.py)
 #   ./run_pipeline.sh --types roles --from-step 3 --judge-prompt-version 4
 #                                                     # steps 3-5 again under rubric 4
-#   ./run_pipeline.sh --types roles --judge-model gpt-5.6-luna --judge-save-replies
-#                                                     # the October judging (roles and traits
-#                                                     # need gpt-5.6-luna under version 13)
+#   ./run_pipeline.sh --types roles --judge-save-replies
+#                                                     # the October judging (gpt-5.6-luna, the
+#                                                     # default judge since 2026-10-31, under
+#                                                     # version 20; --judge-model gpt-5.6-luna
+#                                                     # was needed before)
 #   ./run_pipeline.sh --types r_combinations --to-step 2
 #                                                     # steps 1 and 2 only; judge later
 #                                                     # with --from-step 3
@@ -63,9 +65,12 @@
 # 9, a rejected draft, is not runnable; 10 version 8's text with a role reply
 # scored from its A, B and C answers, settled 2026-10-28, the role rubric for
 # the October extraction; 11 and 12 drafts, the trait rubric review's arms;
-# 13 version 10 with the review's trait rubric, settled, the default since
-# 2026-10-30: roles and traits judged by gpt-5.6-luna only, so a roles or
-# traits run needs --judge-model gpt-5.6-luna; combinations as version 3).  A
+# 13 version 10 with the review's trait rubric, settled 2026-10-30, the default
+# until 2026-10-31: roles and traits judged by gpt-5.6-luna only; 14 to 19
+# drafts, the combination rubric review's arms; 20 version 13's roles and
+# traits with the two-sided combination rule, versions 16 and 17, a response
+# kept when both give 3, settled, the default since 2026-10-31: every type
+# judged by gpt-5.6-luna only, the default judge since the same day).  A
 # version other than the default writes scores_v<N>/, vectors_v<N>/ and
 # axis_v<N>.pt beside the default's scores/, vectors/ and axis.pt, so the
 # versions can be compared on the same responses and activations; the scan
@@ -201,8 +206,11 @@ JUDGE_ARGS=()                   # step 3's arguments from the --judge-* flags
 # --judge-batch, --judge-realtime, resolved after the flags are read.
 JUDGE_MODE=""
 # Step 3's default --judge_model (its DEFAULT_JUDGE_MODEL; a test pins the two
-# together), for the Flex check when --judge-model is not given.
-JUDGE_MODEL_DEFAULT=gpt-4.1-mini
+# together), for the Flex check when --judge-model is not given: gpt-5.6-luna
+# since 2026-10-31, the judge every entity type needs under the default
+# prompt version (gpt-4.1-mini before; it still judges under version 3 or
+# earlier, --judge-model gpt-4.1-mini --judge-prompt-version 3).
+JUDGE_MODEL_DEFAULT=gpt-5.6-luna
 
 # Step 3's rubric version (3_judge.py --prompt_version; versions in
 # assistant_axis/judge_rubrics.py).  Any version other than the default
@@ -210,8 +218,10 @@ JUDGE_MODEL_DEFAULT=gpt-4.1-mini
 # default's scores/, vectors/ and axis.pt, so that steps 3 to 5 can be rerun
 # under another rubric on the same responses and activations (Roger,
 # 2026-10-23; with --from-step 3).  The default is step 3's
-# DEFAULT_PROMPT_VERSION (a test pins the two together).
-JUDGE_PROMPT_VERSION_DEFAULT=13
+# DEFAULT_PROMPT_VERSION (a test pins the two together): 20 since 2026-10-31
+# (version 13's roles and traits, so their directories judged under 13 take
+# it, and the two-sided combination rule, versions 16 and 17, both 3).
+JUDGE_PROMPT_VERSION_DEFAULT=20
 JUDGE_PROMPT_VERSION=""
 # First step to run: 1 (everything, the default), or 3, 4 or 5 to rerun from
 # that step on outputs already there.  From step 3 on no step uses the GPU or

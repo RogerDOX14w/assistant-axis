@@ -67,7 +67,9 @@ def test_the_scripts_modules_are_the_packages():
 
 class TestJudgeDisplayForm:
     def test_rubric_version(self, judge):
-        assert judge.JUDGE_RUBRIC_VERSION == 13       # 2 -> 3: P4, 2026-10-12; 3 -> 10: 2026-10-28; 10 -> 13: 2026-10-30
+        # 2 -> 3: P4, 2026-10-12; 3 -> 10: 2026-10-28; 10 -> 13: 2026-10-30; 13 -> 20: 2026-10-31
+        assert judge.JUDGE_RUBRIC_VERSION == 20
+        assert judge.DEFAULT_JUDGE_MODEL == "gpt-5.6-luna"          # gpt-4.1-mini until 2026-10-31
         assert judge.JUDGE_LABEL_FORM == "judge-display-v1"
 
     def test_trait_prompt_uses_the_long_form_of_a_standard(self, judge):
@@ -82,12 +84,21 @@ class TestJudgeDisplayForm:
         assert f"displays the trait: **{doc['positive_label']}**. {doc['description']}" in p
 
     def test_combination_prompt_no_longer_shows_raw_stems(self, judge):
-        p = judge.resolve_eval_prompt("r_devils_advocate__systems_thinker", ROLES, TRAITS, "combination")
+        # version 3's one-prompt rubric; the default, 20, renders the two sides' texts one after
+        # the other (side_prompts gives each side's own), with the same names
+        p = judge.resolve_eval_prompt("r_devils_advocate__systems_thinker", ROLES, TRAITS, "combination",
+                                      prompt_version=3)
         assert "1. The role: **devil's advocate** — " in p
         assert "2. The trait: **systems-thinker** — " in p
         assert "devils_advocate" not in p and "systems_thinker" not in p
-        p = judge.resolve_eval_prompt("t_coral_reef__careless_hexaco", ROLES, TRAITS, "combination")
+        p = judge.resolve_eval_prompt("t_coral_reef__careless_hexaco", ROLES, TRAITS, "combination",
+                                      prompt_version=3)
         assert "**coral reef**" in p and "**careless (from HEXACO)**" in p
+        sides = judge.side_prompts("r_devils_advocate__systems_thinker", ROLES, TRAITS, judge.PROMPT_VERSIONS[20])
+        assert set(sides) == {"role", "trait"}
+        assert "displays the role: **devil's advocate**" in sides["role"] and "**systems-thinker**" in sides["role"]
+        assert "displays the trait: **systems-thinker**" in sides["trait"] and "**devil's advocate**" in sides["trait"]
+        assert "devils_advocate" not in sides["role"] + sides["trait"]
 
     def test_role_prompt_is_the_files_eval_prompt(self, judge):
         doc = json.loads((ROLES / "devils_advocate.json").read_text())
@@ -139,15 +150,21 @@ def test_score_entity_ticks_the_usage_tracker(judge):
     assert list(usage.per_model) == ["gpt-4.1-mini"]
 
 
-def _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, batch=False, version="3"):
+def _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, batch=False, version="3",
+         judge_model="gpt-4.1-mini"):
     """Runs step 3 as the command line would, on traits unless ``extra`` says
     otherwise.  The tests of step 3's mechanics run under prompt version 3
-    (``version``): the default, 13 since 2026-10-30, refuses the default judge
-    for traits, as 10 did for roles.  ``version=None`` leaves the version to
-    step 3's default; a ``--prompt_version`` in ``extra`` wins over both."""
+    (``version``) with gpt-4.1-mini (``judge_model``), the judge the May trees
+    were judged with: the default version, 20 since 2026-10-31 (13 from
+    2026-10-30), takes gpt-5.6-luna only, which is step 3's default judge since
+    the same day.  ``version=None`` leaves the version to step 3's default and
+    ``judge_model=None`` the judge; a ``--prompt_version`` or ``--judge_model``
+    in ``extra`` wins over both."""
     monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-used")
     monkeypatch.setattr(judge.openai, "AsyncOpenAI", lambda: client)
     pinned = [] if version is None or "--prompt_version" in extra else ["--prompt_version", version]
+    if judge_model is not None and "--judge_model" not in extra:
+        pinned += ["--judge_model", judge_model]
     monkeypatch.setattr(sys, "argv", [
         "3_judge.py", "--responses_dir", str(responses_dir), "--output_dir", str(output_dir),
         "--roles_dir", str(ROLES), "--traits_dir", str(TRAITS), "--entity_type", "trait",
@@ -193,12 +210,12 @@ def test_main_writes_usage_json_and_merges_on_resume(judge, monkeypatch, tmp_pat
 def test_stamp_marks_unstamped_scores_as_version_1(judge, tmp_path, caplog):
     (tmp_path / "patient.json").write_text(json.dumps({"pos_p0_q0": 3}))
     stamp = judge.stamp_rubric(tmp_path, entity_type="trait", judge_model="gpt-4.1-mini")
-    assert stamp["rubric_versions"] == [1, 13]                          # the default version
-    assert "rubric versions [1, 13]" in caplog.text
+    assert stamp["rubric_versions"] == [1, 20]                          # the default version
+    assert "rubric versions [1, 20]" in caplog.text
     # side-cars alone do not count as scores
     fresh = tmp_path / "fresh"; fresh.mkdir()
     (fresh / "usage.json").write_text("{}")
-    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [13]
+    assert judge.stamp_rubric(fresh, entity_type="trait", judge_model="m")["rubric_versions"] == [20]
 
 
 # ---------------------------------------------------------------------------
@@ -1302,9 +1319,9 @@ def test_a_directory_of_another_version_is_refused(judge, monkeypatch, tmp_path,
     client = _client()
     with pytest.raises(SystemExit) as e:
         _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "gpt-5.6-luna",
-             version=None)                                            # the default, version 13
+             version=None)                                            # the default, version 20
     assert e.value.code == 1 and client.chat.completions.create.call_count == 0
-    assert "judged under prompt version(s) 0, not 13" in caplog.text
+    assert "judged under prompt version(s) 0, not 20" in caplog.text
 
 
 def test_a_changed_draft_is_refused(judge, monkeypatch, tmp_path, caplog):
@@ -1477,26 +1494,27 @@ def test_a_version_10_trait_run_reads_the_marker(judge, monkeypatch, tmp_path):
     assert json.loads((output_dir / "judge_rubric.json").read_text())["reply_format"] == "score_marker"
 
 
-def test_the_default_version_13_judges_traits_with_luna_only(judge, monkeypatch, tmp_path, caplog):
-    """Version 13 (settled 2026-10-30, the default) has the trait rubric the
-    review settled for gpt-5.6-luna: a trait run with the default judge is refused
-    before any request, as a role run under 10 is; with luna it scores under
-    version 13 (its 200 tokens, the SCORE marker) and stamps the trait hash."""
+def test_the_default_version_judges_traits_with_luna_only(judge, monkeypatch, tmp_path, caplog):
+    """The default version (20 since 2026-10-31, with version 13's trait rubric,
+    which the review settled for gpt-5.6-luna): a trait run with gpt-4.1-mini is
+    refused before any request, as a role run under 10 is; with the default
+    judge, luna since the same day, it scores under version 20 (200 tokens, the
+    SCORE marker) and stamps version 13's trait hash under 20."""
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
     _write_responses(responses_dir, "patient", 2)
     client = _client()
     for extra in ((), ("--dry_run",)):
         caplog.clear()
         with pytest.raises(SystemExit) as e:
-            _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, version=None)
+            _run(judge, monkeypatch, responses_dir, output_dir, client, *extra, version=None)   # gpt-4.1-mini
         assert e.value.code == 1 and "trait rubric was settled for gpt-5.6-luna" in caplog.text
     assert client.chat.completions.create.call_count == 0 and not output_dir.exists()
-    _run(judge, monkeypatch, responses_dir, output_dir, client, "--judge_model", "gpt-5.6-luna", version=None)
+    _run(judge, monkeypatch, responses_dir, output_dir, client, version=None, judge_model=None)
     assert json.loads((output_dir / "patient.json").read_text()) == {f"pos_p0_q{q}": 3 for q in range(2)}
     stamp = json.loads((output_dir / "judge_rubric.json").read_text())
-    assert stamp["rubric_versions"] == [13] and stamp["reply_format"] == "score_marker"
+    assert stamp["rubric_versions"] == [20] and stamp["reply_format"] == "score_marker"
     assert stamp["judge_models"] == ["gpt-5.6-luna"]
-    assert stamp["prompt_sha256"] == {"13": judge.PROMPT_VERSIONS[13].sha256("trait")}
+    assert stamp["prompt_sha256"] == {"20": judge.PROMPT_VERSIONS[13].sha256("trait")}
     kwargs = client.chat.completions.create.call_args.kwargs
     assert kwargs["model"] == "gpt-5.6-luna" and kwargs["max_completion_tokens"] == 200
     assert not (output_dir / "abc_disagreements.jsonl").exists()
@@ -1505,15 +1523,213 @@ def test_the_default_version_13_judges_traits_with_luna_only(judge, monkeypatch,
 def test_a_role_run_under_the_default_version_sends_300_tokens(judge, monkeypatch, tmp_path):
     """Version 13's max_tokens, 200, is for its trait replies; a role reply is read
     from its A, B and C answers and needs 300 (found 2026-10-30, the day 13 became
-    the default: the extraction's roles pod would have cut every reply)."""
+    the default: the extraction's roles pod would have cut every reply).  Version
+    20 keeps that."""
     responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
     _write_responses(responses_dir, "robot", 1)
     client = _client(text=IN_ROLE_REFUSAL)
     _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "role",
-         "--judge_model", "gpt-5.6-luna", version=None)
+         version=None, judge_model=None)
+    kwargs = client.chat.completions.create.call_args.kwargs
+    assert kwargs["model"] == "gpt-5.6-luna" and kwargs["max_completion_tokens"] == 300
+    assert json.loads((output_dir / "judge_rubric.json").read_text())["rubric_versions"] == [20]
+
+
+COMBO_REPLY = ("A: no — answers the question\nB: no — no disclaimer\nR: yes — “as a robot”\n"
+               "T: no — no patience shown\nSCORE: 2")
+
+
+@pytest.mark.parametrize("version, score", [("14", 2), ("15", 3)])
+def test_a_combination_run_under_versions_14_and_15_scores_from_four_answers(
+        judge, monkeypatch, tmp_path, caplog, version, score):
+    """The combination rubric drafts (Roger, 2026-10-30): the reply's A, B, R and
+    T answers give the score by the version's table (14 both, 15 either), the
+    SCORE line only logged when it disagrees; 350 reply tokens; an AI role's
+    combination gets the AI-role B."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "t_robot__patient", 2)
+    client = _client(text=COMBO_REPLY)
+    caplog.set_level("INFO")
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "combination",
+         "--prompt_version", version, "--judge_model", "gpt-5.6-luna")
+    assert json.loads((output_dir / "t_robot__patient.json").read_text()) == {f"pos_p0_q{q}": score for q in range(2)}
+    kwargs = client.chat.completions.create.call_args.kwargs
+    assert kwargs["max_completion_tokens"] == 350
+    prompt = kwargs["messages"][0]["content"]
+    assert "Answer four questions" in prompt and "This role is an AI or a machine" in prompt
+    assert "**robot**" in prompt and "**patient**" in prompt
+    stamp = json.loads((output_dir / "judge_rubric.json").read_text())
+    assert stamp["reply_format"] == ("abrt_both" if version == "14" else "abrt_either")
+    assert stamp["prompt_sha256"] == {version: judge.PROMPT_VERSIONS[int(version)].sha256("combination")}
+    log = output_dir / "abc_disagreements.jsonl"
+    if version == "15":          # the reply states 2; the either table says 3
+        rows = [json.loads(l) for l in log.read_text().splitlines()]
+        assert rows == [{"entity": "t_robot__patient", "key": f"pos_p0_q{q}", "answers": "AnBnRyTn",
+                         "stated": 2, "score": 3, "keep_changed": True} for q in range(2)]
+    else:
+        assert not log.exists()
+
+
+ROLE_SIDE_REPLY = "A: no — answers the question\nB: no — none\nC: yes — “as a robot”\nSCORE: 3"
+
+
+def test_a_combination_run_under_versions_16_and_17_judges_one_side_with_the_other_as_context(
+        judge, monkeypatch, tmp_path):
+    """The context-aware drafts (Roger, 2026-10-30: both must show, each judged
+    by its own rubric knowing the other half): version 16 sends the role rubric
+    with the trait named as context and reads A, B and C (300 tokens); version 17
+    the trait rubric with the role as context, read by its SCORE line (200
+    tokens); an AI role's combination gets each rubric's AI carve-out."""
+    responses_dir = tmp_path / "responses"
+    _write_responses(responses_dir, "t_robot__patient", 2)
+    out16, out17 = tmp_path / "scores16", tmp_path / "scores17"
+    client = _client(text=ROLE_SIDE_REPLY)
+    _run(judge, monkeypatch, responses_dir, out16, client, "--entity_type", "combination",
+         "--prompt_version", "16", "--judge_model", "gpt-5.6-luna")
+    assert json.loads((out16 / "t_robot__patient.json").read_text()) == {f"pos_p0_q{q}": 3 for q in range(2)}
     kwargs = client.chat.completions.create.call_args.kwargs
     assert kwargs["max_completion_tokens"] == 300
-    assert json.loads((output_dir / "judge_rubric.json").read_text())["rubric_versions"] == [13]
+    prompt = kwargs["messages"][0]["content"]
+    assert "Answer three questions" in prompt and "Judge the role only." in prompt
+    assert "This role is an AI or a machine" in prompt and "**robot**" in prompt and "**patient**" in prompt
+    assert "displays the role: **robot**" in prompt
+    stamp = json.loads((out16 / "judge_rubric.json").read_text())
+    assert stamp["reply_format"] == "abc_answers"
+    assert stamp["prompt_sha256"] == {"16": judge.PROMPT_VERSIONS[16].sha256("combination")}
+    assert not (out16 / "abc_disagreements.jsonl").exists()
+    client = _client(text="The trait runs throughout.\nSCORE: 3")
+    _run(judge, monkeypatch, responses_dir, out17, client, "--entity_type", "combination",
+         "--prompt_version", "17", "--judge_model", "gpt-5.6-luna")
+    assert json.loads((out17 / "t_robot__patient.json").read_text()) == {f"pos_p0_q{q}": 3 for q in range(2)}
+    kwargs = client.chat.completions.create.call_args.kwargs
+    assert kwargs["max_completion_tokens"] == 200
+    prompt = kwargs["messages"][0]["content"]
+    assert "displays the trait: **patient**" in prompt and "Judge the trait only." in prompt
+    assert "**robot**" in prompt and "This role is an AI or a machine" in prompt
+    assert "Focus only on whether the model exhibits this trait." in prompt and "Answer three questions" not in prompt
+    stamp = json.loads((out17 / "judge_rubric.json").read_text())
+    assert stamp["reply_format"] == "score_marker"
+    assert stamp["prompt_sha256"] == {"17": judge.PROMPT_VERSIONS[17].sha256("combination")}
+
+
+def _two_sided_client():
+    """A client whose reply depends on the side it is asked for: the role side
+    (version 16's prompt, "Judge the role only.") gets an A/B/C reply scoring
+    3, the trait side (version 17's, "Judge the trait only.") a SCORE line of
+    2, so the combined score is the lower, 2."""
+    usage = SimpleNamespace(prompt_tokens=300, completion_tokens=40)
+
+    async def create(**kwargs):
+        prompt = kwargs["messages"][0]["content"]
+        assert ("Judge the role only." in prompt) != ("Judge the trait only." in prompt)
+        text = ROLE_SIDE_REPLY if "Judge the role only." in prompt else "The trait is faint.\nSCORE: 2"
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=text),
+                                                        finish_reason="stop")], usage=usage)
+    client = MagicMock()
+    client.chat.completions.create = AsyncMock(side_effect=create)
+    return client
+
+
+def test_the_default_version_judges_a_combination_on_two_sides(judge, monkeypatch, tmp_path, caplog):
+    """Version 20 (settled 2026-10-31, the default): each response is judged by
+    version 16 (the role side, 300 tokens, A/B/C) and by version 17 (the trait
+    side, 200 tokens, the SCORE line), the sides' scores kept in _sides/, the
+    combined score the lower; replies carry their side; a rerun judges only the
+    side a key lacks; gpt-4.1-mini is refused."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "t_robot__patient", 2)
+    client = _two_sided_client()
+    caplog.set_level("INFO")
+    with pytest.raises(SystemExit) as e:
+        _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "combination",
+             version=None)                                              # gpt-4.1-mini
+    assert e.value.code == 1 and "combination rule was settled for gpt-5.6-luna" in caplog.text
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "combination",
+         "--save_replies", version=None, judge_model=None)
+    keys = [f"pos_p0_q{q}" for q in range(2)]
+    assert json.loads((output_dir / "t_robot__patient.json").read_text()) == {k: 2 for k in keys}
+    assert json.loads((output_dir / "_sides" / "t_robot__patient.json").read_text()) == {
+        k: {"role": 3, "trait": 2} for k in keys}
+    calls = [c.kwargs for c in client.chat.completions.create.call_args_list]
+    assert len(calls) == 4 and all(c["model"] == "gpt-5.6-luna" for c in calls)
+    by_side = {("role" if "Judge the role only." in c["messages"][0]["content"] else "trait"): c["max_completion_tokens"]
+               for c in calls}
+    assert by_side == {"role": 300, "trait": 200}
+    stamp = json.loads((output_dir / "judge_rubric.json").read_text())
+    assert stamp["rubric_versions"] == [20] and stamp["reply_format"] == "two_sides"
+    assert stamp["combination_sides"] == {"role": 16, "trait": 17}
+    assert stamp["side_max_tokens"] == {"role": 300, "trait": 200}
+    assert stamp["prompt_sha256"] == {"20": judge.PROMPT_VERSIONS[20].sha256("combination")}
+    rows = [json.loads(l) for l in (output_dir / "_replies" / "t_robot__patient.jsonl").read_text().splitlines()]
+    assert sorted((r["key"], r["side"], r["score"]) for r in rows) == sorted(
+        [(k, "role", 3) for k in keys] + [(k, "trait", 2) for k in keys])
+    assert json.loads((output_dir / "usage.json").read_text())["n_calls"] == 4
+    assert "Saved 2 combined scores for t_robot__patient (2 new; 2 role side, 2 trait side)" in caplog.text
+    # a rerun with one side's scores missing judges that side alone
+    sides = output_dir / "_sides" / "t_robot__patient.json"
+    sides.write_text(json.dumps({keys[0]: {"role": 3, "trait": 2}, keys[1]: {"role": 3}}))
+    (output_dir / "t_robot__patient.json").write_text(json.dumps({keys[0]: 2}))
+    client = _two_sided_client()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "combination",
+         version=None, judge_model=None)
+    calls = [c.kwargs for c in client.chat.completions.create.call_args_list]
+    assert len(calls) == 1 and "Judge the trait only." in calls[0]["messages"][0]["content"]
+    assert json.loads((output_dir / "t_robot__patient.json").read_text()) == {k: 2 for k in keys}
+    assert json.loads(sides.read_text())[keys[1]] == {"role": 3, "trait": 2}
+    # nothing left: no calls
+    client = _two_sided_client()
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "combination",
+         version=None, judge_model=None)
+    assert client.chat.completions.create.call_count == 0
+
+
+def test_a_two_sided_dry_run_counts_both_sides_and_shows_each(judge, monkeypatch, tmp_path, caplog):
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "t_robot__patient", 3)
+    caplog.set_level("INFO")
+    _run(judge, monkeypatch, responses_dir, output_dir, _two_sided_client(), "--entity_type", "combination",
+         "--dry_run", version=None, judge_model=None)
+    assert "t_robot__patient: 6 prompts" in caplog.text and "Total prompts: 6" in caplog.text
+    assert "[the role side, prompt version 16, --max_tokens 300]" in caplog.text
+    assert "[the trait side, prompt version 17, --max_tokens 200]" in caplog.text
+    assert "Judge the role only." in caplog.text and "Judge the trait only." in caplog.text
+
+
+def test_a_two_sided_batch_run_requests_each_side_and_merges(judge, monkeypatch, tmp_path, caplog):
+    """Batch mode under version 20: a request per side with the side's token
+    limit (custom id <entity>|<key>#<side>), replies read by the side's format,
+    sides and combined scores merged as each batch lands."""
+    responses_dir, output_dir = tmp_path / "responses", tmp_path / "scores"
+    _write_responses(responses_dir, "t_robot__patient", 2)
+    client = FakeBatchClient(text=ROLE_SIDE_REPLY)          # parses on both sides: A/B/C 3, SCORE 3
+    caplog.set_level("INFO")
+    _run(judge, monkeypatch, responses_dir, output_dir, client, "--entity_type", "combination",
+         "--save_replies", version=None, judge_model=None, batch=True)
+    keys = [f"pos_p0_q{q}" for q in range(2)]
+    lines = [json.loads(l) for fid in client.uploaded if fid.startswith("file-") and "out" not in fid
+             for l in client.uploaded[fid].splitlines() if l.strip()]
+    assert sorted(l["custom_id"] for l in lines) == sorted(
+        f"t_robot__patient|{k}#{s}" for k in keys for s in ("role", "trait"))
+    tokens = {l["custom_id"].rsplit("#", 1)[1]: l["body"]["max_completion_tokens"] for l in lines}
+    assert tokens == {"role": 300, "trait": 200}
+    assert json.loads((output_dir / "t_robot__patient.json").read_text()) == {k: 3 for k in keys}
+    assert json.loads((output_dir / "_sides" / "t_robot__patient.json").read_text()) == {
+        k: {"role": 3, "trait": 3} for k in keys}
+    rows = [json.loads(l) for l in (output_dir / "_replies" / "t_robot__patient.jsonl").read_text().splitlines()]
+    assert sorted((r["key"], r["side"]) for r in rows) == sorted((k, s) for k in keys for s in ("role", "trait"))
+    assert client.chat.completions.create.call_count == 0
+    assert json.loads((output_dir / "judge_rubric.json").read_text())["combination_sides"] == {"role": 16, "trait": 17}
+
+
+def test_reread_replies_refuses_a_two_sided_version(judge, monkeypatch, tmp_path, caplog):
+    source, output_dir = tmp_path / "scores_v20", tmp_path / "out"
+    source.mkdir()
+    (source / "judge_rubric.json").write_text(json.dumps({"rubric_versions": [20], "entity_type": "combination"}))
+    monkeypatch.setattr(sys, "argv", ["3_judge.py", "--entity_type", "combination", "--prompt_version", "20",
+                                      "--reread_replies", str(source), "--output_dir", str(output_dir), "--dry_run"])
+    with pytest.raises(SystemExit) as e:
+        asyncio.run(judge.main_async())
+    assert e.value.code == 1 and "judges a combination on two sides" in caplog.text
 
 
 def _reread(judge, monkeypatch, source, output_dir, *extra):

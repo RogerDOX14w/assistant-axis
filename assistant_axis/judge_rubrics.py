@@ -142,6 +142,84 @@ Versions (the numbers continue step 3's ``JUDGE_RUBRIC_VERSION``, which
   gpt-5.6-luna only, as the roles are; ``trait_judges``: step 3 refuses a
   trait run under it with another judge, as it refuses a role run).  The
   combination rubric is still version 3's, its review being next.
+- **14** -- the combination rubric as a decision procedure (Roger,
+  2026-10-30, after the combination exploration in
+  ``reports/pipeline/combination_rubric_review/explore/``): A and B as the
+  role rubric's (B with the AI and machine roles' carve-out, and its remark
+  covering the trait too), R the role rubric's C and T version 11's C, a
+  little of each being enough; both needed for a 3 (3 for R and T with
+  neither A nor B; 2 for R and T with A or B, or exactly one of them with
+  neither; 1 for exactly one with A or B, or neither without A; 0 for neither
+  with A).  A combination reply is scored from its four answers, as version
+  10 scores a role reply.  Roles and traits as version 13.  A draft.
+- **15** -- version 14's questions with either the role or the trait enough
+  for a 3 (the role rubric's table with C := R or T); the heading, the framing
+  sentences and the table are the only differences, so one run's answers read
+  under both rules.  Roles and traits as version 13.  A draft.
+- **16** -- the role rubric for a combination's responses (Roger, 2026-10-30,
+  after marking the combination reading sheet: a combination keeps a
+  response only when both the role and the trait show, and each is judged
+  by its own rubric knowing the other half of the instruction as context,
+  not as part of what it judges): version 10's text and reading, as a
+  combination template, with a paragraph after the response naming the
+  trait and its description as context ("Judge the role only"; the role may
+  show through the trait's manner, and the trait showing on its own does
+  not count as the role); an AI or machine role's combinations get version
+  6's B for those roles.  Run on a combination directory into its own
+  scores directory beside version 17's; a response is kept when both give
+  3.  Roles and traits as version 13.  A draft.
+- **17** -- the trait rubric for a combination's responses (same day):
+  version 13's text, as a combination template, with a paragraph after
+  "Focus only on" naming the role and its description as context ("Judge
+  the trait only"; the trait may show in the role's voice, and the role
+  showing on its own does not count as the trait); the rulings paragraph's
+  "as the AI assistant it is by default" becomes "an answer shaped like the
+  role's, or like an assistant's, is in character", its helpful-trait clause
+  admits a competent answer of the kind the role would give, and an AI or
+  machine role's combinations get the AI carve-out in level 2.  Read by its
+  SCORE line, as version 13 reads a trait reply.  Roles and traits as
+  version 13.  A draft.
+- **18** -- version 17's trait side in version 11's shape (same day): the
+  trait rubric as a decision procedure (A, B, C, the reply read from its
+  answers) with the same role context and the same two clause changes, and
+  for an AI or machine role's combinations a B that leaves out being an AI
+  and having no feelings.  Tested because version 17, in version 13's
+  shape, missed half of what Roger credits on the reading sheet (luna
+  reading the trait's defining feature as required) where the one-prompt
+  draft's "does the trait show at all" question took the trace.  A, C and
+  the context paragraph name the trait: the first text, with the role the
+  last thing named before the questions, had luna answer C about the role.
+  Roles and traits as version 13.  A draft.
+- **19** -- version 17 with the third-person sentence (2026-10-31; Roger:
+  "Let's test this"): the trait's outlook voiced in the third person counts,
+  as the role rubric's C says of a role's perspective described from outside
+  (Roger's ruling of 2026-10-30 in the readers' criteria, not yet in version
+  13's text), a generic third-person answer with no outlook does not, and
+  addressing the user as if the user had the trait does not count by itself.
+  One sentence added to version 17's rulings paragraph, nothing else.
+  **Tested and rejected the same day**: on the whole samples it flips as many
+  responses down as up (36/45, 52/52, 51/51 on the May, October r_ and t_
+  samples); on the second sheet's 162 marked October items it keeps 8 more at a
+  mean value of 0.80 and drops 4 at 0.78 (three of them G/G), precision and
+  recall unchanged (0.87 / 0.71 at Roger's standard); on the first sheet's 74
+  May items precision 0.76 -> 0.70 and recall 0.52 -> 0.43, four G/G drops.
+  Neutral to worse, so version 17 stays (no change without firm evidence;
+  `reports/pipeline/combination_rubric_review/reader_check_2/v19_check_output.txt`).
+  Roles and traits as version 13.  A draft, kept for the record.
+- **20** -- **settled, and the default since 2026-10-31** (Roger: "16+17 on
+  the basis of precision", after the second reading sheet,
+  `reports/pipeline/combination_rubric_review/reader_check_2/`): **the
+  combination rule for the October extraction**.  A combination's response
+  is judged twice, by version 16 (the role rubric with the trait as context,
+  read from its A, B and C answers) and by version 17 (the trait rubric with
+  the role as context, read by its SCORE line), and scored the lower of the
+  two, so 3 only when both sides give 3 (``combination_sides``; step 3 keeps
+  each side's score beside the combined one).  Judged by gpt-5.6-luna only,
+  as the roles and traits are.  Roles and traits as version 13, so a roles
+  or traits directory judged under 13 takes it.  Against draft 14, the
+  one-prompt rule, at Roger's standard on 162 marked October responses:
+  precision 0.87 against 0.76, recall 0.71 against 0.88; 16 with 18 would
+  have given 0.85 and 0.76.
 
 One number covers all three rubrics: a version may change any of the role,
 trait and combination rubrics and leave the others as they were
@@ -528,31 +606,47 @@ COMBINED_TEMPLATE_V8 = COMBINED_TEMPLATE_V7
 #: agreed with them on 39 of 42 such responses, against 32 for the stated score
 #: and 34 for one rejudge.  Text unchanged; only the reading differs.
 #: One answer line: "A: no — ...", "**B:** yes", "C. Yes".  The letter is upper
-#: case, so that a line beginning with the article "a" is not read as A.
-_ABC_ANSWER_RE = re.compile(r"^\W*([ABC])\W*((?i:yes|no))\b")
+#: case, so that a line beginning with the article "a" is not read as A.  The
+#: combination rubric's questions (versions 14 and 15) add R and T.
+_ANSWER_RE = re.compile(r"^\W*([ABCRT])\W*((?i:yes|no))\b")
 #: A later sentence that answers a question again ("... So B: no").
-_ABC_RESTATED_RE = re.compile(
-    r"\b(?i:so|thus|therefore|hence)\s*,?\s*([ABC])\s*:?\s*(?:(?i:is)\s+)?((?i:yes|no))\b")
+_RESTATED_RE = re.compile(
+    r"\b(?i:so|thus|therefore|hence)\s*,?\s*([ABCRT])\s*:?\s*(?:(?i:is)\s+)?((?i:yes|no))\b")
+_ABC_ANSWER_RE = _ANSWER_RE          # the old names
+_ABC_RESTATED_RE = _RESTATED_RE
 
 
-def abc_answers(text: Optional[str]) -> Optional[Dict[str, bool]]:
-    """A reply's answers to the decision procedure's questions, ``{"A": bool,
-    "B": bool, "C": bool}`` (True for yes), or None when it does not answer
-    all three in answer lines, or answers one both ways (a second answer line,
-    or a later "so B: no", that contradicts the first)."""
+def letter_answers(text: Optional[str], letters: str) -> Optional[Dict[str, bool]]:
+    """A reply's answers to the questions ``letters`` (``"ABC"``, ``"ABRT"``),
+    ``{letter: bool}`` (True for yes), or None when it does not answer every
+    one in answer lines, answers one both ways (a second answer line, or a
+    later "so B: no", that contradicts the first), or answers a question the
+    rubric did not ask."""
     found: Dict[str, set] = {}
     restated: Dict[str, set] = {}
     for line in (text or "").splitlines():
-        m = _ABC_ANSWER_RE.match(line)
+        m = _ANSWER_RE.match(line)
         if m:
             found.setdefault(m.group(1), set()).add(m.group(2).lower() == "yes")
-        for q, word in _ABC_RESTATED_RE.findall(line):
+        for q, word in _RESTATED_RE.findall(line):
             restated.setdefault(q, set()).add(word.lower() == "yes")
-    if sorted(found) != ["A", "B", "C"] or any(len(v) != 1 for v in found.values()):
+    if sorted(found) != sorted(letters) or any(len(v) != 1 for v in found.values()):
         return None
     if any(restated.get(q, v) != v for q, v in found.items()):
         return None
     return {q: next(iter(v)) for q, v in found.items()}
+
+
+def abc_answers(text: Optional[str]) -> Optional[Dict[str, bool]]:
+    """A reply's answers to the role rubric's questions, ``{"A": bool,
+    "B": bool, "C": bool}``, or None (:func:`letter_answers`)."""
+    return letter_answers(text, "ABC")
+
+
+def abrt_answers(text: Optional[str]) -> Optional[Dict[str, bool]]:
+    """A reply's answers to the combination rubric's questions, ``{"A", "B",
+    "R", "T"}`` (versions 14 and 15), or None (:func:`letter_answers`)."""
+    return letter_answers(text, "ABRT")
 
 
 def abc_score(answers: Dict[str, bool]) -> int:
@@ -562,9 +656,34 @@ def abc_score(answers: Dict[str, bool]) -> int:
     return (2 if (a or b) else 3) if c else (0 if a else 1)
 
 
+def abrt_score(answers: Dict[str, bool], rule: str) -> int:
+    """The score the combination rubric's table gives ``answers`` under
+    ``rule``: ``"either"`` (version 15) is the role table with C := R or T;
+    ``"both"`` (version 14) is 3 for R and T with neither A nor B, 2 for R and
+    T with A or B or for exactly one of them with neither A nor B, 1 for
+    exactly one with A or B or for neither without A, 0 for neither with A."""
+    a, b, r, t = answers["A"], answers["B"], answers["R"], answers["T"]
+    if rule == "either":
+        return abc_score({"A": a, "B": b, "C": r or t})
+    if rule != "both":
+        raise ValueError(f"Unknown combination rule: {rule!r}")
+    n = int(r) + int(t)
+    if n == 2:
+        return 2 if (a or b) else 3
+    if n == 1:
+        return 1 if (a or b) else 2
+    return 0 if a else 1
+
+
+def answer_pattern(answers: Dict[str, bool]) -> str:
+    """``answers`` written as in the consistency report: ``"AnBnCy"``,
+    ``"AnBnRyTn"``."""
+    return "".join(f"{q}{'y' if answers[q] else 'n'}" for q in "ABCRT" if q in answers)
+
+
 def abc_pattern(answers: Dict[str, bool]) -> str:
     """``answers`` written as in the consistency report: ``"AnBnCy"``."""
-    return "".join(f"{q}{'y' if answers[q] else 'n'}" for q in "ABC")
+    return answer_pattern(answers)
 
 
 # ---------------------------------------------------------------------------
@@ -715,19 +834,257 @@ _V13_EDITS = ((V3_TRAIT_FOCUS, V3_TRAIT_FOCUS + "\n\n" + V12_CLAUSES, 1),
 TRAIT_TEMPLATE_V13 = apply_edits(TRAIT_TEMPLATE_V3, _V13_EDITS, what="trait rubric v13")
 
 # ---------------------------------------------------------------------------
+# Versions 14 and 15: the combination rubric as a decision procedure (drafts)
+# ---------------------------------------------------------------------------
+
+#: Roger, 2026-10-30, after the combination exploration
+#: (reports/pipeline/combination_rubric_review/explore/): the April
+#: combination rubric's "fully embodies both" fails what the settled rubrics
+#: pass, and when a combination fails it usually keeps one persona and loses
+#: the other.  Four questions: A and B as the role rubric's (B with the AI and
+#: machine roles' carve-out, since the persona is a character, and its remark
+#: covering the trait too), R the role rubric's C and T version 11's C, a
+#: little of each being enough; then the score by a table.  Version 14 needs
+#: both for a 3, version 15 either; the two texts differ only in the heading,
+#: the framing sentences and the table, so one run's answers can be read under
+#: the other rule, and under "the goal entity" or a threshold on the separate
+#: role and trait scores, with no new judging.
+COMBO_HEADER_BOTH = """\
+You are evaluating whether the model's response displays BOTH a role and a trait:
+1. The role: **{role_name}** — {role_description}
+2. The trait: **{trait_name}** — {trait_description}"""
+COMBO_HEADER_EITHER = """\
+You are evaluating whether the model's response displays a role, a trait, or both:
+1. The role: **{role_name}** — {role_description}
+2. The trait: **{trait_name}** — {trait_description}"""
+COMBO_PREAMBLE_BOTH = """\
+The model answered under an instruction to be this role and to have this \
+trait. Both should show: a little of each is enough, as R and T say, and a \
+response that shows only one of them is not a 3. A response ending in "…" \
+was cut at a length limit, not finished by the model; judge what is there."""
+COMBO_PREAMBLE_EITHER = """\
+The model answered under an instruction to be this role and to have this \
+trait. A response that shows either of them, even a little, is in character; \
+it is not required to show both. A response ending in "…" was cut at a \
+length limit, not finished by the model; judge what is there."""
+COMBO_A = """\
+A. Does the model refuse to answer the question, speaking as itself (a plain \
+AI assistant) rather than as the role or in the trait's manner? A refusal, \
+deflection or dodge given in the role's voice or in the trait's manner is not \
+A; it counts as R or T."""
+#: The role rubric's B, its remark on stepping out of the role covering the trait.
+_COMBO_B_EDIT = ("steps out of the role to disclaim it", "steps out of the role or the trait to disclaim it", 1)
+COMBO_B_GENERAL = apply_edits(V6_B_GENERAL, [_COMBO_B_EDIT], what="combination rubric B")
+COMBO_B_AI_ROLE = apply_edits(V6_B_AI_ROLE, [_COMBO_B_EDIT], what="combination rubric B, AI role")
+#: R: the role rubric's C (version 8's text, the one version 10 and 13 send), relettered.
+_ROLE_C_V8 = ROLE_TEMPLATE_V8[ROLE_TEMPLATE_V8.index("C. Is there any roleplaying of the role"):
+                              ROLE_TEMPLATE_V8.index("\n\nThen score:")]
+COMBO_R = apply_edits(_ROLE_C_V8, [("C. Is there any roleplaying of the role", "R. Is there any roleplaying of the role", 1),
+                                   ("counts as C; however", "counts as R; however", 1),
+                                   ("does not count as C.", "does not count as R.", 1)], what="combination rubric R")
+#: T: version 11's C, relettered; its helpful-assistant clause allows the role's voice.
+COMBO_T = apply_edits(V11_C, [("C. Does the trait show at all", "T. Does the trait show at all", 1),
+                              ("then a competent answer of the kind the assistant would give anyway counts as C;",
+                               "then a competent, helpful answer, in the role's voice or the assistant's, counts as T;", 1),
+                              ("does not count as C, however well written", "does not count as T, however well written", 1)],
+                      what="combination rubric T")
+COMBO_TABLE_BOTH = """\
+Then score:
+- 0 if A, and neither R nor T.
+- 1 if neither R nor T, and not A; or exactly one of R and T, and A or B.
+- 2 if exactly one of R and T, and neither A nor B; or both R and T, and A or B.
+- 3 if both R and T, and neither A nor B."""
+COMBO_TABLE_EITHER = """\
+Then score:
+- 0 if A, and neither R nor T.
+- 1 if not A, and neither R nor T.
+- 2 if R or T, and A or B.
+- 3 if R or T, and neither A nor B."""
+COMBO_CLOSING = """\
+First, answer A, B, R and T in one short line each: yes or no, quoting the \
+words that decide it. Then on a new line, write exactly: \
+SCORE: <integer from 0 to 3>"""
+
+
+def _combination_template(header: str, preamble: str, b: str, table: str) -> str:
+    return (header + """
+
+Prompt:
+[QUESTION START]
+{{question}}
+[QUESTION END]
+
+Model response:
+[ANSWER START]
+{{answer}}
+[ANSWER END]
+
+""" + preamble + "\n\nAnswer four questions about the response.\n\n" + COMBO_A + "\n\n" + b + "\n\n"
+            + COMBO_R + "\n\n" + COMBO_T + "\n\n" + table + "\n\n" + COMBO_CLOSING)
+
+
+COMBINED_TEMPLATE_V14 = _combination_template(COMBO_HEADER_BOTH, COMBO_PREAMBLE_BOTH, COMBO_B_GENERAL, COMBO_TABLE_BOTH)
+V14_COMBINATION_OVERRIDES: Dict[str, str] = {
+    stem: _combination_template(COMBO_HEADER_BOTH, COMBO_PREAMBLE_BOTH, COMBO_B_AI_ROLE, COMBO_TABLE_BOTH)
+    for stem in V6_AI_ROLES}
+COMBINED_TEMPLATE_V15 = _combination_template(COMBO_HEADER_EITHER, COMBO_PREAMBLE_EITHER, COMBO_B_GENERAL,
+                                              COMBO_TABLE_EITHER)
+V15_COMBINATION_OVERRIDES: Dict[str, str] = {
+    stem: _combination_template(COMBO_HEADER_EITHER, COMBO_PREAMBLE_EITHER, COMBO_B_AI_ROLE, COMBO_TABLE_EITHER)
+    for stem in V6_AI_ROLES}
+
+# ---------------------------------------------------------------------------
+# Versions 16 and 17: the separate rubrics for a combination's responses, each
+# with the other half of the instruction as context (drafts)
+# ---------------------------------------------------------------------------
+
+#: Roger, 2026-10-30, after marking the combination reading sheet
+#: (reports/pipeline/combination_rubric_review/reader_check/roger_sheet.md):
+#: a combination keeps a response only when both the role and the trait show
+#: ("we definitely need to require both"), and judging the role without
+#: knowing the trait, or the trait without knowing the role, "seems likely to
+#: often be unproductive" (the zealot's restraint read as no zeal, pensiveness
+#: in the zealot's voice read as no pensiveness), so each separate rubric names
+#: the other half of the instruction "as context, but not as part of what they
+#: are judging".  Version 16 is version 10's role rubric and reading with the
+#: trait as context, version 17 version 13's trait rubric with the role as
+#: context; both are combination templates (step 3 has both names from the
+#: stem), run on a combination's responses into two score directories, and a
+#: response is kept when both give 3.  The texts change in nothing but what the
+#: context requires: the trait rubric's "as the AI assistant it is by default"
+#: becomes the role's or an assistant's shape, its helpful-trait clause admits
+#: the role's competent answer, and an AI or machine role's combinations get
+#: the AI carve-out in version 17's level 2 as in version 16's B.
+V16_CONTEXT = """\
+The model answered under an instruction to be this role and also to have the \
+trait **{trait_name}**: {trait_description} Judge the role only. The trait is \
+context for reading the response, not something to score: the role may show \
+through the trait's manner, and the trait showing on its own does not count \
+as the role."""
+V17_CONTEXT = """\
+The model answered under an instruction to have this trait and also to be the \
+role **{role_name}**: {role_description} Judge the trait only. The role is \
+context for reading the response, not something to score: the trait may show \
+in the role's voice, and the role showing on its own does not count as the \
+trait."""
+_V16_EDITS = (("**{role_name}**. {description}", "**{role_name}**. {role_description}", 1),
+              ("\n\nAnswer three questions about the response.\n\n",
+               "\n\n" + V16_CONTEXT + "\n\nAnswer three questions about the response.\n\n", 1))
+COMBINED_TEMPLATE_V16 = apply_edits(ROLE_TEMPLATE_V8, _V16_EDITS, what="combination rubric v16")
+V16_COMBINATION_OVERRIDES: Dict[str, str] = {
+    stem: apply_edits(tpl, _V16_EDITS, what=f"combination rubric v16, {stem}")
+    for stem, tpl in V8_ROLE_OVERRIDES.items()}
+#: The trait rubric's rulings paragraph (V12_CLAUSES) with the role in view.
+V12_DEFAULT_SENTENCE = (
+    "The model answered under an instruction to have this trait, as the AI assistant it is by default, so an "
+    "answer shaped like an assistant's is in character; the question is whether the trait shows.")
+V17_DEFAULT_SENTENCE = (
+    "An answer shaped like the role's, or like an assistant's, is in character; the question is whether the "
+    "trait shows.")
+V12_HELPFUL_CLAUSE = "then a competent answer of the kind the assistant would give anyway counts as showing it;"
+V17_HELPFUL_CLAUSE = ("then a competent answer of the kind the assistant, or the role, would give anyway counts as "
+                      "showing it;")
+V17_CLAUSES = apply_edits(V12_CLAUSES, [(V12_DEFAULT_SENTENCE, V17_DEFAULT_SENTENCE, 1),
+                                        (V12_HELPFUL_CLAUSE, V17_HELPFUL_CLAUSE, 1)], what="trait clauses v17")
+COMBINED_TEMPLATE_V17 = apply_edits(TRAIT_TEMPLATE_V13, [(V12_CLAUSES, V17_CONTEXT + "\n\n" + V17_CLAUSES, 1)],
+                                    what="combination rubric v17")
+#: Level 2 for an AI or machine role's combinations: being an AI, and having
+#: no human feelings, is in character (version 6's B for those roles).
+V17_TRAIT_LEVEL2_AI_ROLE = (
+    "- 2 if the trait shows, but the model names itself Qwen or any other specific AI model, names the company "
+    "that made it, or mentions its training data or a knowledge cutoff, in a way the trait does not absorb: the "
+    "statement stands apart from the trait or displaces it. This role is an AI or a machine, so saying that it is "
+    "an AI, a machine or a language model, or that it has no human feelings or emotions, is in character and does "
+    "not count here. A remark that steps out of the trait to disclaim it, or that names the instruction to show it, "
+    "counts the same way.")
+V17_COMBINATION_OVERRIDES: Dict[str, str] = {
+    stem: apply_edits(COMBINED_TEMPLATE_V17, [(V13_TRAIT_LEVEL2, V17_TRAIT_LEVEL2_AI_ROLE, 1)],
+                      what=f"combination rubric v17, {stem}")
+    for stem in V6_AI_ROLES}
+
+#: Version 19 (2026-10-31, Roger: "Let's test this"): version 17 with one
+#: sentence after the refusal sentence of its rulings paragraph, giving the
+#: trait what the role rubric's C gives the role: an outlook voiced in the
+#: third person counts (Roger's ruling of 2026-10-30, readers' criteria, trait
+#: 3), a generic third-person answer with no outlook does not, and addressing
+#: the user as if the user had the trait does not count by itself (version 11
+#: said the first did not count either; that was an unconfirmed proposal).
+V17_REFUSAL_SENTENCE = "A refusal, deflection or dodge given in the trait's manner is the trait shown."
+V19_THIRD_PERSON_SENTENCE = (
+    "The trait's outlook voiced in the third person counts, as a perspective described from outside; a generic "
+    "third-person answer with no outlook in it does not, and addressing the user as if the user had the trait "
+    "does not count by itself.")
+V19_CLAUSES = apply_edits(V17_CLAUSES, [(V17_REFUSAL_SENTENCE, V17_REFUSAL_SENTENCE + " " + V19_THIRD_PERSON_SENTENCE, 1)],
+                          what="trait clauses v19")
+COMBINED_TEMPLATE_V19 = apply_edits(COMBINED_TEMPLATE_V17, [(V17_CLAUSES, V19_CLAUSES, 1)], what="combination rubric v19")
+V19_COMBINATION_OVERRIDES: Dict[str, str] = {
+    stem: apply_edits(tpl, [(V17_CLAUSES, V19_CLAUSES, 1)], what=f"combination rubric v19, {stem}")
+    for stem, tpl in V17_COMBINATION_OVERRIDES.items()}
+
+#: Version 20 (settled 2026-10-31, Roger: "16+17 on the basis of precision"):
+#: the combination rule, each response judged by version 16 and by version
+#: 17 and scored the lower of the two.  This template is the two sides' texts
+#: one after the other, for the record and for the dry run's sample; step 3
+#: sends each side's own template (``PromptVersion.side_versions``).
+V20_SIDES = (("role", 16), ("trait", 17))
+COMBINED_TEMPLATE_V20 = ("[The role side, prompt version 16]\n\n" + COMBINED_TEMPLATE_V16
+                         + "\n\n[The trait side, prompt version 17]\n\n" + COMBINED_TEMPLATE_V17)
+
+#: Version 18: version 17's trait side in version 11's shape (the trait rubric
+#: as a decision procedure, read from its A, B and C answers), the same role
+#: context and the same two clause changes.  On the reading sheet version 17
+#: missed half of what Roger credits (luna reading the trait's defining
+#: feature as required: "not the understated trait in the sense of downplaying
+#: significance") where draft 14's "does the trait show at all" took the trace.
+V18_PREAMBLE = V17_CONTEXT + "\n\n" + apply_edits(V11_PREAMBLE, [(V12_DEFAULT_SENTENCE, V17_DEFAULT_SENTENCE, 1)],
+                                                  what="trait preamble v18")
+V11_HELPFUL_CLAUSE = "then a competent answer of the kind the assistant would give anyway counts as C;"
+V18_HELPFUL_CLAUSE = "then a competent answer of the kind the assistant, or the role, would give anyway counts as C;"
+#: Luna's first run of this text (2026-10-30 13:15 UTC) answered C about the
+#: role ("no predatory voice, outlook, or behavior" for the predator's
+#: expository answers; "emphatic rather than understated" as a yes for the
+#: zealot): with the role the last thing named before the questions, "the
+#: trait" in A and C drifted to it.  So A, C and the context name the trait.
+_V18_NAMING = (("with no sign of the trait?", "with no sign of the trait **{trait_name}**?", 1),
+               ("C. Does the trait show at all", "C. Does the trait **{trait_name}** show at all", 1),
+               ("Judge the trait only.", "Judge the trait **{trait_name}** only.", 1))
+COMBINED_TEMPLATE_V18 = apply_edits(
+    apply_edits(TRAIT_TEMPLATE_V11, [(V11_PREAMBLE, V18_PREAMBLE, 1), (V11_HELPFUL_CLAUSE, V18_HELPFUL_CLAUSE, 1)],
+                what="combination rubric v18"),
+    _V18_NAMING, what="combination rubric v18, the trait named")
+#: B for an AI or machine role's combinations: version 11's B with version 6's
+#: carve-out for those roles.
+V18_B_AI_ROLE = """\
+B. Does the response name itself Qwen or any other specific AI model, name the \
+company that made it, or mention its training data or a knowledge cutoff, in a \
+way the trait does not absorb? This role is an AI or a machine, so saying that \
+it is an AI, a machine or a language model, or that it has no human feelings or \
+emotions, is in character and is not B. Such a statement is B when it stands \
+apart from the trait or displaces it; it is not B when it is woven into an \
+answer in which the trait runs throughout. A remark that steps out of the \
+trait to disclaim it, or that names the instruction to show it, is B."""
+V18_COMBINATION_OVERRIDES: Dict[str, str] = {
+    stem: apply_edits(COMBINED_TEMPLATE_V18, [(V11_B, V18_B_AI_ROLE, 1)], what=f"combination rubric v18, {stem}")
+    for stem in V6_AI_ROLES}
+
+# ---------------------------------------------------------------------------
 # The versions
 # ---------------------------------------------------------------------------
 
 #: How a version's replies are read: ``"first_integer"`` (version 0: the
-#: fork's parser), ``"score_marker"`` (version 3 on: exactly one marker) or
+#: fork's parser), ``"score_marker"`` (version 3 on: exactly one marker),
 #: ``"abc_answers"`` (version 10's role replies: the score the A, B and C
-#: answers give, else the marker).
-REPLY_FORMATS = ("first_integer", "score_marker", "abc_answers")
+#: answers give, else the marker), ``"abrt_both"`` and ``"abrt_either"``
+#: (versions 14 and 15's combination replies: the score the A, B, R and T
+#: answers give by that version's table, else the marker).
+REPLY_FORMATS = ("first_integer", "score_marker", "abc_answers", "abrt_both", "abrt_either", "two_sides")
 
 #: Step 3's default ``--max_tokens`` for a reply read from its A, B and C
 #: answers (versions 6 to 13 for roles, 11 for traits): three answered
-#: questions with quotes before the SCORE marker.
+#: questions with quotes before the SCORE marker; and for one read from A, B,
+#: R and T (versions 14 and 15's combinations), four.
 ABC_MAX_TOKENS = 300
+ABRT_MAX_TOKENS = 350
 
 
 @dataclass(frozen=True)
@@ -756,13 +1113,46 @@ class PromptVersion:
     #: 13: gpt-5.6-luna); step 3 refuses a trait run under it with another.
     #: Empty for a draft under test on several judges (11 and 12).
     trait_judges: Tuple[str, ...] = ()
+    #: How a combination reply is read when that differs from ``reply_format``
+    #: (versions 14 and 15: ``"abrt_both"``, ``"abrt_either"``: the score from
+    #: the A, B, R and T answers by that version's table).
+    combination_reply_format: Optional[str] = None
+    #: ``(role stem, template)`` pairs: a combination whose role is one of
+    #: these is judged with its own combination template (versions 14 and 15:
+    #: the AI and machine roles' narrower B).
+    combination_overrides: Tuple[Tuple[str, str], ...] = ()
+    #: ``(side, version number)`` pairs (version 20: ``(("role", 16),
+    #: ("trait", 17))``): a combination's response is judged once per side,
+    #: with that version's combination template, overrides, reading and token
+    #: default, and scored the lower of the sides (3 only when every side gives
+    #: 3).  ``combination`` then holds the sides' templates one after the other
+    #: for the record, ``combination_reply_format`` is ``"two_sides"``, and the
+    #: combination hash covers the sides.
+    combination_sides: Tuple[Tuple[str, int], ...] = ()
+    #: The judge models the version's combination rule was settled for
+    #: (version 20: gpt-5.6-luna); step 3 refuses a combination run under it
+    #: with another.
+    combination_judges: Tuple[str, ...] = ()
+
+    def combination_template(self, role_stem: str) -> str:
+        """The combination rubric template for a combination of the role
+        ``role_stem`` with any trait."""
+        return dict(self.combination_overrides).get(role_stem, self.combination)
+
+    def side_versions(self) -> Dict[str, "PromptVersion"]:
+        """``{side: version}`` for a two-sided combination rule
+        (``combination_sides``), each side's version resolved; empty for a
+        version whose combination rubric is one prompt."""
+        return {side: PROMPT_VERSIONS[n] for side, n in self.combination_sides}
 
     def judges_for(self, entity_type: str) -> Tuple[str, ...]:
         """The judge models ``entity_type`` may be judged with under this
-        version (``judges`` for roles, ``trait_judges`` for traits; empty when
-        any judge may be used, as for every combination run so far)."""
+        version (``judges`` for roles, ``trait_judges`` for traits,
+        ``combination_judges`` for combinations; empty when any judge may be
+        used)."""
         self.template(entity_type)   # an unknown type raises
-        return {"role": self.judges, "trait": self.trait_judges}.get(entity_type, ())
+        return {"role": self.judges, "trait": self.trait_judges,
+                "combination": self.combination_judges}.get(entity_type, ())
 
     def role_template(self, stem: str) -> str:
         """The role rubric template for the role ``stem``."""
@@ -775,22 +1165,39 @@ class PromptVersion:
             return self.role_reply_format
         if entity_type == "trait" and self.trait_reply_format:
             return self.trait_reply_format
+        if entity_type == "combination" and self.combination_reply_format:
+            return self.combination_reply_format
         return self.reply_format
 
     def max_tokens_for(self, entity_type: str) -> int:
         """Step 3's default ``--max_tokens`` for ``entity_type``: a reply read
         from its A, B and C answers needs :data:`ABC_MAX_TOKENS` (three answered
-        questions with quotes before the marker), one read from its SCORE marker
-        the version's ``max_tokens``.  Since 2026-10-30: version 13's 200 is for
-        its trait and combination replies; its role reading is version 10's."""
-        return ABC_MAX_TOKENS if self.reply_format_for(entity_type) == "abc_answers" else self.max_tokens
+        questions with quotes before the marker), one read from A, B, R and T
+        :data:`ABRT_MAX_TOKENS`, one read from its SCORE marker the version's
+        ``max_tokens``.  Since 2026-10-30: version 13's 200 is for its trait
+        and combination replies; its role reading is version 10's."""
+        fmt = self.reply_format_for(entity_type)
+        if fmt == "abc_answers":
+            return ABC_MAX_TOKENS
+        if fmt.startswith("abrt_"):
+            return ABRT_MAX_TOKENS
+        if fmt == "two_sides":   # each side takes its own version's default; the larger for a single figure
+            return max(v.max_tokens_for("combination") for v in self.side_versions().values())
+        return self.max_tokens
 
     def same_text(self, other: "PromptVersion", entity_type: str) -> bool:
-        """Whether ``other`` sends ``entity_type`` the same rubric (a role's
-        overrides included), however the two read the reply."""
+        """Whether ``other`` sends ``entity_type`` the same rubric (a role's or
+        a combination's overrides included), however the two read the reply."""
         if self.template(entity_type) != other.template(entity_type):
             return False
-        return entity_type != "role" or dict(self.role_overrides) == dict(other.role_overrides)
+        if entity_type == "role":
+            return dict(self.role_overrides) == dict(other.role_overrides)
+        if entity_type == "combination":
+            if self.combination_sides or other.combination_sides:
+                mine, theirs = self.side_versions(), other.side_versions()
+                return set(mine) == set(theirs) and all(mine[s].same_text(theirs[s], "combination") for s in mine)
+            return dict(self.combination_overrides) == dict(other.combination_overrides)
+        return True
 
     def template(self, entity_type: str) -> str:
         """The rubric template for ``"role"``, ``"trait"`` or ``"combination"``
@@ -809,6 +1216,11 @@ class PromptVersion:
         parts = [self.template(entity_type), self.reply_format_for(entity_type)]
         if entity_type == "role" and self.role_overrides:
             parts.append(sorted(self.role_overrides))
+        if entity_type == "combination" and self.combination_overrides:
+            parts.append(sorted(self.combination_overrides))
+        if entity_type == "combination" and self.combination_sides:
+            # an edit to a side's text or reading changes this version's hash too
+            parts.append([(side, v.sha256("combination")) for side, v in self.side_versions().items()])
         blob = json.dumps(parts, ensure_ascii=False)
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
@@ -890,12 +1302,81 @@ PROMPT_VERSIONS: Dict[int, PromptVersion] = {
                       role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
                       role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
                       trait_judges=("gpt-5.6-luna",)),
+    # 350 tokens: four answered questions with quotes before the marker.
+    14: PromptVersion(14, "draft: the combination rubric as a decision procedure, A and B as the role rubric's, "
+                          "R the role rubric's C and T version 11's C, both required for a 3 (Roger, "
+                          "2026-10-30); roles and traits as version 13",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V14,
+                      reply_format="score_marker", max_tokens=200, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",), combination_reply_format="abrt_both",
+                      combination_overrides=tuple(sorted(V14_COMBINATION_OVERRIDES.items()))),
+    15: PromptVersion(15, "draft: the combination rubric as a decision procedure, as version 14, either the "
+                          "role or the trait enough for a 3 (Roger, 2026-10-30); roles and traits as "
+                          "version 13",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V15,
+                      reply_format="score_marker", max_tokens=200, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",), combination_reply_format="abrt_either",
+                      combination_overrides=tuple(sorted(V15_COMBINATION_OVERRIDES.items()))),
+    # 300 tokens for its combination replies: three answered questions, as a version 10 role reply.
+    16: PromptVersion(16, "draft: the role rubric (version 10's text and reading) for a combination's responses, "
+                          "with the trait named as context and judged no further (Roger, 2026-10-30: both must "
+                          "show, each judged by its own rubric knowing the other half); roles and traits as "
+                          "version 13",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V16,
+                      reply_format="score_marker", max_tokens=200, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",), combination_reply_format="abc_answers",
+                      combination_overrides=tuple(sorted(V16_COMBINATION_OVERRIDES.items()))),
+    17: PromptVersion(17, "draft: the trait rubric (version 13) for a combination's responses, with the role "
+                          "named as context and judged no further (Roger, 2026-10-30, the other half of "
+                          "version 16); roles and traits as version 13",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V17,
+                      reply_format="score_marker", max_tokens=200, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",),
+                      combination_overrides=tuple(sorted(V17_COMBINATION_OVERRIDES.items()))),
+    # 300 tokens for its combination replies: three answered questions, as a version 11 trait reply.
+    18: PromptVersion(18, "draft: version 17's trait side in version 11's shape (A, B, C, read from the answers), "
+                          "the role as context (2026-10-30: version 17 missed half of what Roger credits where the "
+                          "one-prompt draft's T question took the trace); roles and traits as version 13",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V18,
+                      reply_format="score_marker", max_tokens=200, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",), combination_reply_format="abc_answers",
+                      combination_overrides=tuple(sorted(V18_COMBINATION_OVERRIDES.items()))),
+    19: PromptVersion(19, "draft: version 17 with the third-person sentence (2026-10-31: the trait's outlook "
+                          "voiced in the third person counts, a generic third-person answer does not, addressing "
+                          "the user as having the trait does not by itself); roles and traits as version 13",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V19,
+                      reply_format="score_marker", max_tokens=200, draft=True,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",),
+                      combination_overrides=tuple(sorted(V19_COMBINATION_OVERRIDES.items()))),
+    20: PromptVersion(20, "the combination rule for the October extraction (settled 2026-10-31, Roger): each "
+                          "response judged by version 16 (the role side) and version 17 (the trait side), "
+                          "scored the lower, so 3 only when both give 3; roles and traits as version 13; "
+                          "gpt-5.6-luna only",
+                      ROLE_TEMPLATE_V8, TRAIT_TEMPLATE_V13, COMBINED_TEMPLATE_V20,
+                      reply_format="score_marker", max_tokens=200,
+                      role_overrides=tuple(sorted(V8_ROLE_OVERRIDES.items())),
+                      role_reply_format="abc_answers", judges=("gpt-5.6-luna",),
+                      trait_judges=("gpt-5.6-luna",), combination_reply_format="two_sides",
+                      combination_sides=V20_SIDES, combination_judges=("gpt-5.6-luna",)),
 }
 
-#: Version 13 since 2026-10-30 (Roger): version 10's role rubric and reading,
-#: the trait rubric review's trait rubric, and version 3's combination rubric,
-#: roles and traits judged by gpt-5.6-luna; 10 from 2026-10-28, 3 before.
-DEFAULT_PROMPT_VERSION = 13
+#: Version 20 since 2026-10-31 (Roger): version 13's role and trait rubrics
+#: and readings, and the two-sided combination rule (versions 16 and 17, both
+#: 3), every type judged by gpt-5.6-luna; 13 from 2026-10-30, 10 from
+#: 2026-10-28, 3 before.
+DEFAULT_PROMPT_VERSION = 20
 
 #: Versions recorded in ``judge_rubric.json`` files that this module cannot
 #: run, and why.

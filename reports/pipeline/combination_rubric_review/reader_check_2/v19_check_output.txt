@@ -1,0 +1,110 @@
+1. the whole samples
+   May exploration sample             n  1522  trait side 17 -> 19:  36 up,  45 down; pair keeps 0.382 -> 0.374
+                                      up by trait: understated 10, pensive 4, lustful 4, speculative 3, deontological 3, harmful 3, visceral 2, sociopathic 2
+   October r_ sample                  n  1620  trait side 17 -> 19:  52 up,  52 down; pair keeps 0.448 -> 0.450
+                                      up by trait: understated 14, unassuming 7, pensive 6, specialist 5, observant 4, expository 3, temperamental 3, concise 2
+   October t_ sample                  n  2640  trait side 17 -> 19:  51 up,  51 down; pair keeps 0.556 -> 0.560
+                                      up by trait: harmful 8, individualistic 5, deontological 4, ecocentric 4, manipulative 3, relativist 3, selfish 3, competitive 2
+
+2. the second sheet's 162 October items
+
+   at Roger's standard (readers' letters mapped through his 30, his own kept)
+   slice              n expect                               16 and 17                               16 and 19
+                                keep   precision [95% CI]   recall [95% CI]  keep   precision [95% CI]   recall [95% CI]
+   all              162   0.62  0.51  0.87 [0.78 0.93]  0.71 [0.67 0.75]  0.52  0.87 [0.78 0.93]  0.72 [0.67 0.76]
+   r_                81   0.53  0.44  0.82 [0.72 0.91]  0.68 [0.62 0.73]  0.44  0.82 [0.72 0.90]  0.68 [0.59 0.75]
+   t_                81   0.68  0.56  0.89 [0.77 0.97]  0.73 [0.68 0.78]  0.56  0.89 [0.78 0.97]  0.74 [0.68 0.79]
+   low keep          54   0.46  0.29  0.81 [0.69 0.92]  0.51 [0.44 0.59]  0.28  0.85 [0.75 0.93]  0.51 [0.41 0.62]
+   medium keep       54   0.67  0.52  0.93 [0.86 1.00]  0.73 [0.66 0.80]  0.52  0.92 [0.84 0.99]  0.72 [0.65 0.79]
+   high keep         54   0.74  0.72  0.84 [0.68 0.95]  0.82 [0.77 0.86]  0.74  0.83 [0.68 0.94]  0.84 [0.76 0.90]
+   r_ low            27   0.43  0.25  0.80 [0.66 0.94]  0.46 [0.37 0.58]  0.28  0.82 [0.69 0.94]  0.52 [0.41 0.66]
+   r_ medium         27   0.50  0.48  0.78 [0.53 1.00]  0.74 [0.63 0.83]  0.48  0.78 [0.53 1.00]  0.74 [0.63 0.83]
+   r_ high           27   0.74  0.73  0.87 [0.74 0.96]  0.85 [0.80 0.90]  0.69  0.85 [0.72 0.96]  0.78 [0.58 0.92]
+   t_ low            27   0.49  0.33  0.82 [0.65 0.96]  0.55 [0.44 0.70]  0.28  0.88 [0.75 0.97]  0.51 [0.35 0.69]
+   t_ medium         27   0.75  0.55  1.00 [1.00 1.00]  0.73 [0.64 0.82]  0.55  0.98 [0.95 1.00]  0.71 [0.62 0.81]
+   t_ high           27   0.73  0.72  0.83 [0.60 0.99]  0.81 [0.74 0.86]  0.76  0.83 [0.62 0.98]  0.86 [0.79 0.92]
+   r_ not predator   17   0.59  0.60  0.80 [0.67 0.92]  0.81 [0.65 0.95]  0.60  0.80 [0.67 0.92]  0.81 [0.65 0.95]
+   t_ not chef       27   0.45  0.45  0.70 [0.38 0.97]  0.69 [0.45 0.86]  0.40  0.71 [0.36 0.98]  0.63 [0.34 0.83]
+   r_ all keep       30   0.83  1.00  0.83 [0.73 0.92]  1.00 [1.00 1.00]  0.96  0.82 [0.72 0.91]  0.95 [0.84 1.00]
+   r_ mixed          36   0.50  0.06  0.62 [0.50 1.00]  0.07 [0.00 0.19]  0.13  0.77 [0.49 1.00]  0.20 [0.03 0.39]
+   r_ all drop       15   0.13  0.00   nan [nan nan]  0.00 [0.00 0.00]  0.00   nan [nan nan]  0.00 [0.00 0.00]
+   t_ all keep       30   0.88  1.00  0.88 [0.77 0.97]  1.00 [1.00 1.00]  0.97  0.89 [0.77 0.98]  0.98 [0.95 1.00]
+   t_ mixed          36   0.55  0.09  1.00 [1.00 1.00]  0.16 [0.00 0.32]  0.20  0.84 [0.65 0.97]  0.30 [0.13 0.48]
+   t_ all drop       15   0.36  0.00   nan [nan nan]  0.00 [0.00 0.00]  0.00   nan [nan nan]  0.00 [0.00 0.00]
+
+   the readers' letters with Roger's overrides
+   slice              n expect                               16 and 17                               16 and 19
+                                keep   precision [95% CI]   recall [95% CI]  keep   precision [95% CI]   recall [95% CI]
+   all              162   0.43  0.51  0.70              0.83              0.52  0.69              0.83            
+   r_                81   0.37  0.44  0.68              0.81              0.44  0.67              0.80            
+   t_                81   0.47  0.56  0.71              0.84              0.56  0.71              0.84            
+   low keep          54   0.26  0.29  0.59              0.64              0.28  0.62              0.66            
+   medium keep       54   0.48  0.52  0.78              0.85              0.52  0.76              0.83            
+   high keep         54   0.55  0.72  0.68              0.90              0.74  0.67              0.91            
+   r_ low            27   0.27  0.25  0.63              0.59              0.28  0.67              0.69            
+   r_ medium         27   0.36  0.48  0.67              0.89              0.48  0.67              0.89            
+   r_ high           27   0.56  0.73  0.71              0.92              0.69  0.67              0.82            
+   t_ low            27   0.26  0.33  0.56              0.71              0.28  0.57              0.62            
+   t_ medium         27   0.54  0.55  0.83              0.84              0.55  0.80              0.81            
+   t_ high           27   0.55  0.72  0.68              0.89              0.76  0.67              0.94            
+   r_ not predator   17   0.35  0.60  0.55              0.93              0.60  0.55              0.93            
+   t_ not chef       27   0.23  0.45  0.47              0.92              0.40  0.46              0.80            
+   r_ all keep       30   0.69  1.00  0.69              1.00              0.96  0.67              0.94            
+   r_ mixed          36   0.27  0.06  0.43              0.09              0.13  0.64              0.30            
+   r_ all drop       15   0.00  0.00   nan               nan              0.00   nan               nan            
+   t_ all keep       30   0.72  1.00  0.72              1.00              0.97  0.73              0.98            
+   t_ mixed          36   0.24  0.09  0.44              0.16              0.20  0.42              0.34            
+   t_ all drop       15   0.13  0.00   nan              0.00              0.00   nan              0.00            
+
+   the readers' letters alone
+   slice              n expect                               16 and 17                               16 and 19
+                                keep   precision [95% CI]   recall [95% CI]  keep   precision [95% CI]   recall [95% CI]
+   all              162   0.39  0.51  0.67              0.89              0.52  0.67              0.90            
+   r_                81   0.32  0.44  0.61              0.83              0.44  0.60              0.82            
+   t_                81   0.43  0.56  0.69              0.91              0.56  0.70              0.93            
+   low keep          54   0.21  0.29  0.50              0.69              0.28  0.58              0.79            
+   medium keep       54   0.42  0.52  0.77              0.94              0.52  0.75              0.92            
+   high keep         54   0.52  0.72  0.66              0.91              0.74  0.65              0.91            
+   r_ low            27   0.24  0.25  0.57              0.59              0.28  0.61              0.71            
+   r_ medium         27   0.31  0.48  0.62              0.95              0.48  0.62              0.95            
+   r_ high           27   0.48  0.73  0.63              0.95              0.69  0.57              0.81            
+   t_ low            27   0.17  0.33  0.44              0.85              0.28  0.54              0.89            
+   t_ medium         27   0.48  0.55  0.83              0.94              0.55  0.80              0.91            
+   t_ high           27   0.54  0.72  0.68              0.90              0.76  0.67              0.95            
+   r_ not predator   17   0.30  0.60  0.46              0.92              0.60  0.46              0.92            
+   t_ not chef       27   0.19  0.45  0.39              0.95              0.40  0.45              0.95            
+   r_ all keep       30   0.62  1.00  0.62              1.00              0.96  0.60              0.93            
+   r_ mixed          36   0.21  0.06  0.43              0.12              0.13  0.53              0.33            
+   r_ all drop       15   0.00  0.00   nan               nan              0.00   nan               nan            
+   t_ all keep       30   0.70  1.00  0.70              1.00              0.97  0.72              1.00            
+   t_ mixed          36   0.22  0.09  0.44              0.18              0.20  0.42              0.37            
+   t_ all drop       15   0.01  0.00   nan              0.00              0.00   nan              0.00            
+
+   marked items the pair flips (12): item, stem, direction, letters (role / trait, readers; Roger's where he marked), value at Roger's standard
+       3 t_summarizer__lustful                    17 keeps, 19 drops B / G/T; Roger G / G         value 1.00
+      22 t_chef__ecocentric                       17 drops, 19 keeps G / T                        value 0.83
+      26 t_chef__existentialist                   17 drops, 19 keeps G / T                        value 0.83
+      36 t_proofreader__unhelpful                 17 keeps, 19 drops B / T                        value 0.14
+      39 t_chef__lustful                          17 keeps, 19 drops G / G/T                      value 1.00
+      86 r_predator__observant                    17 drops, 19 keeps G / B                        value 0.44
+      90 t_chef__destructive                      17 drops, 19 keeps G / B                        value 0.44
+     100 r_predator__unassuming                   17 drops, 19 keeps G / G                        value 1.00
+     115 t_chef__individualistic                  17 drops, 19 keeps G / G                        value 1.00
+     122 t_chef__amoral                           17 drops, 19 keeps G / T                        value 0.83
+     131 r_predator__pensive                      17 keeps, 19 drops G / G; Roger G / G           value 1.00
+     151 r_predator__witty                        17 drops, 19 keeps G / B; Roger G / G           value 1.00
+   19's extra keeps: 8, mean value 0.80
+   19's extra drops: 4, mean value 0.78
+
+3. the first sheet's 74 May items (adjusted letters, unweighted)
+   16 and 17  n 74  keeps 0.30  precision 0.76  recall 0.52
+   16 and 19  n 74  keeps 0.27  precision 0.70  recall 0.43
+   flipped (8):
+      16 r_prey__intuitive                        17 keeps, 19 drops G / G (Roger)  value 1.00
+      25 r_paperclip_maximizer__visceral          17 keeps, 19 drops G / G (Roger)  value 1.00
+      36 r_paperclip_maximizer__visceral          17 keeps, 19 drops G / G (Roger)  value 1.00
+      49 t_biologist__deontological               17 drops, 19 keeps G / T (Roger)  value 0.50
+      58 r_zealot__understated                    17 drops, 19 keeps G / G (Roger)  value 1.00
+      60 t_marketer__lustful                      17 keeps, 19 drops G / G (Roger)  value 1.00
+      71 t_lawyer__lustful                        17 keeps, 19 drops G / G/T  value 0.75
+      74 t_poet__harmful                          17 drops, 19 keeps G / T  value 0.50

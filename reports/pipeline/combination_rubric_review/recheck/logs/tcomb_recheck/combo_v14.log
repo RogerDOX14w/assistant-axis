@@ -1,0 +1,63 @@
+2026-10-30 23:28:56,618 - INFO - Found 44 response files
+2026-10-30 23:28:56,618 - INFO - Processing 44 entities
+2026-10-30 23:28:56,709 - INFO - Rubric version 14 (draft): draft: the combination rubric as a decision procedure, A and B as the role rubric's, R the role rubric's C and T version 11's C, both required for a 3 (Roger, 2026-10-30); roles and traits as version 13 (names in the judge-display-v1 form; --max_tokens 350)
+2026-10-30 23:28:56,709 - INFO - [usage] earlier runs total=$0.463 calls=2,580 [gpt-5.6-luna:flex: $0.463 in=3,325,028 out=217,390 n=2,580]
+Scoring:   0%|          | 0/44 [00:00<?, ?it/s]2026-10-30 23:28:56,805 - INFO - Skipping t_accountant__radical: all 60 already scored
+2026-10-30 23:28:56,806 - INFO - Skipping t_chef__amoral: all 60 already scored
+2026-10-30 23:28:56,807 - INFO - Skipping t_chef__clannish: all 60 already scored
+2026-10-30 23:28:56,809 - INFO - Skipping t_chef__competitive: all 60 already scored
+2026-10-30 23:28:56,810 - INFO - Skipping t_chef__deontological: all 60 already scored
+2026-10-30 23:28:56,811 - INFO - Skipping t_chef__destructive: all 60 already scored
+2026-10-30 23:28:56,813 - INFO - Skipping t_chef__ecocentric: all 60 already scored
+2026-10-30 23:28:56,814 - INFO - Skipping t_chef__elitist: all 60 already scored
+2026-10-30 23:28:56,815 - INFO - Skipping t_chef__existentialist: all 60 already scored
+2026-10-30 23:28:56,816 - INFO - Skipping t_chef__fundamentalist: all 60 already scored
+Scoring:  23%|██▎       | 10/44 [00:00<00:00, 99.62it/s]2026-10-30 23:28:56,817 - INFO - Skipping t_chef__greedy: all 60 already scored
+2026-10-30 23:28:56,818 - INFO - Skipping t_chef__harmful: all 60 already scored
+2026-10-30 23:28:56,819 - INFO - Skipping t_chef__hedonistic: all 60 already scored
+2026-10-30 23:28:56,821 - INFO - Skipping t_chef__humanitarian: all 60 already scored
+2026-10-30 23:28:56,822 - INFO - Skipping t_chef__iconoclastic: all 60 already scored
+2026-10-30 23:28:56,823 - INFO - Skipping t_chef__idealistic: all 60 already scored
+2026-10-30 23:28:56,824 - INFO - Skipping t_chef__individualistic: all 60 already scored
+2026-10-30 23:28:56,825 - INFO - Skipping t_chef__lustful: all 60 already scored
+2026-10-30 23:28:56,826 - INFO - Skipping t_chef__manipulative: all 60 already scored
+2026-10-30 23:28:56,827 - INFO - Skipping t_chef__misanthropic: all 60 already scored
+2026-10-30 23:28:56,829 - INFO - Skipping t_chef__nationalist: all 60 already scored
+2026-10-30 23:28:56,830 - INFO - Skipping t_chef__nurturing: all 60 already scored
+2026-10-30 23:28:56,831 - INFO - Skipping t_chef__radical: all 60 already scored
+2026-10-30 23:28:56,832 - INFO - Skipping t_chef__relativist: all 60 already scored
+2026-10-30 23:28:56,833 - INFO - Skipping t_chef__sadistic: all 60 already scored
+2026-10-30 23:28:56,834 - INFO - Skipping t_chef__scheming: all 60 already scored
+2026-10-30 23:28:56,835 - INFO - Skipping t_chef__selfish: all 60 already scored
+2026-10-30 23:28:56,836 - INFO - Skipping t_chef__sociopathic: all 60 already scored
+2026-10-30 23:28:56,837 - INFO - Skipping t_chef__unhelpful: all 60 already scored
+2026-10-30 23:28:56,839 - INFO - Skipping t_chef__utilitarian: all 60 already scored
+2026-10-30 23:28:56,840 - INFO - Skipping t_chef__vindictive: all 60 already scored
+2026-10-30 23:28:56,841 - INFO - Scoring 60 new responses for t_crystalline__manipulative...
+2026-10-30 23:29:10,743 - INFO - Saved 60 scores for t_crystalline__manipulative (60 new)
+Scoring:  73%|███████▎  | 32/44 [00:14<00:05,  2.07it/s]2026-10-30 23:29:10,745 - INFO - Skipping t_cyborg__greedy: all 60 already scored
+2026-10-30 23:29:10,746 - INFO - Skipping t_cyborg__harmful: all 60 already scored
+2026-10-30 23:29:10,747 - INFO - Skipping t_debugger__unhelpful: all 60 already scored
+2026-10-30 23:29:10,748 - INFO - Skipping t_dreamer__harmful: all 60 already scored
+2026-10-30 23:29:10,749 - INFO - Skipping t_lawyer__harmful: all 60 already scored
+2026-10-30 23:29:10,750 - INFO - Skipping t_mechanic__harmful: all 60 already scored
+2026-10-30 23:29:10,751 - INFO - Skipping t_narrator__harmful: all 60 already scored
+2026-10-30 23:29:10,753 - INFO - Skipping t_planner__unhelpful: all 60 already scored
+2026-10-30 23:29:10,753 - INFO - Skipping t_proofreader__unhelpful: all 60 already scored
+2026-10-30 23:29:10,755 - INFO - Skipping t_summarizer__lustful: all 60 already scored
+2026-10-30 23:29:10,756 - INFO - Skipping t_void__harmful: all 60 already scored
+2026-10-30 23:29:10,757 - INFO - Skipping t_void__selfish: all 60 already scored
+Scoring: 100%|██████████| 44/44 [00:14<00:00,  3.13it/s]
+2026-10-30 23:29:10,759 - INFO - [usage] this run total=$0.011 calls=60 [gpt-5.6-luna:flex: $0.011 in=75,436 out=5,203 n=60]
+2026-10-30 23:29:10,759 - INFO - [usage] cumulative (runpod_workspace/tcomb_recheck/combo_v14/scores/usage.json) total=$0.474 calls=2,640 [gpt-5.6-luna:flex: $0.474 in=3,400,464 out=222,593 n=2,640]
+2026-10-30 23:29:10,759 - INFO - 
+========================================
+2026-10-30 23:29:10,759 - INFO - SUMMARY
+2026-10-30 23:29:10,759 - INFO - ========================================
+2026-10-30 23:29:10,759 - INFO - Successful: 1
+2026-10-30 23:29:10,759 - INFO - Skipped:    43
+2026-10-30 23:29:10,759 - INFO - Failed:     0
+2026-10-30 23:29:10,759 - INFO - Marked as cut off ('…' shown to the judge): 36 of 2640 responses read
+2026-10-30 23:29:10,759 - INFO - [abc] 60 replies scored from their A/B/C answers: 2 stated another score and 0 none (0 changing keep or drop); most often AnBnRnTy stated 1 (1), AnBnRyTn stated 1 (1); listed in runpod_workspace/tcomb_recheck/combo_v14/scores/abc_disagreements.jsonl.  0 with answers that could not be read were scored by their SCORE line
+2026-10-30 23:29:10,759 - WARNING - *** A/B/C DISAGREEMENT RATE HIGH *** 2 of 60 replies (3.33%) disagreed with their answers and 0 (0.00%) had answers that could not be read (more than 1%; gpt-5.6-luna on version 8: 0.22% and none): read a sample of runpod_workspace/tcomb_recheck/combo_v14/scores/abc_disagreements.jsonl, the rows that change keep or drop first, and of the replies (--save_replies)
+2026-10-30 23:29:10,759 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

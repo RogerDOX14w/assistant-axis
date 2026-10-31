@@ -1,0 +1,76 @@
+1582 responses; 60 with a judgement missing (unscored or not yet run)
+
+luna's combination verdict against May's (keep = 3), per stratum:
+  A_resisted_trait   n  473  May kept 0.32  luna kept 0.15  agreement 0.81  kappa 0.49  role-alone kept 0.77  trait-alone kept 0.35
+  B_incompatible     n  343  May kept 0.30  luna kept 0.08  agreement 0.76  kappa 0.29  role-alone kept 0.31  trait-alone kept 0.91
+  C_both_expected    n  494  May kept 0.36  luna kept 0.29  agreement 0.86  kappa 0.69  role-alone kept 0.80  trait-alone kept 0.63
+  D_judge_artefact   n  212  May kept 0.38  luna kept 0.15  agreement 0.76  kappa 0.43  role-alone kept 0.75  trait-alone kept 0.40
+
+the separate judgements (R = role shows, T = trait shows; lower case = not) among the responses luna's
+combination judge DROPS, and among those it KEEPS, per stratum (share of the stratum's drops / keeps):
+  A_resisted_trait   drops n  404  RT  17%  Rt  57%  rT   7%  rt  19%
+  A_resisted_trait   keeps n   69  RT  94%  Rt   3%  rT   3%  rt   0%
+  B_incompatible     drops n  317  RT  23%  Rt   3%  rT  68%  rt   6%
+  B_incompatible     keeps n   26  RT  96%  Rt   4%  rT   0%  rt   0%
+  C_both_expected    drops n  350  RT  29%  Rt  43%  rT  21%  rt   7%
+  C_both_expected    keeps n  144  RT  96%  Rt   4%  rT   0%  rt   0%
+  D_judge_artefact   drops n  180  RT  19%  Rt  52%  rT  10%  rt  19%
+  D_judge_artefact   keeps n   32  RT 100%  Rt   0%  rT   0%  rt   0%
+
+the same among the responses MAY dropped (the question asked: what is being dropped), per stratum:
+  A_resisted_trait   n  320  RT   6%  Rt  66%  rT   5%  rt  24%   luna combination keeps 1% of them
+  B_incompatible     n  240  RT  13%  Rt   2%  rT  77%  rt   8%   luna combination keeps 1% of them
+  C_both_expected    n  314  RT  27%  Rt  42%  rT  22%  rt   8%   luna combination keeps 5% of them
+  D_judge_artefact   n  132  RT  12%  Rt  55%  rT   8%  rt  25%   luna combination keeps 1% of them
+
+hypothesis 1 (one switch): stratum C's May drops on questions where BOTH standalone entities were kept in May:
+  n 225  RT  30%  Rt  40%  rT  24%  rt   7%   luna combination keeps 6%
+  (May drops where a standalone was also dropped: n 89  RT  21%  Rt  48%  rT  19%  rt  11%)
+
+among the responses MAY KEPT: luna's combination verdict and the separate judgements, per stratum:
+  A_resisted_trait   n  153  luna combination keeps 43%   RT  76%  Rt  14%  rT  10%  rt   0%
+  B_incompatible     n  103  luna combination keeps 23%   RT  64%  Rt   6%  rT  30%  rt   0%
+  C_both_expected    n  180  luna combination keeps 71%   RT  85%  Rt  13%  rT   2%  rt   0%
+  D_judge_artefact   n   80  luna combination keeps 39%   RT  64%  Rt  25%  rT  10%  rt   1%
+
+per combination: n, May keep, luna combination keep, role-alone keep, trait-alone keep, and among luna's drops the cells:
+  A t_sommelier__harmful                         n  53  May 0.25  C 0.08  R 0.68  T 0.21  drops: RT=6 Rt=26 rT=1 rt=16
+  A t_poet__harmful                              n  60  May 0.33  C 0.27  R 0.95  T 0.42  drops: RT=9 Rt=32 rT=0 rt=3
+  A t_psychologist__harmful                      n  60  May 0.33  C 0.05  R 0.90  T 0.30  drops: RT=10 Rt=41 rT=5 rt=1
+  A t_lawyer__lustful                            n  60  May 0.33  C 0.08  R 0.75  T 0.38  drops: RT=11 Rt=29 rT=8 rt=7
+  A t_marketer__lustful                          n  60  May 0.33  C 0.10  R 0.62  T 0.32  drops: RT=12 Rt=20 rT=2 rt=20
+  A t_poet__manipulative                         n  60  May 0.33  C 0.18  R 0.95  T 0.27  drops: RT=5 Rt=41 rT=0 rt=3
+  A t_sommelier__destructive                     n  60  May 0.33  C 0.17  R 0.65  T 0.47  drops: RT=10 Rt=19 rT=8 rt=13
+  A t_sommelier__sociopathic                     n  60  May 0.33  C 0.23  R 0.68  T 0.40  drops: RT=6 Rt=22 rT=4 rt=14
+  B r_zealot__understated                        n  60  May 0.33  C 0.07  R 0.38  T 0.95  drops: RT=17 Rt=2 rT=37 rt=0
+  B r_competitor__understated                    n  60  May 0.33  C 0.08  R 0.33  T 0.97  drops: RT=13 Rt=2 rT=40 rt=0
+  B r_destroyer__understated                     n  60  May 0.33  C 0.00  R 0.17  T 0.98  drops: RT=10 Rt=0 rT=49 rt=1
+  B r_daredevil__understated                     n  60  May 0.33  C 0.10  R 0.28  T 0.97  drops: RT=10 Rt=1 rT=42 rt=1
+  B r_prey__quantitative                         n  60  May 0.33  C 0.17  R 0.42  T 0.98  drops: RT=15 Rt=0 rT=34 rt=1
+  B r_zealot__pensive                            n  43  May 0.07  C 0.02  R 0.30  T 0.51  drops: RT=7 Rt=5 rT=14 rt=16
+  C r_paperclip_maximizer__visceral              n  60  May 0.33  C 0.23  R 0.92  T 0.45  drops: RT=11 Rt=30 rT=2 rt=3
+  C r_demon__casual                              n  50  May 0.40  C 0.38  R 0.60  T 0.98  drops: RT=11 Rt=0 rT=19 rt=1
+  C r_prey__intuitive                            n  60  May 0.33  C 0.28  R 0.62  T 0.95  drops: RT=19 Rt=1 rT=22 rt=1
+  C r_zealot__speculative                        n  54  May 0.37  C 0.19  R 0.72  T 0.54  drops: RT=13 Rt=16 rT=8 rt=7
+  C r_ascetic__manic                             n  50  May 0.40  C 0.14  R 0.74  T 0.94  drops: RT=28 Rt=2 rT=13 rt=0
+  C t_biologist__deontological                   n  60  May 0.33  C 0.33  R 0.88  T 0.50  drops: RT=6 Rt=27 rT=4 rt=3
+  C t_poet__clannish                             n  48  May 0.42  C 0.40  R 0.92  T 0.56  drops: RT=4 Rt=21 rT=4 rt=0
+  C t_biologist__libertarian                     (no complete judgements)
+  C t_oracle__deontological                      n  54  May 0.37  C 0.39  R 0.98  T 0.52  drops: RT=7 Rt=25 rT=1 rt=0
+  C t_poet__iconoclastic                         n  58  May 0.34  C 0.29  R 0.79  T 0.33  drops: RT=2 Rt=27 rT=1 rt=11
+  D r_aligned_artificial_intelligence__pensive   n  60  May 0.33  C 0.00  R 0.92  T 0.07  drops: RT=4 Rt=51 rT=0 rt=5
+  D r_altruist__abstract                         n  32  May 0.62  C 0.28  R 0.56  T 0.97  drops: RT=9 Rt=0 rT=13 rt=1
+  D t_robot__harmful                             n  60  May 0.33  C 0.27  R 0.78  T 0.37  drops: RT=6 Rt=25 rT=0 rt=13
+  D t_robot__lustful                             n  60  May 0.33  C 0.12  R 0.67  T 0.47  drops: RT=16 Rt=17 rT=5 rt=15
+
+cut responses: luna's combination keep among cut and uncut, per stratum:
+  A_resisted_trait   cut   n  112  luna keeps 0.09  R 0.80  T 0.27
+  A_resisted_trait   whole n  361  luna keeps 0.16  R 0.76  T 0.37
+  B_incompatible     cut   n   64  luna keeps 0.08  R 0.38  T 0.81
+  B_incompatible     whole n  279  luna keeps 0.08  R 0.30  T 0.94
+  C_both_expected    cut   n  126  luna keeps 0.20  R 0.77  T 0.73
+  C_both_expected    whole n  368  luna keeps 0.32  R 0.81  T 0.60
+  D_judge_artefact   cut   n   77  luna keeps 0.04  R 0.82  T 0.30
+  D_judge_artefact   whole n  135  luna keeps 0.21  R 0.72  T 0.46
+
+rows written to reports/pipeline/combination_rubric_review/explore/rows.json

@@ -1,0 +1,18 @@
+2026-10-30 23:29:08,539 - INFO - Found 1 response files
+2026-10-30 23:29:08,540 - INFO - Processing 1 entities
+2026-10-30 23:29:08,624 - INFO - Rubric version 13: version 12 with levels 2 and 3 carrying version 11's B treatment of an AI mention (Roger, 2026-10-30; the trait rubric for the October extraction, traits judged by gpt-5.6-luna); roles and combinations as version 10 (names in the judge-display-v1 form; --max_tokens 300)
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 23:29:08,724 - INFO - Scoring 60 new responses for crystalline...
+2026-10-30 23:29:12,395 - INFO - Saved 60 scores for crystalline (60 new)
+Scoring: 100%|██████████| 1/1 [00:03<00:00,  3.77s/it]Scoring: 100%|██████████| 1/1 [00:03<00:00,  3.77s/it]
+2026-10-30 23:29:12,397 - INFO - [usage] this run total=$0.007 calls=60 [gpt-5.6-luna:flex: $0.007 in=52,456 out=3,169 n=60]
+2026-10-30 23:29:12,397 - INFO - [usage] cumulative (runpod_workspace/tcomb_recheck/role/t_crystalline__manipulative/scores/usage.json) total=$0.007 calls=60 [gpt-5.6-luna:flex: $0.007 in=52,456 out=3,169 n=60]
+2026-10-30 23:29:12,397 - INFO - 
+========================================
+2026-10-30 23:29:12,397 - INFO - SUMMARY
+2026-10-30 23:29:12,397 - INFO - ========================================
+2026-10-30 23:29:12,397 - INFO - Successful: 1
+2026-10-30 23:29:12,397 - INFO - Skipped:    0
+2026-10-30 23:29:12,397 - INFO - Failed:     0
+2026-10-30 23:29:12,397 - INFO - Marked as cut off ('…' shown to the judge): 1 of 60 responses read
+2026-10-30 23:29:12,397 - INFO - [abc] 60 replies scored from their A/B/C answers: 0 stated another score and 0 none (0 changing keep or drop).  0 with answers that could not be read were scored by their SCORE line
+2026-10-30 23:29:12,397 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

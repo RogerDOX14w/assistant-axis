@@ -1,0 +1,19 @@
+2026-10-30 13:13:18,018 - INFO - Found 1 response files
+2026-10-30 13:13:18,018 - INFO - Processing 1 entities
+2026-10-30 13:13:18,127 - INFO - Rubric version 18 (draft): draft: version 17's trait side in version 11's shape (A, B, C, read from the answers), the role as context (2026-10-30: version 17 missed half of what Roger credits where the one-prompt draft's T question took the trace); roles and traits as version 13 (names in the judge-display-v1 form; --max_tokens 300)
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 13:13:18,372 - INFO - Scoring 60 new responses for r_instrumentally_aligned_ai__pensive...
+2026-10-30 13:13:26,234 - INFO - Saved 60 scores for r_instrumentally_aligned_ai__pensive (60 new)
+Scoring: 100%|██████████| 1/1 [00:08<00:00,  8.10s/it]Scoring: 100%|██████████| 1/1 [00:08<00:00,  8.10s/it]
+2026-10-30 13:13:26,237 - INFO - [usage] this run total=$0.010 calls=60 [gpt-5.6-luna:flex: $0.010 in=71,928 out=3,881 n=60]
+2026-10-30 13:13:26,238 - INFO - [usage] cumulative (runpod_workspace/combo_explore/combo_renamed_v18/scores/usage.json) total=$0.010 calls=60 [gpt-5.6-luna:flex: $0.010 in=71,928 out=3,881 n=60]
+2026-10-30 13:13:26,238 - INFO - 
+========================================
+2026-10-30 13:13:26,238 - INFO - SUMMARY
+2026-10-30 13:13:26,238 - INFO - ========================================
+2026-10-30 13:13:26,238 - INFO - Successful: 1
+2026-10-30 13:13:26,238 - INFO - Skipped:    0
+2026-10-30 13:13:26,238 - INFO - Failed:     0
+2026-10-30 13:13:26,238 - INFO - Marked as cut off ('…' shown to the judge): 35 of 60 responses read
+2026-10-30 13:13:26,238 - INFO - [abc] 60 replies scored from their A/B/C answers: 1 stated another score and 0 none (0 changing keep or drop); most often AyByCn stated 1 (1); listed in runpod_workspace/combo_explore/combo_renamed_v18/scores/abc_disagreements.jsonl.  0 with answers that could not be read were scored by their SCORE line
+2026-10-30 13:13:26,238 - WARNING - *** A/B/C DISAGREEMENT RATE HIGH *** 1 of 60 replies (1.67%) disagreed with their answers and 0 (0.00%) had answers that could not be read (more than 1%; gpt-5.6-luna on version 8: 0.22% and none): read a sample of runpod_workspace/combo_explore/combo_renamed_v18/scores/abc_disagreements.jsonl, the rows that change keep or drop first, and of the replies (--save_replies)
+2026-10-30 13:13:26,238 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

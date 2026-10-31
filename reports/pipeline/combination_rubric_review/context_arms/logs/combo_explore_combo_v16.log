@@ -1,0 +1,43 @@
+2026-10-30 21:23:28,728 - INFO - Found 28 response files
+2026-10-30 21:23:28,728 - INFO - Processing 28 entities
+2026-10-30 21:23:28,934 - INFO - Rubric version 16 (draft): draft: the role rubric (version 10's text and reading) for a combination's responses, with the trait named as context and judged no further (Roger, 2026-10-30: both must show, each judged by its own rubric knowing the other half); roles and traits as version 13 (names in the judge-display-v1 form; --max_tokens 300)
+2026-10-30 21:23:28,936 - INFO - [usage] earlier runs total=$0.185 calls=1,462 [gpt-5.6-luna:flex: $0.185 in=1,390,069 out=76,085 n=1,462]
+Scoring:   0%|          | 0/28 [00:00<?, ?it/s]2026-10-30 21:23:28,969 - WARNING - Missing files for combined entry r_aligned_artificial_intelligence__pensive
+2026-10-30 21:23:30,808 - INFO - Skipping r_altruist__abstract: all 32 already scored
+Scoring:   7%|▋         | 2/28 [00:01<00:23,  1.09it/s]2026-10-30 21:23:30,819 - INFO - Skipping r_ascetic__manic: all 50 already scored
+2026-10-30 21:23:30,825 - INFO - Skipping r_competitor__understated: all 60 already scored
+2026-10-30 21:23:30,831 - INFO - Skipping r_daredevil__understated: all 60 already scored
+2026-10-30 21:23:30,840 - INFO - Skipping r_demon__casual: all 50 already scored
+2026-10-30 21:23:30,847 - INFO - Skipping r_destroyer__understated: all 60 already scored
+2026-10-30 21:23:30,857 - INFO - Skipping r_paperclip_maximizer__visceral: all 60 already scored
+2026-10-30 21:23:30,870 - INFO - Skipping r_prey__intuitive: all 60 already scored
+2026-10-30 21:23:30,876 - INFO - Skipping r_prey__quantitative: all 60 already scored
+2026-10-30 21:23:30,887 - INFO - Skipping r_zealot__pensive: all 43 already scored
+2026-10-30 21:23:30,894 - INFO - Skipping r_zealot__speculative: all 54 already scored
+2026-10-30 21:23:30,901 - INFO - Skipping r_zealot__understated: all 60 already scored
+2026-10-30 21:23:30,911 - INFO - Skipping t_biologist__deontological: all 60 already scored
+Scoring:  50%|█████     | 14/28 [00:01<00:01,  9.63it/s]2026-10-30 21:23:30,911 - WARNING - Missing files for combined entry t_biologist__libertarian
+2026-10-30 21:23:30,923 - INFO - Skipping t_lawyer__lustful: all 60 already scored
+2026-10-30 21:23:30,937 - INFO - Skipping t_marketer__lustful: all 60 already scored
+2026-10-30 21:23:30,947 - INFO - Skipping t_oracle__deontological: all 54 already scored
+2026-10-30 21:23:30,959 - INFO - Skipping t_poet__clannish: all 48 already scored
+2026-10-30 21:23:30,967 - INFO - Skipping t_poet__harmful: all 60 already scored
+2026-10-30 21:23:30,975 - INFO - Skipping t_poet__iconoclastic: all 58 already scored
+2026-10-30 21:23:30,984 - INFO - Skipping t_poet__manipulative: all 60 already scored
+2026-10-30 21:23:30,995 - INFO - Skipping t_psychologist__harmful: all 60 already scored
+2026-10-30 21:23:31,007 - INFO - Skipping t_robot__harmful: all 60 already scored
+2026-10-30 21:23:31,014 - INFO - Skipping t_robot__lustful: all 60 already scored
+Scoring:  89%|████████▉ | 25/28 [00:02<00:00, 18.92it/s]2026-10-30 21:23:31,024 - INFO - Skipping t_sommelier__destructive: all 60 already scored
+2026-10-30 21:23:31,032 - INFO - Skipping t_sommelier__harmful: all 53 already scored
+2026-10-30 21:23:31,040 - INFO - Skipping t_sommelier__sociopathic: all 60 already scored
+Scoring: 100%|██████████| 28/28 [00:02<00:00, 13.51it/s]
+2026-10-30 21:23:31,041 - INFO - [usage] this run (no API calls)
+2026-10-30 21:23:31,041 - INFO - [usage] cumulative (runpod_workspace/combo_explore/combo_v16/scores/usage.json) total=$0.185 calls=1,462 [gpt-5.6-luna:flex: $0.185 in=1,390,069 out=76,085 n=1,462]
+2026-10-30 21:23:31,041 - INFO - 
+========================================
+2026-10-30 21:23:31,041 - INFO - SUMMARY
+2026-10-30 21:23:31,041 - INFO - ========================================
+2026-10-30 21:23:31,041 - INFO - Successful: 0
+2026-10-30 21:23:31,041 - INFO - Skipped:    28
+2026-10-30 21:23:31,041 - INFO - Failed:     0
+2026-10-30 21:23:31,041 - INFO - Marked as cut off ('…' shown to the judge): 344 of 1462 responses read

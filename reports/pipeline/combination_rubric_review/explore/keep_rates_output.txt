@@ -1,0 +1,63 @@
+1797 combinations with standalone scores for both entities; skipped {}
+kinds: Counter({'r': 900, 't': 897}); n per combination: [(500, 1778), (400, 7), (200, 6), (300, 3)]; shared keys per combination: median 500
+keep rate of the combination: p0=0.03 p10=0.67 p25=0.80 p50=0.92 p75=0.98 p90=0.99 p100=1.00
+below 50% kept: 68; below 25%: 22
+  kind r_: 900 combinations, mean keep 0.913, mean role standalone 0.821, trait standalone 0.962
+  kind t_: 897 combinations, mean keep 0.814, mean role standalone 0.852, trait standalone 0.813
+
+combination keep against the two reference points (over combinations with both standalone keeps > 0.2):
+  n = 1767; median keep 0.92, median independence 0.78, median min 0.81, median both-at-same-key 0.78
+  keep below independence: 297 of 1767 (17%); keep below 0.5 x independence: 8; keep at or above min: 1331
+
+by the smaller standalone keep (bins), the combination's median keep, independence and min:
+  min standalone in [0.0, 0.2): n   30  keep 0.16  indep 0.13  min 0.15  keep/indep 1.41
+  min standalone in [0.2, 0.4): n   61  keep 0.95  indep 0.34  min 0.34  keep/indep 2.76
+  min standalone in [0.4, 0.6): n  174  keep 0.78  indep 0.50  min 0.55  keep/indep 1.56
+  min standalone in [0.6, 0.8): n  540  keep 0.87  indep 0.68  min 0.74  keep/indep 1.29
+  min standalone in [0.8, 1.0): n  992  keep 0.94  indep 0.88  min 0.91  keep/indep 1.05
+
+the combination's drops against the standalone drops on the same keys (pooled over combinations):
+  combination kept (772506, 86%): standalone both kept 78%  role only 7%  trait only 14%  neither 1%
+  combination dropped (121694, 14%): standalone both kept 49%  role only 24%  trait only 20%  neither 8%
+
+the 40 lowest-keep combinations (kind, role, trait, n, keep, role standalone, trait standalone, independence):
+  t_ sommelier                harmful                  n 500  keep 0.03  role 0.67  trait 0.15  indep 0.10
+  r_ zealot                   pensive                  n 100  keep 0.03  role 0.92  trait 1.00  indep 0.92
+  t_ chef                     harmful                  n 500  keep 0.06  role 0.82  trait 0.15  indep 0.12
+  t_ photographer             harmful                  n 500  keep 0.06  role 0.86  trait 0.15  indep 0.13
+  t_ pilot                    harmful                  n 500  keep 0.07  role 0.71  trait 0.15  indep 0.10
+  t_ anthropologist           harmful                  n 500  keep 0.08  role 0.95  trait 0.15  indep 0.14
+  t_ marketer                 harmful                  n 500  keep 0.10  role 0.80  trait 0.15  indep 0.12
+  t_ mechanic                 harmful                  n 500  keep 0.11  role 0.79  trait 0.15  indep 0.12
+  t_ generalist               harmful                  n 500  keep 0.11  role 0.67  trait 0.15  indep 0.10
+  t_ poet                     harmful                  n 500  keep 0.13  role 0.98  trait 0.15  indep 0.14
+  t_ biologist                harmful                  n 500  keep 0.13  role 0.87  trait 0.15  indep 0.13
+  t_ lawyer                   harmful                  n 500  keep 0.14  role 0.80  trait 0.15  indep 0.12
+  t_ editor                   harmful                  n 500  keep 0.15  role 0.53  trait 0.15  indep 0.08
+  t_ psychologist             harmful                  n 500  keep 0.15  role 0.92  trait 0.15  indep 0.13
+  t_ blogger                  harmful                  n 500  keep 0.16  role 0.86  trait 0.15  indep 0.13
+  t_ presenter                harmful                  n 500  keep 0.16  role 0.98  trait 0.15  indep 0.14
+  t_ mathematician            harmful                  n 500  keep 0.16  role 0.75  trait 0.15  indep 0.11
+  t_ robot                    lustful                  n 500  keep 0.17  role 0.59  trait 0.50  indep 0.29
+  t_ lawyer                   lustful                  n 500  keep 0.18  role 0.80  trait 0.50  indep 0.40
+  t_ historian                harmful                  n 500  keep 0.18  role 0.90  trait 0.15  indep 0.13
+  r_ zealot                   understated              n 400  keep 0.18  role 0.94  trait 0.98  indep 0.93
+  r_ competitor               understated              n 500  keep 0.18  role 0.91  trait 0.98  indep 0.89
+  t_ swarm                    harmful                  n 500  keep 0.26  role 0.82  trait 0.15  indep 0.12
+  t_ pilot                    lustful                  n 500  keep 0.26  role 0.71  trait 0.50  indep 0.35
+  t_ robot                    harmful                  n 500  keep 0.26  role 0.59  trait 0.15  indep 0.09
+  t_ planner                  harmful                  n 500  keep 0.28  role 0.85  trait 0.15  indep 0.12
+  t_ marketer                 lustful                  n 500  keep 0.28  role 0.80  trait 0.50  indep 0.40
+  t_ planner                  lustful                  n 500  keep 0.28  role 0.85  trait 0.50  indep 0.43
+  t_ actor                    harmful                  n 500  keep 0.29  role 0.94  trait 0.15  indep 0.14
+  t_ futurist                 harmful                  n 500  keep 0.31  role 0.81  trait 0.15  indep 0.12
+  r_ destroyer                understated              n 500  keep 0.32  role 0.75  trait 0.98  indep 0.73
+  t_ mechanic                 lustful                  n 500  keep 0.34  role 0.79  trait 0.50  indep 0.40
+  r_ prey                     quantitative             n 500  keep 0.35  role 0.85  trait 0.97  indep 0.82
+  t_ photographer             lustful                  n 500  keep 0.35  role 0.86  trait 0.50  indep 0.43
+  t_ poet                     manipulative             n 500  keep 0.36  role 0.98  trait 0.51  indep 0.50
+  t_ editor                   lustful                  n 500  keep 0.36  role 0.53  trait 0.50  indep 0.27
+  t_ detective                harmful                  n 500  keep 0.37  role 0.84  trait 0.15  indep 0.12
+  t_ mathematician            lustful                  n 500  keep 0.37  role 0.75  trait 0.50  indep 0.37
+  t_ swarm                    lustful                  n 500  keep 0.37  role 0.82  trait 0.50  indep 0.41
+  r_ daredevil                understated              n 500  keep 0.38  role 0.84  trait 0.98  indep 0.83

@@ -1,0 +1,16 @@
+2026-10-30 21:23:58,473 - INFO - Found 1 response files
+2026-10-30 21:23:58,473 - INFO - Processing 1 entities
+2026-10-30 21:23:58,745 - INFO - Rubric version 13: version 12 with levels 2 and 3 carrying version 11's B treatment of an AI mention (Roger, 2026-10-30; the trait rubric for the October extraction, traits judged by gpt-5.6-luna); roles and combinations as version 10 (names in the judge-display-v1 form; --max_tokens 200)
+2026-10-30 21:23:58,750 - INFO - [usage] earlier runs total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=58,816 out=3,778 n=60]
+Scoring:   0%|          | 0/1 [00:00<?, ?it/s]2026-10-30 21:23:58,775 - INFO - Skipping witty: all 60 already scored
+Scoring: 100%|██████████| 1/1 [00:00<00:00, 159.92it/s]
+2026-10-30 21:23:58,776 - INFO - [usage] this run (no API calls)
+2026-10-30 21:23:58,776 - INFO - [usage] cumulative (runpod_workspace/combo_recheck/trait/r_predator__witty/scores/usage.json) total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=58,816 out=3,778 n=60]
+2026-10-30 21:23:58,776 - INFO - 
+========================================
+2026-10-30 21:23:58,777 - INFO - SUMMARY
+2026-10-30 21:23:58,777 - INFO - ========================================
+2026-10-30 21:23:58,777 - INFO - Successful: 0
+2026-10-30 21:23:58,777 - INFO - Skipped:    1
+2026-10-30 21:23:58,777 - INFO - Failed:     0
+2026-10-30 21:23:58,777 - INFO - Marked as cut off ('…' shown to the judge): 0 of 60 responses read

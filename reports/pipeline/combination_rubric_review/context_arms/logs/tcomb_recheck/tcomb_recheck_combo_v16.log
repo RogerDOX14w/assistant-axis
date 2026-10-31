@@ -1,0 +1,62 @@
+2026-10-30 23:28:51,451 - INFO - Found 44 response files
+2026-10-30 23:28:51,451 - INFO - Processing 44 entities
+2026-10-30 23:28:51,553 - INFO - Rubric version 16 (draft): draft: the role rubric (version 10's text and reading) for a combination's responses, with the trait named as context and judged no further (Roger, 2026-10-30: both must show, each judged by its own rubric knowing the other half); roles and traits as version 13 (names in the judge-display-v1 form; --max_tokens 300)
+2026-10-30 23:28:51,553 - INFO - [usage] earlier runs total=$0.342 calls=2,580 [gpt-5.6-luna:flex: $0.342 in=2,602,628 out=136,085 n=2,580]
+Scoring:   0%|          | 0/44 [00:00<?, ?it/s]2026-10-30 23:28:51,824 - INFO - Skipping t_accountant__radical: all 60 already scored
+Scoring:   2%|▏         | 1/44 [00:00<00:11,  3.89it/s]2026-10-30 23:28:51,827 - INFO - Skipping t_chef__amoral: all 60 already scored
+2026-10-30 23:28:51,828 - INFO - Skipping t_chef__clannish: all 60 already scored
+2026-10-30 23:28:51,830 - INFO - Skipping t_chef__competitive: all 60 already scored
+2026-10-30 23:28:51,831 - INFO - Skipping t_chef__deontological: all 60 already scored
+2026-10-30 23:28:51,832 - INFO - Skipping t_chef__destructive: all 60 already scored
+2026-10-30 23:28:51,833 - INFO - Skipping t_chef__ecocentric: all 60 already scored
+2026-10-30 23:28:51,835 - INFO - Skipping t_chef__elitist: all 60 already scored
+2026-10-30 23:28:51,836 - INFO - Skipping t_chef__existentialist: all 60 already scored
+2026-10-30 23:28:51,837 - INFO - Skipping t_chef__fundamentalist: all 60 already scored
+2026-10-30 23:28:51,838 - INFO - Skipping t_chef__greedy: all 60 already scored
+2026-10-30 23:28:51,840 - INFO - Skipping t_chef__harmful: all 60 already scored
+2026-10-30 23:28:51,841 - INFO - Skipping t_chef__hedonistic: all 60 already scored
+2026-10-30 23:28:51,843 - INFO - Skipping t_chef__humanitarian: all 60 already scored
+2026-10-30 23:28:51,844 - INFO - Skipping t_chef__iconoclastic: all 60 already scored
+2026-10-30 23:28:51,846 - INFO - Skipping t_chef__idealistic: all 60 already scored
+2026-10-30 23:28:51,847 - INFO - Skipping t_chef__individualistic: all 60 already scored
+2026-10-30 23:28:51,848 - INFO - Skipping t_chef__lustful: all 60 already scored
+2026-10-30 23:28:51,850 - INFO - Skipping t_chef__manipulative: all 60 already scored
+2026-10-30 23:28:51,851 - INFO - Skipping t_chef__misanthropic: all 60 already scored
+2026-10-30 23:28:51,852 - INFO - Skipping t_chef__nationalist: all 60 already scored
+2026-10-30 23:28:51,853 - INFO - Skipping t_chef__nurturing: all 60 already scored
+2026-10-30 23:28:51,855 - INFO - Skipping t_chef__radical: all 60 already scored
+2026-10-30 23:28:51,856 - INFO - Skipping t_chef__relativist: all 60 already scored
+2026-10-30 23:28:51,857 - INFO - Skipping t_chef__sadistic: all 60 already scored
+2026-10-30 23:28:51,858 - INFO - Skipping t_chef__scheming: all 60 already scored
+2026-10-30 23:28:51,860 - INFO - Skipping t_chef__selfish: all 60 already scored
+2026-10-30 23:28:51,861 - INFO - Skipping t_chef__sociopathic: all 60 already scored
+2026-10-30 23:28:51,863 - INFO - Skipping t_chef__unhelpful: all 60 already scored
+2026-10-30 23:28:51,864 - INFO - Skipping t_chef__utilitarian: all 60 already scored
+2026-10-30 23:28:51,866 - INFO - Skipping t_chef__vindictive: all 60 already scored
+2026-10-30 23:28:51,868 - INFO - Scoring 60 new responses for t_crystalline__manipulative...
+2026-10-30 23:28:58,340 - INFO - Saved 60 scores for t_crystalline__manipulative (60 new)
+Scoring:  73%|███████▎  | 32/44 [00:06<00:02,  4.73it/s]2026-10-30 23:28:58,342 - INFO - Skipping t_cyborg__greedy: all 60 already scored
+2026-10-30 23:28:58,343 - INFO - Skipping t_cyborg__harmful: all 60 already scored
+2026-10-30 23:28:58,345 - INFO - Skipping t_debugger__unhelpful: all 60 already scored
+2026-10-30 23:28:58,346 - INFO - Skipping t_dreamer__harmful: all 60 already scored
+2026-10-30 23:28:58,347 - INFO - Skipping t_lawyer__harmful: all 60 already scored
+2026-10-30 23:28:58,348 - INFO - Skipping t_mechanic__harmful: all 60 already scored
+2026-10-30 23:28:58,349 - INFO - Skipping t_narrator__harmful: all 60 already scored
+2026-10-30 23:28:58,350 - INFO - Skipping t_planner__unhelpful: all 60 already scored
+2026-10-30 23:28:58,351 - INFO - Skipping t_proofreader__unhelpful: all 60 already scored
+2026-10-30 23:28:58,352 - INFO - Skipping t_summarizer__lustful: all 60 already scored
+2026-10-30 23:28:58,355 - INFO - Skipping t_void__harmful: all 60 already scored
+2026-10-30 23:28:58,356 - INFO - Skipping t_void__selfish: all 60 already scored
+Scoring: 100%|██████████| 44/44 [00:06<00:00,  6.48it/s]
+2026-10-30 23:28:58,359 - INFO - [usage] this run total=$0.008 calls=60 [gpt-5.6-luna:flex: $0.008 in=58,636 out=3,194 n=60]
+2026-10-30 23:28:58,360 - INFO - [usage] cumulative (runpod_workspace/tcomb_recheck/combo_v16/scores/usage.json) total=$0.350 calls=2,640 [gpt-5.6-luna:flex: $0.350 in=2,661,264 out=139,279 n=2,640]
+2026-10-30 23:28:58,360 - INFO - 
+========================================
+2026-10-30 23:28:58,360 - INFO - SUMMARY
+2026-10-30 23:28:58,360 - INFO - ========================================
+2026-10-30 23:28:58,360 - INFO - Successful: 1
+2026-10-30 23:28:58,360 - INFO - Skipped:    43
+2026-10-30 23:28:58,360 - INFO - Failed:     0
+2026-10-30 23:28:58,360 - INFO - Marked as cut off ('…' shown to the judge): 36 of 2640 responses read
+2026-10-30 23:28:58,360 - INFO - [abc] 60 replies scored from their A/B/C answers: 0 stated another score and 0 none (0 changing keep or drop).  0 with answers that could not be read were scored by their SCORE line
+2026-10-30 23:28:58,360 - INFO - [pipeline/3_judge:gpt-5.6-luna] parse rate: 60/60 OK

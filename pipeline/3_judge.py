@@ -16,8 +16,13 @@ an explicit decision procedure, a draft; 7, version 6 without its rule
 excluding the role reversed, a draft; 8, version 7 with its helpful-professional
 clause given its converse, a draft (9, a rejected draft, is not runnable); 10,
 version 8's text with a role reply scored from its A, B and C answers, settled
-and the default since 2026-10-28 (the role rubric for the October extraction,
-roles judged by gpt-5.6-luna only; traits and combinations as version 3).
+2026-10-28 (the role rubric for the October extraction, roles judged by
+gpt-5.6-luna only); 11 and 12, drafts; 13, version 10 with the trait rubric
+review's trait rubric, settled 2026-10-30; 14 to 19, drafts, the combination
+rubric review's arms; 20, version 13's roles and traits with the two-sided
+combination rule (each response judged by version 16 and by version 17,
+scored the lower), settled and the default since 2026-10-31, every type
+judged by gpt-5.6-luna only, the default judge since the same day.
 --reread_replies scores the replies a run saved (--save_replies) under another
 version's reading, with no judge calls.
 
@@ -80,7 +85,8 @@ from assistant_axis.judge import (
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
 from assistant_axis.judge_rubrics import (
     DEFAULT_PROMPT_VERSION, PROMPT_VERSIONS, PromptVersion, abc_answers,
-    abc_pattern, abc_score, first_integer_score, get_version, may_share_directory,
+    abc_score, abrt_answers, abrt_score, answer_pattern, first_integer_score, get_version,
+    may_share_directory,
 )
 from assistant_axis.openai_batch import OpenAIBatchRunner
 
@@ -142,6 +148,22 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 #     rulings and version 11's treatment of an AI mention), traits judged by
 #     gpt-5.6-luna only as the roles are; the combination rubric still
 #     version 3's.
+#   14 and 15 (drafts, 2026-10-30) -- the combination rubric as a decision
+#     procedure (A, B, R, T; 14 needs both, 15 either), scored from the four
+#     answers (:func:`read_reply`) as version 10 scores a role reply.
+#   16 to 18 (drafts, 2026-10-30) -- the role rubric (16, version 10's text
+#     and A/B/C reading) and the trait rubric (17, version 13's; 18, the same
+#     in version 11's A/B/C shape) for a combination's responses, each naming
+#     the other half of the instruction as context; run on a combination
+#     directory into two scores directories, a response kept when both give 3
+#     (Roger: both must show).  19 (draft, 2026-10-31): 17 with the
+#     third-person sentence, tested and rejected the same day.
+#   20 (settled, the default since 2026-10-31) -- version 13's role and trait
+#     rubrics, and the two-sided combination rule: each combination response
+#     judged by version 16 and by version 17 (``PromptVersion.combination_sides``),
+#     scored the lower, so 3 only when both sides give 3; the sides' scores
+#     kept in ``_sides/<entity>.json`` beside the combined score file, every
+#     reply saved with its side; every type judged by gpt-5.6-luna only.
 # Every version renders a role's rubric from its template, the role's judge
 # display name and its description; until 2026-10-23 step 3 read the
 # ``eval_prompt`` baked into the role file, which a test pins equal to the
@@ -153,10 +175,12 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 JUDGE_RUBRIC_VERSION = DEFAULT_PROMPT_VERSION
 
 #: The default ``--judge_model`` (run_pipeline.sh's JUDGE_MODEL_DEFAULT is
-#: pinned to it).  gpt-4.1-mini still judges the combinations, whose rubric
-#: is under review; roles and traits need gpt-5.6-luna under the default
-#: prompt version.  OpenAI retires gpt-4.1-mini on 2027-01-14.
-DEFAULT_JUDGE_MODEL = "gpt-4.1-mini"
+#: pinned to it): gpt-5.6-luna since 2026-10-31, the judge every entity type
+#: needs under the default prompt version (20; the Runpod session's request,
+#: with Roger's approval, once the combination rule was settled).  It was
+#: gpt-4.1-mini, which OpenAI retires on 2027-01-14, and which still judges
+#: under version 3 or earlier (``--prompt_version 3 --judge_model gpt-4.1-mini``).
+DEFAULT_JUDGE_MODEL = "gpt-5.6-luna"
 
 # Version 3's templates under their old names.
 COMBINED_EVAL_TEMPLATE = PROMPT_VERSIONS[3].combination
@@ -179,6 +203,12 @@ ABC_PATTERNS: Counter = Counter()
 #: "answers", "stated", "score", "keep_changed"}``.  A .jsonl file, so nothing
 #: that reads ``*.json`` score files takes it for an entity.
 ABC_LOG_FILENAME = "abc_disagreements.jsonl"
+#: The reply formats read from answer lines: version 10's role replies (A, B,
+#: C), versions 16 and 18's combination replies (the role side and the trait
+#: side in version 11's shape, A, B, C) and versions 14 and 15's combination
+#: replies (A, B, R, T, scored by that version's table: "both" or "either").
+ABRT_FORMATS = ("abrt_both", "abrt_either")
+ANSWER_FORMATS = ("abc_answers",) + ABRT_FORMATS
 #: The share of version 10 role replies that may disagree with their answers,
 #: or have answers that cannot be read, before the run's summary warns:
 #: gpt-5.6-luna's was 0.22% on version 8 (0.05% changing keep or drop) and its
@@ -202,12 +232,17 @@ def _read(text: Optional[str], finish_reason: Optional[str],
     if not text:
         return None, None, "no_reply"
     stated = parse_judge_score(text, require_marker=True)
-    answers = abc_answers(text) if reply_format == "abc_answers" else None
+    answers = score = None
+    if reply_format == "abc_answers":
+        answers = abc_answers(text)
+        score = abc_score(answers) if answers is not None else None
+    elif reply_format in ABRT_FORMATS:
+        answers = abrt_answers(text)
+        score = abrt_score(answers, reply_format[len("abrt_"):]) if answers is not None else None
     if answers is not None:
-        score = abc_score(answers)
         if stated == score:
             return score, {}, None
-        return score, {"answers": abc_pattern(answers), "stated": stated, "score": score,
+        return score, {"answers": answer_pattern(answers), "stated": stated, "score": score,
                        "keep_changed": (stated == 3) != (score == 3)}, None
     if stated is None:
         n = len(_MARKER_RE.findall(text))
@@ -239,7 +274,7 @@ def read_reply(text: Optional[str], finish_reason: Optional[str] = None, *,
     score, disagreement, problem = _read(text, finish_reason, reply_format)
     if problem:
         REPLY_PROBLEMS[problem] += 1
-    if reply_format == "abc_answers" and problem not in ("truncated", "no_reply"):
+    if reply_format in ANSWER_FORMATS and problem not in ("truncated", "no_reply"):
         if disagreement is None:
             ABC_STATS["unreadable"] += 1
         else:
@@ -481,7 +516,8 @@ def resolve_eval_prompt(
         trait_data = _load_json(trait_file)
         trait_desc = _description_from(trait_data)
         # JUDGE_RUBRIC_VERSION 2: the judge display form, not the raw stems.
-        return version.combination.format(
+        # Versions 14 and 15 give an AI or machine role's combinations their own B.
+        return version.combination_template(role_name).format(
             role_name=_literal(role_judge_name(role_name, roles_dir)),
             trait_name=_literal(trait_judge_name(trait_name, trait_data)),
             role_description=_literal(role_desc),
@@ -489,6 +525,77 @@ def resolve_eval_prompt(
         )
 
     raise ValueError(f"Unknown entity_type: {entity_type!r}")
+
+
+# ---------------------------------------------------------------------------
+# The two-sided combination rule (version 20, settled 2026-10-31)
+# ---------------------------------------------------------------------------
+#
+# Under a version with ``combination_sides`` a combination's response is
+# judged once per side, with that side's version (16: the role rubric with the
+# trait as context, read from its A, B and C answers; 17: the trait rubric
+# with the role as context, read by its SCORE line), and its score is the
+# lower of the sides, so 3 only when both give 3 (Roger, 2026-10-30: "we
+# definitely need to require both").  The sides' scores live in
+# ``<scores_dir>/_sides/<entity>.json`` (``{key: {side: score}}``), the
+# combined score in the flat ``<entity>.json`` step 4 reads, written only for
+# keys every side has scored; a rerun judges only the sides a key lacks.  A
+# saved reply carries its ``side``; a batch request's custom id is
+# ``<entity>|<key>#<side>``.
+
+SIDES_DIRNAME = "_sides"
+SIDE_SEP = "#"   # score keys never contain it
+
+
+def side_prompts(stem: str, roles_dir: Path, traits_dir: Path,
+                 version: PromptVersion) -> Optional[Dict[str, str]]:
+    """``{side: eval prompt template}`` for a combination under a two-sided
+    ``version``, each side rendered by its own version; None when the entity
+    should be skipped (as :func:`resolve_eval_prompt`)."""
+    out = {}
+    for side, v in version.side_versions().items():
+        tpl = resolve_eval_prompt(stem, roles_dir, traits_dir, "combination", prompt_version=v.number)
+        if tpl is None:
+            return None
+        out[side] = tpl
+    return out
+
+
+def combine_sides(scores: Dict[str, int], sides: Iterable[str]) -> Optional[int]:
+    """The combined score of one response: the lower of its sides' scores (3
+    only when every side gives 3), or None until every side has scored it."""
+    sides = list(sides)
+    if any(s not in scores for s in sides):
+        return None
+    return min(scores[s] for s in sides)
+
+
+def load_sides(output_dir: Path, name: str) -> Dict[str, Dict[str, int]]:
+    """An entity's per-side scores (``{key: {side: score}}``), or {}."""
+    return load_scores(output_dir / SIDES_DIRNAME / f"{name}.json", strict=True)
+
+
+def merge_sides(output_dir: Path, name: str, new: Dict[str, Dict[str, int]],
+                sides: Iterable[str]) -> Tuple[Dict[str, Dict[str, int]], Dict[str, int]]:
+    """Merge ``new`` per-side scores into ``_sides/<name>.json`` and the
+    combined scores of the keys now scored on every side into
+    ``<name>.json`` (both NFS-safely).  Returns ``(all sides, the combined
+    scores written this time)``."""
+    sides = list(sides)
+    path = output_dir / SIDES_DIRNAME / f"{name}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    merged = {k: dict(v) for k, v in load_scores(path, strict=True).items()}
+    for key, by_side in new.items():
+        merged.setdefault(key, {}).update(by_side)
+    atomic_write_text(json.dumps(merged, indent=2), path, logger_obj=logger)
+    combined = {}
+    for key in new:
+        c = combine_sides(merged.get(key, {}), sides)
+        if c is not None:
+            combined[key] = c
+    if combined:
+        merge_scores(output_dir / f"{name}.json", combined)
+    return merged, combined
 
 
 # ---------------------------------------------------------------------------
@@ -864,6 +971,47 @@ async def score_entity(
     return scores, n_attempted, n_parsed
 
 
+async def score_entity_sides(
+    name: str,
+    responses: List[dict],
+    templates: Dict[str, str],
+    sides: Dict[str, PromptVersion],
+    side_max_tokens: Dict[str, int],
+    existing_sides: Dict[str, Dict[str, int]],
+    *,
+    replies: Optional[List[dict]] = None,
+    disagreements: Optional[List[dict]] = None,
+    **call_kwargs,
+) -> Tuple[Dict[str, Dict[str, int]], int, int]:
+    """Score one combination's responses under a two-sided version in real
+    time: :func:`score_entity` once per side (its template, reading and
+    token limit), each side judging only the keys it has not scored
+    (``existing_sides``: ``{key: {side: score}}``).  Returns ``(new per-side
+    scores, calls attempted, calls parsed)``; a saved reply and a logged
+    disagreement carry their ``side``."""
+    new: Dict[str, Dict[str, int]] = {}
+    n_attempted = n_parsed = 0
+    for side, tpl in templates.items():
+        version = sides[side]
+        existing = {k: v[side] for k, v in existing_sides.items() if side in v}
+        side_replies: Optional[List[dict]] = [] if replies is not None else None
+        side_notes: Optional[List[dict]] = [] if disagreements is not None else None
+        scores, a, p = await score_entity(
+            name=f"{name} ({side} side)", responses=responses, eval_prompt_template=tpl,
+            max_tokens=side_max_tokens[side], existing_scores=existing,
+            reply_format=version.reply_format_for("combination"),
+            replies=side_replies, disagreements=side_notes, **call_kwargs)
+        for key, score in scores.items():
+            new.setdefault(key, {})[side] = score
+        if side_replies:
+            replies.extend({**r, "side": side} for r in side_replies)
+        if side_notes:
+            disagreements.extend({**r, "side": side} for r in side_notes)
+        n_attempted += a
+        n_parsed += p
+    return new, n_attempted, n_parsed
+
+
 # ---------------------------------------------------------------------------
 # Batch mode (the default since 2026-10-10)
 # ---------------------------------------------------------------------------
@@ -1002,6 +1150,8 @@ async def judge_in_batches(
     before_write: Callable[[], None] = lambda: None,
     reply_format: str = "score_marker",
     keep_replies: bool = False,
+    sides: Optional[Dict[str, PromptVersion]] = None,
+    side_max_tokens: Optional[Dict[str, int]] = None,
 ) -> Tuple[int, int, int, set]:
     """Judge ``entities`` (name, existing scores, eval template, responses;
     consumed once, so a generator keeps one entity's responses in memory at
@@ -1013,9 +1163,14 @@ async def judge_in_batches(
     (:func:`read_reply`); a version 10 reply that disagrees with its answers
     is logged (:func:`log_disagreements`).  ``keep_replies``
     (``--save_replies``): every reply is written beside the scores
-    (:func:`save_replies`), with its ``finish_reason``.  Returns ``(n_attempted, n_parsed, n_left,
-    entities_with_new_scores)``; ``n_left`` requests are unanswered and
-    unscored, for a rerun."""
+    (:func:`save_replies`), with its ``finish_reason``.  Under a two-sided
+    version (``sides``: ``{side: version}``, ``side_max_tokens``) an entity
+    is ``(name, existing per-side scores, {side: template}, responses)``,
+    each side's pending keys are requested with that side's template and
+    token limit (custom id ``<name>|<key>#<side>``), read by that side's
+    format, and merged through :func:`merge_sides`.  Returns ``(n_attempted,
+    n_parsed, n_left, entities_with_new_scores)``; ``n_left`` requests are
+    unanswered and unscored, for a rerun."""
     # A Claude judge goes through Anthropic Message Batches (2026-10-26), an
     # OpenAI one through the OpenAI Batch API; the runners share an interface.
     anthropic_judge = provider_for_model(judge_model) == "anthropic"
@@ -1046,10 +1201,43 @@ async def judge_in_batches(
 
     def requests():
         for name, existing, eval_tpl, responses in entities:
+            if sides:
+                for side, tpl in eval_tpl.items():
+                    done = {k: v[side] for k, v in existing.items() if side in v}
+                    for key, prompt in pending_prompts(responses, tpl, done, name=f"{name} ({side} side)"):
+                        cid = f"{name}{CUSTOM_ID_SEP}{key}{SIDE_SEP}{side}"
+                        if cid not in inflight:
+                            yield cid, request_for(prompt, judge_model, side_max_tokens[side])
+                continue
             for key, prompt in pending_prompts(responses, eval_tpl, existing, name=name):
                 cid = f"{name}{CUSTOM_ID_SEP}{key}"
                 if cid not in inflight:
                     yield cid, request_for(prompt, judge_model, max_tokens)
+
+    def split_cid(cid: str) -> Tuple[str, str, Optional[str]]:
+        """``(name, key, side)`` of a custom id; ``side`` None for a one-prompt version."""
+        name, key = cid.split(CUSTOM_ID_SEP, 1)
+        if sides and SIDE_SEP in key:
+            key, side = key.rsplit(SIDE_SEP, 1)
+            return name, key, side
+        return name, key, None
+
+    def take(name: str, key: str, side: Optional[str], text: Optional[str], finish: Optional[str]) -> None:
+        """Read one reply into the buffers."""
+        fmt = sides[side].reply_format_for("combination") if side else reply_format
+        score, disagreement = read_reply(text, finish, reply_format=fmt)
+        tag = {"side": side} if side else {}
+        if keep_replies:
+            reply_buffer.setdefault(name, []).append(
+                {"key": key, **tag, "score": score, "reply": text, "finish_reason": finish})
+        if disagreement:
+            abc_buffer.setdefault(name, []).append({"key": key, **tag, **disagreement})
+        if score is not None:
+            if side:
+                side_buffer.setdefault(name, {}).setdefault(key, {})[side] = score
+            else:
+                buffer.setdefault(name, {})[key] = score
+            counts["parsed"] += 1
 
     chunks = runner.write_chunks(requests(), max_requests=chunk_requests)
     if chunks:
@@ -1060,6 +1248,7 @@ async def judge_in_batches(
                 + (f", plus {len(inflight)} in batches already submitted" if inflight else ""))
 
     buffer: Dict[str, Dict[str, int]] = {}
+    side_buffer: Dict[str, Dict[str, Dict[str, int]]] = {}
     reply_buffer: Dict[str, List[dict]] = {}
     abc_buffer: Dict[str, List[dict]] = {}
     counts = {"attempted": 0, "parsed": 0}
@@ -1069,7 +1258,7 @@ async def judge_in_batches(
     def on_result(cid: str, body: Optional[dict], error: Optional[str]) -> None:
         if body is None:
             return   # counted when the fallback (or the remainder) takes it
-        name, key = cid.split(CUSTOM_ID_SEP, 1)
+        name, key, side = split_cid(cid)
         counts["attempted"] += 1
         if anthropic_judge:
             text, finish, n_in, n_out, refused = anthropic_reply(body)
@@ -1083,24 +1272,24 @@ async def judge_in_batches(
             choices = body.get("choices") or []
             text = ((choices[0].get("message") or {}).get("content") if choices else None)
             finish = choices[0].get("finish_reason") if choices else None
-        score, disagreement = read_reply(text, finish, reply_format=reply_format)
-        if keep_replies:
-            reply_buffer.setdefault(name, []).append(
-                {"key": key, "score": score, "reply": text, "finish_reason": finish})
-        if disagreement:
-            abc_buffer.setdefault(name, []).append({"key": key, **disagreement})
-        if score is not None:
-            buffer.setdefault(name, {})[key] = score
-            counts["parsed"] += 1
+        take(name, key, side, text, finish)
 
     def flush() -> None:
-        if buffer:
+        if buffer or side_buffer:
             before_write()
         for name, new in buffer.items():
             merged = merge_scores(output_dir / f"{name}.json", new)
             touched.add(name)
             logger.info(f"Saved {len(merged)} scores for {name} ({len(new)} new)")
         buffer.clear()
+        for name, new in side_buffer.items():
+            all_sides, combined = merge_sides(output_dir, name, new, sides)
+            touched.add(name)
+            n_total = sum(1 for v in all_sides.values() if combine_sides(v, sides) is not None)
+            logger.info(f"Saved {n_total} combined scores for {name} ({len(combined)} new; "
+                        + ", ".join(f"{len(by)} {side} side" for side, by in
+                                    ((s, [k for k, v in new.items() if s in v]) for s in sides)) + ")")
+        side_buffer.clear()
         for name, rows in reply_buffer.items():
             save_replies(output_dir, name, rows)
         reply_buffer.clear()
@@ -1114,24 +1303,23 @@ async def judge_in_batches(
     n_left = 0
     if unanswered and len(unanswered) <= fallback_max:
         logger.info(f"Judging {len(unanswered)} requests no batch answered in real time")
-        ids = sorted(unanswered)
-        texts = await call_judge_batch(
-            client=client,
-            prompts=[unanswered[c]["messages"][0]["content"] for c in ids],
-            model=judge_model, max_tokens=max_tokens, rate_limiter=rate_limiter,
-            batch_size=realtime_batch_size, usage=run_usage,
-            reject_truncated=reply_format == "score_marker")
-        for cid, text in zip(ids, texts):
-            name, key = cid.split(CUSTOM_ID_SEP, 1)
-            counts["attempted"] += 1
-            score, disagreement = read_reply(text, reply_format=reply_format)
-            if keep_replies:
-                reply_buffer.setdefault(name, []).append({"key": key, "score": score, "reply": text})
-            if disagreement:
-                abc_buffer.setdefault(name, []).append({"key": key, **disagreement})
-            if score is not None:
-                buffer.setdefault(name, {})[key] = score
-                counts["parsed"] += 1
+        # one call per side (or one for a one-prompt version): the token limit
+        # and the truncation rule are the side's
+        groups: Dict[Optional[str], List[str]] = {}
+        for cid in sorted(unanswered):
+            groups.setdefault(split_cid(cid)[2], []).append(cid)
+        for side, ids in groups.items():
+            fmt = sides[side].reply_format_for("combination") if side else reply_format
+            texts = await call_judge_batch(
+                client=client,
+                prompts=[unanswered[c]["messages"][0]["content"] for c in ids],
+                model=judge_model, max_tokens=side_max_tokens[side] if side else max_tokens,
+                rate_limiter=rate_limiter, batch_size=realtime_batch_size, usage=run_usage,
+                reject_truncated=fmt == "score_marker")
+            for cid, text in zip(ids, texts):
+                name, key, side_ = split_cid(cid)
+                counts["attempted"] += 1
+                take(name, key, side_, text, None)
         flush()
     elif unanswered:
         n_left = len(unanswered)
@@ -1213,6 +1401,9 @@ def reread_replies(args, *, source_dir: Path, output_dir: Path) -> None:
         logger.error(f"--reread_replies {source_dir}: {msg}")
         sys.exit(1)
 
+    if args.entity_type == "combination" and version.combination_sides:
+        stop(f"prompt version {version.number} judges a combination on two sides, each read at judging "
+             f"time; re-read a side's own scores directory under that side's version instead")
     stamp_path = source_dir / RUBRIC_STAMP_FILENAME
     if not stamp_path.exists():
         stop(f"no {RUBRIC_STAMP_FILENAME}, so the version its replies answer is not known")
@@ -1355,8 +1546,9 @@ async def main_async():
     parser.add_argument("--output_dir", type=str, required=True,
                         help="Output directory for score JSON files")
     parser.add_argument("--judge_model", type=str, default=DEFAULT_JUDGE_MODEL,
-                        help=f"Judge model to use (default {DEFAULT_JUDGE_MODEL}; roles and traits under "
-                             "the default prompt version need gpt-5.6-luna)")
+                        help=f"Judge model to use (default {DEFAULT_JUDGE_MODEL}, the judge every entity "
+                             "type needs under the default prompt version; gpt-4.1-mini judges under "
+                             "version 3 or earlier)")
     parser.add_argument("--prompt_version", type=int, default=DEFAULT_PROMPT_VERSION,
                         help="Rubric version (assistant_axis/judge_rubrics.py): 0, the original "
                              "number-only rubrics read as the first integer in the reply; 3, the "
@@ -1369,7 +1561,12 @@ async def main_async():
                              "only; traits and combinations as version 3); 11 and 12, drafts, the "
                              "trait rubric review's arms; 13, version 10 with the review's trait "
                              "rubric, the trait rubric for the October extraction (traits judged by "
-                             "gpt-5.6-luna only, as the roles), the default.  A scores "
+                             "gpt-5.6-luna only, as the roles); 14 and 15, drafts, the "
+                             "combination rubric as a decision procedure (both needed; either enough); "
+                             "16 to 18, drafts, the role rubric and the trait rubric for a combination's "
+                             "responses with the other half as context; 19, a rejected draft; 20, the "
+                             "two-sided combination rule (versions 16 and 17, a response kept when both "
+                             "give 3) with version 13's roles and traits, the default.  A scores "
                              "directory holds one version: a run refuses a directory judged under "
                              "another (run_pipeline.sh --judge-prompt-version gives each version "
                              f"its own directories).  Default {DEFAULT_PROMPT_VERSION}")
@@ -1380,7 +1577,9 @@ async def main_async():
                              "for versions 3 and 4, which must fit 2-3 sentences of reasoning + "
                              "the SCORE: line, and the fork's 10 for version 0, whose replies "
                              "are a number; 10 under a reasoning-first version would truncate "
-                             "every judge call)")
+                             "every judge call.  Under the two-sided combination rule each side "
+                             "takes its own default, 300 for the role side and 200 for the trait "
+                             "side, unless this is given, which then applies to both)")
     parser.add_argument("--batch_size", type=int, default=50,
                         help="Concurrent requests per group in real time (--no_batch, and the "
                              "fallback for requests no batch answered); not the Batch API")
@@ -1469,10 +1668,17 @@ async def main_async():
         version = get_version(args.prompt_version)
     except ValueError as e:
         parser.error(f"--prompt_version: {e}")
+    # A two-sided combination rule (version 20): each side's version, template
+    # and token limit; empty for every other run.
+    sides = version.side_versions() if args.entity_type == "combination" else {}
     if args.max_tokens is None:
         # the version's, except 300 for a reply read from its A/B/C answers (a role
-        # run under 13, whose 200 is for traits and combinations; 2026-10-30)
+        # run under 13, whose 200 is for traits and combinations; 2026-10-30), and
+        # under a two-sided rule each side's own
         args.max_tokens = version.max_tokens_for(args.entity_type)
+        args.side_max_tokens = {s: v.max_tokens_for("combination") for s, v in sides.items()}
+    else:
+        args.side_max_tokens = {s: args.max_tokens for s in sides}
 
     if args.reread_replies:
         output_dir = Path(args.output_dir)
@@ -1518,6 +1724,12 @@ async def main_async():
                        f"gpt-4.1-mini the stated score was the right part, not its answers); judge with "
                        f"{expected[0]} (run_pipeline.sh --judge-model), or pass --prompt_version 8 "
                        f"(or 3) for another judge")
+        elif args.entity_type == "combination":
+            problem = (f"prompt version {version.number}'s combination rule was settled for "
+                       f"{', '.join(expected)} (the combination rubric review of October 2026: each side "
+                       f"judged by it, the role side read from its A/B/C answers); judge with "
+                       f"{expected[0]} (run_pipeline.sh --judge-model), or pass --prompt_version 3 for "
+                       f"another judge")
         else:
             problem = (f"prompt version {version.number}'s {args.entity_type} rubric was settled for "
                        f"{', '.join(expected)} (the trait rubric review of October 2026: on the parent "
@@ -1627,11 +1839,14 @@ async def main_async():
         for response_file in response_files:
             name = response_file.stem
             # the live run's reader and request list, so the counts agree
-            existing_scores = load_scores(output_dir / f"{name}.json")
-
-            eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
-                                           entity_type=args.entity_type,
-                                           prompt_version=args.prompt_version)
+            if sides:
+                existing_sides = load_sides(output_dir, name)
+                eval_tpl = side_prompts(name, roles_dir, traits_dir, version)
+            else:
+                existing_scores = load_scores(output_dir / f"{name}.json")
+                eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
+                                               entity_type=args.entity_type,
+                                               prompt_version=args.prompt_version)
             if eval_tpl is None:
                 logger.info(f"  {name}: skipped (no eval prompt)")
                 continue
@@ -1643,9 +1858,20 @@ async def main_async():
             if args.mark_truncated:
                 responses, n_marked = mark_truncated_responses(responses)
                 logger.info(f"  {name}: {n_marked} of {len(responses)} responses marked as cut off")
-            pending = pending_prompts(responses, eval_tpl, existing_scores, name=name)
-            count = len(pending)
-            sample_prompt = pending[0][1] if pending else None
+            if sides:
+                count, samples = 0, []
+                for side, tpl in eval_tpl.items():
+                    done = {k: v[side] for k, v in existing_sides.items() if side in v}
+                    pending = pending_prompts(responses, tpl, done, name=f"{name} ({side} side)")
+                    count += len(pending)
+                    if pending:
+                        samples.append(f"[the {side} side, prompt version {sides[side].number}, "
+                                       f"--max_tokens {args.side_max_tokens[side]}]\n{pending[0][1]}")
+                sample_prompt = "\n\n".join(samples) or None
+            else:
+                pending = pending_prompts(responses, eval_tpl, existing_scores, name=name)
+                count = len(pending)
+                sample_prompt = pending[0][1] if pending else None
 
             if count > 0:
                 total_prompts += count
@@ -1717,6 +1943,11 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         logger.error(conflict)
         sys.exit(1)
     version = get_version(args.prompt_version)
+    # The two-sided combination rule (version 20): {side: version}, each
+    # side's token limit from main_async; empty for every other run.
+    sides = version.side_versions() if args.entity_type == "combination" else {}
+    side_max_tokens = getattr(args, "side_max_tokens", {}) or {
+        s: v.max_tokens_for("combination") for s, v in sides.items()}
 
     client = judge_client(args.judge_model, args.service_tier)
     # A Flex run falls back to the standard tier, request by request, after
@@ -1733,7 +1964,9 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         if not stamped:
             stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=args.judge_model,
                          prompt_version=args.prompt_version,
-                         extra={"truncation_marker": marker})
+                         extra={"truncation_marker": marker,
+                                **({"combination_sides": {s: v.number for s, v in sides.items()},
+                                    "side_max_tokens": side_max_tokens} if sides else {})})
             stamped.append(True)
 
     logger.info(f"Rubric version {version.number}{' (draft)' if version.draft else ''}: "
@@ -1771,10 +2004,14 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
         nonlocal skipped, failed
         # strict: a score file there that cannot be read is not taken as
         # empty, which would pay to judge again what it holds
-        existing_scores = load_scores(output_dir / f"{name}.json", strict=True)
-        eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
-                                       entity_type=args.entity_type,
-                                       prompt_version=args.prompt_version)
+        if sides:
+            existing_scores = load_sides(output_dir, name)
+            eval_tpl = side_prompts(name, roles_dir, traits_dir, version)
+        else:
+            existing_scores = load_scores(output_dir / f"{name}.json", strict=True)
+            eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
+                                           entity_type=args.entity_type,
+                                           prompt_version=args.prompt_version)
         if eval_tpl is None:
             skipped += 1
             return None
@@ -1800,7 +2037,13 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
             return None
         # Builds every prompt now, so that a bad record or template fails
         # this entity here instead of the whole run inside the batch writer.
-        if not pending_prompts(responses, eval_tpl, existing_scores, name=name):
+        if sides:
+            pending = any(pending_prompts(responses, tpl, {k: v[s] for k, v in existing_scores.items() if s in v},
+                                          name=f"{name} ({s} side)")
+                          for s, tpl in eval_tpl.items())
+        else:
+            pending = bool(pending_prompts(responses, eval_tpl, existing_scores, name=name))
+        if not pending:
             logger.info(f"Skipping {name}: all {len(responses)} already scored")
             skipped += 1
             return None
@@ -1836,7 +2079,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                 chunk_requests=args.batch_requests, poll_seconds=args.batch_poll_seconds,
                 fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
                 realtime_batch_size=args.batch_size, before_write=stamp_once,
-                reply_format=reply_format, keep_replies=args.save_replies)
+                reply_format=reply_format, keep_replies=args.save_replies,
+                sides=sides or None, side_max_tokens=side_max_tokens or None)
             successful = len(touched)
         except ModelDriftError as e:
             logger.error(str(e))
@@ -1850,6 +2094,27 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
             try:
                 replies: Optional[List[dict]] = [] if args.save_replies else None
                 disagreements: List[dict] = []
+                if sides:
+                    new_sides, n_attempted, n_parsed = await score_entity_sides(
+                        name, responses, eval_tpl, sides, side_max_tokens, existing_scores,
+                        replies=replies, disagreements=disagreements,
+                        client=client, rate_limiter=rate_limiter, judge_model=args.judge_model,
+                        batch_size=args.batch_size, usage=run_usage, service_tier=args.service_tier,
+                        fallback_client=fallback_client)
+                    write_usage(usage_path, prior_usage, run_usage)
+                    if replies:
+                        save_replies(output_dir, name, replies)
+                    total_call_attempted += n_attempted
+                    total_call_parsed += n_parsed
+                    stamp_once()
+                    all_sides, combined = merge_sides(output_dir, name, new_sides, sides)
+                    log_disagreements(output_dir, name, disagreements)
+                    n_total = sum(1 for v in all_sides.values() if combine_sides(v, sides) is not None)
+                    logger.info(f"Saved {n_total} combined scores for {name} ({len(combined)} new; "
+                                + ", ".join(f"{sum(s in v for v in new_sides.values())} {s} side" for s in sides)
+                                + ")")
+                    successful += 1
+                    continue
                 new_scores, n_attempted, n_parsed = await score_entity(
                     name=name,
                     responses=responses,
