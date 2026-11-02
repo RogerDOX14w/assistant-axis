@@ -177,6 +177,16 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     # reasoning_effort "none" as Luna is.
     ("gpt-5.4-mini", 0.75, 4.50),
     ("gpt-5.6-luna", 0.20, 1.20),
+    # GPT-5.6 Terra and Sol (OpenAI pricing page, read 2026-11-01), judged for the tier evaluation.
+    ("gpt-5.6-terra", 2.00, 12.00),
+    ("gpt-5.6-sol", 4.00, 20.00),
+    # Gemini (ai.google.dev/gemini-api/docs/pricing, read 2026-11-01).  Reached in real time only, so
+    # no batch factor.  2.5 Flash-Lite answers HTTP 404 to new users (2026-11-02).
+    ("gemini-3.1-flash-lite", 0.25, 1.50),
+    ("gemini-3.5-flash-lite", 0.30, 2.50),
+    ("gemini-2.5-flash-lite", 0.10, 0.40),
+    ("gemini-3-flash", 0.50, 3.00),
+    ("gemini-2.5-flash", 0.30, 2.50),
     # Haiku 5.5 (claude-haiku-5-5, released 2026-10-07; pricing page read that day): $0.10 / $0.50 for
     # prompts up to 100,000 tokens, cache reads at the standard 0.1x ($0.01), batch at half (the "haiku"
     # batch factor below).  It must come before the bare "haiku" fragment, which would price it at 4.5's

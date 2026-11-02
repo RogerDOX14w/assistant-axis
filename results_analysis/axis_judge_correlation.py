@@ -28,7 +28,9 @@ from tqdm import tqdm
 # Repo-internal imports: reuse the existing OpenAI judge infrastructure.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from assistant_axis.judge import (  # type: ignore  # noqa: E402
-    RateLimiter,
+    accepts_temperature, anthropic_reply, anthropic_request_params, BillingError,
+    chat_create_kwargs, chat_request_body, content_flag, DEFAULT_TEMPERATURE, is_billing_error,
+    JudgeRequestError, provider_for_model, RateLimiter, REFUSED_REPLIES, request_temperature, TRUNCATED_REPLIES,
     warn_if_low_parse_rate,
 )
 from assistant_axis import (  # noqa: E402
@@ -49,7 +51,9 @@ from assistant_axis.judge_pricing import (  # noqa: E402
     BudgetExceededError,
     BudgetTracker,
     UsageTotals,
+    anthropic_usage,
     extract_usage_anthropic,
+    openai_usage,
     extract_usage_openai,
 )
 from assistant_axis.provenance import (  # noqa: E402
@@ -1453,19 +1457,23 @@ async def _call_with_retry(
     classify+backoff retries. Returns the call result, or ``None`` if all
     attempts failed (logged at WARNING with full classification).
 
-    :class:`BudgetExceededError` (Phase 4c, May 2026) is RE-RAISED
-    unconditionally — it indicates the cost cap was crossed and the
-    run must abort immediately, NOT retry.  All other exceptions are
-    classified normally.
+    :class:`BudgetExceededError` (Phase 4c, May 2026) and
+    :class:`JudgeRequestError` are RE-RAISED unconditionally: the run must
+    abort at once, NOT retry.  A fatal error other than a content flag on this
+    one prompt raises :class:`JudgeRequestError` (:class:`BillingError` for an
+    account the provider refuses), since every further call would fail the
+    same way; until 2026-11-02 it gave None, so that a judge refusing the
+    request's temperature "completed" with no score at all.  All other
+    exceptions are classified normally.
     """
     last_exc: Optional[BaseException] = None
     for attempt in range(1 + len(delays)):
         try:
             return await one_attempt()
-        except BudgetExceededError:
+        except (BudgetExceededError, JudgeRequestError):
             # Hard escape: bypass all retry/swallow logic.  The
             # orchestrator's try/except in run() catches this and
-            # exits with code 2.
+            # exits with code 2 (budget) or 1.
             raise
         except Exception as e:  # noqa: BLE001 (we intentionally classify)
             action, server_wait = _classify_judge_error(e)
@@ -1475,7 +1483,13 @@ async def _call_with_retry(
                     f"{provider_name} fatal error (no retry): "
                     f"{type(e).__name__}: {e}"
                 )
-                return None
+                flag = content_flag(e)
+                if flag is not None:
+                    logger.warning(f"{provider_name}: content flag ({flag}): this item gives None")
+                    return None
+                error = BillingError if is_billing_error(e) else JudgeRequestError
+                raise error(f"{provider_name} judge call refused: {type(e).__name__}: {e}.  Every further "
+                            f"call would fail the same way") from e
             if attempt == len(delays):
                 logger.warning(
                     f"{provider_name} call failed after {attempt + 1} attempts: "
@@ -1494,6 +1508,21 @@ async def _call_with_retry(
     return None
 
 
+def _usable_reply(text: Optional[str], finish: Optional[str], refused: bool, model: str) -> Optional[str]:
+    """The reply's text, or None for a refusal or a reply cut at ``max_tokens``, each counted (a
+    cut reply is never parsed, as in step 3: its reasoning was cut, whatever it holds)."""
+    if refused:
+        REFUSED_REPLIES[model] = REFUSED_REPLIES.get(model, 0) + 1
+        logger.warning(f"{model} refused a judge prompt ({REFUSED_REPLIES[model]} refusals so far)")
+        return None
+    if finish == "length":
+        TRUNCATED_REPLIES[model] = TRUNCATED_REPLIES.get(model, 0) + 1
+        logger.warning(f"{model}: a reply was cut at max_tokens ({TRUNCATED_REPLIES[model]} so far): scored as "
+                       f"missing; raise --max_tokens")
+        return None
+    return text
+
+
 async def _call_anthropic_batch(
     prompts: Sequence[str],
     model: str,
@@ -1508,11 +1537,9 @@ async def _call_anthropic_batch(
 
     async def one(prompt: str) -> Optional[str]:
         async def attempt() -> Optional[str]:
+            params = anthropic_request_params(prompt, model, max_tokens, temperature=temperature)
             await rate_limiter.acquire()
-            resp = await client.messages.create(
-                model=model, max_tokens=max_tokens, temperature=temperature,
-                messages=[{"role": "user", "content": prompt}],
-            )
+            resp = await client.messages.create(**params)
             # Tick the budget tracker BEFORE returning text so a
             # cap-crossing call still gets accounted for in n_calls
             # and prompt/completion tokens (the orchestrator wants
@@ -1520,14 +1547,11 @@ async def _call_anthropic_batch(
             # cap).  charge() raises BudgetExceededError if the
             # running total now exceeds the cap.
             if tracker is not None:
-                pt, ct = extract_usage_anthropic(resp)
-                tracker.charge(pt, ct)
-            parts = []
-            for block in resp.content:
-                text = getattr(block, "text", None)
-                if text:
-                    parts.append(text)
-            return "".join(parts) if parts else None
+                u = anthropic_usage(resp)
+                tracker.charge(u.prompt_tokens, u.completion_tokens,
+                               u.cache_write_tokens, u.cache_read_tokens)
+            text, finish, _n_in, _n_out, refused = anthropic_reply(resp)
+            return _usable_reply(text, finish, refused, model)
 
         return await _call_with_retry(attempt, provider_name="anthropic")
 
@@ -1537,7 +1561,7 @@ async def _call_anthropic_batch(
         tasks = [one(p) for p in chunk]
         r = await asyncio.gather(*tasks, return_exceptions=True)
         for x in r:
-            if isinstance(x, BudgetExceededError):
+            if isinstance(x, (BudgetExceededError, JudgeRequestError)):
                 # Phase 4c: cap exceeded — abort immediately rather
                 # than swallowing as None (which would let the loop
                 # continue spending on the remaining chunks).
@@ -1559,39 +1583,30 @@ async def _call_openai_batch(
     batch_size: int,
     tracker: Optional[BudgetTracker] = None,
 ) -> List[Optional[str]]:
-    """Local OpenAI async path; parallels _call_anthropic_batch so we can set
-    temperature and token budget freely.  (Since B1, commit 8bf84f14, the
-    shared assistant_axis/judge.py sends no temperature when it equals the
-    provider default, and checks a non-default one against
-    judge.MODEL_CAPABILITIES; this comment used to say it hard-coded
-    temperature=1.)  Since 2026-11-01 a judge that takes OpenAI's
-    ``prompt_cache_options`` (GPT-5.6 and later) is sent explicit mode with
-    no breakpoints (``judge.DEFAULT_PROMPT_CACHE``: a batch prompt of B
-    responses is never repeated, and its default caching would write it at
-    1.25x the input rate), and the tracker is charged the cache tokens the
-    response reports.
+    """Local OpenAI async path; parallels _call_anthropic_batch, with this
+    script's retries around the requests of ``judge.py`` (since 2026-11-02):
+    ``judge.chat_request_body`` leaves out a temperature equal to the provider
+    default, checks a non-default one against ``judge.MODEL_CAPABILITIES`` and
+    adds the model's request settings (reasoning effort "none"), and turns
+    prompt caching off for a judge that takes the field (GPT-5.6 and later: a
+    batch prompt of B responses is never repeated, and its default caching
+    would write it at 1.25x the input rate).  The tracker is charged the cache
+    tokens the response reports.
     """
     import openai
-    from assistant_axis.judge import chat_create_kwargs, prompt_cache_fields
-    from assistant_axis.judge_pricing import openai_usage
     client = openai.AsyncOpenAI()
-    cache_kwargs = chat_create_kwargs(prompt_cache_fields(model))
 
     async def one(prompt: str) -> Optional[str]:
         async def attempt() -> Optional[str]:
+            body = chat_request_body(prompt, model, max_tokens, temperature=temperature)
             await rate_limiter.acquire()
-            resp = await client.chat.completions.create(
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-                max_completion_tokens=max_tokens,
-                temperature=temperature,
-                **cache_kwargs,
-            )
+            resp = await client.chat.completions.create(**chat_create_kwargs(body))
             if tracker is not None:
                 u = openai_usage(resp)
                 tracker.charge(u.prompt_tokens, u.completion_tokens,
                                u.cache_write_tokens, u.cache_read_tokens)
-            return resp.choices[0].message.content
+            choice = resp.choices[0]
+            return _usable_reply(choice.message.content, getattr(choice, "finish_reason", None), False, model)
 
         return await _call_with_retry(attempt, provider_name="openai")
 
@@ -1601,7 +1616,7 @@ async def _call_openai_batch(
         tasks = [one(p) for p in chunk]
         r = await asyncio.gather(*tasks, return_exceptions=True)
         for x in r:
-            if isinstance(x, BudgetExceededError):
+            if isinstance(x, (BudgetExceededError, JudgeRequestError)):
                 # Phase 4c: cap exceeded — abort immediately.
                 raise x
             if isinstance(x, Exception):
@@ -3372,6 +3387,10 @@ def parse_args() -> argparse.Namespace:
 
     # Scoring modes.
     sm = p.add_argument_group("scoring modes")
+    sm.add_argument("--projections_only", action="store_true",
+                    help="Write <output_dir>/projections.json and stop: no judge calls.  For judging an axis "
+                         "by results_analysis/judge_descriptions.py, the batched percentile method (2026-11-02), "
+                         "which reads <experiments_dir>/<axis>/gpt/projections.json.")
     sm.add_argument("--score_descriptions", action="store_true",
                     help="Score each entity's description text.")
     sm.add_argument("--score_instructions", action="store_true",
@@ -3433,8 +3452,11 @@ def parse_args() -> argparse.Namespace:
                    help="Defaults: claude-sonnet-4-6 (anthropic) / gpt-4.1-mini (openai).")
     j.add_argument("--max_tokens", type=int, default=1024,
                    help="Token budget for the judge response (must fit reasoning + SCORE line).")
-    j.add_argument("--temperature", type=float, default=0.0,
-                   help="Sampling temperature; 0 for greedy/deterministic rubric grading.")
+    j.add_argument("--temperature", type=float, default=None,
+                   help="Sampling temperature.  Default: 0 for greedy/deterministic rubric grading on a "
+                        "model that takes one, else the provider's default (judge.MODEL_CAPABILITIES: GPT-5 "
+                        "and later and Claude 5 refuse any other with HTTP 400).  A value the model refuses "
+                        "stops the run before anything is sent.")
     j.add_argument("--rps", type=float, default=10.0, help="Requests per second (token bucket).")
     j.add_argument("--batch_size", type=int, default=20, help="Concurrent in-flight calls.")
     j.add_argument("--save_every", type=int, default=40,
@@ -3547,11 +3569,27 @@ def parse_args() -> argparse.Namespace:
         args.score_descriptions = True
         args.score_instructions = True
         args.score_responses = True
-    if not (args.score_descriptions or args.score_instructions or args.score_responses):
+    if not (args.score_descriptions or args.score_instructions or args.score_responses or args.projections_only):
         p.error("Specify at least one of --score_descriptions / --score_instructions / "
-                "--score_responses, or use --all.")
+                "--score_responses, or use --all, or --projections_only.")
+    if args.projections_only and (args.score_descriptions or args.score_instructions or args.score_responses):
+        p.error("--projections_only excludes the --score_* modes and --all.")
     if args.judge_model is None:
         args.judge_model = _default_model_for_provider(args.provider)
+    try:
+        provider = provider_for_model(args.judge_model)
+    except ValueError:      # a name no prefix covers goes to --provider's client, as before
+        provider = args.provider
+    if provider != args.provider:
+        hint = (" (Gemini is judged by results_analysis/judge_descriptions.py, not by this script)"
+                if provider == "google" else "")
+        p.error(f"--judge_model {args.judge_model} is a {provider} model, but --provider is {args.provider}{hint}")
+    if args.temperature is None:
+        args.temperature = 0.0 if accepts_temperature(args.judge_model) else DEFAULT_TEMPERATURE
+    try:
+        request_temperature(args.judge_model, args.temperature)     # before minutes of projections
+    except JudgeRequestError as e:
+        p.error(str(e))
     args.rejudge_names = _parse_rejudge_names(args.rejudge_names)
     return args
 
@@ -3803,6 +3841,9 @@ async def run(args: argparse.Namespace) -> None:
         schema_version=2,
         notes={"usage": tracker.as_dict()},
     )
+    if args.projections_only:
+        logger.info(f"--projections_only: wrote {Path(args.output_dir) / 'projections.json'}; no judge calls")
+        return
 
     # Save config up-front.  ``cohort_kind`` records the kind-pure
     # cohort the responses_dir points at (when in response mode);
@@ -3861,6 +3902,12 @@ async def run(args: argparse.Namespace) -> None:
         logger.error(str(e))
         _flush_budget_artifacts(args, tracker)
         raise SystemExit(2) from e
+    except JudgeRequestError as e:
+        # The API refuses the request or the account: every further call
+        # would fail the same way.  What was judged is already saved.
+        logger.error(str(e))
+        _flush_budget_artifacts(args, tracker)
+        raise SystemExit(1) from e
     else:
         # On clean completion, also write the side-car / log a
         # one-line final summary so the operator sees the bill.

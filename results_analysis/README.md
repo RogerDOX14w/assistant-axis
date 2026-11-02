@@ -2735,6 +2735,438 @@ by judge *family*, so on resume the producer compares the cache's recorded
 rejudges legacy caches that recorded no model).  See AGENT_NOTES "Judge-model
 drift on resume".
 
+### Description judging: the settled method (Roger, 2026-11-02)
+
+[`judge_descriptions.py`](./judge_descriptions.py) judges axes from the entities'
+descriptions as the judge-tier evaluation settled it: the batched percentile rubric
+`b10`, 20 entities per call, two passes in independent random orders, no reasoning,
+each judge's passes averaged and the judges blended by the mean of their scores.
+The defaults are the constants at the top of that script, one place to change them.
+
+| judges, at N=20 and 2 passes (30 development axes, slot 6, layer 25, raw) | ρ | $ per axis, list price | on the frontier, of 12 variants |
+|---|---:|---:|---:|
+| GPT-6 Luna alone (the cheap end) | 0.680 | 0.019 | 12 |
+| GPT-5.6 Luna alone | 0.704 | 0.042 | 12 |
+| **GPT-5.6 Luna + Haiku 5.5 (the default)** | **0.716** | **0.084** | **12** |
+| the same + Gemini 3.1 Flash-Lite (`--judge_model`, optional) | 0.721 | 0.152 | 9 |
+
+The third judge's gain is +0.004 [−0.001, +0.009], and a third pass of Luna and Haiku
+(0.721 at N=10, $0.143) gives as much.  Gemini 3.1 is not on the frontier alone, and
+behaves as the others do on batch size and passes, except that reasoning hurts it.
+Gemini 3.1 Flash-Lite's earliest shutdown is 2027-05-07.
+
+```bash
+# New data: projections first (no judge calls)
+uv run python results_analysis/axis_judge_correlation.py --projections_only --pair POS NEG --pair_type traits \
+    --data_dir DATA --output_dir roger/axis_judge_experiments/POS_vs_NEG/gpt
+# Then the cost, then the run (a rerun resumes; finished work is kept)
+uv run python results_analysis/judge_descriptions.py --axes_file AXES.tsv --dry_run
+uv run python results_analysis/judge_descriptions.py --axes_file AXES.tsv --budget_usd 20
+```
+
+Cells go to `<axis>_tier_eval/<judge>@b10n20s<seed>/`, the averages to
+`<judge>@b10n20x2/` and the blend to `<judge>+<judge>@b10n20x2/`
+([`judge_tier_average.py`](./judge_tier_average.py), which refuses a source holding
+under 90% of the axis).  **Not yet wired to the older consumers**: the scripts that
+read `<axis>/gpt/scores_descriptions.json` (the weight sweeps, `optimal_axis_for_judge.py`)
+still read `axis_judge_correlation.py --score_descriptions`' one-entity −3..+3 scores.
+That waits until instruction and response judging are settled, since they change the
+same code.
+
+`axis_judge_correlation.py` itself now sends through `judge.py` (since 2026-11-02): a
+judge's request settings go in, the temperature defaults to 0 where the model takes
+one and to the provider's default otherwise, a request or account the provider
+refuses stops the run instead of giving every entity None, and a reply cut at
+`--max_tokens` is counted and never parsed.  Its requests for the older judges are
+byte-for-byte as they were.
+
+### Evaluating a new judge tier without recomputing activations
+
+`judge_tier_cost_eval.py` scores a *new* judge model against an
+**already-computed** axis, reusing a cached `projections.json` instead of
+recomputing projections from raw activation vectors (which
+`axis_judge_correlation.py` itself always does — `--data_dir` is
+required there). 61 axes under `roger/axis_judge_experiments/` have that
+cache (`<axis>/gpt/projections.json`, about 571-580 entities × 8 slots ×
+{raw, whitened}); [`scripts/tier_eval_axes.tsv`](../scripts/tier_eval_axes.tsv)
+lists all of them as `axis_dir pos neg pair_type` rows (the two axes judged
+first, `angel_vs_demon` and `decisive_vs_indecisive`, then the 18 of
+[`run_tier_eval_20axes.sh`](../scripts/run_tier_eval_20axes.sh) and the 41 of
+[`run_tier_eval_41axes.sh`](../scripts/run_tier_eval_41axes.sh)).
+
+```bash
+# All 61 axes, several models, preview (zero API calls, nothing written):
+uv run python results_analysis/judge_tier_cost_eval.py \
+    --axes_file scripts/tier_eval_axes.tsv \
+    --instructions_dir /tmp/corpus_2026-05-24/data \
+    --judge_model gpt-5.6-luna --judge_model claude-haiku-5-5 --judge_model gpt-6-luna \
+    --dry_run
+
+# The same through the driver (corpus check; MODELS defaults to luna, terra, opus-5):
+MODELS="gpt-5.6-luna claude-haiku-5-5" bash scripts/run_tier_eval.sh --dry_run
+
+# One axis (the original interface):
+uv run python results_analysis/judge_tier_cost_eval.py \
+    --pair angel demon --pair_type roles \
+    --projections_file roger/axis_judge_experiments/angel_vs_demon/gpt/projections.json \
+    --judge_model claude-opus-5 --judge_model gpt-5.6-luna \
+    --output_dir roger/axis_judge_experiments/angel_vs_demon_tier_eval \
+    --dry_run
+```
+
+With `--axes_file` (which excludes `--pair`, `--pair_type`,
+`--projections_file` and `--output_dir`) each axis reads
+`<experiments_dir>/<axis_dir>/gpt/projections.json` and writes
+`<experiments_dir>/<axis_dir>_tier_eval/<model>/` (`--experiments_dir`,
+default `roger/axis_judge_experiments`). An axis whose
+`<model>/usage.json` already exists is skipped for that model, in both
+modes, so a rerun judges only what is missing. The dry run prints each
+axis's entity count and, per model, the transport, the number of calls and
+the estimated cost at that transport's price (coarse token model: 470 in /
+80 out per entity), less the answers saved by earlier runs.
+
+**Saved answers, the in-flight limit and the stall restart** (2026-11-01,
+after a Flex run for four models held nine hours of answers only in memory
+and never finished; the cause was every request handed to the HTTP client
+at once, whose connection pool then spent a full core on bookkeeping):
+
+- Every billed live or Flex answer is appended, as it arrives, to the cell's
+  `answers.partial.jsonl`: a header (model, cell label, rubric version,
+  request settings, `max_tokens`), then one line per answer with the entity,
+  the reply text, whether it was cut at the cap, its charges and a digest of
+  the exact prompt.  A rerun by any transport, batch included, takes every
+  saved answer to the same prompt instead of asking again (its charges go
+  into the cell's `usage.json`, not into the run's `--budget_usd`), and
+  refuses a log written under other settings (exit 1, naming the file and
+  the difference).  A call that failed without a charge is not saved and is
+  asked again.  When the cell is written the log is kept as
+  `answers.jsonl.gz` and removed.  So a run can be stopped at any moment and
+  rerun, losing at most the requests in flight.
+- Live and Flex requests go axis by axis, at most `--max_in_flight` (default
+  200) per model at a time, so cells complete as the run goes.
+- A progress line per model every five minutes: judged so far this run,
+  answers resumed, in flight, Flex fallbacks, cells written, cost.
+- No answer for `--stall_minutes` (default 30) while live or Flex requests
+  remain: the run stops and starts itself again with the same arguments
+  (`os.execv`, same process and log), up to `--stall_restarts` (default 3)
+  times; exit status 3 when none is left.  Batch waits do not count.
+
+**Transports** (`--transport`, default `auto`; 2026-11-01). Requests, the capability table and the Flex and retry loops are
+[`assistant_axis/judge.py`](../assistant_axis/judge.py)'s, the code pipeline
+step 3 and the axis judge use; [`judge_tier_transport.py`](./judge_tier_transport.py)
+only chooses the transport.  The batch runners are
+[`assistant_axis/openai_batch.py`](../assistant_axis/openai_batch.py) and
+[`assistant_axis/anthropic_batch.py`](../assistant_axis/anthropic_batch.py).
+
+| transport | how | usage key | chosen by `auto` for |
+|---|---|---|---|
+| `flex` | OpenAI Flex processing through the rate limiter (`--requests_per_second`, default 10), at most `--max_in_flight` in flight; a request Flex keeps failing is retried every 30 s until 10 minutes after it was first sent, then sent once to the standard tier.  Each Flex attempt goes with no SDK retries and a timeout of the time left (at least 60 s), so the 10 minutes hold; before 2026-11-01 the client's 900 s timeout and 8 retries could hold a request for over two hours | `<model>:flex` (batch price); fallbacks `<model>` | OpenAI models `MODEL_CAPABILITIES` lists as taking Flex (gpt-5.6-luna); untested OpenAI models with a **probe**: the first request alone, and an HTTP 400 refusing the service tier switches the model to batch for the run (that request goes into the batch) |
+| `batch` | OpenAI Batch API or Anthropic Message Batches: one submission per model for all the axes being run, custom ids `a<axis index>\|<entity>`; each cell written as soon as its axis is complete; requests a batch never answered sent in real time on the standard tier (up to `--batch_fallback_max`, default 2000) | `<model>:batch` (half price); remainder `<model>` | Anthropic models; OpenAI models listed as refusing Flex (gpt-4.1-mini) |
+| `realtime` | every request in real time through the rate limiter (the behaviour before 2026-11-01) | `<model>` | never (explicit override) |
+
+Batch work and state live in `<experiments_dir>/_tier_eval_batches/<model>/`
+(never inside a `*_tier_eval` directory): `batch_state.json` and `chunks/`
+(the runner's), `axis_map.json` (axis index → axis, cumulative, plus the
+model, `max_tokens` and request settings the batches were requested with),
+and `collected/a<index>.json` (results of axes not yet complete, so a run
+stopped between batches does not ask for them again). A rerun collects
+batches still in flight before submitting anything; it refuses (exit 1)
+when batches in flight were requested with another model or other settings,
+and a `flex` / `realtime` run refuses while a model's batches are in flight.
+
+**Prompt caching is off** (2026-11-02): GPT-5.6 and later write any prompt of
+1,024 tokens or more to the cache by default, at 1.25x the input rate, and a judge
+prompt is never read back.  `judge.prompt_cache_fields` turns that off for all
+three OpenAI send sites here: `judge.call_judge_single`, `_call_openai_batch` in
+`axis_judge_correlation.py`, and this tool's real-time, Flex and Batch requests.
+It is not a request setting, so earlier cells keep resuming.  This tree's usage
+records price every prompt token plain, so a reply reporting cache writes logs a
+warning instead; add such a model to `judge.PROMPT_CACHE_OFF_MODELS`.
+
+**Gemini** (2026-11-02): a `gemini-*` judge is reached directly at Google's
+generateContent endpoint over HTTPS (httpx; the key, `GEMINI_API_KEY`, travels
+in the `x-goog-api-key` header, never in the URL), in real time only (no
+Flex; Google's batch mode is not wired up).  Default settings: temperature 0
+(Gemini takes it) and `thinkingConfig.thinkingLevel` "minimal" (no thought
+tokens on 3.1 Flash-Lite; "low" added about 120 per call).  Thought tokens are
+charged as output.  A 429 or 5xx is retried eight times with growing sleeps.
+In the Luna / Haiku 5.5 price class: `gemini-3.1-flash-lite` ($0.25 / $1.50;
+earliest shutdown 2027-05-07 on [Google's deprecations page](https://ai.google.dev/gemini-api/docs/deprecations))
+and `gemini-3.5-flash-lite` ($0.30 / $2.50; tested and dropped 2026-11-02, worse
+and dearer than 3.1); 2.5 Flash-Lite is no longer offered to new users.  A free-tier key is enough for probes, not
+for a quick run: about 15 requests a minute and about 500 a day per model (seen
+2026-11-02), against 870 calls for one pass over 30 axes at N=20.  A 429 naming a
+`PerDay` quota raises `BillingError`, which stops the run; a rerun resumes from the
+saved answers once the quota resets.  On the paid tier, `--requests_per_second 5
+--max_in_flight 20` ran a pass over 30 axes in about two minutes.  Neither model
+reached the frontier at N=20 and two passes (update 3 of
+[`pareto_pooled_61axes_notes.md`](../roger/axis_judge_experiments/pareto_pooled_61axes_notes.md)).
+
+**Request settings per model** come from `JUDGE_REQUEST_SETTINGS` in
+[`assistant_axis/judge.py`](../assistant_axis/judge.py), what step 3 sends:
+`reasoning_effort` "none" for GPT-5.4, GPT-5.6 and GPT-6, thinking disabled for
+Haiku 5.5, T=0 and the lowest thinking level for Gemini; the default temperature
+(1) is not sent. `--request_setting [MODEL_FRAGMENT:]key=<json>` (repeatable)
+overrides the table for one run; `null` removes a field.  Cells judged before the
+port of 2026-11-02 went by an adapted table: to extend one pass
+`'gpt-5.6:reasoning_effort=null'` for a GPT-5.6 cell with no `@none` in its label,
+or `'opus-5:output_config={"effort":"low"}'` (and the like) for a Claude 5 cell.
+
+**Entity names in prompts** (`--name_format`, 2026-11-02): `judge_label`, the
+project's judge display form (`systems-thinker`, `achiever (from VALS)`), as every
+other judge prompt shows; `mechanical`, underscores to spaces, reproduces the
+prompts of the cells judged before then (`systems thinker`, `achiever vals`), to
+extend one or to replay it.  The two differ for 13 of the May corpus's 583
+entities and 316 of the 1,272 of November's.  The poles are left out by entity
+id, `AxisSpec.pole_entity_ids`, in either format: on a traits axis the role of a
+pole's name is judged.
+
+**A call that gets no answer never finishes a cell** (2026-11-02).  A network or
+provider failure comes back as `judge.FAILED`, not None: nothing was charged and
+nothing is known, so its entities stay unscored, live and Flex runs ask them again
+up to `REASK_ROUNDS` times, a minute apart, and what is still open at the end leaves
+its cell without a `usage.json`, for a rerun (exit status 4).  A refusal, a content
+flag and an unparseable reply are outcomes: asking again would repeat them.  A Mac
+asleep for three hours that day left eight empty cells marked finished, which is
+why this exists.
+
+**Scores in words** (2026-11-02, [`assistant_axis/judge_score_words.py`](../assistant_axis/judge_score_words.py)).
+GPT-5.6 Luna now and then writes `SCORE: thirty-five`, usually for a whole batch,
+and the contemporary and batched rubrics' parsers read that: any case, a hyphen, a
+dash, a space or nothing between the parts, UK and US forms (`one hundred and five`,
+`one hundred five`, `a hundred`, `nought`, `naught`, `zero`), a sign, markup round
+it.  A digit marker takes precedence (`SCORE: thirty? Must integer no words.
+SCORE: 32` is 32), so the parser can only turn a missing score into a score.  In
+1.4 million recorded ratings it changed none that had a score and filled 978.  Step
+3 does not use it: none of 4.8 million saved step-3 markers held a number in words.
+
+**Reply cap** (`--max_tokens`): 300 since 2026-11-01 (Roger: "200 is clearly
+too low for safety"; 200 before). A reply cut at the cap (Anthropic
+`stop_reason: "max_tokens"`, OpenAI `finish_reason: "length"`, as the
+transport reports it) usually loses its `SCORE:` line, and
+`parse_signed_score`'s fallback (the first standalone integer in [-3, 3])
+used to score it silently from a number in its reasoning. Since 2026-11-01 it
+is scored as missing without being parsed (as step 3's `reject_truncated`),
+in every transport, counted in the summary line
+(`truncated N`) and as a failure in the parse rate, and the cell's provenance
+lists such entities under `truncated` (sorted entity keys, empty when none).
+Measured on the Anthropic batches of 2026-11-01 at the old cap: Opus 5 with
+thinking off 70 of 11,484 replies cut (52 came out unscored, 18 scored by the
+fallback); Haiku 4.5 3 of 34,072, at T=0 1 of 35,214; Sonnet 5 7 of 34,072;
+Haiku 5.5 (cap 250) 7 of 35,214.
+
+**Repairing cut replies** (`--repair_truncated`, with the same `--axes_file`,
+`--experiments_dir`, `--instructions_dir`, `--judge_model`, `--cell_label`
+and `--request_setting` as the run that made the cells, and the new
+`--max_tokens`): for each finished cell, re-asks exactly the entities whose
+reply was cut, in real time on the standard tier with the model's request
+settings, and patches the cell. That is the same as rerunning at the higher
+cap, since a cap changes only the replies that reach it. The cut entities come
+from the provenance's `truncated` list.  A cell without one (made before
+2026-11-01) is reported and left
+alone, as is a cell whose recorded request settings differ from the run's, or
+whose correlations cannot be reproduced from its scores. Only the re-asked
+entities' scores change (a reply cut again scores as missing); the cell's
+`correlations.json` is recomputed as the original write did (its slots, the
+same projections, pole exclusion), the re-asks' usage is merged into
+`usage.json` under the plain model name (earlier entries kept), and the
+provenance gains a `repairs` record (`date`, `max_tokens`, `reasked`,
+`still_truncated`, `source`); `max_tokens` and `truncated` keep the original
+run's values. An entity is re-asked only when the new cap is above the one it
+was last asked at, so a repeated repair re-asks nothing. `--dry_run` lists the
+cells, counts and estimated cost (it reads batch results, makes no judge
+calls). A call that fails leaves its entity as it was, for a rerun.
+
+`--budget_usd` stops a real-time or Flex run (a batch's real-time remainder
+included) from issuing new requests once its measured spend passes the
+figure; a cell left incomplete is written as `scores_descriptions.partial.json`
+and `usage.partial.json` (no `usage.json`, so a rerun judges it again) and
+the run exits 2. A batch is submitted whole: the dry run is its control.
+At the end the script prints, per model, parsed/attempted, replies cut at the
+cap (`truncated`), Flex fallbacks, refusals (an Anthropic
+`stop_reason: "refusal"` is a counted, unparseable call) and cost, and
+`warn_if_low_parse_rate` logs `*** HIGH FAIL RATE ***` below 99%. Models run
+concurrently. Exit status: 0 done, 1 a model failed or a key is missing, 2 the
+budget stop, 3 a stall with no restart left, 4 calls left unanswered (rerun).
+
+Writes `scores_descriptions.json`, `correlations.json` and, last,
+`usage.json` (real measured cost, not estimated) per judge model, in the
+same shape `axis_judge_correlation.py` itself writes;
+`scores_descriptions.json`'s `_provenance` also records `transport`,
+`transport_reason`, `request_settings`, `max_tokens`, `truncated` (since
+2026-11-01) and, after a repair, `repairs`.
+
+**Scope of what actually gets touched:**
+
+- **What's scored**: not the pole pair itself (`angel`/`demon`, excluded by
+  design) — the other entities in the cached projections (every other
+  role/trait), each scored for where it falls on that axis's spectrum.
+- **Network**: only `api.anthropic.com` / `api.openai.com` (the judge
+  calls and batch submissions). No GPU, no RunPod, no other service contacted.
+- **Filesystem**: writes new files under each axis's `<axis>_tier_eval/<model>/`
+  and, for batch, under `_tier_eval_batches/<model>/`. Never touches the
+  existing committed `gpt/`/`sonnet/` subdirectories or their cached
+  scores/projections/correlations.
+- **Git**: nothing is committed or pushed automatically.
+
+### Pooled plot across axes, and the robustness check (2026-11-01)
+
+[`judge_tier_cost_plot_pooled.py`](./judge_tier_cost_plot_pooled.py) pools
+every `<axis>_tier_eval/<model>/` cell into one Pareto plot: mean ρ over the
+axes, mean cost per axis, log cost axis, labels placed next to their own
+point.
+
+- **Coverage.**  A model judged on fewer axes than the headline count (the
+  most any model has) is left off and named in the title; `--min_axes N`
+  lowers the bar.
+- **Cost.**  `--price_basis list` (default) recomputes every cell from its
+  token counts at the real-time list price, so batch and Flex cells compare
+  with real-time ones; `batch` halves that; `recorded` takes `usage.json` as
+  billed.
+- **ρ.**  `--robustness_json` takes each cell's ρ from
+  `judge_tier_robustness.py`'s output (default variant `s6_l25_raw`), which
+  drops the nine trait/role collision names on bare-keyed axes that the
+  cells' own `correlations.json` mismatch.
+- **Leaving runs out.**  `--exclude_models CELL ...` drops cell directories,
+  for example a run superseded by one under consistent settings; they are
+  named in the title.
+- **Labels.**  A cell label's suffix is spelled out (`@none` "no reasoning",
+  `@t0` "T=0", `@nothink` "thinking off"), unlabelled cells of the
+  2026-10-26 runs say their setting (Opus and Sonnet 5 "effort low", GPT-5.6
+  "default reasoning"), and gpt-4.1-mini is marked as retiring on 2027-01-14.
+  The May 2026 legacy cells enter only with `--legacy`.
+
+**Rubric variants and batched judging** (`--rubric`, `--entities_per_call`;
+2026-11-01, Roger's rubric tuning).  The v3 descriptions rubric is a 2023-style
+judge prompt whose 0 row ("neutral, ambiguous, or does not map onto this
+axis") the newer models take literally: 52-70% zeros against gpt-4.1-mini's
+32%, and across judges the share of zeros tracks lower ρ (a 0 ties every
+entity the judge would not place, while the projection orders them all).
+[`judge_tier_rubrics.py`](./judge_tier_rubrics.py) holds the variants, each
+with its own prompt builder and parser, recorded in every cell's provenance
+(`rubric`, `rubric_version`):
+
+- `v3` (default): the 2026-04-20 rubric, unchanged, so existing cells stay
+  comparable.  It shows a collision key with its kind suffix ("amateur|R")
+  on the 38 suffix-keyed axes; the judges cope.  **Remove that once the
+  old-versus-new comparison is finished** (Roger, 2026-11-01: keep it only
+  for compatibility): render through `shown_name` as the other variants do,
+  under a new version label.  `v3fix` names the poles by their own type
+  (no measurable difference: 0.6053 against a 0.6053 repeat run).
+- `c1` to `c7`: contemporary rubrics.  They say what the score is for (a
+  rank among several hundred entities, compared with an independent
+  measurement; relative position and small differences matter), give a
+  standard for indirect cases (typical behaviour, values, associations),
+  keep 0 for balanced entities only and ask for the lean otherwise, keep
+  reasoning before the score, and read the score strictly (exactly one
+  `SCORE: <int>` in range).  They differ in scale (-3..+3, -10..+10,
+  -100..+100), reasoning length and prompt length.
+- `c8`, `c10`: ask for the entity's **percentile among all the roles and
+  traits on the axis** (0..100), which is what a rank correlation measures.
+  `c10` drops c8's "most percentiles sit between 20 and 80" hint, which Haiku
+  5.5 took as a prior (59% of its scores at about 40 or 60).  `c9`: a
+  calibrated 0 (about one entity in ten), no better than c5.
+- `b5`, `b10`: batch forms (`--entities_per_call N`, `--shuffle_seed S`):
+  N entities of one axis per call in a seeded shuffle, one line each in the
+  reply, so the judge has a comparison frame and the rubric is shared (input
+  cost per entity about a third at N=10).  Through any transport: one Batch
+  API request per group (the group's members recorded in the batch work
+  directory's `groups.json`; a group no batch answers is judged live).
+  Judging each entity under two seeds measures the crosstalk between
+  batch-mates (between-seed agreement about 0.85), and averaging the two
+  beats single-entity judging at lower cost.  Raise `--max_tokens` (600 for
+  N=10, 1,500 for Haiku 5.5, which writes about 60 tokens per entity): the 300
+  default cuts ten-line replies.  `--batch_design rows` / `cols` (Roger,
+  2026-11-01) replaces the second independent shuffle: the axis's entities
+  are cut into N x N squares of one seeded shuffle, one pass judges the rows
+  and the other the columns, so an entity's two batches share no other
+  member (two independent shuffles put one of the same batch-mates back
+  together for 13% of entities, two for 0.8%).  On the 30 development axes
+  the grid ties two random shuffles (within 0.004 of ρ for every judge), so
+  the method is two independent shuffles at a fixed batch size (Roger,
+  2026-11-01); the grid is kept as an option only.
+
+**Result (2026-11-01, 61 axes, slot 6 layer 25 raw):** batched percentile
+judging with two shuffles averaged (`b10`, `--entities_per_call 10`, cells
+`<judge>@b10x2` from `scripts/judge_tier_average_cells.py`) lifts every judge
+by 0.11 to 0.23 ρ at 35% to 40% lower cost: gpt-5.6-luna 0.547 → 0.725,
+gpt-4.1-mini 0.605 → 0.720, claude-haiku-5-5 0.544 → 0.716, gpt-6-luna 0.478
+→ 0.708, and, run the same way later that evening, gpt-5.6-terra 0.550 →
+0.731, claude-sonnet-5 0.551 → 0.713, gpt-5.4-mini 0.514 → 0.699, claude-haiku-4-5
+0.561 → 0.696 (and on the 20-axis set Opus 5 0.693 → 0.784, Sol 0.644 → 0.779);
+the held-out 31 axes gain as much as the 30 tuning axes.  Plot:
+[`pareto_pooled_61axes_rubrics.png`](../roger/axis_judge_experiments/pareto_pooled_61axes_rubrics.png);
+account in update 2 of
+[`pareto_pooled_61axes_notes.md`](../roger/axis_judge_experiments/pareto_pooled_61axes_notes.md).
+
+**Tuned (2026-11-02): use N=20, two passes, no reasoning** (`--entities_per_call 20`;
+`--max_tokens` 1200 for the Lunas, 3000 for Haiku 5.5).  On 61 axes: gpt-6-luna 0.712 at
+$0.019, gpt-5.6-luna 0.732 at $0.042, and the two judges gpt-5.6-luna + claude-haiku-5-5
+averaged 0.744 at $0.084, which are the frontier in all 12 projection variants; N=5 is
+worse, more passes pay less each, and reasoning effort pays nothing.
+[`scripts/judge_tier_grid_analysis.py`](../scripts/judge_tier_grid_analysis.py) prints
+the grid and draws
+[`judge_tier_grid_dev30.png`](../roger/axis_judge_experiments/judge_tier_grid_dev30/judge_tier_grid_dev30.png);
+[`scripts/judge_tier_grid_12way.py`](../scripts/judge_tier_grid_12way.py) draws the grid
+under the 12 projection variants, one figure per dimension and one of the whole grid
+([`judge_tier_grid_12way_all.png`](../roger/axis_judge_experiments/judge_tier_grid_dev30/judge_tier_grid_12way_all.png));
+[`scripts/judge_tier_compare_arms.py`](../scripts/judge_tier_compare_arms.py) compares any
+arms, blends included, with bootstrap intervals; a blend's cell comes from
+`judge_tier_average_cells.py` with both judges' cells as sources.  Account in update 3 of
+the same notes.
+Batched cells judged live can be re-scored from their archived replies with
+`scripts/judge_tier_reparse_batched.py` (no API calls), as was done after the
+parser learnt Haiku's layout and after a resume bug.
+
+A non-default rubric needs its own `--cell_label` (`@c8`, stacked as
+`@none@c8` for Luna with reasoning off), so its cells sit beside the v3
+cells.  Tuning used the seeded 30/31 split
+[`scripts/tier_eval_axes_dev30.tsv`](../scripts/tier_eval_axes_dev30.tsv) /
+[`tier_eval_axes_holdout31.tsv`](../scripts/tier_eval_axes_holdout31.tsv).
+`--batch_chunk_requests` (default 10,000; 2,500 is safer under load) sizes
+batch submissions: three 10,000-request Anthropic submissions and one OpenAI
+one hung and dropped on 2026-11-01 while Flex runs saturated the connection;
+a rerun collects the batches already in flight and submits the rest.
+
+[`judge_tier_robustness.py`](./judge_tier_robustness.py) asks whether the
+choice of judge depends on which projection the scores are compared with.  It
+recomputes every judge's ρ, axis by axis, against 12 projection variants:
+token slot 0 or 6, layer 25 or 49, and three regimes (raw; soft whitening
+with K=2; soft shear with L=3, combined goal/no-goal).  It reports mean ρ per
+variant, Kendall τ of each variant's ranking against the default, the Pareto
+frontier per variant and how often each judge is on it, the best judge under
+a price band, and a bootstrap over axes of the top two judges' order.  It
+checks itself against the cells' cached `correlations.json` at `s6_l25_raw`
+(identical where the entity count matches).  It reads the May 2026 8-slot
+vectors (`--data_dir`) and caches the activation slices it needs
+(`--cache_dir`); it also takes `--exclude_models` and `--legacy`.
+
+The current results, with the commands that made them:
+[`pareto_pooled_61axes_notes.md`](../roger/axis_judge_experiments/pareto_pooled_61axes_notes.md)
+and [`pareto_pooled_20axes_notes.md`](../roger/axis_judge_experiments/pareto_pooled_20axes_notes.md).
+
+### Regenerating the judge-tier figures
+
+[`scripts/judge_tier_make_figures.sh`](../scripts/judge_tier_make_figures.sh) rebuilds every
+figure from the recorded cells with no API calls, and each PNG records its command, commit
+and inputs: `judge_tier_robustness_*.png` (this tool), `pareto_pooled_*.png`
+([`judge_tier_cost_plot_pooled.py`](./judge_tier_cost_plot_pooled.py); the arrows run from
+the old rubric to the batched method), the rubric tuning
+([`scripts/judge_tier_tuning_panels.py`](../scripts/judge_tier_tuning_panels.py)) and the
+optimisation grid: [`scripts/judge_tier_grid_12way.py`](../scripts/judge_tier_grid_12way.py),
+[`scripts/judge_tier_grid_analysis.py`](../scripts/judge_tier_grid_analysis.py) and
+[`scripts/judge_tier_grid_shapes.py`](../scripts/judge_tier_grid_shapes.py) (do the judges
+respond alike, and is each setting on the judge's own frontier).  The unfiltered vectors
+behind `judge_tier_robustness_61axes_unfiltered.png` come from
+[`scripts/judge_tier_build_unfiltered_vectors.py`](../scripts/judge_tier_build_unfiltered_vectors.py),
+which needs the archive drive.
+
+[`scripts/judge_tier_replay.py`](../scripts/judge_tier_replay.py) replays recorded judging through
+the current code with no API calls: each logged prompt rebuilt and its digest compared, each
+logged reply re-parsed.  With `--name_format mechanical` on the May corpus (2026-11-02): 141,719 of
+141,719 prompts identical, 1,400,544 of 1,400,568 ratings identical, the other 24 from two
+GPT-6 Luna cells whose groups were asked twice.
+
 ## Output layout
 
 ```

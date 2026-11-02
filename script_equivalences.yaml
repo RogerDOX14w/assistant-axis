@@ -115,3 +115,13 @@ equivalences:
     the recorded command (defaults: slot 6, L=0, rho_by_layer_L.json) into TMPDIR
     gives an equal JSON (max |diff| 0) and a pixel-identical PNG.'
   marked_at: '2026-10-13T01:29:52+00:00'
+- script: results_analysis/axis_judge_correlation.py
+  from_fp: v1:2026-05-14T20:27:30+00:00@156138
+  to_fp: v1:2026-11-02T21:17:09+00:00@178060
+  reason: '2026-11-01/02: requests through judge.py (prompt caching off, the model''s
+    settings, temperature checked).  For the judges of the recorded caches (gpt-4.1-mini,
+    Claude Sonnet and Haiku 4.x at T=0) the requests are byte-for-byte as before (test_the_old_judges_requests_are_unchanged);
+    a rejected request or refused account now stops the run instead of giving None,
+    a cut reply is counted and never parsed, --projections_only added.  No recorded
+    output changes.'
+  marked_at: '2026-11-02T21:31:37+00:00'

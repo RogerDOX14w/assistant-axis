@@ -79,8 +79,8 @@ from assistant_axis.entity_id import (
 )
 from assistant_axis.anthropic_batch import AnthropicBatchRunner
 from assistant_axis.judge import (
-    DEFAULT_PROMPT_CACHE, PARSE_RATE_LOUD_THRESHOLD, PROMPT_CACHE_MODES, JudgeRequestError,
-    RateLimiter, anthropic_reply, anthropic_request_params, call_judge_batch, chat_request_body,
+    DEFAULT_PROMPT_CACHE, FLEX_MAX_RETRIES, FLEX_TIMEOUT_S, PARSE_RATE_LOUD_THRESHOLD,
+    PROMPT_CACHE_MODES, JudgeRequestError, RateLimiter, anthropic_reply, judge_client, anthropic_request_params, call_judge_batch, chat_request_body,
     parse_judge_score, provider_for_model, warn_if_low_parse_rate,
 )
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, openai_usage, price_for_model
@@ -1353,7 +1353,8 @@ def check_judge_model(model: str, *, batch: bool) -> Optional[str]:
     the collection stopped).  A batch run is priced under ``<model>:batch``,
     and its fallback in real time under the plain name."""
     try:
-        provider_for_model(model)
+        if provider_for_model(model) == "google":
+            return "step 3 judges with OpenAI and Claude models; a Gemini judge is wired for description judging only"
     except ValueError as e:
         return str(e)
     for name in ([model, f"{model}{BATCH_SUFFIX}"] if batch else [model]):
@@ -1373,21 +1374,6 @@ def judge_key_name(model: str) -> str:
 #: OpenAI Flex calls can wait in a queue and be refused with an uncharged 429
 #: when capacity is short: a longer client timeout and more SDK retries (with
 #: its exponential backoff), as the Flex guide recommends (read 2026-10-26).
-FLEX_TIMEOUT_S = 900.0
-FLEX_MAX_RETRIES = 8
-
-
-def judge_client(model: str, service_tier: Optional[str] = None):
-    """The async client for the judge ``model``'s provider (for a Flex run,
-    with :data:`FLEX_TIMEOUT_S` and :data:`FLEX_MAX_RETRIES`)."""
-    if provider_for_model(model) == "anthropic":
-        import anthropic
-        return anthropic.AsyncAnthropic()
-    if service_tier == "flex":
-        return openai.AsyncOpenAI(timeout=FLEX_TIMEOUT_S, max_retries=FLEX_MAX_RETRIES)
-    return openai.AsyncOpenAI()
-
-
 def reread_replies(args, *, source_dir: Path, output_dir: Path) -> None:
     """``--reread_replies``: score the replies a step-3 run saved in
     ``<source_dir>/_replies/`` (``--save_replies``) under ``--prompt_version``'s

@@ -26,7 +26,8 @@ import os
 import re
 import time
 import logging
-from typing import Dict, List, Optional, Any, Iterable, Tuple, Sequence, TYPE_CHECKING
+from dataclasses import dataclass, field
+from typing import Callable, Dict, List, Optional, Any, Iterable, Tuple, Sequence, TYPE_CHECKING
 
 import openai
 from dotenv import load_dotenv
@@ -52,10 +53,11 @@ logger = logging.getLogger(__name__)
 
 _OPENAI_PREFIXES = ("gpt-", "o1-", "o3-", "o4-")
 _ANTHROPIC_PREFIXES = ("claude-",)
+_GOOGLE_PREFIXES = ("gemini-",)
 
 
 def provider_for_model(model: str) -> str:
-    """Return 'openai' or 'anthropic' based on the model name prefix.
+    """Return 'openai', 'anthropic' or 'google' based on the model name prefix.
 
     Raises ValueError for unrecognised prefixes so we fail loudly rather
     than silently routing a typo to the wrong SDK.
@@ -64,9 +66,11 @@ def provider_for_model(model: str) -> str:
         return "openai"
     if any(model.startswith(p) for p in _ANTHROPIC_PREFIXES):
         return "anthropic"
+    if any(model.startswith(p) for p in _GOOGLE_PREFIXES):
+        return "google"
     raise ValueError(
         f"unknown judge model {model!r}; expected a prefix in "
-        f"{_OPENAI_PREFIXES + _ANTHROPIC_PREFIXES}"
+        f"{_OPENAI_PREFIXES + _ANTHROPIC_PREFIXES + _GOOGLE_PREFIXES}"
     )
 
 
@@ -136,6 +140,13 @@ MODEL_CAPABILITIES: Dict[str, Dict[str, Optional[bool]]] = {
     "gpt-4.1-mini": {"flex": False, "cache_mode": False},
     "gpt-5.6": {"cache_mode": True},
     "gpt-5.6-luna": {"flex": True},
+    # Each answered its first Flex request (judge tier evaluation, 2026-11-01)
+    "gpt-5.6-terra": {"flex": True},
+    "gpt-5.6-sol": {"flex": True},
+    "gpt-6-luna": {"flex": True},
+    "gpt-5.4-mini": {"flex": True},
+    # Google: temperature accepted (the judges send 0), and no Flex tier
+    "gemini": {"flex": False},
 }
 
 #: How a judge request treats OpenAI's prompt caching (2026-11-01).  GPT-5.6
@@ -168,23 +179,70 @@ PROMPT_CACHE_OFF_OPTIONS: Dict[str, str] = {"mode": "explicit"}
 #: not, so the fragments name the versions, not "gpt-5".
 #: Haiku 5.5 thinks adaptively unless the request says otherwise, its thinking
 #: counts toward ``max_tokens``, and it accepts thinking disabled at its default
-#: effort (medium).  A model in no entry adds nothing.
+#: effort (medium).  Gemini takes a temperature, so T=0 (Roger's rule: T=0 where
+#: a model takes it), and its lowest thinking level, ``minimal``, which spent no
+#: thought tokens on 3.1 Flash-Lite in a probe of 2026-11-02 (``low`` about 120 a
+#: call); the fields go in ``generationConfig`` (:func:`gemini_request_body`).
+#: A model in no entry adds nothing.
 JUDGE_REQUEST_SETTINGS: Dict[str, Dict[str, Any]] = {
     "gpt-5.4": {"reasoning_effort": "none"},
     "gpt-5.6": {"reasoning_effort": "none"},
     "gpt-6": {"reasoning_effort": "none"},
     "haiku-5": {"thinking": {"type": "disabled"}},
+    "gemini": {"temperature": 0, "thinkingConfig": {"thinkingLevel": "minimal"}},
 }
 
+#: One override of a request's settings: (model fragment or None for every model,
+#: key, value); a value of None removes the key.  :func:`parse_request_setting`.
+RequestOverride = Tuple[Optional[str], str, Any]
 
-def judge_request_settings(model: str) -> Dict[str, Any]:
-    """The fields :data:`JUDGE_REQUEST_SETTINGS` adds to a request to ``model``."""
+
+def _fragment_matches(model: str, fragment: str) -> bool:
     m = str(model).lower()
+    return m.startswith(fragment) or f"-{fragment}" in m
+
+
+def judge_request_settings(model: str, overrides: Iterable[RequestOverride] = ()) -> Dict[str, Any]:
+    """The fields a request to ``model`` adds: the :data:`JUDGE_REQUEST_SETTINGS`
+    rows that match it, then the ``overrides`` that apply to it.  A fresh dict."""
     out: Dict[str, Any] = {}
     for fragment, entry in JUDGE_REQUEST_SETTINGS.items():
-        if m.startswith(fragment) or f"-{fragment}" in m:
-            out.update(entry)
+        if _fragment_matches(model, fragment):
+            out.update(json.loads(json.dumps(entry)))
+    for fragment, key, value in overrides:
+        if fragment is not None and not _fragment_matches(model, fragment):
+            continue
+        if value is None:
+            out.pop(key, None)
+        else:
+            out[key] = json.loads(json.dumps(value))
     return out
+
+
+def parse_request_setting(text: str) -> RequestOverride:
+    """``[MODEL_FRAGMENT:]key=<json>`` -> ``(fragment, key, value)``.
+
+    ``reasoning_effort="low"`` applies to every model of a run;
+    ``gpt-6:reasoning_effort="low"`` only to models matching ``gpt-6`` (as
+    :data:`JUDGE_REQUEST_SETTINGS` matches).  The value is JSON
+    (``'{"type": "disabled"}'``, ``'"none"'``, ``200``); ``null`` removes a
+    field the table would add."""
+    if "=" not in text:
+        raise ValueError(f"request setting {text!r}: expected [MODEL_FRAGMENT:]key=<json>")
+    left, raw = text.split("=", 1)
+    fragment: Optional[str] = None
+    if ":" in left:
+        fragment, left = left.split(":", 1)
+        fragment = fragment.strip().lower() or None
+    key = left.strip()
+    if not key:
+        raise ValueError(f"request setting {text!r}: empty key")
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"request setting {text!r}: the value is not JSON ({e}); "
+                         f"quote a string, e.g. {key}='\"none\"'") from e
+    return fragment, key, value
 
 
 class JudgeRequestError(ValueError):
@@ -193,14 +251,27 @@ class JudgeRequestError(ValueError):
     swallowed, because every further call would fail the same way."""
 
 
+class FlexRefusedError(JudgeRequestError):
+    """OpenAI refused ``service_tier="flex"`` for the model (HTTP 400 naming the
+    service tier), or :data:`MODEL_CAPABILITIES` says it would."""
+
+
+class BillingError(JudgeRequestError):
+    """The provider refuses the account, not the request: out of credits, over
+    quota, or a daily quota used up.  Every further call fails the same way, so
+    it stops a run at once instead of being retried (OpenAI, 2026-11-01: HTTP
+    429 with code ``credit_balance_exhausted``, type ``insufficient_quota``,
+    which a Flex loop used to retry for ten minutes per request and then leave
+    unscored)."""
+
+
 def model_capabilities(model: str) -> Dict[str, Optional[bool]]:
     """What ``model`` takes, by :data:`MODEL_CAPABILITIES`: ``{"temperature":
     bool, "flex": bool or None}``.  A model no entry names takes a temperature,
     and its Flex support is untested (None)."""
-    m = str(model).lower()
     caps: Dict[str, Optional[bool]] = {"temperature": True, "flex": None, "cache_mode": None}
     for fragment, entry in MODEL_CAPABILITIES.items():
-        if m.startswith(fragment) or f"-{fragment}" in m:
+        if _fragment_matches(model, fragment):
             caps.update(entry)
     return caps
 
@@ -306,18 +377,24 @@ TRUNCATED_REPLIES: Dict[str, int] = {}
 REFUSED_REPLIES: Dict[str, int] = {}
 
 
-def _error_code(exc: BaseException) -> Optional[str]:
-    """The provider's error code: OpenAI's SDK sets ``code``; otherwise the
-    ``code`` of the error body (``{"code": ...}`` or ``{"error": {"code": ...}}``)."""
-    code = getattr(exc, "code", None)
-    if code:
-        return str(code)
+def _error_field(exc: BaseException, name: str) -> Optional[str]:
+    """A field of a provider's error: OpenAI's SDK copies ``code``, ``param`` and
+    ``type`` onto the exception; otherwise from the error body (``{name: ...}`` or
+    ``{"error": {name: ...}}``)."""
+    value = getattr(exc, name, None)
+    if value:
+        return str(value)
     body = getattr(exc, "body", None)
     if isinstance(body, dict):
         inner = body.get("error") if isinstance(body.get("error"), dict) else body
-        if inner.get("code"):
-            return str(inner["code"])
+        if inner.get(name):
+            return str(inner[name])
     return None
+
+
+def _error_code(exc: BaseException) -> Optional[str]:
+    """The provider's error code."""
+    return _error_field(exc, "code")
 
 
 def content_flag(exc: BaseException) -> Optional[str]:
@@ -344,6 +421,42 @@ def _bad_request_error(model: str, exc: BaseException) -> JudgeRequestError:
         f"HTTP 400 from judge model {model}: {exc}.  The API rejected the "
         f"request itself, so every call would fail the same way (check "
         f"judge.MODEL_CAPABILITIES for this model)")
+
+
+def is_flex_refusal(exc: BaseException) -> bool:
+    """An HTTP 400 refusing the service tier (gpt-4.1-mini, 2026-10-28: "Invalid
+    service_tier argument"): its ``param`` is ``service_tier``, or its message
+    names the tier."""
+    if not _is_bad_request(exc):
+        return False
+    if _error_field(exc, "param") == "service_tier":
+        return True
+    text = f"{getattr(exc, 'message', '')} {exc}".lower()
+    return "service_tier" in text or "service tier" in text
+
+
+BILLING_ERROR_CODES: Tuple[str, ...] = ("insufficient_quota", "credit_balance_exhausted", "billing_hard_limit_reached")
+BILLING_ERROR_PHRASES: Tuple[str, ...] = ("no credits remaining", "exceeded your current quota",
+                                          "credit balance is too low")
+
+
+def is_billing_error(exc: BaseException) -> bool:
+    """An error saying the account cannot pay: a 4xx whose code or type is a
+    quota code (OpenAI answers HTTP 429), or whose message says so (Anthropic
+    answers a low credit balance with HTTP 400 "Your credit balance is too low")."""
+    status = getattr(exc, "status_code", None)
+    if status is None or not 400 <= int(status) < 500:
+        return False
+    if _error_field(exc, "code") in BILLING_ERROR_CODES or _error_field(exc, "type") in BILLING_ERROR_CODES:
+        return True
+    text = f"{getattr(exc, 'message', '')} {exc}".lower()
+    return any(p in text for p in BILLING_ERROR_PHRASES)
+
+
+def _billing_error(model: str, exc: BaseException) -> BillingError:
+    logger.error(f"Billing refusal from judge model {model}: {exc}")
+    return BillingError(f"{model}: the provider refuses the account ({exc}).  Every call would fail the same "
+                        f"way: add credits or raise the quota, then rerun")
 
 
 class RateLimiter:
@@ -706,15 +819,58 @@ SERVICE_TIERS = ("flex",)
 #: Flex processing (pipeline step 3's ``--service_tier flex``) is tried for this
 #: long before a request falls back to the standard tier (Roger, 2026-10-29:
 #: "if flex keeps failing, it should eventually fall back to an actual
-#: real-time query, but only after trying for a while").  Each Flex attempt is
-#: the client's own retries (step 3's Flex client: 8, with a 900 s timeout);
-#: between attempts :func:`call_judge_single` sleeps :data:`FLEX_RETRY_SLEEP_S`.
-#: The fallback call goes through the standard client with no tier and is
-#: charged under the plain model name, so ``usage.json`` records how much went
-#: each way; :data:`FLEX_FALLBACKS` counts the fallbacks by model.
+#: real-time query, but only after trying for a while").  The clock starts when a
+#: request is first sent, not when it was queued, and each attempt goes out with
+#: no SDK retries and a timeout of the time left, at least :data:`FLEX_MIN_ATTEMPT_S`
+#: (:func:`flex_attempt_client`), so that ten minutes means ten minutes: until
+#: 2026-11-02 one attempt could hold a request for ``FLEX_TIMEOUT_S`` x
+#: (``FLEX_MAX_RETRIES`` + 1), over two hours (the stuck Luna and Terra run of
+#: 2026-11-01).  Between attempts the call sleeps :data:`FLEX_RETRY_SLEEP_S`.  The
+#: fallback call goes through the standard client with no tier and is charged
+#: under the plain model name, so ``usage.json`` records how much went each way;
+#: :data:`FLEX_FALLBACKS` counts the fallbacks by model.
 FLEX_FALLBACK_AFTER_S = 600.0
 FLEX_RETRY_SLEEP_S = 30.0
+FLEX_MIN_ATTEMPT_S = 60.0
+#: The Flex client's own limits (:func:`judge_client`): Flex calls can wait in a
+#: queue and be refused with an uncharged 429.
+FLEX_TIMEOUT_S = 900.0
+FLEX_MAX_RETRIES = 8
 FLEX_FALLBACKS: Dict[str, int] = {}
+
+
+def flex_attempt_client(client: Any, started: float) -> Any:
+    """``client`` for one Flex attempt: no SDK retries, and a timeout of the time
+    left before :data:`FLEX_FALLBACK_AFTER_S` (at least :data:`FLEX_MIN_ATTEMPT_S`).
+    A client without ``with_options`` (a test fake) is used as it is."""
+    with_options = getattr(client, "with_options", None)
+    if with_options is None:
+        return client
+    left = FLEX_FALLBACK_AFTER_S - (time.monotonic() - started)
+    return with_options(max_retries=0, timeout=max(left, FLEX_MIN_ATTEMPT_S))
+
+
+def make_gemini_client(api_key: str, timeout_s: float = 120.0) -> Any:
+    """An httpx client for generateContent; the key travels only in the
+    x-goog-api-key header (never in the URL, which an HTTP log prints)."""
+    import httpx
+    return httpx.AsyncClient(base_url=GEMINI_BASE_URL, headers={"x-goog-api-key": api_key},
+                             timeout=httpx.Timeout(timeout_s, connect=20.0))
+
+
+def judge_client(model: str, service_tier: Optional[str] = None) -> Any:
+    """The async client for the judge ``model``'s provider (for a Flex run, with
+    :data:`FLEX_TIMEOUT_S` and :data:`FLEX_MAX_RETRIES`).  Keys come from the
+    environment (the caller's ``load_dotenv``)."""
+    provider = provider_for_model(model)
+    if provider == "anthropic":
+        import anthropic
+        return anthropic.AsyncAnthropic()
+    if provider == "google":
+        return make_gemini_client(os.environ["GEMINI_API_KEY"])
+    if service_tier == "flex":
+        return openai.AsyncOpenAI(timeout=FLEX_TIMEOUT_S, max_retries=FLEX_MAX_RETRIES)
+    return openai.AsyncOpenAI()
 
 
 def usage_key(model: str, service_tier: Optional[str] = None) -> str:
@@ -726,7 +882,8 @@ def usage_key(model: str, service_tier: Optional[str] = None) -> str:
 def chat_request_body(prompt: str, model: str, max_tokens: int, *,
                       temperature: Optional[float] = DEFAULT_TEMPERATURE,
                       service_tier: Optional[str] = None,
-                      prompt_cache: str = DEFAULT_PROMPT_CACHE) -> Dict[str, Any]:
+                      prompt_cache: str = DEFAULT_PROMPT_CACHE,
+                      settings: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """The chat-completion request a judge call sends: the ``body`` of an
     OpenAI Batch API line (``assistant_axis.openai_batch``), unchanged, and
     through :func:`chat_create_kwargs` the keyword arguments of
@@ -736,7 +893,7 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
     ``temperature`` is left out at the default, 1 (every request until
     2026-10-12 sent ``"temperature": 1`` explicitly: the same sampling), and
     is checked against :data:`MODEL_CAPABILITIES` otherwise
-    (:func:`request_temperature`).  The model's
+    (:func:`request_temperature`).  ``settings`` when given, else the model's
     :data:`JUDGE_REQUEST_SETTINGS` are added (GPT-6 Luna's reasoning effort),
     ``service_tier`` when given (one of :data:`SERVICE_TIERS`), and the
     prompt-caching field of ``prompt_cache`` (:func:`prompt_cache_fields`;
@@ -749,13 +906,155 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
     t = request_temperature(model, temperature)
     if t is not None:
         body["temperature"] = t
-    body.update(judge_request_settings(model))
+    body.update(judge_request_settings(model) if settings is None else json.loads(json.dumps(settings)))
     if service_tier is not None:
         if service_tier not in SERVICE_TIERS:
             raise ValueError(f"service_tier {service_tier!r}: expected one of {SERVICE_TIERS}")
         body["service_tier"] = service_tier
     body.update(prompt_cache_fields(model, prompt_cache))
     return body
+
+
+@dataclass(frozen=True)
+class Truncated:
+    """What a call function returns, instead of the text, for a reply cut at
+    ``max_tokens``.  It usually lacks its ``SCORE:`` line, so it is never parsed:
+    it scores as missing.  ``text`` is kept for inspection only."""
+    text: Optional[str] = None
+
+
+class _CallOutcome:
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def __repr__(self) -> str:
+        return self.name
+
+
+#: Returned by a call function when its ``gate()`` said not to issue the request.
+SKIPPED = _CallOutcome("SKIPPED")
+#: Returned by a call function for a call that got no answer (network, 5xx, a 429
+#: past its retries).  Nothing was charged and nothing is known about the item, so
+#: unlike None (a refusal or a content flag, which asking again would repeat) a
+#: caller keeping a record must leave the item open and ask it again.
+FAILED = _CallOutcome("FAILED")
+
+
+@dataclass
+class CallStats:
+    """What happened to one model's calls in a run (beyond scores)."""
+    refused: int = 0          # Anthropic stop_reason "refusal": counted, unparseable
+    content_flagged: int = 0  # HTTP 400 content flags, blocked Gemini prompts: counted, unparseable
+    errors: int = 0           # calls that got no answer (network, 5xx...)
+    flex_fallbacks: int = 0   # Flex calls sent to the standard tier after FLEX_FALLBACK_AFTER_S
+    skipped: int = 0          # not issued (a budget stop, or a fatal error elsewhere)
+    truncated: int = 0        # replies cut at max_tokens: counted by the caller, which records them
+    refusal_categories: Dict[str, int] = field(default_factory=dict)
+
+    def note_refusal(self, model: str, category: Optional[str]) -> None:
+        self.refused += 1
+        key = str(category)
+        self.refusal_categories[key] = self.refusal_categories.get(key, 0) + 1
+        REFUSED_REPLIES[model] = REFUSED_REPLIES.get(model, 0) + 1
+        logger.warning("%s refused a judge prompt (category %s; %d refusals so far)", model, category,
+                       REFUSED_REPLIES[model])
+
+
+async def call_openai_judge(
+    client: Any,
+    prompt: str,
+    model: str,
+    max_tokens: int,
+    rate_limiter: RateLimiter,
+    usage: Any = None,
+    *,
+    temperature: Optional[float] = DEFAULT_TEMPERATURE,
+    settings: Optional[Dict[str, Any]] = None,
+    service_tier: Optional[str] = None,
+    fallback_client: Any = None,
+    prompt_cache: str = DEFAULT_PROMPT_CACHE,
+    stats: Optional[CallStats] = None,
+    gate: Optional[Callable[[], bool]] = None,
+) -> Any:
+    """One chat-completion judge call: the reply text, a :class:`Truncated` for a
+    reply cut at ``max_tokens``, None for a content flag or an empty reply,
+    :data:`FAILED` for a call that got no answer, or :data:`SKIPPED` when
+    ``gate()`` (checked once the rate limiter lets the request go, before it is
+    first sent, and between Flex attempts) is True.
+
+    ``usage`` is charged under :func:`usage_key` with
+    :func:`assistant_axis.judge_pricing.openai_usage`.  A Flex call that fails
+    with anything but an HTTP 400 is tried again every :data:`FLEX_RETRY_SLEEP_S`
+    until :data:`FLEX_FALLBACK_AFTER_S` has passed since it was first sent, then
+    sent once through ``fallback_client`` with no tier (without one it fails as
+    any other call does).  Raises :class:`BillingError` when the provider refuses
+    the account, and for an HTTP 400 :class:`JudgeRequestError`
+    (:class:`FlexRefusedError` when it refuses the service tier), except a content
+    flag, and likewise before sending for what :data:`MODEL_CAPABILITIES` says the
+    model refuses."""
+    from .judge_pricing import openai_usage
+    stats = stats if stats is not None else CallStats()
+    if service_tier == "flex" and accepts_flex(model) is False:
+        raise FlexRefusedError(f"OpenAI refuses Flex processing for {model} (HTTP 400; judge.MODEL_CAPABILITIES): "
+                               f"judge it through the Batch API or in real time without a service tier")
+    body = chat_request_body(prompt, model, max_tokens, temperature=temperature, settings=settings,
+                             service_tier=service_tier, prompt_cache=prompt_cache)
+    started: Optional[float] = None
+    while True:
+        await rate_limiter.acquire()
+        if started is None:
+            started = time.monotonic()    # the clock starts at the first send, not when it was queued
+            if gate is not None and gate():
+                stats.skipped += 1
+                return SKIPPED
+        sender = flex_attempt_client(client, started) if service_tier == "flex" else client
+        try:
+            response = await sender.chat.completions.create(**chat_create_kwargs(body))
+            break
+        except Exception as e:  # noqa: BLE001 -- classified below
+            if is_billing_error(e):
+                raise _billing_error(model, e) from e
+            if _is_bad_request(e):
+                if service_tier == "flex" and is_flex_refusal(e):
+                    raise FlexRefusedError(f"OpenAI refused Flex processing for {model}: {e}") from e
+                flag = content_flag(e)
+                if flag is None:
+                    raise _bad_request_error(model, e) from e
+                stats.content_flagged += 1
+                _note_content_flag(model, flag, e)
+                return None
+            if service_tier == "flex" and fallback_client is not None:
+                if gate is not None and gate():
+                    stats.skipped += 1    # a fatal error elsewhere, or the budget: stop retrying
+                    return SKIPPED
+                waited = time.monotonic() - started
+                if waited < FLEX_FALLBACK_AFTER_S:
+                    logger.warning(f"Flex call to {model} failed after {waited:.0f}s ({e}); trying Flex "
+                                   f"again in {FLEX_RETRY_SLEEP_S:.0f}s")
+                    await asyncio.sleep(FLEX_RETRY_SLEEP_S)
+                    continue
+                logger.warning(f"Flex call to {model} failed for {waited:.0f}s ({e}); sending it to the "
+                               f"standard tier")
+                stats.flex_fallbacks += 1
+                FLEX_FALLBACKS[model] = FLEX_FALLBACKS.get(model, 0) + 1
+                client, service_tier = fallback_client, None
+                body = chat_request_body(prompt, model, max_tokens, temperature=temperature, settings=settings,
+                                         prompt_cache=prompt_cache)
+                continue
+            stats.errors += 1
+            logger.error(f"Error calling judge model {model}: {e}")
+            return FAILED
+    try:
+        if usage is not None:
+            usage.charge_usage(usage_key(model, service_tier), openai_usage(response))
+        first = response.choices[0] if response.choices else None
+        text = first.message.content if first is not None else None
+        if first is not None and getattr(first, "finish_reason", None) == "length":
+            return Truncated(text or None)
+        return text or None
+    except Exception as e:  # noqa: BLE001 -- a reply that cannot be read: billed, so not asked again
+        logger.error(f"Error reading the judge model's reply: {e}")
+        return None
 
 
 async def call_judge_single(
@@ -772,14 +1071,15 @@ async def call_judge_single(
     fallback_client: Optional[openai.AsyncOpenAI] = None,
     prompt_cache: str = DEFAULT_PROMPT_CACHE,
 ) -> Optional[str]:
-    """Call the judge model with a single prompt.
+    """Call the judge model with a single prompt (:func:`call_openai_judge`).
 
     Returns the response text, or None when the call failed (logged).  An
     HTTP 400 is raised as :class:`JudgeRequestError` instead, as is a
     non-default ``temperature`` for a model that refuses one (before sending),
     except a 400 that flags this prompt's content (:func:`content_flag`),
-    which gives None with a WARNING.  ``service_tier`` (``"flex"``) is sent
-    and the tokens are charged under :func:`usage_key`.
+    which gives None with a WARNING.  An account the provider refuses raises
+    :class:`BillingError`.  ``service_tier`` (``"flex"``) is sent and the tokens
+    are charged under :func:`usage_key`.
 
     Args:
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
@@ -796,68 +1096,26 @@ async def call_judge_single(
             (``finish_reason == "length"``), counted in
             :data:`TRUNCATED_REPLIES` (the usage is charged all the same).
         fallback_client: a standard-tier client for a Flex call (step 3
-            passes one with ``--service_tier flex``).  A Flex call that keeps
-            failing with anything but an HTTP 400 is tried again every
-            :data:`FLEX_RETRY_SLEEP_S` until :data:`FLEX_FALLBACK_AFTER_S` has
-            passed since the first attempt, then sent once through this client
-            with no tier and charged under the plain model name
-            (:data:`FLEX_FALLBACKS`).  Without one, a failed Flex call gives
+            passes one with ``--service_tier flex``), as
+            :func:`call_openai_judge`.  Without one, a failed Flex call gives
             None as any other failed call does.
     """
-    body = chat_request_body(prompt, model, max_tokens, temperature=temperature,
-                             service_tier=service_tier, prompt_cache=prompt_cache)
-    if service_tier == "flex" and accepts_flex(model) is False:
-        raise JudgeRequestError(
-            f"OpenAI refuses Flex processing for {model} (HTTP 400; judge.MODEL_CAPABILITIES): "
-            f"judge it through the Batch API or in real time without a service tier")
-    started = time.monotonic()
-    while True:
-        await rate_limiter.acquire()
-        try:
-            response = await client.chat.completions.create(**chat_create_kwargs(body))
-            break
-        except Exception as e:
-            if _is_bad_request(e):
-                flag = content_flag(e)
-                if flag is None:
-                    raise _bad_request_error(model, e) from e
-                _note_content_flag(model, flag, e)
-                return None
-            if service_tier == "flex" and fallback_client is not None:
-                waited = time.monotonic() - started
-                if waited < FLEX_FALLBACK_AFTER_S:
-                    logger.warning(f"Flex call to {model} failed after {waited:.0f}s ({e}); trying Flex "
-                                   f"again in {FLEX_RETRY_SLEEP_S:.0f}s")
-                    await asyncio.sleep(FLEX_RETRY_SLEEP_S)
-                    continue
-                logger.warning(f"Flex call to {model} failed for {waited:.0f}s ({e}); sending it to the "
-                               f"standard tier")
-                FLEX_FALLBACKS[model] = FLEX_FALLBACKS.get(model, 0) + 1
-                client, service_tier = fallback_client, None
-                body = chat_request_body(prompt, model, max_tokens, temperature=temperature,
-                                         prompt_cache=prompt_cache)
-                continue
-            logger.error(f"Error calling judge model: {e}")
-            return None
+    reply = await call_openai_judge(client, prompt, model, max_tokens, rate_limiter, usage,
+                                    temperature=temperature, service_tier=service_tier,
+                                    fallback_client=fallback_client, prompt_cache=prompt_cache)
+    return _plain_reply(reply, model, reject_truncated)
 
-    try:
-        if usage is not None:
-            # Lazy import to avoid a hard dep cycle (judge_pricing imports
-            # nothing from judge but judge.py is imported from many places).
-            from .judge_pricing import openai_usage
-            usage.charge_usage(usage_key(model, service_tier), openai_usage(response))
 
-        if reject_truncated and response.choices and \
-                getattr(response.choices[0], "finish_reason", None) == "length":
+def _plain_reply(reply: Any, model: str, reject_truncated: bool) -> Optional[str]:
+    """A call function's result as the plain callers take it: the text, or None."""
+    if reply is FAILED or reply is SKIPPED:
+        return None
+    if isinstance(reply, Truncated):
+        if reject_truncated:
             TRUNCATED_REPLIES[model] = TRUNCATED_REPLIES.get(model, 0) + 1
             return None
-        if response.choices and response.choices[0].message.content:
-            return response.choices[0].message.content
-        return None
-
-    except Exception as e:
-        logger.error(f"Error reading the judge model's reply: {e}")
-        return None
+        return reply.text
+    return reply
 
 
 async def call_judge_batch(
@@ -896,8 +1154,9 @@ async def call_judge_batch(
     results = []
     try:
         anthropic_model = provider_for_model(model) == "anthropic"
+        google_model = provider_for_model(model) == "google"
     except ValueError:      # a name no prefix covers goes to the client given, as before
-        anthropic_model = False
+        anthropic_model = google_model = False
 
     for i in range(0, len(prompts), batch_size):
         batch = prompts[i:i + batch_size]
@@ -908,6 +1167,11 @@ async def call_judge_batch(
                                             reject_truncated=reject_truncated)
                 for prompt in batch
             ]
+        elif google_model:
+            async def one_gemini(prompt: str) -> Optional[str]:
+                reply = await call_gemini_judge(client, prompt, model, max_tokens, rate_limiter, usage)
+                return _plain_reply(reply, model, reject_truncated)
+            tasks = [one_gemini(prompt) for prompt in batch]
         else:
             tasks = [
                 call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
@@ -1040,13 +1304,14 @@ def score_responses_sync(
 # uniformly).
 
 def anthropic_request_params(prompt: str, model: str, max_tokens: int, *,
-                             temperature: Optional[float] = DEFAULT_TEMPERATURE) -> Dict[str, Any]:
+                             temperature: Optional[float] = DEFAULT_TEMPERATURE,
+                             settings: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """The Messages API parameters a judge call sends: the keyword arguments
     of ``client.messages.create`` and, unchanged, the ``params`` of a Message
     Batches request (``assistant_axis.anthropic_batch``), as
     :func:`chat_request_body` is for OpenAI.  ``temperature`` is left out at
-    the default; the model's :data:`JUDGE_REQUEST_SETTINGS` are added
-    (Haiku 5.5's thinking off)."""
+    the default; ``settings`` when given, else the model's
+    :data:`JUDGE_REQUEST_SETTINGS` are added (Haiku 5.5's thinking off)."""
     params: Dict[str, Any] = {
         "model": model,
         "max_tokens": max_tokens,
@@ -1055,7 +1320,7 @@ def anthropic_request_params(prompt: str, model: str, max_tokens: int, *,
     t = request_temperature(model, temperature)
     if t is not None:
         params["temperature"] = t
-    params.update(judge_request_settings(model))
+    params.update(judge_request_settings(model) if settings is None else json.loads(json.dumps(settings)))
     return params
 
 
@@ -1076,6 +1341,65 @@ def anthropic_reply(message: Any) -> Tuple[Optional[str], Optional[str], int, in
             stop == "refusal")
 
 
+async def call_anthropic_judge(
+    client: Any,
+    prompt: str,
+    model: str,
+    max_tokens: int,
+    rate_limiter: RateLimiter,
+    usage: Any = None,
+    *,
+    temperature: Optional[float] = DEFAULT_TEMPERATURE,
+    settings: Optional[Dict[str, Any]] = None,
+    stats: Optional[CallStats] = None,
+    gate: Optional[Callable[[], bool]] = None,
+) -> Any:
+    """One Messages API judge call: the reply text (of the text blocks, read by
+    type: a model that thinks can begin with ``thinking`` blocks), a
+    :class:`Truncated` for a reply cut at ``max_tokens``, None for a refusal
+    (``stop_reason == "refusal"``, counted and charged), a content flag or an
+    empty reply, :data:`FAILED` for a call that got no answer, or :data:`SKIPPED`.
+    Raises :class:`BillingError` when the provider refuses the account, and
+    :class:`JudgeRequestError` for an HTTP 400 unless it flags the prompt's
+    content, or before sending for a temperature the model refuses."""
+    from .judge_pricing import anthropic_usage
+    stats = stats if stats is not None else CallStats()
+    params = anthropic_request_params(prompt, model, max_tokens, temperature=temperature, settings=settings)
+    await rate_limiter.acquire()
+    if gate is not None and gate():
+        stats.skipped += 1
+        return SKIPPED
+    try:
+        response = await client.messages.create(**params)
+    except Exception as e:  # noqa: BLE001 -- classified below
+        if is_billing_error(e):
+            raise _billing_error(model, e) from e
+        if _is_bad_request(e):
+            flag = content_flag(e)
+            if flag is None:
+                raise _bad_request_error(model, e) from e
+            stats.content_flagged += 1
+            _note_content_flag(model, flag, e)
+            return None
+        stats.errors += 1
+        logger.error(f"Error calling Anthropic judge model {model}: {e}")
+        return FAILED
+    try:
+        if usage is not None:
+            usage.charge_usage(model, anthropic_usage(response))
+        text, finish, _n_in, _n_out, refused = anthropic_reply(response)
+        if refused:
+            details = getattr(response, "stop_details", None)
+            stats.note_refusal(model, getattr(details, "category", None))
+            return None
+        if finish == "length":
+            return Truncated(text)
+        return text
+    except Exception as e:  # noqa: BLE001 -- a reply that cannot be read: billed, so not asked again
+        logger.error(f"Error reading the judge model's reply: {e}")
+        return None
+
+
 async def call_anthropic_judge_single(
     client: "anthropic.AsyncAnthropic",
     prompt: str,
@@ -1087,17 +1411,16 @@ async def call_anthropic_judge_single(
     *,
     reject_truncated: bool = False,
 ) -> Optional[str]:
-    """Call an Anthropic judge model with a single prompt.
+    """Call an Anthropic judge model with a single prompt (:func:`call_anthropic_judge`).
 
     Returns the response text, or None on error.  Errors are logged at
     ERROR level and swallowed so a single bad call doesn't take down a
     whole batch of judging, except an HTTP 400, raised as
     :class:`JudgeRequestError` because every call would fail alike (a 400
-    that flags this prompt's content, :func:`content_flag`, gives None).
+    that flags this prompt's content, :func:`content_flag`, gives None),
+    and an account the provider refuses, raised as :class:`BillingError`.
 
-    The text is that of the response's text blocks, read by type: a model
-    that thinks can begin its content with ``thinking`` blocks.  A refusal
-    (``stop_reason == "refusal"``) gives None, counted in
+    A refusal (``stop_reason == "refusal"``) gives None, counted in
     :data:`REFUSED_REPLIES` with a WARNING naming its category.
 
     Args:
@@ -1110,36 +1433,159 @@ async def call_anthropic_judge_single(
             (``stop_reason == "max_tokens"``), counted in
             :data:`TRUNCATED_REPLIES`, as :func:`call_judge_single` does.
     """
-    params = anthropic_request_params(prompt, model, max_tokens, temperature=temperature)
-    await rate_limiter.acquire()
+    reply = await call_anthropic_judge(client, prompt, model, max_tokens, rate_limiter, usage,
+                                       temperature=temperature)
+    return _plain_reply(reply, model, reject_truncated)
 
+
+# ---------------------------------------------------------------------------
+# Gemini (2026-11-02): generateContent over HTTPS, reached directly with its own key
+# ---------------------------------------------------------------------------
+
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
+GEMINI_RETRY_STATUSES = (429, 500, 502, 503, 504)
+GEMINI_ATTEMPTS = 8
+GEMINI_RETRY_SLEEP_S = (5, 10, 20, 30, 45, 60, 60)
+
+
+def gemini_request_body(prompt: str, model: str, max_tokens: int, *,
+                        settings: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """The generateContent request: ``settings`` when given, else the model's
+    :data:`JUDGE_REQUEST_SETTINGS`, go in ``generationConfig``."""
+    config: Dict[str, Any] = {"maxOutputTokens": max_tokens}
+    config.update(judge_request_settings(model) if settings is None else json.loads(json.dumps(settings)))
+    return {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": config}
+
+
+def gemini_quota_ids(body: str) -> List[str]:
+    """The quotas a 429 names (``GenerateRequestsPerDayPerProjectPerModel-FreeTier``
+    and the like), from its ``google.rpc.QuotaFailure`` detail; empty when the body
+    says nothing readable."""
     try:
-        response = await client.messages.create(**params)
-        if usage is not None:
-            from .judge_pricing import anthropic_usage
-            usage.charge_usage(model, anthropic_usage(response))
-        stop = getattr(response, "stop_reason", None)
-        if stop == "refusal":
-            REFUSED_REPLIES[model] = REFUSED_REPLIES.get(model, 0) + 1
-            details = getattr(response, "stop_details", None)
-            logger.warning("%s refused a judge prompt (category %s; %d refusals so far)", model,
-                           getattr(details, "category", None), REFUSED_REPLIES[model])
-            return None
-        if reject_truncated and stop == "max_tokens":
-            TRUNCATED_REPLIES[model] = TRUNCATED_REPLIES.get(model, 0) + 1
-            return None
-        text = "".join(getattr(b, "text", "") or "" for b in (response.content or [])
-                       if getattr(b, "type", "text") == "text")
-        return text or None
-    except Exception as e:  # noqa: BLE001 - we deliberately catch everything
-        if _is_bad_request(e):
-            flag = content_flag(e)
-            if flag is None:
-                raise _bad_request_error(model, e) from e
-            _note_content_flag(model, flag, e)
-            return None
-        logger.error(f"Error calling Anthropic judge model {model}: {e}")
-        return None
+        details = json.loads(body)["error"]["details"]
+        return [v["quotaId"] for d in details for v in d.get("violations", []) if "quotaId" in v]
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return []
+
+
+def gemini_reply(data: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], int, int]:
+    """``(text, finish_reason, prompt_tokens, output_tokens)`` of a generateContent
+    response; output tokens include the thought tokens, which Google bills as
+    output, and the text leaves out the thought parts."""
+    u = data.get("usageMetadata") or {}
+    n_in = int(u.get("promptTokenCount") or 0)
+    n_out = int(u.get("candidatesTokenCount") or 0) + int(u.get("thoughtsTokenCount") or 0)
+    candidates = data.get("candidates") or []
+    if not candidates:
+        return None, (data.get("promptFeedback") or {}).get("blockReason"), n_in, n_out
+    c = candidates[0]
+    parts = (c.get("content") or {}).get("parts") or []
+    text = "".join(p.get("text", "") for p in parts if not p.get("thought")) or None
+    return text, c.get("finishReason"), n_in, n_out
+
+
+async def call_gemini_judge(
+    client: Any,
+    prompt: str,
+    model: str,
+    max_tokens: int,
+    rate_limiter: RateLimiter,
+    usage: Any = None,
+    *,
+    settings: Optional[Dict[str, Any]] = None,
+    stats: Optional[CallStats] = None,
+    gate: Optional[Callable[[], bool]] = None,
+) -> Any:
+    """One generateContent call (``client``: :func:`make_gemini_client`): the reply
+    text, a :class:`Truncated` when it hit ``maxOutputTokens``, None for a blocked
+    prompt, :data:`FAILED` for a call that got no answer, or :data:`SKIPPED`.  A
+    connection error, a 429 or a 5xx (rate limits, "high demand" 503s) is tried
+    :data:`GEMINI_ATTEMPTS` times with growing sleeps.  An HTTP 400, 401, 403 or 404
+    raises :class:`JudgeRequestError`, and a 429 naming a daily quota
+    :class:`BillingError`, since no retry within a run gets past it."""
+    from .judge_pricing import TokenUsage
+    stats = stats if stats is not None else CallStats()
+    body = gemini_request_body(prompt, model, max_tokens, settings=settings)
+    last: Optional[str] = None
+    for attempt in range(GEMINI_ATTEMPTS):
+        await rate_limiter.acquire()
+        if attempt == 0 and gate is not None and gate():
+            stats.skipped += 1
+            return SKIPPED
+        try:
+            resp = await client.post(f"/models/{model}:generateContent", json=body)
+        except Exception as e:  # noqa: BLE001 -- a connection error: tried again
+            last = f"{type(e).__name__}: {e}"
+            resp = None
+        if resp is not None:
+            if resp.status_code == 200:
+                try:
+                    text, finish, n_in, n_out = gemini_reply(resp.json())
+                except ValueError as e:     # a truncated or non-JSON body: no answer yet
+                    text, finish, n_in, n_out = None, None, 0, 0
+                    last = f"HTTP 200 with an unreadable body: {e}"
+                    sleep = GEMINI_RETRY_SLEEP_S[min(attempt, len(GEMINI_RETRY_SLEEP_S) - 1)]
+                    logger.warning(f"Gemini call to {model} failed ({last}); attempt {attempt + 1} of "
+                                   f"{GEMINI_ATTEMPTS}, trying again in {sleep}s")
+                    await asyncio.sleep(sleep)
+                    continue
+                if usage is not None:
+                    usage.charge_usage(model, TokenUsage(n_in, n_out))
+                if finish == "MAX_TOKENS":
+                    return Truncated(text)
+                if text is None:
+                    stats.content_flagged += 1
+                    logger.warning(f"{model}: no text in the reply (finishReason {finish}); this item gives None")
+                return text
+            last = f"HTTP {resp.status_code}: {resp.text[:200]}"
+            if resp.status_code in (400, 401, 403, 404):
+                logger.error(f"Error calling judge model {model}: {last}")
+                raise JudgeRequestError(f"{model}: {last}")
+            if resp.status_code == 429:
+                quotas = gemini_quota_ids(resp.text)
+                if any("PerDay" in q for q in quotas):
+                    raise BillingError(f"{model}: daily quota used up ({', '.join(quotas)}); a rerun resumes "
+                                       f"once it resets")
+                if quotas:
+                    last = f"HTTP 429: {', '.join(quotas)}"
+            if resp.status_code not in GEMINI_RETRY_STATUSES:
+                break
+        sleep = GEMINI_RETRY_SLEEP_S[min(attempt, len(GEMINI_RETRY_SLEEP_S) - 1)]
+        logger.warning(f"Gemini call to {model} failed ({last}); attempt {attempt + 1} of {GEMINI_ATTEMPTS}, "
+                       f"trying again in {sleep}s")
+        await asyncio.sleep(sleep)
+    stats.errors += 1
+    logger.error(f"Error calling judge model {model}: {last}")
+    return FAILED
+
+
+async def call_judge_model(
+    model: str,
+    prompt: str,
+    max_tokens: int,
+    rate_limiter: RateLimiter,
+    usage: Any = None,
+    *,
+    client: Any,
+    settings: Optional[Dict[str, Any]] = None,
+    service_tier: Optional[str] = None,
+    fallback_client: Any = None,
+    stats: Optional[CallStats] = None,
+    gate: Optional[Callable[[], bool]] = None,
+) -> Any:
+    """:func:`call_openai_judge`, :func:`call_anthropic_judge` or
+    :func:`call_gemini_judge` by the model's provider, at the provider's default
+    temperature unless ``settings`` says otherwise (Gemini's T=0 is a setting)."""
+    provider = provider_for_model(model)
+    if provider == "google":
+        return await call_gemini_judge(client, prompt, model, max_tokens, rate_limiter, usage,
+                                       settings=settings, stats=stats, gate=gate)
+    if provider == "anthropic":
+        return await call_anthropic_judge(client, prompt, model, max_tokens, rate_limiter, usage,
+                                          settings=settings, stats=stats, gate=gate)
+    return await call_openai_judge(client, prompt, model, max_tokens, rate_limiter, usage, settings=settings,
+                                   service_tier=service_tier, fallback_client=fallback_client, stats=stats,
+                                   gate=gate)
 
 
 async def call_judge_single_unified(
@@ -1206,4 +1652,5 @@ async def call_judge_single_unified(
             usage=usage,
             reject_truncated=reject_truncated,
         )
-    raise ValueError(f"unknown provider for model {model!r}")
+    raise ValueError(f"call_judge_single_unified has no client for {provider} judge model {model!r}: "
+                     f"use call_judge_model")

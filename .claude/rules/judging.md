@@ -16,6 +16,39 @@ paths:
 
 **When:** editing judge prompts, rubrics, parse-rate handling, or any LLM judge call site.  Loads automatically for files matching the `paths` above.  Source: the sections of [`AGENT_NOTES.md`](AGENT_NOTES.md) marked `rule=judging`; edit there, then run `uv run python tools/sync_agent_notes.py`.
 
+### Description judging: the settled method (Roger, 2026-11-02)
+
+**The decision:** the batched percentile rubric `b10`, N=20 entities per call, two
+passes in independent random orders, no reasoning, GPT-5.6 Luna + Haiku 5.5 blended by
+the mean of their scores: ρ 0.716 at $0.084 per axis on the 30 development axes, on the
+frontier in 12 of 12 projection variants, and confirmed on the 31 held out.  Gemini 3.1
+Flash-Lite is a supported third judge (0.721 at $0.152, +0.004 [−0.001, +0.009]; not run
+on the held-out axes), GPT-6 Luna alone the cheap end (0.680 at $0.019).  Gemini 3.5 is out
+of the running (0.653 at $0.108).  Run it with
+[`results_analysis/judge_descriptions.py`](./results_analysis/judge_descriptions.py); the
+defaults are the constants at its top.  Instruction and response judging are next, and
+the older consumers of `scores_descriptions.json` are not wired to this until they
+are settled.  The account: [`results_analysis/README.md`](./results_analysis/README.md)
+§ "Description judging: the settled method" and
+[`reports/judge_pareto/judge_tier_update_2026-11-01.md`](./reports/judge_pareto/judge_tier_update_2026-11-01.md).
+
+**One request layer.**  [`assistant_axis/judge.py`](./assistant_axis/judge.py) holds every
+judge's requests, the capability and settings tables, the Flex and retry loops and what a
+reply means; step 3, the axis judge and the Pareto tools all send through it.  A new judge
+model, or anything learnt about one, goes there.  Pipeline step 3 stops on a Gemini judge:
+Gemini is wired for description judging only.
+
+**A failed call is not an outcome** (`judge.FAILED`, 2026-11-02).  A network or provider
+failure was once None, like a refusal, and an outage then left empty cells marked
+finished, which the averaging took in without a word.  Any tool that keeps a record must
+leave such an item open and ask it again.  After a long unattended run check coverage
+(entities scored against the axis), not only the exit status.
+
+**Scores in words** ([`assistant_axis/judge_score_words.py`](./assistant_axis/judge_score_words.py)):
+the percentile rubrics' parsers read `SCORE: thirty-five`, digits first.  Step 3's parser and
+`parse_signed_score` do not, on the evidence: none of 4.8 million saved step-3 markers held a
+number in words.
+
 ### Judge prompts: reason BEFORE score (mandatory)
 
 In any LLM judge prompt that asks for **both** a reasoning/explanation
