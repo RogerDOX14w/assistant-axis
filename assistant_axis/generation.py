@@ -20,7 +20,7 @@ import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, List, Dict, Mapping, Optional
+from typing import Any, List, Dict, Mapping, Optional, Tuple
 
 import torch
 from tqdm import tqdm
@@ -100,6 +100,137 @@ def looks_like_leaked_thinking(text: str) -> bool:
     a ``</think>`` tag.  A heuristic, recorded as ``thinking_suspected``;
     nothing is removed."""
     return bool(_THIRD_PERSON_USER.search((text or "")[:THINKING_SCAN_CHARS]))
+
+
+# ---------------------------------------------------------------------------
+# The token ranges behind the stored text (the response-token-ids plan,
+# reports/pipeline/response_token_ids/plan.md § 3 and § 4.2, 2026-11-02)
+# ---------------------------------------------------------------------------
+#
+# Step 1 stores vLLM's ids verbatim (``response_token_ids``) and two ranges
+# into them: ``content_token_range``, the tokens behind the stored content,
+# and ``thinking_token_range``, the leaked plan's tokens.  Step 2 prefills the
+# ids and averages slot 0 over the content range.  The content range is
+# checked here, by decoding it, against the text it is said to be behind; a
+# range that fails the check is not written (null), and step 2 takes the text
+# path for that response.
+
+# A UTF-8 character is at most four bytes, so a cap that lands inside one
+# leaves at most three ids of it (each holds at least one byte).
+MAX_PARTIAL_CHARACTER_IDS = 3
+_REPLACEMENT_CHARACTER = "\ufffd"
+
+
+def _decode_plain(tokenizer, ids: List[int]) -> str:
+    """What vLLM's text is expected to be for ``ids``: special tokens left
+    out (vLLM's default ``skip_special_tokens=True``) and no clean-up of
+    spaces (vLLM's detokenizer does none; Llama 3's tokenizer config turns it
+    on for ``decode``)."""
+    return tokenizer.decode(list(ids), skip_special_tokens=True,
+                            clean_up_tokenization_spaces=False)
+
+
+def token_ranges(tokenizer, token_ids: List[int], text: str, *, leaked: bool, stripped: bool,
+                 think_end_id: Optional[int], special_ids) -> Tuple[
+                     Optional[Tuple[int, int]], Optional[Tuple[int, int]]]:
+    """``(thinking_range, content_range)`` for one response: half-open index
+    ranges into ``token_ids`` (vLLM's ids, verbatim), or None.
+
+    ``text`` is the stored content (after the strip when ``stripped``),
+    ``leaked`` whether the strip rule's detection fired on vLLM's text,
+    ``stripped`` whether the strip was applied, ``think_end_id`` the id of
+    ``</think>`` (None when the tokenizer has none) and ``special_ids`` the
+    tokenizer's special ids.  The plan's § 4.2, step by step:
+
+    1. When ``leaked``, the thinking range is ``(0, k)``, ``k`` the index
+       after the last ``think_end_id``; with no such id (``</think>`` spelled
+       in pieces) it is None, and when ``stripped`` so is the content range
+       (its start is unknown).  The content starts at ``k`` when
+       ``stripped``, else at 0.
+    2. Trailing special ids (the stop token) are left out.
+    3. Trailing ids that decode to a partial character (the cap landed inside
+       one: the decoding ends in U+FFFD) are left out, at most
+       :data:`MAX_PARTIAL_CHARACTER_IDS`.
+    4. The check: the range decodes to ``text`` (to ``text`` after
+       ``strip()`` when ``stripped``, since the strip took the whitespace
+       with the plan); the content range is None when it does not.
+    """
+    if stripped and not leaked:
+        raise ValueError("a response cannot be stripped without the strip rule's detection")
+    ids = [int(i) for i in token_ids]
+    thinking = None
+    start = 0
+    if leaked:
+        hits = ([i for i, t in enumerate(ids) if t == think_end_id]
+                if think_end_id is not None else [])
+        if hits:
+            thinking = (0, hits[-1] + 1)
+        elif stripped:
+            return None, None
+        if stripped:
+            start = thinking[1]
+    special = set(int(i) for i in special_ids)
+    end = len(ids)
+    while end > start and ids[end - 1] in special:
+        end -= 1
+    steps = 0
+    while (end > start and steps < MAX_PARTIAL_CHARACTER_IDS
+           and _decode_plain(tokenizer, ids[start:end]).endswith(_REPLACEMENT_CHARACTER)):
+        end -= 1
+        steps += 1
+    decoded = _decode_plain(tokenizer, ids[start:end])
+    ok = (decoded.strip() == text) if stripped else (decoded == text)
+    return thinking, ((start, end) if ok else None)
+
+
+def _range_field(r: Optional[Tuple[int, int]]) -> Optional[List[int]]:
+    """A range as the record stores it: ``[start, end]`` or null."""
+    return None if r is None else [int(r[0]), int(r[1])]
+
+
+def think_end_token_id(tokenizer) -> Optional[int]:
+    """The id of ``</think>`` when the tokenizer has it as one token (Qwen3:
+    151668), else None.  ``convert_tokens_to_ids`` gives the unknown token's
+    id for a token it lacks, so the id is accepted only when it decodes to
+    ``</think>``."""
+    try:
+        tid = tokenizer.convert_tokens_to_ids("</think>")
+    except (KeyError, ValueError):
+        return None
+    if tid is None or isinstance(tid, list):
+        return None
+    return int(tid) if tokenizer.decode([int(tid)]) == "</think>" else None
+
+
+def add_token_ranges(details: List[Dict[str, Any]], tokenizer, log=None) -> int:
+    """Set ``thinking_token_range`` and ``content_token_range`` on each
+    detail dict of :meth:`VLLMGenerator.generate_batch_detailed`
+    (:func:`token_ranges`) and log the batch's null content ranges; returns
+    their number.  A null range never stops the run: step 2 takes the text
+    path for that response."""
+    log = log or logger
+    think_end_id = think_end_token_id(tokenizer)
+    special_ids = list(getattr(tokenizer, "all_special_ids", None) or [])
+    n_null = n_pieces = 0
+    for d in details:
+        thinking, content = token_ranges(
+            tokenizer, d["token_ids"], d["text"], leaked=d["leaked"],
+            stripped=d["thinking_stripped"], think_end_id=think_end_id, special_ids=special_ids)
+        d["thinking_token_range"] = _range_field(thinking)
+        d["content_token_range"] = _range_field(content)
+        if content is None:
+            n_null += 1
+            n_pieces += int(d["leaked"] and thinking is None)
+    if n_null:
+        pieces = (f" ({n_pieces} of them a stripped plan whose </think> is not one id)"
+                  if n_pieces else "")
+        log.warning(f"{n_null} of {len(details)} responses: the stored ids do not decode to the "
+                    f"stored text{pieces}; their range is null and step 2 will take the text "
+                    f"path for them")
+    else:
+        log.info(f"{len(details)} of {len(details)} responses: the stored ids decode to the "
+                 f"stored text")
+    return n_null
 
 
 def _sha256_text(text: str) -> str:
@@ -571,8 +702,10 @@ class VLLMGenerator:
         the ids vLLM sampled (``output.outputs[0].token_ids``) verbatim as
         ints, leaked plan and stop token included; ``leaked``, whether the
         strip rule's detection fired (``</think>`` in vLLM's text, ``<think>``
-        not), decided before any strip; and ``raw_text``, vLLM's text before
-        the strip, when the strip changed it."""
+        not), decided before any strip; ``raw_text``, vLLM's text before the
+        strip, when the strip changed it; and (§ 4.2) ``thinking_token_range``
+        and ``content_token_range`` (:func:`token_ranges`, as ``[start,
+        end]`` lists or None)."""
         self.load()
 
         tokenizer = self.llm.get_tokenizer()
@@ -623,6 +756,9 @@ class VLLMGenerator:
                     f"responses (vLLM/Qwen thinking leak)")
         for d in details:
             d["thinking_suspected"] = looks_like_leaked_thinking(d["text"])
+        # The two token ranges, checked against the text they point at
+        # (the response-token-ids plan § 4.2, 2026-11-02).
+        add_token_ranges(details, tokenizer)
         return details
 
     def generate_for_role(
@@ -647,7 +783,8 @@ class VLLMGenerator:
             question_index, and since 2026-10-12 (walk-through P6, additive)
             question_id, finish_reason, thinking_stripped, thinking_suspected;
             since 2026-11-02 (the response-token-ids plan, additive)
-            response_token_ids, and raw_text when thinking_stripped
+            response_token_ids, content_token_range, thinking_token_range,
+            and raw_text when thinking_stripped
         """
         self.load()
         tokenizer = self.llm.get_tokenizer()
@@ -688,10 +825,15 @@ class VLLMGenerator:
         # Build results.  The keys before "conversation" are those written
         # since the start; the four after it are additive (2026-10-12), and
         # steps 2 and 3 read records by key, so they ignore them.  After those,
-        # since 2026-11-02 (the response-token-ids plan § 3), the ids vLLM
-        # sampled, verbatim, and, when the strip changed the text, raw_text,
-        # the text before it.  The stored content is what it was before: step
-        # 3 and the response judging read it and have no tokenizer.
+        # since 2026-11-02 (the response-token-ids plan § 3): the ids vLLM
+        # sampled, verbatim; content_token_range, [start, end) into them of
+        # the tokens behind the stored content (null when the decoding check
+        # failed: step 2 then re-encodes the text); thinking_token_range,
+        # [0, k) of the leaked plan's tokens up to its last </think> (null
+        # when none was detected or it is not one id); and, when the strip
+        # changed the text, raw_text, the text before it.  The stored content
+        # is what it was before: step 3 and the response judging read it and
+        # have no tokenizer.
         results = []
         for conv, meta, d in zip(all_conversations, all_metadata, details):
             result = {
@@ -705,6 +847,8 @@ class VLLMGenerator:
                 "thinking_stripped": d["thinking_stripped"],
                 "thinking_suspected": d["thinking_suspected"],
                 "response_token_ids": d["token_ids"],
+                "content_token_range": d["content_token_range"],
+                "thinking_token_range": d["thinking_token_range"],
             }
             if d["thinking_stripped"]:
                 result["raw_text"] = d["raw_text"]

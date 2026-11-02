@@ -73,3 +73,25 @@ def test_step3_judges_the_same_requests(tmp_path):
         reqs[new] = step3.pending_prompts(responses, "Q: {question} A: {answer}", {})
     assert reqs[True] == reqs[False]
     assert [k for k, _ in reqs[True]] == ["pos_p0_q0", "pos_p1_q1", "pos_p0_q2"]
+
+
+# The fields of the response-token-ids plan (2026-11-02, § 3): the judged text
+# is the stored content, whatever else the record carries (raw_text holds the
+# leaked plan the strip removed; step 3 must not read it).
+TOKEN_FIELDS = {"response_token_ids": [1, 2, 3, 4], "content_token_range": [2, 3],
+                "thinking_token_range": [0, 2], "raw_text": "a plan </think> the answer"}
+
+
+def test_step3_judges_the_same_requests_with_the_token_fields(tmp_path):
+    step3 = _load("_p6_step3_tokens", "pipeline/3_judge.py")
+    reqs = {}
+    for with_tokens in (False, True):
+        path = tmp_path / ("tokens" if with_tokens else "plain") / "pirate.jsonl"
+        _write(path, new=True)
+        if with_tokens:
+            lines = [json.loads(x) for x in path.read_text().splitlines()]
+            path.write_text("".join(json.dumps({**r, **TOKEN_FIELDS}) + "\n" for r in lines))
+        reqs[with_tokens] = step3.pending_prompts(step3.load_responses(path),
+                                                  "Q: {question} A: {answer}", {})
+    assert reqs[True] == reqs[False]
+    assert not any("a plan" in str(r) for r in reqs[True])

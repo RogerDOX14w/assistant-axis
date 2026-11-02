@@ -203,7 +203,8 @@ def test_the_ids_are_stored_verbatim_after_the_existing_keys(monkeypatch):
     old = _old_record("Tides come from the moon.")
     assert list(rec)[:len(old)] == list(old)                 # the old keys first, in order
     assert {k: rec[k] for k in old} == old                   # with the values they had
-    assert list(rec)[len(old):] == ["response_token_ids"]
+    assert list(rec)[len(old):] == ["response_token_ids", "content_token_range",
+                                    "thinking_token_range"]
     assert rec["response_token_ids"] == ids                  # the stop token included
     assert type(rec["response_token_ids"]) is list           # vLLM's tuple, as a list of ints
     assert all(type(i) is int for i in rec["response_token_ids"])
@@ -217,10 +218,164 @@ def test_a_stripped_response_keeps_the_text_before_the_strip(monkeypatch):
     assert {k: rec[k] for k in old} == old                   # content stripped as before
     assert rec["raw_text"] == raw
     assert rec["response_token_ids"] == ids_of(raw) + [STOP] # the plan is in the ids
-    assert list(rec)[len(old):] == ["response_token_ids", "raw_text"]
+    assert list(rec)[len(old):] == ["response_token_ids", "content_token_range",
+                                    "thinking_token_range", "raw_text"]
 
 
 def test_no_raw_text_when_nothing_was_stripped(monkeypatch):
     rec = _one(monkeypatch, ("x </think> y", "stop"), family="gemma2")
     assert rec["conversation"][-1]["content"] == "x </think> y"
     assert "raw_text" not in rec and rec["thinking_stripped"] is False
+    # Another family's rule detects nothing: no plan range, the content from 0.
+    assert rec["thinking_token_range"] is None
+    assert rec["content_token_range"] == [0, len(ids_of("x </think> y"))]
+
+
+# ---------------------------------------------------------------------------
+# The two ranges (§ 4.2), through generate_for_role (§ 4.5 items 2 to 6)
+# ---------------------------------------------------------------------------
+
+def _decoded(ids, r):
+    return FakeTokenizer().decode(ids[r[0]:r[1]], skip_special_tokens=True)
+
+
+def test_a_clean_response_points_at_everything_but_the_stop_token(monkeypatch, caplog):
+    text = "Tides come from the moon."
+    with caplog.at_level(logging.INFO):
+        rec = _one(monkeypatch, (text, "stop"))
+    ids = rec["response_token_ids"]
+    assert ids[-1] == STOP
+    assert rec["content_token_range"] == [0, len(ids) - 1]
+    assert _decoded(ids, rec["content_token_range"]) == rec["conversation"][-1]["content"]
+    assert rec["thinking_token_range"] is None
+    assert "1 of 1 responses: the stored ids decode to the stored text" in caplog.text
+
+
+def test_a_stripped_response_points_past_the_plan(monkeypatch):
+    raw = "Plan: be brief. </think> Not yet. </think>\n\n Tides come from the moon. \n"
+    rec = _one(monkeypatch, (raw, "stop"))
+    ids = rec["response_token_ids"]
+    k = len(ids) - ids[::-1].index(THINK_END)                # the index after the last </think>
+    assert rec["thinking_stripped"] is True and rec["raw_text"] == raw
+    assert rec["thinking_token_range"] == [0, k]
+    assert ids[k - 1] == THINK_END
+    start, end = rec["content_token_range"]
+    assert start == k and end == len(ids) - 1
+    content = rec["conversation"][-1]["content"]
+    assert content == "Tides come from the moon."
+    assert _decoded(ids, [start, end]) != content             # the whitespace is still there
+    assert _decoded(ids, [start, end]).strip() == content     # ... and the strip took it
+
+
+def test_a_plan_whose_end_tag_is_not_one_id_gets_null_ranges(monkeypatch, caplog):
+    raw = "Plan: be brief.</think>Tides."
+    ids = [ord(c) for c in raw] + [STOP]                     # "</think>" spelled in pieces
+    with caplog.at_level(logging.WARNING):
+        rec = _one(monkeypatch, (raw, "stop", ids))
+    assert rec["thinking_stripped"] is True and rec["raw_text"] == raw
+    assert rec["conversation"][-1]["content"] == "Tides."     # stripped as before
+    assert rec["thinking_token_range"] is None and rec["content_token_range"] is None
+    assert rec["response_token_ids"] == ids                   # still written, verbatim
+    assert ("1 of 1 responses: the stored ids do not decode to the stored text (1 of them a "
+            "stripped plan whose </think> is not one id)") in caplog.text
+
+
+@pytest.mark.parametrize("char, kept", [("é", 1), ("€", 2), ("😀", 3)])
+def test_a_cap_inside_a_character_steps_back_over_its_ids(monkeypatch, char, kept):
+    # vLLM's text holds no partial character (the smoke run checks that it
+    # does not end in U+FFFD; if it does, the check fails: the next test).
+    ids = ids_of("Tides") + bytes_of(char)[:kept]
+    rec = _one(monkeypatch, ("Tides", "length", ids))
+    assert rec["finish_reason"] == "length"
+    assert rec["content_token_range"] == [0, 5]
+
+
+def test_a_text_that_keeps_the_partial_character_fails_the_check(monkeypatch):
+    ids = ids_of("Tides") + bytes_of("é")[:1]
+    rec = _one(monkeypatch, ("Tides" + chr(0xFFFD), "length", ids))
+    assert rec["content_token_range"] is None
+
+
+def test_a_sampled_special_token_is_kept_in_the_ids_and_the_range(monkeypatch):
+    ids = ids_of("Arr ") + [SPECIAL] + ids_of("matey.") + [STOP]
+    rec = _one(monkeypatch, ("Arr matey.", "stop", ids))
+    assert rec["response_token_ids"] == ids
+    assert rec["content_token_range"] == [0, len(ids) - 1]   # the special token inside it
+    assert SPECIAL in ids[slice(*rec["content_token_range"])]
+
+
+def test_ids_that_are_not_the_text_get_a_null_range(monkeypatch, caplog):
+    with caplog.at_level(logging.WARNING):
+        rec = _one(monkeypatch, ("Tides.", "stop", ids_of("Tides!") + [STOP]))
+    assert rec["content_token_range"] is None
+    assert rec["conversation"][-1]["content"] == "Tides."     # the text is what vLLM gave
+    assert "step 2 will take the text path for them" in caplog.text
+
+
+# ---------------------------------------------------------------------------
+# token_ranges as a pure function (§ 4.5 item 8)
+# ---------------------------------------------------------------------------
+
+def _ranges(ids, text, *, leaked=False, stripped=False, think_end_id=THINK_END):
+    return g.token_ranges(FakeTokenizer(), ids, text, leaked=leaked, stripped=stripped,
+                          think_end_id=think_end_id, special_ids=[STOP, SPECIAL])
+
+
+def test_token_ranges_clean_and_empty():
+    ids = ids_of("Arr.")
+    assert _ranges(ids + [STOP], "Arr.") == (None, (0, 4))
+    assert _ranges(ids, "Arr.") == (None, (0, 4))                       # no stop token
+    assert _ranges(ids + [STOP, STOP], "Arr.") == (None, (0, 4))        # trailing specials
+    assert _ranges([], "") == (None, (0, 0))                            # an empty response
+    assert _ranges([STOP], "") == (None, (0, 0))
+    assert _ranges(ids + [STOP], "Arr!") == (None, None)                # not the text
+
+
+def test_token_ranges_stripped():
+    plan = ids_of("Plan.") + [THINK_END]
+    ids = plan + ids_of("\n\nArr.\n") + [STOP]
+    assert _ranges(ids, "Arr.", leaked=True, stripped=True) == ((0, 6), (6, len(ids) - 1))
+    # Only a plan: the thinking range is everything, the content range empty.
+    assert _ranges(plan + [STOP], "", leaked=True, stripped=True) == ((0, 6), (6, 6))
+    # </think> in pieces: both null when stripped.
+    pieces = ids_of("Plan.") + [ord(c) for c in "</think>"] + ids_of("Arr.") + [STOP]
+    assert _ranges(pieces, "Arr.", leaked=True, stripped=True) == (None, None)
+    # No </think> id at all in the tokenizer: the same.
+    assert _ranges(ids, "Arr.", leaked=True, stripped=True, think_end_id=None) == (None, None)
+
+
+def test_token_ranges_leaked_but_kept():
+    # --response_cleanup keep: the text is vLLM's, plan and all.
+    ids = ids_of("Plan.") + [THINK_END] + ids_of("\n\nArr.") + [STOP]
+    raw = "Plan.</think>\n\nArr."
+    assert _ranges(ids, raw, leaked=True) == ((0, 6), (0, len(ids) - 1))
+    # </think> in pieces: no thinking range, the content range still from 0.
+    pieces = [ord(c) for c in raw] + [STOP]
+    assert _ranges(pieces, raw, leaked=True) == (None, (0, len(pieces) - 1))
+
+
+def test_token_ranges_partial_characters():
+    for char, n in (("é", 2), ("€", 3), ("😀", 4)):
+        ids = ids_of("Hi") + bytes_of(char)
+        assert _ranges(ids, "Hi" + char) == (None, (0, 2 + n))          # the whole character
+        for kept in range(1, n):
+            assert _ranges(ids_of("Hi") + bytes_of(char)[:kept], "Hi") == (None, (0, 2))
+    # At most three ids are dropped: four lone continuation bytes are not a
+    # partial character at the cap (the check then fails).
+    stray = ids_of("Hi") + [BYTE + 0x80] * 4
+    assert _ranges(stray, "Hi") == (None, None)
+
+
+def test_token_ranges_a_strip_without_detection_is_a_bug():
+    with pytest.raises(ValueError):
+        _ranges(ids_of("Arr."), "Arr.", stripped=True)
+
+
+def test_the_end_tag_id_is_accepted_only_when_it_decodes_to_the_tag():
+    assert g.think_end_token_id(FakeTokenizer()) == THINK_END
+
+    class NoTag(FakeTokenizer):
+        def convert_tokens_to_ids(self, token):
+            return 0                                          # the unknown token's id
+
+    assert g.think_end_token_id(NoTag()) is None
