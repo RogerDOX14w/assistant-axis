@@ -1050,7 +1050,9 @@ Read the rule file itself first.
 **The decision:** the batched percentile rubric `b10`, N=20 entities per call, two
 passes in independent random orders, no reasoning, GPT-5.6 Luna + Haiku 5.5 blended by
 the mean of their scores: ρ 0.716 at $0.084 per axis on the 30 development axes, on the
-frontier in 12 of 12 projection variants, and confirmed on the 31 held out.  Gemini 3.1
+frontier in 12 of 12 projection variants, and confirmed on the 31 held out.  Two judges stay
+the default until a third is proven (Roger: the ensemble of two was significantly better than
+either alone, while three models bring three pairs and a trio to evaluate).  Gemini 3.1
 Flash-Lite is a supported third judge (0.720 at $0.152, +0.004 [−0.001, +0.010]; not run
 on the held-out axes), GPT-6 Luna alone the cheap end (0.680 at $0.019).  Gemini 3.5 is out
 of the running (0.653 at $0.108).  Run it with

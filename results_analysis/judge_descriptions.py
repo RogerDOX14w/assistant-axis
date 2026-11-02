@@ -54,6 +54,8 @@ logger = logging.getLogger(__name__)
 DESCRIPTION_RUBRIC = "b10"
 DESCRIPTION_ENTITIES_PER_CALL = 20
 DESCRIPTION_PASSES = 2
+#: Two judges until a third is proven (Roger, 2026-11-02): the ensemble of two was found significantly better
+#: than either alone, while three models bring three pairs and a trio to evaluate.
 DESCRIPTION_JUDGES = ("gpt-5.6-luna", "claude-haiku-5-5")
 #: Supported and measured, not in the default: pass them as --judge_model.  Gemini 3.1 Flash-Lite as a third
 #: judge, GPT-6 Luna alone for the cheap end.
