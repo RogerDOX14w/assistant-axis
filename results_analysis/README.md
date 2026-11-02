@@ -2748,10 +2748,10 @@ The defaults are the constants at the top of that script, one place to change th
 | GPT-6 Luna alone (the cheap end) | 0.680 | 0.019 | 12 |
 | GPT-5.6 Luna alone | 0.704 | 0.042 | 12 |
 | **GPT-5.6 Luna + Haiku 5.5 (the default)** | **0.716** | **0.084** | **12** |
-| the same + Gemini 3.1 Flash-Lite (`--judge_model`, optional) | 0.721 | 0.152 | 9 |
+| the same + Gemini 3.1 Flash-Lite (`--judge_model`, optional) | 0.720 | 0.152 | 9 |
 
-The third judge's gain is +0.004 [−0.001, +0.009], and a third pass of Luna and Haiku
-(0.721 at N=10, $0.143) gives as much.  Gemini 3.1 is not on the frontier alone, and
+The third judge's gain is +0.004 [−0.001, +0.010], and a third pass of Luna and Haiku
+at N=10 ($0.143) gives as much, +0.005 [+0.001, +0.009].  Gemini 3.1 is not on the frontier alone, and
 behaves as the others do on batch size and passes, except that reasoning hurts it.
 Gemini 3.1 Flash-Lite's earliest shutdown is 2027-05-07.
 

@@ -377,8 +377,8 @@ never: [`judge_tier_grid_shapes.png`](../../roger/axis_judge_experiments/judge_t
 [`judge_tier_grid_own_frontier.png`](../../roger/axis_judge_experiments/judge_tier_grid_dev30/judge_tier_grid_own_frontier.png).
 
 **Ensemble size** (N=20, two passes each): Luna 0.704, Luna + Haiku 0.716 (+0.012 [−0.000, +0.022]),
-with Gemini 0.721 (+0.004 [−0.001, +0.010], ahead in 9 of 12 variants).  A third pass of Luna and
-Haiku at N=10 gets 0.721 for $0.143 against $0.152.  3.1 beats 3.5 by +0.034 [+0.019, +0.051], ahead
+with Gemini 0.720 (+0.004 [−0.001, +0.010], ahead in 9 of 12 variants).  A third pass of Luna and
+Haiku at N=10 gains as much, +0.005 [+0.001, +0.009], for $0.143 against $0.152.  3.1 beats 3.5 by +0.034 [+0.019, +0.051], ahead
 in 12 of 12 variants, for less money.
 
 **What the production audit found.**  `judge.py` and this tool sent byte-identical bodies, but

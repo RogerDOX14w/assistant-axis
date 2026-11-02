@@ -11,7 +11,7 @@ frontier unless noted):
     gpt-6-luna alone                      0.680   $0.019    the cheap end
     gpt-5.6-luna alone                    0.704   $0.042
     gpt-5.6-luna + claude-haiku-5-5       0.716   $0.084    the default
-    the same + gemini-3.1-flash-lite      0.721   $0.152    +0.004 [-0.001, +0.009], frontier in 9 of 12
+    the same + gemini-3.1-flash-lite      0.720   $0.152    +0.004 [-0.001, +0.010], frontier in 9 of 12
 
 Reasoning adds nothing to any of them, a third pass adds about 0.009 for half as much again, and N=5 and N=7 are
 never on a judge's frontier.  The defaults below are that decision: change them here, in one place.
