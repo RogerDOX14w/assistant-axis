@@ -42,6 +42,7 @@ Usage:
 
 import argparse
 import asyncio
+import functools
 import hashlib
 import json
 import logging
@@ -78,11 +79,11 @@ from assistant_axis.entity_id import (
 )
 from assistant_axis.anthropic_batch import AnthropicBatchRunner
 from assistant_axis.judge import (
-    PARSE_RATE_LOUD_THRESHOLD, JudgeRequestError, RateLimiter, anthropic_reply,
-    anthropic_request_params, call_judge_batch, chat_request_body, parse_judge_score,
-    provider_for_model, warn_if_low_parse_rate,
+    DEFAULT_PROMPT_CACHE, PARSE_RATE_LOUD_THRESHOLD, PROMPT_CACHE_MODES, JudgeRequestError,
+    RateLimiter, anthropic_reply, anthropic_request_params, call_judge_batch, chat_request_body,
+    parse_judge_score, provider_for_model, warn_if_low_parse_rate,
 )
-from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
+from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, openai_usage, price_for_model
 from assistant_axis.judge_rubrics import (
     DEFAULT_PROMPT_VERSION, PROMPT_VERSIONS, PromptVersion, abc_answers,
     abc_score, abrt_answers, abrt_score, answer_pattern, first_integer_score, get_version,
@@ -909,14 +910,16 @@ async def score_entity(
     replies: Optional[List[dict]] = None,
     disagreements: Optional[List[dict]] = None,
     fallback_client: Optional[openai.AsyncOpenAI] = None,
+    prompt_cache: str = DEFAULT_PROMPT_CACHE,
 ) -> Tuple[dict, int, int]:
     """Score responses for a single entity.  ``usage`` (a
     MultiModelUsage) is ticked with every response's token counts;
     ``reply_format`` is the prompt version's for the entity type
-    (:func:`read_reply`); ``service_tier`` (``"flex"``) and
+    (:func:`read_reply`); ``service_tier`` (``"flex"``),
     ``fallback_client`` (the standard-tier client a Flex request that keeps
-    failing is sent through, ``judge.call_judge_single``) are passed to every
-    call; ``replies``, when given, collects every reply as ``{"key",
+    failing is sent through, ``judge.call_judge_single``) and
+    ``prompt_cache`` (``--prompt_cache``; ``judge.PROMPT_CACHE_MODES``) are
+    passed to every call; ``replies``, when given, collects every reply as ``{"key",
     "score", "reply"}`` (``--save_replies``), and ``disagreements`` every
     version 10 reply whose SCORE line disagrees with its answers, as
     ``{"key", **disagreement}``.
@@ -952,6 +955,7 @@ async def score_entity(
         reject_truncated=reply_format == "score_marker",
         service_tier=service_tier,
         fallback_client=fallback_client,
+        prompt_cache=prompt_cache,
     )
 
     scores: Dict[str, int] = {}
@@ -1152,6 +1156,7 @@ async def judge_in_batches(
     keep_replies: bool = False,
     sides: Optional[Dict[str, PromptVersion]] = None,
     side_max_tokens: Optional[Dict[str, int]] = None,
+    prompt_cache: str = DEFAULT_PROMPT_CACHE,
 ) -> Tuple[int, int, int, set]:
     """Judge ``entities`` (name, existing scores, eval template, responses;
     consumed once, so a generator keeps one entity's responses in memory at
@@ -1168,7 +1173,9 @@ async def judge_in_batches(
     is ``(name, existing per-side scores, {side: template}, responses)``,
     each side's pending keys are requested with that side's template and
     token limit (custom id ``<name>|<key>#<side>``), read by that side's
-    format, and merged through :func:`merge_sides`.  Returns ``(n_attempted,
+    format, and merged through :func:`merge_sides`.  ``prompt_cache``
+    (``--prompt_cache``) goes into every request body and into the real-time
+    calls for what no batch answered.  Returns ``(n_attempted,
     n_parsed, n_left, entities_with_new_scores)``; ``n_left`` requests are
     unanswered and unscored, for a rerun."""
     # A Claude judge goes through Anthropic Message Batches (2026-10-26), an
@@ -1185,7 +1192,7 @@ async def judge_in_batches(
             poll_seconds=poll_seconds,
             metadata={"source": "pipeline/3_judge.py", "output_dir": str(output_dir)[-200:]},
             logger=logger)
-        request_for = chat_request_body
+        request_for = functools.partial(chat_request_body, prompt_cache=prompt_cache)
     inflight = await runner.resume()
     # Model drift (walk-through P5; review P3 D4): a batch in flight was
     # requested with another judge model.  Collected under this run's
@@ -1266,9 +1273,7 @@ async def judge_in_batches(
                 _judge_mod.REFUSED_REPLIES[judge_model] = _judge_mod.REFUSED_REPLIES.get(judge_model, 0) + 1
             run_usage.charge(batch_key, n_in, n_out)
         else:
-            u = body.get("usage") or {}
-            run_usage.charge(batch_key, int(u.get("prompt_tokens") or 0),
-                             int(u.get("completion_tokens") or 0))
+            run_usage.charge_usage(batch_key, openai_usage(body))
             choices = body.get("choices") or []
             text = ((choices[0].get("message") or {}).get("content") if choices else None)
             finish = choices[0].get("finish_reason") if choices else None
@@ -1315,7 +1320,7 @@ async def judge_in_batches(
                 prompts=[unanswered[c]["messages"][0]["content"] for c in ids],
                 model=judge_model, max_tokens=side_max_tokens[side] if side else max_tokens,
                 rate_limiter=rate_limiter, batch_size=realtime_batch_size, usage=run_usage,
-                reject_truncated=fmt == "score_marker")
+                reject_truncated=fmt == "score_marker", prompt_cache=prompt_cache)
             for cid, text in zip(ids, texts):
                 name, key, side_ = split_cid(cid)
                 counts["attempted"] += 1
@@ -1599,6 +1604,17 @@ async def main_async():
                              "(judge.FLEX_FALLBACK_AFTER_S; Roger, 2026-10-29).  Not every model takes it: "
                              "gpt-4.1-mini is refused with HTTP 400 'Invalid service_tier "
                              "argument' (2026-10-28); judge it by batch, the default")
+    parser.add_argument("--prompt_cache", choices=list(PROMPT_CACHE_MODES), default=DEFAULT_PROMPT_CACHE,
+                        help="OpenAI prompt caching for a judge that takes prompt_cache_options (GPT-5.6 "
+                             "and later; judge.MODEL_CAPABILITIES).  'off' (the default since 2026-11-01) "
+                             "sends explicit mode with no breakpoints, so nothing is written or read: those "
+                             "models' default writes every prompt of 1,024 tokens or more at 1.25x the "
+                             "input rate, and a judge prompt, which ends in its unique response, is never "
+                             "read back (luna Flex, 29 Oct to 1 Nov 2026: $198 of writes for $0.05 of "
+                             "reads, about 10%% of the bill).  'implicit' leaves the field out.  "
+                             "gpt-4.1-mini refuses the field and is sent nothing either way (it writes "
+                             "free).  Applies in real time, on Flex and in the Batch API; usage.json "
+                             "records the cache tokens either way")
     parser.add_argument("--batch_requests", type=int,
                         default=_openai_batch.DEFAULT_CHUNK_REQUESTS,
                         help="Requests per batch (service limit 50,000 and 200 MB; a batch over "
@@ -2080,7 +2096,8 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                 fallback_max=args.batch_fallback_max, rate_limiter=rate_limiter,
                 realtime_batch_size=args.batch_size, before_write=stamp_once,
                 reply_format=reply_format, keep_replies=args.save_replies,
-                sides=sides or None, side_max_tokens=side_max_tokens or None)
+                sides=sides or None, side_max_tokens=side_max_tokens or None,
+                prompt_cache=args.prompt_cache)
             successful = len(touched)
         except ModelDriftError as e:
             logger.error(str(e))
@@ -2100,7 +2117,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                         replies=replies, disagreements=disagreements,
                         client=client, rate_limiter=rate_limiter, judge_model=args.judge_model,
                         batch_size=args.batch_size, usage=run_usage, service_tier=args.service_tier,
-                        fallback_client=fallback_client)
+                        fallback_client=fallback_client, prompt_cache=args.prompt_cache)
                     write_usage(usage_path, prior_usage, run_usage)
                     if replies:
                         save_replies(output_dir, name, replies)
@@ -2131,6 +2148,7 @@ async def live_scoring(args, *, output_dir: Path, roles_dir: Path, traits_dir: P
                     replies=replies,
                     disagreements=disagreements,
                     fallback_client=fallback_client,
+                    prompt_cache=args.prompt_cache,
                 )
                 write_usage(usage_path, prior_usage, run_usage)
                 if replies:

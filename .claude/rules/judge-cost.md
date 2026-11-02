@@ -55,6 +55,73 @@ batch's prompt with the *current* RUBRIC_RESPONSE_BATCH and tiktoken-
 counts it -- so re-running after any rubric change re-validates the
 model automatically.
 
+### Prompt caching: off on GPT-5.6 and later (2026-11-01)
+
+**The finding** (the Judging Pareto Handoff session, from Roger's OpenAI
+cost dashboard): on luna Flex from 29 Oct to 1 Nov 2026 the bill was
+about $406, of which cache writes $198.04 (1,584M tokens at $0.125 per
+1M), cache reads $0.05 (4.9M tokens), uncached input $118.69 and output
+$89.40.  OpenAI's GPT-5.6 and later cache every prompt of 1,024 tokens
+or more by default ("implicit" mode, a breakpoint at the end of the last
+message) and bill the written tokens at **1.25x** the input rate ("not an
+additive fee"; a read is 0.1x).  A judge prompt ends in its unique
+response and is never repeated, so only 0.3% of the written tokens were
+ever read back (retries) and the writes were a premium for nothing:
+**about $39, 10% of the bill**, which the `usage.json` records of those
+runs do not show, since every prompt token was priced plain until that
+day.
+
+**What was done** (Roger: "set caching correctly in actual judging for
+the lowest price"):
+
+- `judge.DEFAULT_PROMPT_CACHE = "off"`: every judge request to a model
+  that takes `prompt_cache_options` (`judge.MODEL_CAPABILITIES`
+  `"cache_mode"`: GPT-5.6 and later) carries `{"mode": "explicit"}` with
+  no breakpoints, which writes and reads nothing.  Checked live on
+  2026-11-01: luna on Flex wrote 1,215 of a 1,218-token prompt by default
+  and read them back on a repeat; with the field, 0 and 0; the Batch API
+  accepts the field in a request body and behaves the same.  Step 3's
+  `--prompt_cache off|implicit`, `judge.chat_request_body(prompt_cache=)`
+  and `call_judge_single` / `call_judge_batch` take it; the SDK (2.17)
+  does not know the field, so `judge.chat_create_kwargs` moves it into
+  `extra_body` for a live call while a batch line carries the body as it
+  is.  `axis_judge_correlation.py`'s own OpenAI path sends it too.
+- **gpt-4.1-mini is left alone**: it refuses the field (HTTP 400
+  "prompt_cache_options is not supported on this model"), its caching
+  writes free and reads at 0.25x, so there is nothing to lose; the
+  probe showed it reading 1,024 tokens of a repeated prompt.  Anthropic
+  caches only on `cache_control`, which no judge sends.
+- **The record prices the cache tokens**: `TokenUsage`, `openai_usage`
+  and `anthropic_usage` in `judge_pricing.py` read the write and read
+  counts (OpenAI's `prompt_tokens_details.cache_write_tokens` and
+  `cached_tokens`, an SDK extra field and a Batch API body alike;
+  Anthropic's `cache_creation_input_tokens` and
+  `cache_read_input_tokens`, added back into the prompt total, which
+  Anthropic's `input_tokens` leaves out), every accumulator charges them
+  at `cache_rate_factors`, and `usage.json` carries them (schema above).
+
+**Why real caching cannot pay here** (Roger's other possibility: cache
+on purpose, ordering and grouping the requests): the minimum cacheable
+prompt on these models is 1,024 tokens, and the shared part of a judge
+prompt is far below it: the trait rubric is 560 tokens, the role rubric
+493, each version-20 combination side under 600 with the other half's
+description as context, and the axis judge's batch header 320.  Moving
+the rubric ahead of the response (it comes after the question and
+answer today) would not reach the minimum, so no breakpoint could be
+set and there is nothing to group by entity; the per-entity template
+variation (the per-role overrides) never comes into it.  Only a prompt
+with a shared prefix over 1,024 tokens could use a breakpoint, and that
+is a rubric design decision for Roger, not a setting.
+
+**For estimates**: a judge prompt of 1,024 tokens or more on a GPT-5.6
+or later model in implicit mode costs 1.25x its input; below 1,024 it
+costs nothing extra.  Step 3's prompts cross the line often (57% of the
+Flex run's input tokens were written), and the axis judge's B=7 batches
+(about 3,400 tokens) always do, so an estimate at plain rates was low by
+up to 20% on such a judge before 2026-11-01 and is right since.  The
+figures in [`reports/pipeline/rubric_version_vectors/plan.md`](reports/pipeline/rubric_version_vectors/plan.md)
+are plain-rate figures and stand.
+
 ### Per-batch token model (B=10)
 
 * Input: ≈ 320 (header) + 10 × 438 (per item) ≈ **4,700 tokens**.

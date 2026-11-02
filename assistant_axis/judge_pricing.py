@@ -34,11 +34,17 @@ numbers are documented in README.md "Judging cost model" and are
 the same numbers the cost-vs-quality plot uses.  Update both places
 together if rates change.
 
-Note on caching: gpt-4.1-mini / gpt-4-class models support prompt
-caching (~5x cheaper for the cached prefix portion).  We do NOT
-account for cache hits here — running totals will slightly
-overestimate cost for cache-friendly workloads, which is
-conservative-by-default for a budget cap.
+Prompt caching (2026-11-01): a cached prompt token is billed at a multiple
+of the input rate, and the multiples differ by model (``cache_rate_factors``):
+OpenAI's GPT-5.6 and later charge a cache write at 1.25x and a read at 0.1x,
+earlier OpenAI models write free and read at their cached-input rate, and
+Anthropic writes at 1.25x and reads at 0.1x when a request asks for caching.
+Every accumulator here takes the write and read counts beside the prompt
+total (:class:`TokenUsage`, :func:`openai_usage`, :func:`anthropic_usage`),
+so ``usage.json`` prices what the bill prices.  Until then every prompt token
+was priced at the plain rate, which understated a luna Flex run by the write
+premium (about 10%; see judge.DEFAULT_PROMPT_CACHE for why the judges now
+send those models explicit mode with no breakpoints).
 """
 from __future__ import annotations
 
@@ -220,6 +226,53 @@ _BATCH_PRICE_FACTORS: tuple[tuple[str, float], ...] = (
 FLEX_SUFFIX = ":flex"
 
 
+# ---------------------------------------------------------------------------
+# Prompt caching (2026-11-01)
+# ---------------------------------------------------------------------------
+#
+# A cached prompt token is billed at a multiple of the model's input rate.
+# OpenAI's GPT-5.6 and later charge a cache WRITE at 1.25x and a READ at
+# 0.1x (developers.openai.com prompt-caching guide, read 2026-11-01: "not an
+# additive fee", the written tokens are billed at 1.25x instead of 1x); in
+# their default, implicit, mode they write every prompt of 1,024 tokens or
+# more, so a judge prompt, which ends in a unique response and is never read
+# back, pays the premium for nothing (Roger's dashboard, luna Flex 29 Oct to
+# 1 Nov 2026: 1,584M tokens written at $0.125 per 1M = 1.25 x the $0.10 Flex
+# rate, 4.9M read; judge.DEFAULT_PROMPT_CACHE turns the writes off).  Earlier
+# OpenAI models write free and read at their cached-input rate (gpt-4.1-mini
+# $0.10 of $0.40; gpt-5.4-mini $0.075 of $0.75, pricing page 2026-10-27).
+# Anthropic writes at 1.25x (the five-minute cache) and reads at 0.1x, only
+# when a request sends cache_control, which no judge here does.  The factors
+# multiply the rate a usage key resolves to, batch and Flex rates included.
+# A model in no row takes (1.0, 1.0): no discount and no premium.
+_CACHE_RATE_FACTORS: tuple[tuple[str, float, float], ...] = (
+    ("gpt-5.6", 1.25, 0.10),
+    ("gpt-6", 1.25, 0.10),
+    ("gpt-5.4-mini", 1.0, 0.10),
+    ("gpt-4.1-mini", 1.0, 0.25),
+    ("claude", 1.25, 0.10),
+    ("haiku", 1.25, 0.10),
+    ("sonnet", 1.25, 0.10),
+    ("opus", 1.25, 0.10),
+    ("fable", 1.25, 0.10),
+)
+
+
+def cache_rate_factors(model: str) -> tuple[float, float]:
+    """``(write_factor, read_factor)``: what a cache-written and a cache-read
+    prompt token cost as multiples of ``model``'s input rate
+    (:data:`_CACHE_RATE_FACTORS`; a ``:batch`` or ``:flex`` suffix is ignored,
+    the factors apply to that rate).  ``(1.0, 1.0)`` for a model in no row."""
+    m = model.lower()
+    for suffix in (FLEX_SUFFIX, BATCH_SUFFIX):
+        if m.endswith(suffix):
+            m = m[: -len(suffix)]
+    for fragment, write, read in _CACHE_RATE_FACTORS:
+        if fragment in m:
+            return write, read
+    return 1.0, 1.0
+
+
 def price_for_model(model: str) -> tuple[float, float]:
     """Return ``(input_rate, output_rate)`` in USD per 1M tokens for
     ``model`` (canonical name).
@@ -260,13 +313,20 @@ def cost_for_usage(
     model: str,
     prompt_tokens: int,
     completion_tokens: int,
+    cache_write_tokens: int = 0,
+    cache_read_tokens: int = 0,
 ) -> float:
-    """USD cost of a single (prompt, completion) token pair at the
-    model's rates.  Convenience wrapper around :func:`price_for_model`.
+    """USD cost of one call's tokens at the model's rates.  ``prompt_tokens``
+    is every input token, the cache-written and cache-read ones included;
+    those are priced at :func:`cache_rate_factors` times the input rate, the
+    rest at the input rate.
     """
     rate_in, rate_out = price_for_model(model)
+    write_factor, read_factor = cache_rate_factors(model)
+    plain = prompt_tokens - cache_write_tokens - cache_read_tokens
     return (
-        prompt_tokens * rate_in / 1_000_000.0
+        (plain + cache_write_tokens * write_factor + cache_read_tokens * read_factor)
+        * rate_in / 1_000_000.0
         + completion_tokens * rate_out / 1_000_000.0
     )
 
@@ -275,51 +335,89 @@ def cost_for_usage(
 # Usage extractors
 # ---------------------------------------------------------------------------
 
-def extract_usage_anthropic(resp: Any) -> tuple[int, int]:
-    """Return ``(prompt_tokens, completion_tokens)`` from an Anthropic
-    Messages response.  Tolerates SDK version drift: the canonical
-    field is ``resp.usage`` with ``input_tokens`` / ``output_tokens``,
-    but legacy SDKs used ``prompt_tokens`` / ``completion_tokens``.
+@dataclass(frozen=True)
+class TokenUsage:
+    """One call's token counts, as the accumulators charge them:
+    ``prompt_tokens`` is every input token, the cache-written and cache-read
+    ones included (OpenAI's ``prompt_tokens`` counts them in; Anthropic's
+    ``input_tokens`` leaves them out, and :func:`anthropic_usage` adds them)."""
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cache_write_tokens: int = 0
+    cache_read_tokens: int = 0
 
-    Returns ``(0, 0)`` when usage is missing entirely — never raises
-    (keeps the call path resilient to partial response objects from
-    error retries).
-    """
-    usage = getattr(resp, "usage", None)
+
+def _field(obj: Any, *names: str) -> Any:
+    """The first of ``names`` that ``obj`` (an SDK object or a dict) carries
+    with a value that is not None."""
+    for name in names:
+        value = obj.get(name) if isinstance(obj, dict) else getattr(obj, name, None)
+        if value is not None:
+            return value
+    return None
+
+
+def _usage_of(resp: Any) -> Any:
+    """The usage block of a response (an SDK object or a Batch API body)."""
+    return resp.get("usage") if isinstance(resp, dict) else getattr(resp, "usage", None)
+
+
+def openai_usage(resp: Any) -> TokenUsage:
+    """The token counts of an OpenAI chat-completions response: an SDK
+    response object or a Batch API result body (a dict).  The cache counts
+    come from ``prompt_tokens_details`` (``cached_tokens`` for reads,
+    ``cache_write_tokens`` for writes, which the SDK keeps as an extra field),
+    or ``input_tokens_details`` (the Responses API).  Zeros when usage is
+    missing; never raises (a partial response from a retry)."""
+    usage = _usage_of(resp)
     if usage is None:
-        return 0, 0
-    in_tokens = (
-        getattr(usage, "input_tokens", None)
-        or getattr(usage, "prompt_tokens", None)
-        or 0
+        return TokenUsage()
+    details = _field(usage, "prompt_tokens_details", "input_tokens_details")
+    return TokenUsage(
+        prompt_tokens=int(_field(usage, "prompt_tokens", "input_tokens") or 0),
+        completion_tokens=int(_field(usage, "completion_tokens", "output_tokens") or 0),
+        cache_write_tokens=int(_field(details, "cache_write_tokens") or 0) if details is not None else 0,
+        cache_read_tokens=int(_field(details, "cached_tokens") or 0) if details is not None else 0,
     )
-    out_tokens = (
-        getattr(usage, "output_tokens", None)
-        or getattr(usage, "completion_tokens", None)
-        or 0
+
+
+def anthropic_usage(resp: Any) -> TokenUsage:
+    """The token counts of an Anthropic Messages response (an SDK object or a
+    Message Batches result dict).  ``input_tokens`` excludes the cached
+    tokens, so ``prompt_tokens`` is their sum with
+    ``cache_creation_input_tokens`` and ``cache_read_input_tokens``.  Zeros
+    when usage is missing; never raises."""
+    usage = _usage_of(resp)
+    if usage is None:
+        return TokenUsage()
+    plain = int(_field(usage, "input_tokens", "prompt_tokens") or 0)
+    write = int(_field(usage, "cache_creation_input_tokens") or 0)
+    read = int(_field(usage, "cache_read_input_tokens") or 0)
+    return TokenUsage(
+        prompt_tokens=plain + write + read,
+        completion_tokens=int(_field(usage, "output_tokens", "completion_tokens") or 0),
+        cache_write_tokens=write,
+        cache_read_tokens=read,
     )
-    return int(in_tokens), int(out_tokens)
+
+
+def extract_usage_anthropic(resp: Any) -> tuple[int, int]:
+    """``(prompt_tokens, completion_tokens)`` of an Anthropic Messages
+    response (:func:`anthropic_usage`; the tuple form of the older callers).
+    Tolerates SDK version drift (``input_tokens`` / ``output_tokens``, or the
+    legacy ``prompt_tokens`` / ``completion_tokens``) and a missing usage block
+    (``(0, 0)``, never raises).
+    """
+    u = anthropic_usage(resp)
+    return u.prompt_tokens, u.completion_tokens
 
 
 def extract_usage_openai(resp: Any) -> tuple[int, int]:
-    """Return ``(prompt_tokens, completion_tokens)`` from an OpenAI
-    chat-completions response.  Same SDK-drift tolerance as the
-    Anthropic helper.
+    """``(prompt_tokens, completion_tokens)`` of an OpenAI chat-completions
+    response (:func:`openai_usage`; the tuple form of the older callers).
     """
-    usage = getattr(resp, "usage", None)
-    if usage is None:
-        return 0, 0
-    in_tokens = (
-        getattr(usage, "prompt_tokens", None)
-        or getattr(usage, "input_tokens", None)
-        or 0
-    )
-    out_tokens = (
-        getattr(usage, "completion_tokens", None)
-        or getattr(usage, "output_tokens", None)
-        or 0
-    )
-    return int(in_tokens), int(out_tokens)
+    u = openai_usage(resp)
+    return u.prompt_tokens, u.completion_tokens
 
 
 # ---------------------------------------------------------------------------
@@ -335,8 +433,13 @@ class UsageTotals:
 
     Attributes:
         model: Canonical model name (used for re-deriving the cost).
-        prompt_tokens: Sum of input/prompt tokens across all calls.
+        prompt_tokens: Sum of input/prompt tokens across all calls, the
+            cache-written and cache-read ones included.
         completion_tokens: Sum of output/completion tokens.
+        cache_write_tokens: Of the prompt tokens, those written to the
+            provider's prompt cache (priced at :func:`cache_rate_factors`
+            times the input rate; 2026-11-01).
+        cache_read_tokens: Of the prompt tokens, those read from it.
         cost_usd: Running total cost in USD, computed at charge time
             using :func:`price_for_model` rates.
         n_calls: Number of API calls accumulated (for log lines).
@@ -346,29 +449,39 @@ class UsageTotals:
     completion_tokens: int = 0
     cost_usd: float = 0.0
     n_calls: int = 0
+    cache_write_tokens: int = 0
+    cache_read_tokens: int = 0
 
-    def charge(self, prompt_tokens: int, completion_tokens: int) -> float:
-        """Add one API call's tokens; return its USD cost contribution."""
-        rate_in, rate_out = price_for_model(self.model)
-        delta_cost = (
-            prompt_tokens * rate_in / 1_000_000.0
-            + completion_tokens * rate_out / 1_000_000.0
-        )
+    def charge(self, prompt_tokens: int, completion_tokens: int,
+               cache_write_tokens: int = 0, cache_read_tokens: int = 0) -> float:
+        """Add one API call's tokens; return its USD cost contribution.
+        ``prompt_tokens`` includes the cache-written and cache-read tokens."""
+        delta_cost = cost_for_usage(self.model, int(prompt_tokens), int(completion_tokens),
+                                    int(cache_write_tokens), int(cache_read_tokens))
         self.prompt_tokens += int(prompt_tokens)
         self.completion_tokens += int(completion_tokens)
+        self.cache_write_tokens += int(cache_write_tokens)
+        self.cache_read_tokens += int(cache_read_tokens)
         self.cost_usd += delta_cost
         self.n_calls += 1
         return delta_cost
 
     def as_dict(self) -> dict:
-        """Serialisable form for ``usage.json`` side-car / provenance notes."""
-        return {
+        """Serialisable form for ``usage.json`` side-car / provenance notes.
+        The cache counts are written only when they are not zero, so a record
+        of a run that cached nothing reads as before."""
+        out = {
             "model": self.model,
             "prompt_tokens": self.prompt_tokens,
             "completion_tokens": self.completion_tokens,
             "cost_usd": round(self.cost_usd, 4),
             "n_calls": self.n_calls,
         }
+        if self.cache_write_tokens:
+            out["cache_write_tokens"] = self.cache_write_tokens
+        if self.cache_read_tokens:
+            out["cache_read_tokens"] = self.cache_read_tokens
+        return out
 
     @classmethod
     def from_dict(cls, d: dict) -> "UsageTotals":
@@ -381,16 +494,18 @@ class UsageTotals:
         pt = int(d.get("prompt_tokens") or 0)
         ct = int(d.get("completion_tokens") or 0)
         n  = int(d.get("n_calls") or 0)
+        cw = int(d.get("cache_write_tokens") or 0)
+        cr = int(d.get("cache_read_tokens") or 0)
         # Recompute cost from tokens (the stored value is rounded; we
         # keep full precision in memory).
         try:
-            cost = cost_for_usage(model, pt, ct)
+            cost = cost_for_usage(model, pt, ct, cw, cr)
         except KeyError:
             # Unknown model: fall back to the persisted cost so we
             # don't silently zero out historic totals.
             cost = float(d.get("cost_usd") or 0.0)
         return cls(model=model, prompt_tokens=pt, completion_tokens=ct,
-                   cost_usd=cost, n_calls=n)
+                   cost_usd=cost, n_calls=n, cache_write_tokens=cw, cache_read_tokens=cr)
 
 
 # ---------------------------------------------------------------------------
@@ -424,16 +539,25 @@ class MultiModelUsage:
 
     def charge(
         self, model: str, prompt_tokens: int, completion_tokens: int,
+        cache_write_tokens: int = 0, cache_read_tokens: int = 0,
     ) -> float:
         """Tick the (model) sub-accumulator.  Returns the USD cost
         contribution of this single call (sum across all token streams).
+        The cache counts are the part of ``prompt_tokens`` written to or
+        read from the provider's prompt cache (:class:`TokenUsage`).
 
         The model entry is auto-created on first use; subsequent calls
         with the same name accumulate.  Never raises (no budget cap).
         """
         if model not in self.per_model:
             self.per_model[model] = UsageTotals(model=model)
-        return self.per_model[model].charge(prompt_tokens, completion_tokens)
+        return self.per_model[model].charge(prompt_tokens, completion_tokens,
+                                            cache_write_tokens, cache_read_tokens)
+
+    def charge_usage(self, model: str, usage: TokenUsage) -> float:
+        """:meth:`charge` from a :class:`TokenUsage`."""
+        return self.charge(model, usage.prompt_tokens, usage.completion_tokens,
+                           usage.cache_write_tokens, usage.cache_read_tokens)
 
     @property
     def total_cost_usd(self) -> float:
@@ -490,24 +614,26 @@ class MultiModelUsage:
             tgt = self.per_model[model]
             tgt.prompt_tokens += sub.prompt_tokens
             tgt.completion_tokens += sub.completion_tokens
+            tgt.cache_write_tokens += sub.cache_write_tokens
+            tgt.cache_read_tokens += sub.cache_read_tokens
             tgt.n_calls += sub.n_calls
             # Recompute cost from totals at current rates.
             try:
-                rate_in, rate_out = price_for_model(model)
-                tgt.cost_usd = (
-                    tgt.prompt_tokens * rate_in / 1_000_000.0
-                    + tgt.completion_tokens * rate_out / 1_000_000.0
-                )
+                tgt.cost_usd = cost_for_usage(model, tgt.prompt_tokens, tgt.completion_tokens,
+                                              tgt.cache_write_tokens, tgt.cache_read_tokens)
             except KeyError:
                 # Unknown model: keep sum-of-stored-cost as best-effort.
                 tgt.cost_usd += sub.cost_usd
 
     def log_line(self, prefix: str = "[usage]") -> str:
-        """One-line human-readable summary suitable for end-of-run logs."""
+        """One-line human-readable summary suitable for end-of-run logs
+        (the cache counts shown when they are not zero)."""
         if not self.per_model:
             return f"{prefix} (no API calls)"
         per = "; ".join(
             f"{m}: ${t.cost_usd:.3f} in={t.prompt_tokens:,} out={t.completion_tokens:,} n={t.n_calls:,}"
+            + (f" cache_write={t.cache_write_tokens:,}" if t.cache_write_tokens else "")
+            + (f" cache_read={t.cache_read_tokens:,}" if t.cache_read_tokens else "")
             for m, t in sorted(self.per_model.items())
         )
         return (
@@ -613,12 +739,13 @@ class BudgetTracker:
     # Internal: log-line throttling.
     _last_logged_cost: float = field(default=0.0, repr=False)
 
-    def charge(self, prompt_tokens: int, completion_tokens: int) -> float:
+    def charge(self, prompt_tokens: int, completion_tokens: int,
+               cache_write_tokens: int = 0, cache_read_tokens: int = 0) -> float:
         """Tick the underlying totals; raise if the cap is crossed.
 
         Returns the USD cost contribution for this single call.
         """
-        delta = self.totals.charge(prompt_tokens, completion_tokens)
+        delta = self.totals.charge(prompt_tokens, completion_tokens, cache_write_tokens, cache_read_tokens)
         if self.budget_usd is not None and self.totals.cost_usd > self.budget_usd:
             raise BudgetExceededError(self.totals, self.budget_usd)
         return delta
@@ -686,8 +813,12 @@ __all__ = [
     "SONNET_RATE_OUT",
     "ROLES_RESPONSE_LENGTH_FACTOR",
     "price_for_model",
+    "cache_rate_factors",
     "cost_for_usage",
     "surgical_rejudge_cost_split",
+    "TokenUsage",
+    "openai_usage",
+    "anthropic_usage",
     "extract_usage_anthropic",
     "extract_usage_openai",
     "UsageTotals",

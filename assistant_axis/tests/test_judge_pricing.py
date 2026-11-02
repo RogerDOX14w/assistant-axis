@@ -666,3 +666,90 @@ class TestClaude5Prices:
         from assistant_axis.judge_pricing import price_for_model
         with pytest.raises(KeyError):
             price_for_model("claude-opus-4-1")
+
+
+class TestCacheTokens:
+    """Prompt caching (2026-11-01): the cache-written and cache-read parts of a prompt are priced at
+    ``cache_rate_factors`` times the input rate (GPT-5.6 and later: writes 1.25x, reads 0.1x), so that
+    usage.json prices what the bill prices; a record of a run that cached nothing reads as before."""
+
+    def test_factors_by_model(self):
+        from assistant_axis.judge_pricing import cache_rate_factors
+        assert cache_rate_factors("gpt-5.6-luna") == (1.25, 0.10)
+        assert cache_rate_factors("gpt-5.6-luna:flex") == (1.25, 0.10)
+        assert cache_rate_factors("gpt-6-luna:batch") == (1.25, 0.10)
+        assert cache_rate_factors("gpt-4.1-mini") == (1.0, 0.25)
+        assert cache_rate_factors("gpt-5.4-mini") == (1.0, 0.10)
+        assert cache_rate_factors("claude-haiku-5-5") == (1.25, 0.10)
+        assert cache_rate_factors("claude-sonnet-4-6:batch") == (1.25, 0.10)
+        assert cache_rate_factors("text-embedding-3-large") == (1.0, 1.0)
+
+    def test_the_luna_flex_dashboard_arithmetic(self):
+        """Roger's OpenAI dashboard, luna Flex 29 Oct to 1 Nov 2026: 1,584M tokens written at $0.125 per
+        1M = $198.0, 4.9M read at $0.01 = $0.049, 1,187M uncached at $0.10 = $118.7; priced plain, as every
+        record was until 2026-11-01, the same tokens come to $39 less (the write premium less the reads'
+        discount), about 10% of the Flex bill."""
+        written, read, plain = 1_584_000_000, 4_900_000, 1_187_000_000
+        total = written + read + plain
+        cost = cost_for_usage("gpt-5.6-luna:flex", total, 0, written, read)
+        assert cost == pytest.approx(198.0 + 0.049 + 118.7, rel=1e-3)
+        assert cost - cost_for_usage("gpt-5.6-luna:flex", total, 0) == pytest.approx(39.6 - 0.44, abs=0.05)
+
+    def test_charge_record_merge_and_log_line(self, tmp_path):
+        u = MultiModelUsage()
+        u.charge("gpt-5.6-luna:flex", 1218, 4, cache_write_tokens=1215)
+        u.charge("gpt-5.6-luna:flex", 1218, 4, cache_read_tokens=1215)
+        t = u.per_model["gpt-5.6-luna:flex"]
+        assert (t.prompt_tokens, t.cache_write_tokens, t.cache_read_tokens, t.n_calls) == (2436, 1215, 1215, 2)
+        assert t.cost_usd == pytest.approx((6 * 0.10 + 1215 * 0.125 + 1215 * 0.01 + 8 * 0.60) / 1e6)
+        d = t.as_dict()
+        assert d["cache_write_tokens"] == 1215 and d["cache_read_tokens"] == 1215
+        path = tmp_path / "usage.json"
+        u.write_json(path)
+        again = MultiModelUsage.load_or_create(path)
+        assert again.per_model["gpt-5.6-luna:flex"].cache_write_tokens == 1215
+        assert again.total_cost_usd == pytest.approx(u.total_cost_usd)
+        merged = MultiModelUsage()
+        merged.merge_from(u)
+        merged.merge_from(u)
+        m = merged.per_model["gpt-5.6-luna:flex"]
+        assert (m.cache_write_tokens, m.cache_read_tokens) == (2430, 2430)
+        assert m.cost_usd == pytest.approx(2 * t.cost_usd)
+        assert "cache_write=1,215" in u.log_line() and "cache_read=1,215" in u.log_line()
+
+    def test_a_record_without_cache_counts_is_unchanged(self):
+        u = UsageTotals(model="gpt-4.1-mini")
+        u.charge(1_000_000, 1_000_000)
+        assert u.as_dict() == {"model": "gpt-4.1-mini", "prompt_tokens": 1_000_000,
+                               "completion_tokens": 1_000_000, "cost_usd": 2.0, "n_calls": 1}
+        assert "cache" not in MultiModelUsage.from_dict({"per_model": {"gpt-4.1-mini": u.as_dict()}}).log_line()
+
+    def test_extractors_read_sdk_objects_and_batch_bodies(self):
+        from assistant_axis.judge_pricing import TokenUsage, anthropic_usage, openai_usage
+        details = SimpleNamespace(cached_tokens=0, cache_write_tokens=1215, audio_tokens=0)
+        resp = SimpleNamespace(usage=SimpleNamespace(prompt_tokens=1218, completion_tokens=4,
+                                                     prompt_tokens_details=details))
+        assert openai_usage(resp) == TokenUsage(1218, 4, 1215, 0)
+        body = {"usage": {"prompt_tokens": 1218, "completion_tokens": 4,
+                          "prompt_tokens_details": {"cached_tokens": 1215, "cache_write_tokens": 0}}}
+        assert openai_usage(body) == TokenUsage(1218, 4, 0, 1215)
+        assert extract_usage_openai(body) == (1218, 4)
+        # gpt-4.1-mini reports no cache_write_tokens; no details, or no usage, gives zeros
+        resp = SimpleNamespace(usage=SimpleNamespace(prompt_tokens=1219, completion_tokens=1,
+                                                     prompt_tokens_details=SimpleNamespace(cached_tokens=1024)))
+        assert openai_usage(resp) == TokenUsage(1219, 1, 0, 1024)
+        assert openai_usage(SimpleNamespace(usage=SimpleNamespace(prompt_tokens=10, completion_tokens=2))) \
+            == TokenUsage(10, 2)
+        assert openai_usage(SimpleNamespace()) == TokenUsage()
+        # Anthropic's input_tokens leaves the cached tokens out: the prompt total adds them back
+        resp = SimpleNamespace(usage=SimpleNamespace(input_tokens=300, output_tokens=40,
+                                                     cache_creation_input_tokens=600, cache_read_input_tokens=0))
+        assert anthropic_usage(resp) == TokenUsage(900, 40, 600, 0)
+        assert extract_usage_anthropic(resp) == (900, 40)
+        assert anthropic_usage({"usage": {"input_tokens": 300, "output_tokens": 40}}) == TokenUsage(300, 40)
+
+    def test_budget_tracker_charges_cache_tokens(self):
+        tracker = BudgetTracker(totals=UsageTotals(model="gpt-5.6-luna"))
+        tracker.charge(1218, 4, 1215, 0)
+        assert tracker.totals.cache_write_tokens == 1215
+        assert tracker.totals.cost_usd == pytest.approx((3 * 0.20 + 1215 * 0.25 + 4 * 1.20) / 1e6)

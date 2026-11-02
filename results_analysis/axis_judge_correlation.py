@@ -1564,10 +1564,18 @@ async def _call_openai_batch(
     shared assistant_axis/judge.py sends no temperature when it equals the
     provider default, and checks a non-default one against
     judge.MODEL_CAPABILITIES; this comment used to say it hard-coded
-    temperature=1.)
+    temperature=1.)  Since 2026-11-01 a judge that takes OpenAI's
+    ``prompt_cache_options`` (GPT-5.6 and later) is sent explicit mode with
+    no breakpoints (``judge.DEFAULT_PROMPT_CACHE``: a batch prompt of B
+    responses is never repeated, and its default caching would write it at
+    1.25x the input rate), and the tracker is charged the cache tokens the
+    response reports.
     """
     import openai
+    from assistant_axis.judge import chat_create_kwargs, prompt_cache_fields
+    from assistant_axis.judge_pricing import openai_usage
     client = openai.AsyncOpenAI()
+    cache_kwargs = chat_create_kwargs(prompt_cache_fields(model))
 
     async def one(prompt: str) -> Optional[str]:
         async def attempt() -> Optional[str]:
@@ -1577,10 +1585,12 @@ async def _call_openai_batch(
                 messages=[{"role": "user", "content": prompt}],
                 max_completion_tokens=max_tokens,
                 temperature=temperature,
+                **cache_kwargs,
             )
             if tracker is not None:
-                pt, ct = extract_usage_openai(resp)
-                tracker.charge(pt, ct)
+                u = openai_usage(resp)
+                tracker.charge(u.prompt_tokens, u.completion_tokens,
+                               u.cache_write_tokens, u.cache_read_tokens)
             return resp.choices[0].message.content
 
         return await _call_with_retry(attempt, provider_name="openai")

@@ -108,6 +108,13 @@ DEFAULT_TEMPERATURE = 1.0
 #: on); a model in no ``"flex"`` entry is untested (``accepts_flex`` gives
 #: None), and its first Flex request tells: a 400 raises JudgeRequestError.
 #: The pricing table cannot tell (it prices every OpenAI model's ``:flex``).
+#: ``"cache_mode"`` (since 2026-11-01): whether OpenAI takes
+#: ``prompt_cache_options`` for the model, the field that turns its default
+#: prompt caching off (:data:`DEFAULT_PROMPT_CACHE`).  True for GPT-5.6 and
+#: later (the prompt-caching guide; gpt-5.6-luna checked on Flex,
+#: 2026-11-01), False for gpt-4.1-mini (HTTP 400 "prompt_cache_options is
+#: not supported on this model", the same day); a model in no entry is
+#: untested and is sent nothing, and its ``usage.json`` shows what it wrote.
 MODEL_CAPABILITIES: Dict[str, Dict[str, Optional[bool]]] = {
     # Anthropic
     "sonnet-5": {"temperature": False},
@@ -122,11 +129,33 @@ MODEL_CAPABILITIES: Dict[str, Dict[str, Optional[bool]]] = {
     "o3": {"temperature": False},
     "o4": {"temperature": False},
     "gpt-5": {"temperature": False},
-    "gpt-6": {"temperature": False},
-    # OpenAI Flex processing
-    "gpt-4.1-mini": {"flex": False},
+    "gpt-6": {"temperature": False, "cache_mode": True},
+    # OpenAI Flex processing, and prompt_cache_options (GPT-5.6 and later; a
+    # fragment appears once in this table, a later duplicate would replace
+    # the earlier entry)
+    "gpt-4.1-mini": {"flex": False, "cache_mode": False},
+    "gpt-5.6": {"cache_mode": True},
     "gpt-5.6-luna": {"flex": True},
 }
+
+#: How a judge request treats OpenAI's prompt caching (2026-11-01).  GPT-5.6
+#: and later cache by default (implicit mode: every prompt of 1,024 tokens or
+#: more is written, at 1.25x the input rate, and a repeat within 30 minutes
+#: reads it at 0.1x).  A judge prompt ends in a unique response and is never
+#: repeated, so the writes are a premium for nothing: on luna Flex from 29 Oct
+#: to 1 Nov 2026, $198 of writes against $0.05 of reads, about 10% of the
+#: bill (Roger, through the Judging Pareto Handoff session); and the shared
+#: part of a judge prompt (a rubric of 500 to 600 tokens) is under the 1,024
+#: minimum, so no breakpoint could make a cache pay.  ``"off"``: a model that
+#: takes the field (``MODEL_CAPABILITIES`` ``"cache_mode"``) is sent explicit
+#: mode with no breakpoints, which writes and reads nothing (checked on Flex,
+#: 2026-11-01).  ``"implicit"``: the field is left out and the provider's
+#: default applies.  A model listed as refusing the field, or untested, is
+#: sent nothing in either mode (gpt-4.1-mini writes free and discounts reads,
+#: so nothing is lost there).
+PROMPT_CACHE_MODES = ("off", "implicit")
+DEFAULT_PROMPT_CACHE = "off"
+PROMPT_CACHE_OFF_OPTIONS: Dict[str, str] = {"mode": "explicit"}
 
 #: Fields a judge request adds for a model, by model-id fragment (matched as in
 #: :data:`MODEL_CAPABILITIES`).  Judges run without thinking or reasoning, the
@@ -169,11 +198,42 @@ def model_capabilities(model: str) -> Dict[str, Optional[bool]]:
     bool, "flex": bool or None}``.  A model no entry names takes a temperature,
     and its Flex support is untested (None)."""
     m = str(model).lower()
-    caps: Dict[str, Optional[bool]] = {"temperature": True, "flex": None}
+    caps: Dict[str, Optional[bool]] = {"temperature": True, "flex": None, "cache_mode": None}
     for fragment, entry in MODEL_CAPABILITIES.items():
         if m.startswith(fragment) or f"-{fragment}" in m:
             caps.update(entry)
     return caps
+
+
+def accepts_cache_options(model: str) -> Optional[bool]:
+    """Whether OpenAI takes ``prompt_cache_options`` for ``model``
+    (:data:`MODEL_CAPABILITIES` ``"cache_mode"``): True for GPT-5.6 and
+    later, False for gpt-4.1-mini (HTTP 400), None when untested."""
+    return model_capabilities(model)["cache_mode"]
+
+
+def prompt_cache_fields(model: str, prompt_cache: str = DEFAULT_PROMPT_CACHE) -> Dict[str, Any]:
+    """The request fields that set prompt caching for ``model`` under
+    ``prompt_cache`` (one of :data:`PROMPT_CACHE_MODES`): ``"off"`` gives
+    ``prompt_cache_options`` explicit mode with no breakpoints for a model that
+    takes the field, nothing otherwise; ``"implicit"`` gives nothing."""
+    if prompt_cache not in PROMPT_CACHE_MODES:
+        raise ValueError(f"prompt_cache {prompt_cache!r}: expected one of {PROMPT_CACHE_MODES}")
+    if prompt_cache == "off" and accepts_cache_options(model):
+        return {"prompt_cache_options": dict(PROMPT_CACHE_OFF_OPTIONS)}
+    return {}
+
+
+def chat_create_kwargs(body: Dict[str, Any]) -> Dict[str, Any]:
+    """The keyword arguments of ``client.chat.completions.create`` for a
+    request body from :func:`chat_request_body`.  The OpenAI SDK (2.17) does
+    not know ``prompt_cache_options``, so that field travels in
+    ``extra_body``; a Batch API line carries the body as it is."""
+    kwargs = dict(body)
+    extra = {k: kwargs.pop(k) for k in ("prompt_cache_options",) if k in kwargs}
+    if extra:
+        kwargs["extra_body"] = {**(kwargs.get("extra_body") or {}), **extra}
+    return kwargs
 
 
 def accepts_temperature(model: str) -> bool:
@@ -665,18 +725,22 @@ def usage_key(model: str, service_tier: Optional[str] = None) -> str:
 
 def chat_request_body(prompt: str, model: str, max_tokens: int, *,
                       temperature: Optional[float] = DEFAULT_TEMPERATURE,
-                      service_tier: Optional[str] = None) -> Dict[str, Any]:
-    """The chat-completion request a judge call sends: the keyword arguments
-    of ``client.chat.completions.create`` and, unchanged, the ``body`` of an
-    OpenAI Batch API line (``assistant_axis.openai_batch``), so that a
-    response judged in a batch got exactly the request a live call sends.
+                      service_tier: Optional[str] = None,
+                      prompt_cache: str = DEFAULT_PROMPT_CACHE) -> Dict[str, Any]:
+    """The chat-completion request a judge call sends: the ``body`` of an
+    OpenAI Batch API line (``assistant_axis.openai_batch``), unchanged, and
+    through :func:`chat_create_kwargs` the keyword arguments of
+    ``client.chat.completions.create``, so that a response judged in a batch
+    got exactly the request a live call sends.
 
     ``temperature`` is left out at the default, 1 (every request until
     2026-10-12 sent ``"temperature": 1`` explicitly: the same sampling), and
     is checked against :data:`MODEL_CAPABILITIES` otherwise
     (:func:`request_temperature`).  The model's
     :data:`JUDGE_REQUEST_SETTINGS` are added (GPT-6 Luna's reasoning effort),
-    and ``service_tier`` when given (one of :data:`SERVICE_TIERS`)."""
+    ``service_tier`` when given (one of :data:`SERVICE_TIERS`), and the
+    prompt-caching field of ``prompt_cache`` (:func:`prompt_cache_fields`;
+    :data:`DEFAULT_PROMPT_CACHE`)."""
     body: Dict[str, Any] = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
@@ -690,6 +754,7 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
         if service_tier not in SERVICE_TIERS:
             raise ValueError(f"service_tier {service_tier!r}: expected one of {SERVICE_TIERS}")
         body["service_tier"] = service_tier
+    body.update(prompt_cache_fields(model, prompt_cache))
     return body
 
 
@@ -705,6 +770,7 @@ async def call_judge_single(
     reject_truncated: bool = False,
     service_tier: Optional[str] = None,
     fallback_client: Optional[openai.AsyncOpenAI] = None,
+    prompt_cache: str = DEFAULT_PROMPT_CACHE,
 ) -> Optional[str]:
     """Call the judge model with a single prompt.
 
@@ -717,12 +783,15 @@ async def call_judge_single(
 
     Args:
         usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
-            accumulator.  When provided, the (prompt_tokens, completion_tokens)
-            tuple extracted from the response is added to ``usage[model]``.
+            accumulator.  When provided, the response's token counts
+            (:func:`assistant_axis.judge_pricing.openai_usage`, the cache
+            writes and reads included) are added to ``usage[model]``.
             Pass one for every automated/batched call site — see AGENT_NOTES
             "Token usage logging is mandatory on batched LLM call sites".
         temperature: sent only when it is not the default
             (:func:`chat_request_body`).
+        prompt_cache: the request's prompt-caching mode
+            (:data:`PROMPT_CACHE_MODES`; :data:`DEFAULT_PROMPT_CACHE`).
         reject_truncated: return None for a reply cut at ``max_tokens``
             (``finish_reason == "length"``), counted in
             :data:`TRUNCATED_REPLIES` (the usage is charged all the same).
@@ -736,7 +805,7 @@ async def call_judge_single(
             None as any other failed call does.
     """
     body = chat_request_body(prompt, model, max_tokens, temperature=temperature,
-                             service_tier=service_tier)
+                             service_tier=service_tier, prompt_cache=prompt_cache)
     if service_tier == "flex" and accepts_flex(model) is False:
         raise JudgeRequestError(
             f"OpenAI refuses Flex processing for {model} (HTTP 400; judge.MODEL_CAPABILITIES): "
@@ -745,7 +814,7 @@ async def call_judge_single(
     while True:
         await rate_limiter.acquire()
         try:
-            response = await client.chat.completions.create(**body)
+            response = await client.chat.completions.create(**chat_create_kwargs(body))
             break
         except Exception as e:
             if _is_bad_request(e):
@@ -765,7 +834,8 @@ async def call_judge_single(
                                f"standard tier")
                 FLEX_FALLBACKS[model] = FLEX_FALLBACKS.get(model, 0) + 1
                 client, service_tier = fallback_client, None
-                body = chat_request_body(prompt, model, max_tokens, temperature=temperature)
+                body = chat_request_body(prompt, model, max_tokens, temperature=temperature,
+                                         prompt_cache=prompt_cache)
                 continue
             logger.error(f"Error calling judge model: {e}")
             return None
@@ -774,9 +844,8 @@ async def call_judge_single(
         if usage is not None:
             # Lazy import to avoid a hard dep cycle (judge_pricing imports
             # nothing from judge but judge.py is imported from many places).
-            from .judge_pricing import extract_usage_openai
-            pt, ct = extract_usage_openai(response)
-            usage.charge(usage_key(model, service_tier), pt, ct)
+            from .judge_pricing import openai_usage
+            usage.charge_usage(usage_key(model, service_tier), openai_usage(response))
 
         if reject_truncated and response.choices and \
                 getattr(response.choices[0], "finish_reason", None) == "length":
@@ -803,12 +872,13 @@ async def call_judge_batch(
     reject_truncated: bool = False,
     service_tier: Optional[str] = None,
     fallback_client: Optional[openai.AsyncOpenAI] = None,
+    prompt_cache: str = DEFAULT_PROMPT_CACHE,
 ) -> List[Optional[str]]:
     """Call the judge model with multiple prompts concurrently.
 
-    ``service_tier`` (``"flex"``, OpenAI models only) and ``fallback_client``
+    ``service_tier`` (``"flex"``, OpenAI models only), ``fallback_client``
     (the standard-tier client a Flex call falls back to, :func:`call_judge_single`)
-    are passed to every call.
+    and ``prompt_cache`` (:data:`PROMPT_CACHE_MODES`) are passed to every call.
 
     ``client`` is the provider's async client for ``model``
     (:func:`provider_for_model`): an ``openai.AsyncOpenAI`` for a GPT model,
@@ -842,7 +912,7 @@ async def call_judge_batch(
             tasks = [
                 call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage,
                                   reject_truncated=reject_truncated, service_tier=service_tier,
-                                  fallback_client=fallback_client)
+                                  fallback_client=fallback_client, prompt_cache=prompt_cache)
                 for prompt in batch
             ]
 
@@ -1046,9 +1116,8 @@ async def call_anthropic_judge_single(
     try:
         response = await client.messages.create(**params)
         if usage is not None:
-            from .judge_pricing import extract_usage_anthropic
-            pt, ct = extract_usage_anthropic(response)
-            usage.charge(model, pt, ct)
+            from .judge_pricing import anthropic_usage
+            usage.charge_usage(model, anthropic_usage(response))
         stop = getattr(response, "stop_reason", None)
         if stop == "refusal":
             REFUSED_REPLIES[model] = REFUSED_REPLIES.get(model, 0) + 1

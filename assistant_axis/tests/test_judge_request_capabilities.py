@@ -124,8 +124,8 @@ class TestFlex:
         assert accepts_flex("gpt-4.1-mini") is False
         assert accepts_flex("gpt-5.6-luna") is True
         assert accepts_flex("gpt-4.1") is None and accepts_flex("gpt-6-luna") is None
-        assert model_capabilities("gpt-4.1-mini") == {"temperature": True, "flex": False}
-        assert model_capabilities("gpt-5.6-luna") == {"temperature": False, "flex": True}
+        assert model_capabilities("gpt-4.1-mini") == {"temperature": True, "flex": False, "cache_mode": False}
+        assert model_capabilities("gpt-5.6-luna") == {"temperature": False, "flex": True, "cache_mode": True}
 
     def test_a_flex_call_to_a_refused_model_raises_before_sending(self):
         client = FakeOpenAI()
@@ -414,7 +414,9 @@ class TestJudgeRequestSettings:
         assert body["reasoning_effort"] == "none" and "temperature" not in body
         client = FakeOpenAI()
         _run(call_judge_single(client, "p", "gpt-6-luna", 200, RateLimiter(1000)))
-        assert client.calls == [body]
+        # the live call is the body with prompt_cache_options moved into extra_body (2026-11-01)
+        assert client.calls == [J.chat_create_kwargs(body)]
+        assert body["prompt_cache_options"] == {"mode": "explicit"}
 
     def test_gpt_mini_body_is_unchanged(self):
         assert chat_request_body("p", "gpt-4.1-mini", 200) == {
@@ -533,3 +535,102 @@ class TestFlex:
         from assistant_axis.judge_pricing import price_for_model
         with pytest.raises(KeyError, match="Flex"):
             price_for_model("claude-haiku-5-5:flex")
+
+
+# ---------------------------------------------------------------------------
+# OpenAI prompt caching (2026-11-01): off by default on GPT-5.6 and later
+# ---------------------------------------------------------------------------
+
+class _CacheUsageOpenAI(FakeOpenAI):
+    """Replies with the usage block luna returns (checked live on Flex, 2026-11-01): 1,218 prompt tokens
+    of which ``cache_write`` were written to the cache or ``cached`` read from it."""
+
+    def __init__(self, cache_write=0, cached=0):
+        super().__init__()
+
+        async def create(**kw):
+            self.calls.append(kw)
+            details = SimpleNamespace(cached_tokens=cached, cache_write_tokens=cache_write, audio_tokens=0)
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="SCORE: 3"),
+                                                            finish_reason="stop")],
+                                   usage=SimpleNamespace(prompt_tokens=1218, completion_tokens=4,
+                                                         prompt_tokens_details=details))
+        self.chat = SimpleNamespace(completions=SimpleNamespace(create=create))
+
+
+class TestPromptCache:
+    """GPT-5.6 and later cache by default and bill a cache write at 1.25x the input rate; a judge prompt
+    is never read back (luna Flex, 29 Oct to 1 Nov 2026: $198 of writes for $0.05 of reads).  "off", the
+    default, sends those models ``prompt_cache_options`` explicit mode with no breakpoints, which writes
+    and reads nothing; gpt-4.1-mini refuses the field (HTTP 400) and writes free, so it is sent nothing."""
+
+    def test_the_table_says_which_models_take_the_field(self):
+        assert J.accepts_cache_options("gpt-5.6-luna") is True
+        assert J.accepts_cache_options("gpt-6-luna") is True
+        assert J.accepts_cache_options("gpt-4.1-mini") is False
+        assert J.accepts_cache_options("gpt-5.4-mini") is None
+        assert J.accepts_cache_options("claude-haiku-5-5") is None
+        assert not accepts_temperature("gpt-6-luna")      # the gpt-6 row keeps its temperature entry
+        assert J.DEFAULT_PROMPT_CACHE == "off" and J.PROMPT_CACHE_MODES == ("off", "implicit")
+
+    def test_off_sends_explicit_mode_with_no_breakpoints_to_a_model_that_takes_it(self):
+        assert J.prompt_cache_fields("gpt-5.6-luna") == {"prompt_cache_options": {"mode": "explicit"}}
+        assert J.prompt_cache_fields("gpt-5.6-luna", "implicit") == {}
+        for model in ("gpt-4.1-mini", "gpt-5.4-mini", "claude-haiku-5-5"):
+            assert J.prompt_cache_fields(model) == {} and J.prompt_cache_fields(model, "implicit") == {}
+        with pytest.raises(ValueError, match="prompt_cache"):
+            J.prompt_cache_fields("gpt-5.6-luna", "explicit")
+
+    def test_the_body_carries_the_field_and_the_sdk_call_moves_it_to_extra_body(self):
+        body = chat_request_body("p", "gpt-5.6-luna", 200, service_tier="flex")
+        assert body["prompt_cache_options"] == {"mode": "explicit"} and "extra_body" not in body
+        kwargs = J.chat_create_kwargs(body)
+        assert kwargs["extra_body"] == {"prompt_cache_options": {"mode": "explicit"}}
+        assert "prompt_cache_options" not in kwargs
+        assert {k: v for k, v in kwargs.items() if k != "extra_body"} \
+            == {k: v for k, v in body.items() if k != "prompt_cache_options"}
+        assert "prompt_cache_options" not in chat_request_body("p", "gpt-5.6-luna", 200, prompt_cache="implicit")
+        mini = chat_request_body("p", "gpt-4.1-mini", 200)
+        assert "prompt_cache_options" not in mini and J.chat_create_kwargs(mini) == mini
+
+    def test_live_calls_send_it_and_implicit_leaves_it_out(self):
+        client = _CacheUsageOpenAI()
+        _run(call_judge_single(client, "p", "gpt-5.6-luna", 200, RateLimiter(1000), service_tier="flex"))
+        assert client.calls[0]["extra_body"] == {"prompt_cache_options": {"mode": "explicit"}}
+        assert "prompt_cache_options" not in client.calls[0] and client.calls[0]["service_tier"] == "flex"
+        client = _CacheUsageOpenAI()
+        _run(call_judge_single(client, "p", "gpt-5.6-luna", 200, RateLimiter(1000), prompt_cache="implicit"))
+        assert "extra_body" not in client.calls[0] and "prompt_cache_options" not in client.calls[0]
+        client = _CacheUsageOpenAI()
+        _run(call_judge_batch(client, ["a", "b"], "gpt-5.6-luna", 200, RateLimiter(1000)))
+        assert all(c["extra_body"] == {"prompt_cache_options": {"mode": "explicit"}} for c in client.calls)
+        client = _CacheUsageOpenAI()
+        _run(call_judge_batch(client, ["a", "b"], "gpt-5.6-luna", 200, RateLimiter(1000), prompt_cache="implicit"))
+        assert all("extra_body" not in c for c in client.calls)
+
+    def test_the_fallback_to_the_standard_tier_keeps_the_mode(self, monkeypatch):
+        monkeypatch.setattr(J, "FLEX_FALLBACK_AFTER_S", 0.0)
+        monkeypatch.setattr(J, "FLEX_RETRY_SLEEP_S", 0.0)
+        monkeypatch.setattr(J, "FLEX_FALLBACKS", {})
+        flex, standard = FakeOpenAI(exc=_Status500("busy")), _CacheUsageOpenAI()
+        out = _run(call_judge_single(flex, "p", "gpt-5.6-luna", 200, RateLimiter(1000), service_tier="flex",
+                                     fallback_client=standard))
+        assert out == "SCORE: 3" and J.FLEX_FALLBACKS == {"gpt-5.6-luna": 1}
+        assert standard.calls[0]["extra_body"] == {"prompt_cache_options": {"mode": "explicit"}}
+        assert "service_tier" not in standard.calls[0]
+
+    def test_cache_tokens_are_charged_at_their_factors(self):
+        from assistant_axis.judge_pricing import MultiModelUsage
+        client, u = _CacheUsageOpenAI(cache_write=1215), MultiModelUsage()
+        _run(call_judge_single(client, "p", "gpt-5.6-luna", 200, RateLimiter(1000), usage=u, service_tier="flex",
+                               prompt_cache="implicit"))
+        t = u.per_model["gpt-5.6-luna:flex"]
+        assert (t.prompt_tokens, t.completion_tokens, t.cache_write_tokens, t.cache_read_tokens) == (1218, 4, 1215, 0)
+        # 3 plain tokens at the $0.10 Flex rate, 1,215 written at 1.25 x $0.10, 4 out at $0.60 (per 1M)
+        assert t.cost_usd == pytest.approx((3 * 0.10 + 1215 * 0.125 + 4 * 0.60) / 1e6)
+        client, u = _CacheUsageOpenAI(cached=1215), MultiModelUsage()
+        _run(call_judge_single(client, "p", "gpt-5.6-luna", 200, RateLimiter(1000), usage=u))
+        t = u.per_model["gpt-5.6-luna"]
+        assert t.cache_read_tokens == 1215
+        assert t.cost_usd == pytest.approx((3 * 0.20 + 1215 * 0.02 + 4 * 1.20) / 1e6)
+        assert "cache_write=1,215" not in u.log_line() and "cache_read=1,215" in u.log_line()

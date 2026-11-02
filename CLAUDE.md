@@ -467,6 +467,15 @@ The canonical implementations are:
       "n_calls": 67,
       "prompt_tokens": 89012
     },
+    "gpt-5.6-luna:flex": {
+      "cache_read_tokens": 4900,
+      "cache_write_tokens": 1584000,
+      "completion_tokens": 149000,
+      "cost_usd": 0.3167,
+      "model": "gpt-5.6-luna:flex",
+      "n_calls": 2000,
+      "prompt_tokens": 2776000
+    },
     "gpt-4.1-mini": { ... }
   },
   "total_completion_tokens": 23456,
@@ -475,6 +484,16 @@ The canonical implementations are:
   "n_calls": 134
 }
 ```
+
+`cache_write_tokens` and `cache_read_tokens` (since 2026-11-01) are the
+part of `prompt_tokens` written to or read from the provider's prompt
+cache, written only when they are not zero, and priced at
+`judge_pricing.cache_rate_factors` times the input rate (GPT-5.6 and
+later: writes 1.25x, reads 0.1x; the batch and Flex rates included), so
+that a record prices what the bill prices.  A record without them was
+priced plain; the luna Flex records of 29 Oct to 1 Nov 2026 understate
+the bill by about 10% for that reason (§ "Prompt caching" under the
+judging cost model).
 
 **Why this is a hard rule:** before this was wired into steering
 (2026-05-24), we estimated sweep cost from per-record token counts
@@ -782,4 +801,6 @@ These sections exist only in `AGENT_NOTES.md`; open them there when the topic co
 - Clean pair validation results (April 2026)
 - TODO: regenerate activation/vector data after April–May 2026 trait edits
 - TODO: code housekeeping (Sep 2026)
+- TODO: drop the kind suffix from the v3 axis-judge prompt (Nov 2026)
+- TODO: does step 3's score-3 filter throw away trait signal? (Nov 2026)
 - TODO: variant-specific K grids in the PC round-trip experiment (May 2026)
