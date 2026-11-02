@@ -48,8 +48,14 @@ class FakeLLM:
         return self.tokenizer
 
     def generate(self, prompts, sampling_params):
+        # token_ids since the response-token-ids plan (2026-11-02): the
+        # reply's encoding plus the end-of-turn token (harness only; no
+        # assertion changed).
         self.prompts = prompts
-        return [SimpleNamespace(outputs=[SimpleNamespace(text=self.reply, finish_reason="stop")])
+        ids = (list(self.tokenizer(self.reply, add_special_tokens=False)["input_ids"])
+               + [self.tokenizer.eos_token_id])
+        return [SimpleNamespace(outputs=[SimpleNamespace(text=self.reply, finish_reason="stop",
+                                                         token_ids=tuple(ids))])
                 for _ in prompts]
 
 

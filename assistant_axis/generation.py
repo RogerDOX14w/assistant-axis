@@ -564,7 +564,15 @@ class VLLMGenerator:
         ``thinking_stripped`` (the leaked-thinking strip below changed the
         text) and ``thinking_suspected`` (:func:`looks_like_leaked_thinking`
         on the final text).  The three are the additive response fields of
-        walk-through P6 (2026-10-12)."""
+        walk-through P6 (2026-10-12).
+
+        Since the response-token-ids plan (2026-11-02,
+        reports/pipeline/response_token_ids/plan.md § 4.1) also ``token_ids``,
+        the ids vLLM sampled (``output.outputs[0].token_ids``) verbatim as
+        ints, leaked plan and stop token included; ``leaked``, whether the
+        strip rule's detection fired (``</think>`` in vLLM's text, ``<think>``
+        not), decided before any strip; and ``raw_text``, vLLM's text before
+        the strip, when the strip changed it."""
         self.load()
 
         tokenizer = self.llm.get_tokenizer()
@@ -580,20 +588,32 @@ class VLLMGenerator:
         logger.info(f"Running batch inference for {len(prompts)} prompts...")
         outputs = self.llm.generate(prompts, self.sampling_params)
 
+        # The sampled ids are kept as vLLM returned them (a tuple or an array:
+        # plain ints, for JSON), so that step 2 can prefill what the model
+        # generated instead of a re-encoding of the text (the
+        # response-token-ids plan, 2026-11-02).  Read by attribute: every vLLM
+        # CompletionOutput has them, and an output without them should fail
+        # loudly, not write records without ids.
         details = [{"text": output.outputs[0].text,
                     "finish_reason": getattr(output.outputs[0], "finish_reason", None),
-                    "thinking_stripped": False}
+                    "thinking_stripped": False,
+                    "token_ids": [int(i) for i in output.outputs[0].token_ids],
+                    "leaked": False}
                    for output in outputs]
 
         # Workaround: vLLM sometimes generates thinking content with Qwen
         # models despite enable_thinking=False. It strips the opening <think>
         # tag but leaves </think> and the preceding thinking text in the
-        # output. Strip everything up to the last </think>.
+        # output. Strip everything up to the last </think>.  The text before
+        # the strip is kept as raw_text (2026-11-02), for readers that have
+        # no tokenizer.
         if response_cleanup_for(self.family) == "strip_leaked_think":
             cleaned = 0
             for d in details:
                 resp = d["text"]
                 if '</think>' in resp and '<think>' not in resp:
+                    d["leaked"] = True
+                    d["raw_text"] = resp
                     d["text"] = resp[resp.rfind('</think>') + len('</think>'):].strip()
                     d["thinking_stripped"] = True
                     cleaned += 1
@@ -625,7 +645,9 @@ class VLLMGenerator:
         Returns:
             List of result dicts with conversation, prompt_index,
             question_index, and since 2026-10-12 (walk-through P6, additive)
-            question_id, finish_reason, thinking_stripped, thinking_suspected
+            question_id, finish_reason, thinking_stripped, thinking_suspected;
+            since 2026-11-02 (the response-token-ids plan, additive)
+            response_token_ids, and raw_text when thinking_stripped
         """
         self.load()
         tokenizer = self.llm.get_tokenizer()
@@ -665,7 +687,11 @@ class VLLMGenerator:
 
         # Build results.  The keys before "conversation" are those written
         # since the start; the four after it are additive (2026-10-12), and
-        # steps 2 and 3 read records by key, so they ignore them.
+        # steps 2 and 3 read records by key, so they ignore them.  After those,
+        # since 2026-11-02 (the response-token-ids plan § 3), the ids vLLM
+        # sampled, verbatim, and, when the strip changed the text, raw_text,
+        # the text before it.  The stored content is what it was before: step
+        # 3 and the response judging read it and have no tokenizer.
         results = []
         for conv, meta, d in zip(all_conversations, all_metadata, details):
             result = {
@@ -678,7 +704,10 @@ class VLLMGenerator:
                 "finish_reason": d["finish_reason"],
                 "thinking_stripped": d["thinking_stripped"],
                 "thinking_suspected": d["thinking_suspected"],
+                "response_token_ids": d["token_ids"],
             }
+            if d["thinking_stripped"]:
+                result["raw_text"] = d["raw_text"]
             results.append(result)
 
         return results
