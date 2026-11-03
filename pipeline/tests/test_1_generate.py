@@ -484,20 +484,24 @@ def test_response_cleanup_keep_is_recorded_and_refuses_a_family_rerun(mod, monke
                                                                       caplog):
     """The response-token-ids plan § 4.3 (2026-11-02): --response_cleanup keep
     is a recorded setting, so a rerun under the family rule into the same
-    directory is refused like any other change of settings."""
+    directory is refused like any other change of settings.  The side-car
+    records the clean-up applied, "none", and the flag beside it (Roger,
+    2026-11-03), so the refusal names 'none' -> 'strip_leaked_think'."""
     with caplog.at_level(logging.WARNING):
         code, _ = _run_main(mod, monkeypatch, data, "--response_cleanup", "keep", bad={"y"})
     assert code == 1                                  # y failed; x and patient were saved
-    assert _config(data)["runs"][0]["response_cleanup"] == "keep"
+    assert _config(data)["runs"][0]["response_cleanup"] == "none"
+    assert _config(data)["runs"][0]["response_cleanup_override"] == "keep"
     assert "--response_cleanup keep" in caplog.text
     caplog.clear()
     with caplog.at_level(logging.ERROR):
         code, saved = _run_main(mod, monkeypatch, data)            # the family rule
     assert code == 1 and saved == []
-    assert "response_cleanup: 'keep' -> 'strip_leaked_think'" in caplog.text
+    assert "response_cleanup: 'none' -> 'strip_leaked_think'" in caplog.text
     code, saved = _run_main(mod, monkeypatch, data, "--response_cleanup", "keep")
     assert code == 0 and saved == ["y"]
-    assert [r["response_cleanup"] for r in _config(data)["runs"]] == ["keep", "keep"]
+    assert [r["response_cleanup"] for r in _config(data)["runs"]] == ["none", "none"]
+    assert [r["response_cleanup_override"] for r in _config(data)["runs"]] == ["keep", "keep"]
 
 
 def test_the_default_clean_up_is_the_family_rule(mod, monkeypatch, data):
@@ -505,6 +509,7 @@ def test_the_default_clean_up_is_the_family_rule(mod, monkeypatch, data):
     code, saved = _run_main(mod, monkeypatch, data, "--response_cleanup", "family")
     assert code == 0 and saved == ["y"]
     assert [r["response_cleanup"] for r in _config(data)["runs"]] == ["strip_leaked_think"] * 2
+    assert [r["response_cleanup_override"] for r in _config(data)["runs"]] == ["family"] * 2
 
 
 def test_the_clean_up_override_reaches_both_generators(mod, monkeypatch, data, tmp_path):

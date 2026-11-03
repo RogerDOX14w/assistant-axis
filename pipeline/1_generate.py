@@ -622,7 +622,10 @@ def check_and_record_generation_config(args, output_dir: Path, all_items: List[D
     * responses here but no record: a tree made before 2026-10-12 -> refuse;
     * the last recorded run used another model, model type, template kwargs,
       header, clean-up, sampling or question set -> refuse, naming the
-      differences.
+      differences.  The clean-up compared is the one applied to the texts
+      (``response_cleanup``; the flag's value is recorded beside it, not
+      compared), so ``--response_cleanup keep`` on a family whose rule is
+      ``none`` is no difference (Roger, 2026-11-03).
 
     Instruction edits are not refused (one corrected file should not block
     a run): the entities with responses here whose ``pos`` instructions have
@@ -760,9 +763,10 @@ def main():
                              "text (Qwen3: strip a leaked plan up to its last </think>); keep: "
                              "leave vLLM's text as it came, so the stored content, which step 3 "
                              "judges, holds the plan.  Either way the ids and the plan's token "
-                             "range are stored.  Recorded in the side-car as 'keep' or the "
-                             "row's rule, so a directory refuses a run under the other "
-                             "(the response-token-ids plan § 4.3, 2026-11-02)")
+                             "range are stored.  The side-car records the clean-up applied "
+                             "('none' under keep) and the flag beside it, so a directory "
+                             "refuses a later run only when its texts would have been cleaned "
+                             "differently (the response-token-ids plan § 4.3, 2026-11-02)")
 
     args = parser.parse_args()
 
@@ -829,7 +833,8 @@ def main():
         logger.warning(f"--response_cleanup keep: the {pre.family.response_cleanup!r} clean-up "
                        f"of the {pre.family.model_type!r} row is not applied; the stored text, "
                        f"which step 3 judges, keeps any leaked plan (its token range is "
-                       f"recorded); the side-car records 'keep'")
+                       f"recorded); the side-car records the clean-up as 'none' and the flag "
+                       f"as response_cleanup_override")
 
     # The run's side-car (walk-through P2, 2026-10-12), checked against the
     # runs already recorded here and written before anything is generated.

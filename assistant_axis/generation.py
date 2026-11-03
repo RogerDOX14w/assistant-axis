@@ -59,13 +59,20 @@ RESPONSE_CLEANUP_OVERRIDES = ("family", "keep")
 
 def response_cleanup_for(family, override: Optional[str] = None) -> str:
     """The clean-up applied to each generated text: the family row's
-    (``strip_leaked_think`` for Qwen3, ``none`` otherwise), or ``"keep"``
+    (``strip_leaked_think`` for Qwen3, ``none`` otherwise), or ``"none"``
     under ``override="keep"`` (``--response_cleanup keep``).  The side-car
-    records this name, so a directory refuses a run under another one."""
+    records this, what was done to the text, with the flag beside it
+    (``response_cleanup_override``), so that a directory refuses a later run
+    only when its texts would have been cleaned differently: ``keep`` on a
+    row whose rule is ``none`` is the same run as the default (Roger,
+    2026-11-03; until then the side-car recorded the word ``keep`` and
+    refused that pair).  ``keep`` means no clean-up at all; should a family
+    ever get a second clean-up and "keep the plan only" be wanted, that is
+    a new value, not a new meaning of ``keep``."""
     if override is None or override == "family":
         return family.response_cleanup
     if override == "keep":
-        return "keep"
+        return "none"
     raise ValueError(f"response clean-up override {override!r} is not one of "
                      f"{RESPONSE_CLEANUP_OVERRIDES}")
 
@@ -326,9 +333,12 @@ def build_generation_run_record(
     the questions file's ``sha256`` and the number of questions kept,
     ``instructions`` (:func:`instruction_dir_record` per directory read) and
     ``selection`` (mode, flags, goal file and its hash, the work items).
-    ``response_cleanup`` is the rule in force: the row's, or ``"keep"`` under
-    ``response_cleanup_override="keep"`` (``--response_cleanup keep``, since
-    2026-11-02)."""
+    ``response_cleanup`` is the clean-up applied to the texts: the row's, or
+    ``"none"`` under ``response_cleanup_override="keep"`` (``--response_cleanup
+    keep``, since 2026-11-02); ``response_cleanup_override`` (since
+    2026-11-03) is the flag's value, ``"family"`` or ``"keep"``, kept for the
+    record and not compared by the side-car check
+    (:func:`response_cleanup_for`)."""
     from .atomic_io import read_jsonl_with_retry, read_text_with_retry
     q_text = read_text_with_retry(questions_file, logger_obj=logger)
     n_all = len(read_jsonl_with_retry(questions_file, skip_malformed=False, logger_obj=logger))
@@ -345,6 +355,7 @@ def build_generation_run_record(
         "generation_prompt_ids": list(layout.generation_prompt_ids),
         "system_prompt": system_prompt,
         "response_cleanup": response_cleanup_for(family, override=response_cleanup_override),
+        "response_cleanup_override": response_cleanup_override or "family",
         "sampling": {"temperature": temperature, "top_p": top_p,
                      "max_tokens": max_tokens, "max_model_len": max_model_len},
         "questions": {"file": str(questions_file), "sha256": _sha256_text(q_text),

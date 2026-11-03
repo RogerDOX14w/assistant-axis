@@ -325,10 +325,15 @@ def test_keep_leaves_the_plan_in_the_text_and_records_where_it_is(monkeypatch, c
     assert _one(monkeypatch, (raw, "stop"), response_cleanup_override="family") == stripped
 
 
-def test_the_override_is_checked_and_named_in_the_side_car_rule():
-    assert g.response_cleanup_for(FAMILIES["qwen3"], override="keep") == "keep"
+def test_the_override_is_checked_and_the_side_car_rule_is_what_was_done():
+    # The side-car records the clean-up applied, not the flag (Roger,
+    # 2026-11-03): keep is "none", so on a row whose rule is none it is the
+    # same run as the default, and only keep against a strip is a difference.
+    assert g.response_cleanup_for(FAMILIES["qwen3"], override="keep") == "none"
     assert g.response_cleanup_for(FAMILIES["qwen3"], override="family") == "strip_leaked_think"
     assert g.response_cleanup_for(FAMILIES["llama"], override=None) == "none"
+    assert (g.response_cleanup_for(FAMILIES["llama"], override="keep")
+            == g.response_cleanup_for(FAMILIES["llama"], override="family") == "none")
     with pytest.raises(ValueError):
         g.response_cleanup_for(FAMILIES["qwen3"], override="strip")
     with pytest.raises(ValueError):

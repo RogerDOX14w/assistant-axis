@@ -702,19 +702,19 @@ def _sidecar(mod, responses, *, response_cleanup):
 
 def test_the_recorded_clean_up_is_logged_and_read(mod, tmp_path, caplog, monkeypatch):
     monkeypatch.setenv("TMPDIR", str(tmp_path))
-    pre = _sidecar(mod, tmp_path / "responses", response_cleanup="keep")
+    pre = _sidecar(mod, tmp_path / "responses", response_cleanup="none")
     with caplog.at_level("INFO"):
         assert mod.check_generation_config(tmp_path / "responses", pre) == []
-    assert "step 1's response clean-up was 'keep'" in caplog.text
-    assert mod.recorded_response_cleanup(tmp_path / "responses") == "keep"
+    assert "step 1's response clean-up was 'none'" in caplog.text
+    assert mod.recorded_response_cleanup(tmp_path / "responses") == "none"
     assert mod.recorded_response_cleanup(tmp_path / "none") is None
 
 
 def test_the_metadata_records_the_path_the_span_and_the_clean_up(mod, pm, tmp_path):
     recs = [_record(0, "Arr matey.", stored=_stored(mod, pm.tokenizer, "Arr matey."))]
-    _, meta = _run(mod, pm, tmp_path, recs, response_cleanup="keep", content_span="turn")
+    _, meta = _run(mod, pm, tmp_path, recs, response_cleanup="none", content_span="turn")
     assert meta["token_source"] == {"ids": 1, "text": 0, "range_null": 0}
-    assert meta["content_span"] == "turn" and meta["response_cleanup"] == "keep"
+    assert meta["content_span"] == "turn" and meta["response_cleanup"] == "none"
 
 
 def test_main_passes_the_flags_and_the_recorded_clean_up(mod, pm, tmp_path, monkeypatch):
@@ -763,7 +763,7 @@ def test_step_4_copies_the_new_keys_into_the_vector_and_step_5_refuses_nothing_n
     recs = [_record(i, c, stored=_stored(mod, pm.tokenizer, c))
             for i, c in enumerate(["Arr matey.", "Yes", "Law rules."])]
     f = _write_jsonl(tmp_path / "responses" / "pirate.jsonl", recs)
-    mod.process_role(pm, f, act_dir, [0, 1, 2], 2, 2048, response_cleanup="keep")
+    mod.process_role(pm, f, act_dir, [0, 1, 2], 2, 2048, response_cleanup="none")
     (scores / "pirate.json").write_text(json.dumps({"pos_p0_q0": 3, "pos_p1_q1": 3,
                                                     "pos_p0_q2": 3}))
     spec = importlib.util.spec_from_file_location("_p4_for_token_ids", REPO_ROOT / "pipeline"
@@ -774,7 +774,7 @@ def test_step_4_copies_the_new_keys_into_the_vector_and_step_5_refuses_nothing_n
                        "--output_dir", str(vec), "--min_count", "2"]) == 0
     meta = torch.load(vec / "pirate.pt", weights_only=False)["metadata"]
     assert meta["token_source"] == {"ids": 3, "text": 0, "range_null": 0}
-    assert meta["content_span"] == "range" and meta["response_cleanup"] == "keep"
+    assert meta["content_span"] == "range" and meta["response_cleanup"] == "none"
     spec5 = importlib.util.spec_from_file_location("_p5_for_token_ids", REPO_ROOT / "pipeline"
                                                    / "5_axis.py")
     step5 = importlib.util.module_from_spec(spec5)

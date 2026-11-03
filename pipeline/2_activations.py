@@ -651,8 +651,10 @@ def check_generation_config(responses_dir: Path, pre: Preflight, *, ignore: bool
 
 def recorded_response_cleanup(responses_dir: Path) -> Optional[str]:
     """The response clean-up step 1 recorded for this responses directory
-    (the last run of its side-car: ``"strip_leaked_think"``, ``"none"`` or,
-    since 2026-11-02, ``"keep"``), or None when there is no side-car.  Step 2
+    (the last run of its side-car: ``"strip_leaked_think"`` or ``"none"``,
+    the clean-up applied to the texts; ``--response_cleanup keep`` records
+    ``"none"``, with the flag beside it as ``response_cleanup_override``,
+    which step 2 does not read), or None when there is no side-car.  Step 2
     writes it into every activation file's metadata (§ 5.7)."""
     from assistant_axis.generation import read_generation_config
     cfg = read_generation_config(Path(responses_dir))
