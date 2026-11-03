@@ -179,6 +179,13 @@ def build_parser() -> argparse.ArgumentParser:
                              "behind the stored content; turn, everything generated, a leaked "
                              "plan included.  Refused with --token_source text; recorded in the "
                              "metadata, content_span")
+    parser.add_argument("--verify_ids", type=int, default=0, metavar="N",
+                        help="Before extracting each worker's first entity, build both paths' "
+                             "ids for its first N ids-path conversations: report whether they "
+                             "are identical, else how they differ (plan, re-split, special "
+                             "token, partial character), and when identical run both through "
+                             "the model; identical ids with different slots exits 1 without "
+                             "extracting (default 0, off; the smoke run passes 20)")
     parser.add_argument("--prefix_token_layers", type=_layers_arg, default=None,
                         help="With --prefix_token_means: the layers its file keeps, a subset of "
                              "--layers in the same form (default: every extracted layer; at all "
@@ -381,6 +388,12 @@ class TokenSourceError(RuntimeError):
     """A record cannot take the ids path: ``--token_source ids`` and a record
     without stored ids or with a null range, or a stored range that does not
     fit its ids (the response-token-ids plan § 5, 2026-11-02)."""
+
+
+class TokenPathVerificationError(RuntimeError):
+    """``--verify_ids`` found a conversation whose two paths prefill
+    identical ids but give different slots: a bug in the ids path (the
+    response-token-ids plan § 5.6)."""
 
 
 @dataclass(frozen=True)
@@ -671,6 +684,145 @@ def verify_assistant_spans(pm: ProbingModel, conversations: List[List[Dict[str, 
     return mismatches
 
 
+def _trim_blank_ends(tokenizer, ids: List[int]) -> List[int]:
+    """``ids`` without whitespace-only tokens at either end."""
+    ids = list(ids)
+    while ids and not tokenizer.decode([ids[0]]).strip():
+        ids.pop(0)
+    while ids and not tokenizer.decode([ids[-1]]).strip():
+        ids.pop()
+    return ids
+
+
+def describe_token_difference(tokenizer, text_ids: List[int], ids_ids: List[int],
+                              stored: StoredTokens, *, n_prompt: int, n_turn_end: int,
+                              special_ids) -> Dict:
+    """How the ids path's sequence differs from the text path's for one
+    conversation (``--verify_ids``, § 5.6): the number of positions that
+    differ and in how many regions (``difflib`` alignment), and the kinds of
+    difference found in the stored ids: ``plan`` (the content range starts
+    after a leaked plan), ``partial character`` (ids past the range, the cap
+    inside a character), ``special token`` (a special id inside the range),
+    ``re-split`` (the range's other ids are not the re-encoding of the text,
+    boundary whitespace aside), ``prompt or end of turn`` (the two renderings
+    differ outside the response) and, when none of these applies,
+    ``boundary whitespace``."""
+    import difflib
+    ops = difflib.SequenceMatcher(None, text_ids, ids_ids, autojunk=False).get_opcodes()
+    changed = [(i1, i2, j1, j2) for tag, i1, i2, j1, j2 in ops if tag != "equal"]
+    ids = [int(i) for i in stored.ids]
+    end_ids = len(ids)
+    while end_ids > 0 and ids[end_ids - 1] in special_ids:
+        end_ids -= 1
+    response = ids[:end_ids]
+    start, end = (int(x) for x in stored.content_range)
+    kinds = []
+    if start > 0:
+        kinds.append("plan")
+    if end < len(response):
+        kinds.append("partial character")
+    if any(t in special_ids for t in response[start:end]):
+        kinds.append("special token")
+    # The two sequences share the prompt and the end of turn when the
+    # template renders the stored text right after the generation prompt (as
+    # Qwen3's does); then what lies between is each path's response.
+    same_prompt = text_ids[:n_prompt] == ids_ids[:n_prompt]
+    same_end = (len(text_ids) >= n_prompt + n_turn_end
+                and text_ids[len(text_ids) - n_turn_end:] == ids_ids[len(ids_ids) - n_turn_end:])
+    if not (same_prompt and same_end):
+        kinds.append("prompt or end of turn")
+    else:
+        text_content = text_ids[n_prompt:len(text_ids) - n_turn_end]
+        ids_content = [t for t in response[start:end] if t not in special_ids]
+        if _trim_blank_ends(tokenizer, ids_content) != _trim_blank_ends(tokenizer, text_content):
+            kinds.append("re-split")
+    return {"positions": sum(max(i2 - i1, j2 - j1) for i1, i2, j1, j2 in changed),
+            "regions": len(changed), "text_len": len(text_ids), "ids_len": len(ids_ids),
+            "kinds": kinds or ["boundary whitespace"]}
+
+
+def verify_token_paths(
+    pm: ProbingModel,
+    conversations: List[List[Dict[str, str]]],
+    token_records: List[Optional[StoredTokens]],
+    n: int,
+    *,
+    layers: List[int],
+    max_length: int,
+    layout: Optional[ChatLayout] = None,
+    extract_headers: bool = True,
+    content_span: str = "range",
+    entity: str = "?",
+    log=None,
+) -> List[Dict]:
+    """``--verify_ids N`` (the response-token-ids plan § 5.6, 2026-11-02): for
+    the first ``n`` conversations on the ids path, build both paths' ids and
+    compare them.  When they are identical, run each path through the model
+    (one conversation per forward pass, so that both passes have the same
+    shape) and compare every slot bit for bit; when they differ, say how
+    (:func:`describe_token_difference`).  Each conversation is logged and
+    returned as a dict (``conversation``, ``identical``, and
+    ``slots_identical`` or the difference); identical ids with differing
+    slots is logged as an ERROR, and the caller stops on it."""
+    log = log or logger
+    family = pm.family
+    kwargs = dict(family.template_kwargs)
+    encoder = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder=family.span_builder)
+    picks = [i for i, r in enumerate(token_records) if r is not None][:n]
+    if not picks:
+        log.warning(f"{entity}: --verify_ids: no conversation takes the ids path; nothing "
+                    f"verified")
+        return []
+    turn_end_ids = list(derive_turn_end_ids(pm.tokenizer, family))
+    special_ids = set(int(i) for i in pm.tokenizer.all_special_ids)
+    results = []
+    for i in picks:
+        conv, rec = conversations[i], token_records[i]
+        text_ids, _ = encoder.build_turn_spans(conv, **kwargs)
+        ids_ids, _ = build_ids_path_sequence(
+            encoder, conv, rec, template_kwargs=kwargs, turn_end_ids=turn_end_ids,
+            special_ids=special_ids, entity=entity, index=i, content_span=content_span)
+        res: Dict = {"conversation": i, "identical": text_ids == ids_ids}
+        if res["identical"]:
+            common = dict(layout=layout, extract_headers=extract_headers, entity=entity)
+            [a], _, _ = extract_activations_batch(pm, [conv], layers, 1, max_length, **common)
+            [b], _, _ = extract_activations_batch(pm, [conv], layers, 1, max_length, **common,
+                                                  token_records=[rec],
+                                                  content_span=content_span)
+            same = (a is None and b is None) or (
+                a is not None and b is not None and a.dtype == b.dtype and a.shape == b.shape
+                and torch.equal(a.view(torch.int16) if a.dtype == torch.bfloat16 else a,
+                                b.view(torch.int16) if b.dtype == torch.bfloat16 else b))
+            res["slots_identical"] = bool(same)
+            if same:
+                log.info(f"{entity}: --verify_ids: conversation {i}: identical ids "
+                         f"({len(text_ids)}); the slots are bit-identical")
+            else:
+                log.error(f"{entity}: --verify_ids: conversation {i}: identical ids "
+                          f"({len(text_ids)}) but the slots differ: a bug in the ids path")
+        else:
+            res.update(describe_token_difference(
+                pm.tokenizer, text_ids, ids_ids, rec, n_prompt=len(prompt_token_ids(
+                    pm.tokenizer, conv[:-1], kwargs)), n_turn_end=len(turn_end_ids),
+                special_ids=special_ids))
+            log.info(f"{entity}: --verify_ids: conversation {i}: the ids differ at "
+                     f"{res['positions']} position(s) in {res['regions']} region(s) (text "
+                     f"path {res['text_len']} ids, ids path {res['ids_len']}): "
+                     f"{', '.join(res['kinds'])}")
+        results.append(res)
+    n_same = sum(r["identical"] for r in results)
+    n_bad = sum(r["identical"] and not r["slots_identical"] for r in results)
+    kinds: Dict[str, int] = {}
+    for r in results:
+        for k in r.get("kinds", []):
+            kinds[k] = kinds.get(k, 0) + 1
+    log.info(f"{entity}: --verify_ids: {len(results)} ids-path conversation(s): {n_same} with "
+             f"identical ids ({n_same - n_bad} with bit-identical slots), "
+             f"{len(results) - n_same} differing"
+             + (f" ({', '.join(f'{k} {v}' for k, v in sorted(kinds.items()))})" if kinds else ""))
+    return results
+
+
 def extract_activations_batch(
     pm: ProbingModel,
     conversations: List[List[Dict[str, str]]],
@@ -933,6 +1085,7 @@ def process_role(
     prefix_layers: Optional[List[int]] = None,
     token_source: str = "auto",
     content_span: str = "range",
+    verify_ids: int = 0,
 ) -> tuple[bool, int]:
     """Process a single role file and save activations.
 
@@ -948,6 +1101,9 @@ def process_role(
     (``--content_span``, § 5.5) is what slot 0 averages on the ids path:
     ``"range"``, the stored content range, or ``"turn"``, the whole generated
     turn (refused with ``token_source="text"``); written in the metadata.
+    ``verify_ids`` > 0 (``--verify_ids``, § 5.6) runs
+    :func:`verify_token_paths` on the first that many ids-path conversations
+    before extracting anything.
 
     ``prefix_tokens`` (``--prefix_token_means``, the cap pilot, 2026-10-28)
     also writes ``<output_dir>/prefix_means/<role>.pt`` from the same forward
@@ -975,6 +1131,8 @@ def process_role(
         SpanVerificationError: ``--verify_spans`` found a mismatch.
         TokenSourceError: ``token_source="ids"`` and a record cannot take
             the ids path, or a stored range does not fit its ids.
+        TokenPathVerificationError: ``--verify_ids`` found identical ids
+            giving different slots.
     """
     role = role_file.stem
     if content_span not in CONTENT_SPANS:
@@ -1040,6 +1198,18 @@ def process_role(
             raise SpanVerificationError(
                 f"{role}: {len(bad)} of {min(verify_spans, len(conversations))} assistant spans "
                 f"do not decode to the stored content (logged above); nothing extracted")
+
+    if verify_ids > 0:
+        checked = verify_token_paths(pm, conversations, token_records, verify_ids,
+                                     layers=layers, max_length=max_length, layout=layout,
+                                     extract_headers=extract_headers, content_span=content_span,
+                                     entity=role)
+        bad = [r for r in checked if r["identical"] and not r["slots_identical"]]
+        if bad:
+            raise TokenPathVerificationError(
+                f"{role}: {len(bad)} of {len(checked)} conversations prefill the same ids on both "
+                f"paths but give different slots (logged above): a bug in the ids path; nothing "
+                f"extracted")
 
     if prefix_file is None:
         activations_list, mismatches, header_metadata = extract_activations_batch(
@@ -1272,14 +1442,15 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
                     prefix_layers=getattr(args, "prefix_layers", None),
                     token_source=getattr(args, "token_source", "auto"),
                     content_span=getattr(args, "content_span", "range"),
+                    verify_ids=getattr(args, "verify_ids", 0) if i == 0 else 0,
                 )
                 total_mismatches += n_mm
                 if saved:
                     completed_count += 1
                 else:
                     empty_count += 1
-            except SpanVerificationError:
-                raise                     # the spans are wrong for every entity: stop
+            except (SpanVerificationError, TokenPathVerificationError):
+                raise                     # the spans (or the ids path) are wrong for every entity: stop
             except Exception as e:
                 failed_count += 1
                 worker_logger.error(f"Exception processing {role_file.stem}: {e}",
@@ -1530,6 +1701,7 @@ def main():
                     prefix_layers=args.prefix_layers,
                     token_source=args.token_source,
                     content_span=args.content_span,
+                    verify_ids=args.verify_ids if i == 0 else 0,
                 )
             except NoActivationsError as e:
                 # Logged and carried on, like the multi-worker mode; any
@@ -1537,7 +1709,7 @@ def main():
                 logger.error(str(e))
                 no_activations.append(role_file.stem)
                 continue
-            except SpanVerificationError as e:
+            except (SpanVerificationError, TokenPathVerificationError) as e:
                 logger.error(str(e))
                 sys.exit(1)
             total_mismatches += n_mm

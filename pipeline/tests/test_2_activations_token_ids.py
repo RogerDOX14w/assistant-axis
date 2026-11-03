@@ -568,6 +568,118 @@ def test_the_content_span_flag_is_refused_with_the_text_source(mod, monkeypatch,
     assert p.parse_args(base + ["--content_span", "turn"]).content_span == "turn"
 
 
+# ---------------------------------------------------------------------------
+# § 5.6: --verify_ids (§ 5.8 item 9)
+# ---------------------------------------------------------------------------
+
+def _verify_set(mod, tok):
+    """Records of every kind: the re-encoding, a plan, a special token, a
+    partial character, a re-split ("\\n" "\\n" for "\\n\\n"), a null range."""
+    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    nl, nl2 = tok.convert_tokens_to_ids("\n"), tok.convert_tokens_to_ids("\n\n")
+    arr, matey = _ids(tok, "Arr"), _ids(tok, "matey")
+    special = tok.convert_tokens_to_ids("<|endoftext|>")
+    assert _ids(tok, "Arr\n\nmatey") == arr + [nl2] + matey
+    return [
+        _record(0, "Arr matey.", stored=_stored(mod, tok, "Arr matey.")),
+        _record(1, "Arr matey.", stored=_stored(mod, tok, "Arr matey.", plan="Law rules.",
+                                                 lead="\n\n")),
+        _record(2, "Arr matey.", stored=mod.StoredTokens(
+            _ids(tok, "Arr ") + [special] + _ids(tok, "matey.") + [im_end], (0, 5))),
+        _record(3, "Arr matey", stored=_stored(mod, tok, "Arr matey", stop=False,
+                                                extra=_ids(tok, "?"))),
+        _record(4, "Arr\n\nmatey", stored=mod.StoredTokens(arr + [nl, nl] + matey + [im_end],
+                                                           (0, 4))),
+        _record(5, "Yes", stored=_stored(mod, tok, "Yes"), null_range=True),
+    ]
+
+
+def test_verify_ids_reports_each_kind(mod, pm, tmp_path, caplog):
+    recs = _verify_set(mod, pm.tokenizer)
+    records, _ = mod.select_token_paths(recs, "auto", entity="pirate")
+    with caplog.at_level("INFO"):
+        res = mod.verify_token_paths(pm, [r["conversation"] for r in recs], records, 20,
+                                     layers=[0, 1, 2], max_length=2048, entity="pirate")
+    assert [r["conversation"] for r in res] == [0, 1, 2, 3, 4]        # the null range is not
+    assert [r["identical"] for r in res] == [True, False, False, False, False]
+    assert res[0]["slots_identical"] is True
+    assert [r.get("kinds") for r in res[1:]] == [["plan"], ["special token"],
+                                                 ["partial character"], ["re-split"]]
+    assert res[2]["positions"] == 1 and res[2]["regions"] == 1          # the special token
+    assert res[4]["positions"] == 2 and res[4]["regions"] == 1          # \n \n for \n\n
+    assert "conversation 0: identical ids" in caplog.text
+    assert "5 ids-path conversation(s): 1 with identical ids (1 with bit-identical slots), " \
+           "4 differing (partial character 1, plan 1, re-split 1, special token 1)" in caplog.text
+    # N limits the conversations checked; a run with nothing on the ids path says so.
+    assert len(mod.verify_token_paths(pm, [r["conversation"] for r in recs], records, 2,
+                                      layers=[0], max_length=2048)) == 2
+    with caplog.at_level("WARNING"):
+        assert mod.verify_token_paths(pm, [recs[0]["conversation"]], [None], 5, layers=[0],
+                                      max_length=2048, entity="pirate") == []
+    assert "no conversation takes the ids path" in caplog.text
+    # process_role with the flag reports and goes on to extract.
+    acts, meta = _run(mod, pm, tmp_path, recs, verify_ids=20)
+    assert len(acts) == 6 and meta["token_source"] == {"ids": 5, "text": 1, "range_null": 1}
+
+
+def test_identical_ids_with_different_slots_stop_the_run(mod, pm, tmp_path, monkeypatch, caplog):
+    recs = _verify_set(mod, pm.tokenizer)[:1]
+    real = mod.extract_activations_batch
+
+    def perturbed(*a, **k):                     # the second pass (the ids path) is off by one bit
+        acts, mm, meta = real(*a, **k)
+        if k.get("token_records") is not None:
+            acts[0].view(torch.int16)[0, 0, 0] ^= 1
+        return acts, mm, meta
+
+    monkeypatch.setattr(mod, "extract_activations_batch", perturbed)
+    with caplog.at_level("ERROR"):
+        with pytest.raises(mod.TokenPathVerificationError, match="a bug in the ids path"):
+            _run(mod, pm, tmp_path, recs, verify_ids=5)
+    assert "identical ids (" in caplog.text and "but the slots differ" in caplog.text
+    assert not (tmp_path / "pirate.pt").exists()
+
+
+def test_a_worker_stops_on_a_failed_ids_check(mod, monkeypatch, tmp_path):
+    import argparse
+
+    class FakePM:
+        model_name = "Qwen/Qwen3-32B"
+
+        def __init__(self):
+            from assistant_axis.model_families import FAMILIES
+            self.family = FAMILIES["qwen3"]
+            self.tokenizer = pm_tok
+
+        def get_layers(self):
+            return [object()] * 3
+
+    pm_tok = make_fake_probing_model(N_LAYERS).tokenizer
+    done = []
+
+    def fake_process_role(pm, role_file, *a, **k):
+        done.append((role_file.stem, k.get("verify_ids")))
+        raise mod.TokenPathVerificationError("alpha: a bug in the ids path")
+
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    monkeypatch.setattr(mod, "ProbingModel", lambda name, **kw: FakePM())
+    monkeypatch.setattr(mod, "process_role", fake_process_role)
+    args = argparse.Namespace(model="Qwen/Qwen3-32B", output_dir=str(tmp_path), layers="all",
+                              no_headers=False, batch_size=2, max_length=2048, verify_spans=0,
+                              verify_ids=20)
+    with pytest.raises(SystemExit) as e:
+        mod.process_roles_on_worker(0, [0], [tmp_path / "alpha.jsonl", tmp_path / "beta.jsonl"],
+                                    args)
+    assert e.value.code == 1 and done == [("alpha", 20)]              # stopped at the first
+
+
+def test_the_verify_ids_flag(mod):
+    p = mod.build_parser()
+    base = ["--model", "m", "--responses_dir", "r", "--output_dir", "o"]
+    assert p.parse_args(base).verify_ids == 0
+    assert p.parse_args(base + ["--verify_ids", "20"]).verify_ids == 20
+
+
 def test_an_anchor_at_the_spans_start_is_the_search_without_one(pm):
     # The text path's spans have no anchor; an anchor equal to the start
     # searches exactly as before.
