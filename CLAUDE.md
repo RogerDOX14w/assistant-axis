@@ -803,4 +803,5 @@ These sections exist only in `AGENT_NOTES.md`; open them there when the topic co
 - TODO: code housekeeping (Sep 2026)
 - TODO: drop the kind suffix from the v3 axis-judge prompt (Nov 2026)
 - TODO: does step 3's score-3 filter throw away trait signal? (Nov 2026)
+- TODO: keep leaked thinking instead of stripping it? (Nov 2026)
 - TODO: variant-specific K grids in the PC round-trip experiment (May 2026)

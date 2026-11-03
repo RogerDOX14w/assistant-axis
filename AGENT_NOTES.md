@@ -7339,6 +7339,66 @@ with noise.  To investigate:
    consistently, change step 4; it is a one-line change, but it moves every
    vector, so rerun the downstream checks.
 
+### TODO: keep leaked thinking instead of stripping it? (Nov 2026)
+<!-- claude: archive -->
+
+*Raised 2026-11-02* (Roger: "I'm wondering if keeping them would produce
+better results than stripping them").  Step 1's `strip_leaked_think`
+([`generation.py`](assistant_axis/generation.py), `generate_batch_detailed`)
+drops everything up to the last `</think>` when Qwen emits a plan although
+thinking is off, and records it per response as `thinking_stripped`
+(`thinking_suspected` is the heuristic for leaks the strip did not catch).
+So the records say *which* responses it happened to, but not *what* was
+removed: the plan text is gone, and the October extraction cannot get it back.
+
+What the October records show (5,230 responses, 0.34%): it is a persona
+effect, not a question effect.  [gamer](data/roles/instructions/gamer.json)
+78/500, [aural_vark](data/traits/instructions/aural_vark.json) 69/500 (whose
+description has the persona "sorting out one's ideas by speaking first") and
+nine of the fourteen worst entities its combinations (34–76 each),
+[plugged_in](data/traits/instructions/plugged_in.json) 52,
+[millennial](data/traits/instructions/millennial.json) 50,
+[stream_of_consciousness](data/traits/instructions/stream_of_consciousness.json)
+13; the reflective traits ([introspective](data/traits/instructions/introspective.json)
+1, [pensive](data/traits/instructions/pensive.json) 0,
+[deliberate](data/traits/instructions/deliberate.json) 0) do not leak, so the
+trigger looks like a spoken, casual register rather than reflection.  Questions
+32 and 77 of [`extraction_questions.jsonl`](data/extraction_questions.jsonl)
+leak in 2–3% of responses, most others under 1%.  71% of the stripped
+responses hit the 1,024-token cap, and what remains is a full answer (median
+2,016 characters against 1,746 overall).
+
+The plan was in the model's context when it wrote the answer.  The strip
+removes it from step 2's prefill (the text path re-renders the stripped text)
+and from the text step 3 judges, so the vector of a heavy leaker such as gamer
+is built on contexts the model never saw.  The planned token-id fields
+(step 1 storing vLLM's raw ids with a content range, step 2 feeding all of
+them and averaging slot 0 from the range; design in the 2026-11-02 session's
+notes, not yet built) put the plan back into the prefill but still keep it
+out of slot 0 and out of the judged text.  Whether it belongs in those too is
+the open question.
+
+1. Make the strip optional in step 1: a flag (`--response-cleanup
+   {strip,keep}` or the like) that keeps the raw text in the record, with the
+   flag still set; the family row's `response_cleanup` stays the default.
+   **Status 2026-11-03: built**, as `1_generate.py --response_cleanup
+   {family,keep}` (the driver's `--response-cleanup`), with the generated ids
+   and the two token ranges stored per record, on the response-token-ids
+   branch ([plan](reports/pipeline/response_token_ids/plan.md),
+   [build report](reports/pipeline/response_token_ids/build_report.md)).
+   The same day the strip became surgical (Roger): `</think>` plus exactly
+   one following `\n\n`, no `.strip()`, so the stored text keeps whatever
+   whitespace the model wrote at its ends.
+2. On a fresh sample of the worst-affected entities above plus controls,
+   generated with the ids stored, build each entity's vector three ways
+   (plan stripped from the prefill, as today; plan in the prefill and slot 0
+   averaged after it; plan in the prefill and in slot 0) and compare them,
+   per slot and layer, against the sampling-noise floor (the same entity's
+   fresh vector against its October one).
+3. Decide separately whether step 3 should see the plan: a judge reading
+   "let me think about how a gamer would answer" scores the persona, not the
+   performance.
+
 ### TODO: variant-specific K grids in the PC round-trip experiment (May 2026)
 <!-- claude: archive -->
 
