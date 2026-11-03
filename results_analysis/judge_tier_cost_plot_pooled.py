@@ -19,12 +19,17 @@ comparable); the models left out are named in the title and on stderr.
 --min_axes N lowers the bar, e.g. --min_axes 60 keeps a legacy judge that
 is missing one axis, and --min_axes 1 shows everything as before.
 
-Price basis: batch and Flex cells are billed at half the real-time price, so
-their recorded cost (usage.json's total_cost_usd) is not comparable with a
-real-time cell's.  By default (--price_basis list) every cell's cost is
-recomputed from its recorded token counts at the model's real-time price;
---price_basis batch prices everything at the batch rate, and
---price_basis recorded plots the cost as billed.
+Price basis: a cell's recorded cost (usage.json's total_cost_usd) depends on
+the transport it happened to go by, so by default every cell's cost is
+recomputed from its recorded token counts.  Since 2026-11-03 the default is
+--price_basis batch, the real price (Roger: "We should probably be computing
+Pareto at real price, in case someone offered a bigger or smaller discount for
+batch"): each model at its own batch or Flex rate (judge_pricing's
+_BATCH_PRICE_FACTORS; the list price for a model with none).  Every judge here
+is half price that way, so the frontier is the one the list price gave; the
+dollars are half.  --price_basis list prices everything at the real-time list
+price (the default until 2026-11-03, and the basis of every table before it),
+and --price_basis recorded plots the cost as billed.
 
 Usage:
     # After running judge_tier_cost_eval.py on 18+ axes:
@@ -44,6 +49,7 @@ Usage:
 
 import argparse
 import json
+import math
 import re
 import sys
 from collections import defaultdict
@@ -104,7 +110,9 @@ def load_rho(correlations_path: Path, slot: int,
         return None
 
 
-PRICE_BASES = ("list", "batch", "recorded")
+PRICE_BASES = ("batch", "list", "recorded")
+#: The real price (2026-11-03): each model at its own batch or Flex rate.
+DEFAULT_PRICE_BASIS = "batch"
 
 
 def _base_model(key: str) -> str:
@@ -115,16 +123,36 @@ def _base_model(key: str) -> str:
     return key
 
 
-def load_measured_cost(usage_path: Path, price_basis: str = "list") -> Optional[float]:
+def basis_rates(model: str, price_basis: str) -> Tuple[float, float]:
+    """``model``'s ``(input, output)`` rates per 1M tokens on ``price_basis``: its real-time list
+    price, or (``batch``) its own batch or Flex rate, the list price when it has none.  Raises
+    ``KeyError`` for a model the pricing table does not know."""
+    if price_basis == "batch":
+        try:
+            return price_for_model(f"{model}:batch")
+        except KeyError:
+            pass
+    return price_for_model(model)
+
+
+def price_factor(model: str, price_basis: str) -> float:
+    """What ``price_basis`` pays for ``model`` as a fraction of its list price (1.0 when unknown)."""
+    try:
+        return basis_rates(model, price_basis)[0] / price_for_model(model)[0]
+    except (KeyError, ZeroDivisionError):
+        return 1.0
+
+
+def load_measured_cost(usage_path: Path, price_basis: str = DEFAULT_PRICE_BASIS) -> Optional[float]:
     """A cell's cost from its ``usage.json``.
 
     ``recorded``: the cost the run was billed (``total_cost_usd``), which mixes
-    real-time cells with batch and Flex cells billed at half price.  ``list``
-    (the default) and ``batch`` recompute the cost from the recorded token
-    counts at the model's real-time price or its batch price, whatever
-    transport the cell was judged by, so that every point on one plot is
-    priced the same way.  A model the pricing table does not know falls back
-    to the recorded cost with a warning.
+    real-time cells with batch and Flex cells billed at their discount.  ``batch``
+    (the default, the real price) and ``list`` recompute the cost from the
+    recorded token counts at each model's own batch or Flex rate (:func:`basis_rates`)
+    or at its real-time price, whatever transport the cell was judged by, so that
+    every point on one plot is priced the same way.  A model the pricing table
+    does not know falls back to the recorded cost with a warning.
     """
     if not usage_path.exists():
         return None
@@ -135,7 +163,7 @@ def load_measured_cost(usage_path: Path, price_basis: str = "list") -> Optional[
     for key, entry in d["per_model"].items():
         model = _base_model(entry.get("model") or key)
         try:
-            rate_in, rate_out = price_for_model(model if price_basis == "list" else f"{model}:batch")
+            rate_in, rate_out = basis_rates(model, price_basis)
         except KeyError:
             print(f"WARNING: {usage_path}: no {price_basis} price for {model!r}; using the recorded cost",
                   file=sys.stderr)
@@ -198,8 +226,14 @@ def estimate_cost(n_entities: int, rate_in: float, rate_out: float) -> float:
             + n_entities * EST_OUT_PER_ENTITY * rate_out) / 1e6
 
 
-def pareto_frontier(points: List[Tuple[float, float]]) -> List[int]:
-    """Return indices of Pareto-optimal points (min cost, max quality)."""
+def pareto_frontier(points: List[Tuple[float, float]], hull: bool = True) -> List[int]:
+    """Indices of the frontier points ``(cost, quality)``, cheapest first: not dominated (min cost, max
+    quality) and, with ``hull`` (the default since 2026-11-03; Roger: "Only count points on the Pareto
+    frontier if they are on its convex hull"), on the upper convex hull.  Quality is 1/(1 - mean rho), as
+    every caller passes it; the hull is taken on mean rho = 1 - 1/quality against linear cost, the units of
+    an exchange rate (rho per $ per axis), so that a point under the chord of its neighbours, the best
+    choice at no exchange rate, is left off.  A point on the chord itself stays.  ``hull=False``: the
+    non-dominated points alone, the rule before that date."""
     indices = []
     for i, (cost_i, quality_i) in enumerate(points):
         dominated = False
@@ -211,13 +245,30 @@ def pareto_frontier(points: List[Tuple[float, float]]) -> List[int]:
                 break
         if not dominated:
             indices.append(i)
-    return sorted(indices, key=lambda i: points[i][0])
+    indices = sorted(indices, key=lambda i: points[i][0])
+    if not hull:
+        return indices
+
+    def xy(i: int) -> Tuple[float, float]:
+        cost, quality = points[i]
+        return cost, (1.0 - 1.0 / quality) if quality else -math.inf
+
+    kept: List[int] = []
+    for i in indices:
+        while len(kept) >= 2:
+            (xa, ya), (xb, yb), (xc, yc) = xy(kept[-2]), xy(kept[-1]), xy(i)
+            if (xb - xa) * (yc - ya) - (yb - ya) * (xc - xa) > 1e-15:    # b lies under the chord a-c
+                kept.pop()
+            else:
+                break
+        kept.append(i)
+    return kept
 
 
 def collect_tier_eval_data(
     tier_eval_dirs: List[Path],
     slot: int,
-    price_basis: str = "list",
+    price_basis: str = DEFAULT_PRICE_BASIS,
 ) -> Dict[str, List[dict]]:
     """
     Returns {model: [{rho, cost, cost_is_measured, axis_name}, ...]}
@@ -287,15 +338,14 @@ def rho_from_stored_scores(cell_dir: Path, axis_name: str, slot: int,
 def collect_legacy_data(
     legacy_axis_dirs: List[Path],
     slot: int,
-    price_basis: str = "list",
+    price_basis: str = DEFAULT_PRICE_BASIS,
 ) -> Dict[str, List[dict]]:
     """
     Load gpt-4.1-mini and claude-sonnet-4 from the non-tier-eval axis dirs.
     These predate usage.json; costs are estimated at the real-time price
     (``list``, also used for ``recorded``: they were judged in real time) or
-    at half of it (``batch``).
+    at the model's own batch rate (``batch``).
     """
-    factor = 0.5 if price_basis == "batch" else 1.0
     per_model: Dict[str, List[dict]] = defaultdict(list)
 
     legacy_cells = [
@@ -320,7 +370,7 @@ def collect_legacy_data(
             if result is None:
                 continue
             rho, n = result
-            cost = estimate_cost(n, rin, rout) * factor
+            cost = estimate_cost(n, rin, rout) * price_factor(model.split(" (")[0], price_basis)
             per_model[model].append({
                 "rho": rho, "n": n, "cost": cost,
                 "cost_is_measured": False,
@@ -562,13 +612,13 @@ def cost_ticks(lo: float, hi: float) -> List[float]:
 
 PRICE_BASIS_LABEL = {
     "list": "real-time list price",
-    "batch": "batch price (half of list)",
+    "batch": "real price: each judge's batch or Flex rate",
     "recorded": "as billed (mixed transports)",
 }
 
 
 def plot(agg: Dict[str, dict], slot: int, n_total_axes: int, output_path: Path,
-         excluded: Optional[Dict[str, dict]] = None, price_basis: str = "list",
+         excluded: Optional[Dict[str, dict]] = None, price_basis: str = DEFAULT_PRICE_BASIS,
          rho_note: str = "", left_out: Sequence[str] = (), links: Sequence[Tuple[str, str]] = (),
          links_label: str = "same judge: old rubric → new rubric",
          inputs: Optional[list] = None) -> None:
@@ -634,6 +684,8 @@ def plot(agg: Dict[str, dict], slot: int, n_total_axes: int, output_path: Path,
              f"[◆ = Pareto-optimal (bold label), ● = dominated]")
     if price_basis == "list":
         title += "\nCost at real-time list price; Flex and Batch are half price for every judge here"
+    elif price_basis == "batch":
+        title += "\nCost at each judge's batch or Flex price (half of list for every judge here)"
     if any(not d["cost_is_measured"] for d in agg.values()):
         title += "\nFilled = measured cost (usage.json)  Hollow = estimated (legacy tiers)"
     key = label_key(list(agg))
@@ -711,12 +763,12 @@ def main() -> None:
                         help="Plot only models judged on at least this many axes. Default: the "
                              "headline axis count (the most any model has), so every plotted "
                              "model covers the same axes; --min_axes 1 shows everything.")
-    parser.add_argument("--price_basis", choices=PRICE_BASES, default="list",
-                        help="How a point's cost is priced.  'list' (default): every cell recomputed "
-                             "from its token counts at the model's real-time price, whatever transport "
-                             "judged it (batch and Flex cells are billed at half price, so their recorded "
-                             "cost is not comparable with real-time cells); 'batch': the same at the "
-                             "batch price; 'recorded': usage.json's total_cost_usd as billed.")
+    parser.add_argument("--price_basis", choices=PRICE_BASES, default=DEFAULT_PRICE_BASIS,
+                        help="How a point's cost is priced.  'batch' (default since 2026-11-03, the real "
+                             "price): every cell recomputed from its token counts at the model's own batch "
+                             "or Flex rate, whatever transport judged it; 'list': the same at the real-time "
+                             "list price (the default before); 'recorded': usage.json's total_cost_usd as "
+                             "billed, which mixes transports.")
     parser.add_argument("--robustness_json", type=str, default=None,
                         help="judge_tier_robustness.json: take each cell's rho from it (variant "
                              "--robustness_variant) instead of the cell's correlations.json.  Its rho is "

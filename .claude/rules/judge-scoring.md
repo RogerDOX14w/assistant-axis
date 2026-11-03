@@ -13,9 +13,9 @@ paths:
 
 ### Combining judge scores: use the canonical helpers and constants
 
-Three families of empirically-tuned mixing ratios live in
+The mixing ratios in
 [`assistant_axis/judge_score_combine.py`](assistant_axis/judge_score_combine.py)
-and govern how scripts reduce multiple judge × mode scores to a
+govern how scripts reduce multiple judge × mode scores to a
 single per-entity scalar.  Always import the constants instead of
 re-declaring magic floats so a future re-tuning propagates with one
 edit.
@@ -26,6 +26,7 @@ edit.
 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.625` | GPT / Sonnet within the desc+inst ensemble (per mode) (was `0.50` until 2026-05-12; retuned to the soft_shear=3 discrete grid peak w=0.625 on the 35-axis slot 6 sweep — see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.525` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; then `0.41` 2026-05-11→05-12 on the raw-projection v2 sweep; `0.625` 2026-05-12→05-22 on the canonical-whitening soft_shear=3 v2 sweep at 12 axes; **retuned to `0.525` on 2026-05-22 22-axis cohort** — discrete grid peak w=0.525 on the expanded set; see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
+| `TIER_JUDGE_WEIGHTS` | Luna `4`, others `3` (`TIER_JUDGE_DEFAULT_WEIGHT`) | between the batched tier judges (GPT-5.6 Luna, Haiku 5.5, Gemini 3.1 Flash-Lite) in description and instruction judging, each judge's own mean over its passes or rounds first: 4:3 in a pair with Luna, 4:3:3 in the trio, 1:1 without Luna (Roger, 2026-11-03: Luna alone beats Haiku and Gemini alone; equal before).  Set, not tuned: fitted weights lean to Luna but gain nothing out of sample.  `tier_judge_weights`, `combine_tier_judges`; used by `judge_tier_average.py` (blend cells record `averaged.judge_weights`; one made under other weights is made again) and `scripts/judge_instruction_12way.py` |
 
 > **RESOLVED 2026-05-14 — di-extension reconfirm done; all constants hold**
 >

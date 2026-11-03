@@ -180,8 +180,9 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     # GPT-5.6 Terra and Sol (OpenAI pricing page, read 2026-11-01), judged for the tier evaluation.
     ("gpt-5.6-terra", 2.00, 12.00),
     ("gpt-5.6-sol", 4.00, 20.00),
-    # Gemini (ai.google.dev/gemini-api/docs/pricing, read 2026-11-01).  Reached in real time only, so
-    # no batch factor.  2.5 Flash-Lite answers HTTP 404 to new users (2026-11-02).
+    # Gemini (ai.google.dev/gemini-api/docs/pricing, read 2026-11-01; Batch and Flex at half, the
+    # "gemini-" batch factor below, read 2026-11-03).  2.5 Flash-Lite answers HTTP 404 to new users
+    # (2026-11-02).
     ("gemini-3.1-flash-lite", 0.25, 1.50),
     ("gemini-3.5-flash-lite", 0.30, 2.50),
     ("gemini-2.5-flash-lite", 0.10, 0.40),
@@ -227,6 +228,7 @@ _BATCH_PRICE_FACTORS: tuple[tuple[str, float], ...] = (
     ("sonnet", 0.5),
     ("opus", 0.5),
     ("fable", 0.5),
+    ("gemini-", 0.5),     # Gemini Batch API (aistudio.google.com/docs/pricing, read 2026-11-03: 3.1 and 3.5 Flash-Lite)
 )
 
 

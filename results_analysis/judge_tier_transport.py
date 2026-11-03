@@ -37,15 +37,20 @@ CUT_AT_CAP = "length"
 
 def request_for(model: str, prompt: str, max_tokens: int, settings: Dict[str, Any],
                 service_tier: Optional[str] = None) -> Dict[str, Any]:
-    """The provider's request for ``model`` (a chat body or Messages params): the same request a
-    live call sends, which a Batch API line carries unchanged."""
-    if provider_for_model(model) == "anthropic":
+    """The provider's request for ``model`` (a chat body, Messages params or a generateContent
+    body): the same request a live call sends, which a Batch API line carries unchanged."""
+    provider = provider_for_model(model)
+    if provider == "anthropic":
         return anthropic_request_params(prompt, model, max_tokens, settings=settings)
+    if provider == "google":
+        return gemini_request_body(prompt, model, max_tokens, settings=settings)
     return chat_request_body(prompt, model, max_tokens, settings=settings, service_tier=service_tier)
 
 
 def prompt_of_request(request: Dict[str, Any]) -> str:
     """The prompt of a request built by :func:`request_for`."""
+    if "contents" in request:
+        return request["contents"][0]["parts"][0]["text"]
     return request["messages"][0]["content"]
 
 
@@ -79,19 +84,24 @@ class TransportChoice:
 def choose_transport(model: str, requested: str = "auto") -> TransportChoice:
     """The transport for ``model`` under ``--transport requested``.
 
-    ``auto``: an Anthropic model goes by Message Batches; a Gemini model in real time (no Flex, and
-    Google's batch mode is not wired up); an OpenAI model by Flex when ``judge.MODEL_CAPABILITIES``
-    says OpenAI takes it, by the Batch API when it says OpenAI refuses it, and, untested, by Flex
-    with a probe (the first request alone; a service-tier HTTP 400 switches the model to batch for
-    the run).  A transport the model cannot take raises :class:`JudgeRequestError`."""
+    ``auto``: an Anthropic model goes by Message Batches; a Gemini model by its Batch API (half price,
+    ``gemini_batch.py``; since 2026-11-03, once a round of 1,769 requests came back in about 3 minutes);
+    an OpenAI model by Flex when ``judge.MODEL_CAPABILITIES`` says OpenAI takes it, by the
+    Batch API when it says OpenAI refuses it, and, untested, by Flex with a probe (the first request
+    alone; a service-tier HTTP 400 switches the model to batch for the run).  Gemini's Flex tier (a
+    preview, documented for the Interactions API only on 2026-11-03) is not wired.  A transport the
+    model cannot take raises :class:`JudgeRequestError`."""
     if requested not in TRANSPORT_CHOICES:
         raise ValueError(f"--transport {requested!r}: expected one of {TRANSPORT_CHOICES}")
     provider = provider_for_model(model)
     if provider == "google":
-        if requested in ("flex", "batch"):
-            raise JudgeRequestError(f"--transport {requested}: a Gemini model is judged in real time only here "
-                                    f"(no Flex; Google's batch mode is not wired up)")
-        return TransportChoice("realtime", False, "Gemini model: real time (generateContent)")
+        if requested == "flex":
+            raise JudgeRequestError("--transport flex: Gemini's Flex tier is not wired up here; "
+                                    "use --transport batch (the same half price)")
+        if requested == "realtime":
+            return TransportChoice("realtime", False, "--transport realtime: Gemini generateContent")
+        return TransportChoice("batch", False, "--transport batch: Gemini Batch API" if requested == "batch" else
+                               "Gemini model: Batch API at half price; --transport realtime for real time")
     if requested == "realtime":
         return TransportChoice("realtime", False, "--transport realtime")
     if requested == "batch":

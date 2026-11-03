@@ -1,0 +1,146 @@
+"""Run a grid of instruction-judging cells through judge_tier_cost_eval.py, each cell as its own process,
+as judge_descriptions.py runs the passes of description judging.  A cell already finished is skipped by the
+tool's resume rule, so a rerun only judges what is missing.
+
+--design sets: each --passes of each batch size N is the cell <judge>@is_<arm>n<N>s<seed>.
+--design rounds: one pass of all --rounds, the cells <judge>@i1_<arm>n<N>r<round>, each round in its own
+shuffle (seed round + 1); round r shows instruction r mod 5, so rounds 0-4 are one pass over an entity's
+five instructions and rounds 5-9 a second.
+
+**The settled method for instruction judging (Roger, 2026-11-03)** is this script's defaults: the plain
+wrapper (p0), 20 entities a call, one pass (rounds 0-4) of each of GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1
+Flash-Lite (INSTRUCTION_JUDGES), and, once every cell is in, the blend
+<judges>@i1_p0n20x1, each judge's mean over its five rounds weighted Luna 4 : Haiku 3 : Gemini 3
+(judge_tier_average.py; the scores in scores_instructions.json, correlations.json beside them).  Account:
+results_analysis/README.md, "Instruction judging: the settled method".
+
+Usage: uv run python scripts/judge_instruction_grid.py --design rounds --axes_file AXES.tsv --instructions_dir DATA --dry_run
+       uv run python scripts/judge_instruction_grid.py --design sets --arms p0,p1,q0,q1,t0,t1 --ns 20 --passes 2 \\
+           --axes_file scripts/tier_eval_axes_dev30.tsv --instructions_dir /tmp/claude-501/corpus_2026-05-24/data --dry_run"""
+import argparse, subprocess, sys
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+from assistant_axis.judge import provider_for_model
+from results_analysis import judge_tier_average as avg, judge_tier_cost_eval as ev
+from results_analysis.judge_descriptions import max_tokens_for
+
+TOOL = REPO / "results_analysis" / "judge_tier_cost_eval.py"
+#: The settled instruction judges (Roger, 2026-11-03: one pass of every model, "ensembles across three
+#: models ... extra passes of individual models don't appear to be consistently cost effective")
+INSTRUCTION_JUDGES = ("gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite")
+ROUNDS_PER_PASS = 5
+
+
+def blend_label(arm: str, n: int, rounds) -> str:
+    """The blend cell of a rounds design, ``@i1_<arm>n<N>x<passes>``; None unless the rounds are whole passes
+    from round 0 (rounds 5-9 alone are a second pass, not a cell called x1)."""
+    if len(rounds) % ROUNDS_PER_PASS or sorted(rounds) != list(range(len(rounds))):
+        return None
+    return f"@i1_{arm}n{n}x{len(rounds) // ROUNDS_PER_PASS}"
+
+
+def cells(design: str, arms, ns, passes: int, rounds):
+    """``(rubric, label, N, seed, round or None)`` for every cell of one judge."""
+    for arm in arms:
+        for n in ns:
+            if design == "sets":
+                for seed in range(1, passes + 1):
+                    yield f"is_{arm}", f"@is_{arm}n{n}s{seed}", n, seed, None
+            else:
+                for r in rounds:
+                    yield f"i1_{arm}", f"@i1_{arm}n{n}r{r}", n, r + 1, r
+
+
+def command(model: str, cell, args) -> list:
+    rubric, label, n, seed, round_ = cell
+    argv = [sys.executable, str(TOOL), "--judge_model", model, "--rubric", rubric, "--cell_label", label,
+            "--entities_per_call", str(n), "--shuffle_seed", str(seed), "--max_tokens", str(max_tokens_for(model, n)),
+            "--axes_file", args.axes_file, "--experiments_dir", args.experiments_dir, "--instructions_dir", args.instructions_dir]
+    if round_ is not None:
+        argv += ["--instruction_round", str(round_)]
+    if args.budget_usd_per_cell is not None:
+        argv += ["--budget_usd", str(args.budget_usd_per_cell)]
+    argv += ["--max_in_flight", str(args.max_in_flight), "--transport", args.transport]
+    if args.dry_run:
+        argv += ["--dry_run"]
+    return argv
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--design", choices=("sets", "rounds"), required=True)
+    ap.add_argument("--arms", default="p0", help="comma-separated wrapper and sentence codes: p0,p1,q0,q1,t0,t1")
+    ap.add_argument("--ns", default="20", help="comma-separated batch sizes")
+    ap.add_argument("--passes", type=int, default=2, help="--design sets: shuffles per batch size")
+    ap.add_argument("--rounds", default="0,1,2,3,4", help="--design rounds: rounds to judge")
+    ap.add_argument("--judges", default=",".join(INSTRUCTION_JUDGES),
+                    help=f"comma-separated (default the settled three, {','.join(INSTRUCTION_JUDGES)})")
+    ap.add_argument("--no_blend", action="store_true",
+                    help="--design rounds: do not derive the blend cell <judges>@i1_<arm>n<N>x<passes> (Luna 4 : others "
+                         "3, judge_tier_average.py) after the cells finish")
+    ap.add_argument("--axes_file", required=True)
+    ap.add_argument("--experiments_dir", default="roger/axis_judge_experiments")
+    ap.add_argument("--instructions_dir", required=True, help="the corpus to judge (the May pin for the May axes)")
+    ap.add_argument("--budget_usd_per_cell", type=float, default=None, help="--budget_usd of each Flex or real-time cell")
+    ap.add_argument("--parallel", type=int, default=4, help="cells running at once, per judge")
+    ap.add_argument("--max_in_flight", type=int, default=50,
+                    help="Flex and real-time requests in flight per cell (8 cells at the tool's 200 gave 1,500 connection "
+                         "errors a cell and lost Anthropic batch uploads, 2026-11-02)")
+    ap.add_argument("--transport", default="auto", choices=("auto", "flex", "batch", "realtime"),
+                    help="each cell's --transport (auto: Luna by Flex, Haiku by Message Batches, Gemini by its "
+                         "Batch API at half price; realtime for Gemini's generateContent calls)")
+    ap.add_argument("--logs", default=None, help="a directory for each cell's log (default: inherit stdout and stderr)")
+    ap.add_argument("--dry_run", action="store_true", help="each cell's dry run: nothing sent, nothing written")
+    args = ap.parse_args(argv)
+    arms, ns = args.arms.split(","), [int(x) for x in args.ns.split(",")]
+    rounds = [int(x) for x in args.rounds.split(",")]
+    # Anthropic's first, one judge at a time: a batch upload is lost when Flex cells hold the connection
+    judges = sorted(args.judges.split(","), key=lambda m: provider_for_model(m) != "anthropic")
+    jobs = [(m, c) for m in judges for c in cells(args.design, arms, ns, args.passes, rounds)]
+    print(f"{len(jobs)} cells: {args.design}, arms {arms}, batch sizes {ns}, judges {args.judges}, axes {args.axes_file}")
+    logs = Path(args.logs) if args.logs else None
+    if logs:
+        logs.mkdir(parents=True, exist_ok=True)
+
+    def run(job) -> int:
+        model, cell = job
+        cmd = command(model, cell, args)
+        if not logs:
+            return subprocess.run(cmd, cwd=REPO).returncode
+        with open(logs / f"{model}{cell[1]}.log", "a") as f:
+            return subprocess.run(cmd, cwd=REPO, stdout=f, stderr=subprocess.STDOUT).returncode
+
+    codes = []
+    for judge in judges:
+        with ThreadPoolExecutor(max_workers=max(1, args.parallel)) as pool:
+            codes += list(pool.map(run, [j for j in jobs if j[0] == judge]))
+    bad = [(f"{m}{c[1]}", code) for (m, c), code in zip(jobs, codes) if code]
+    for name, code in bad:
+        print(f"{name}: exit status {code}", file=sys.stderr)
+    print(f"{len(jobs) - len(bad)} of {len(jobs)} cells finished")
+    if bad or args.dry_run or args.design != "rounds" or args.no_blend:
+        return 1 if bad else 0
+    # The blend of the judges' rounds, one cell per arm and batch size (the judges in the order given)
+    refused = []
+    given = args.judges.split(",")
+    for arm in arms:
+        for n in ns:
+            label = blend_label(arm, n, rounds)
+            if label is None:
+                print(f"no blend for rounds {rounds}: not whole passes from round 0", file=sys.stderr)
+                continue
+            out = "+".join(given) + label
+            sources = [f"{m}@i1_{arm}n{n}r{r}" for m in given for r in rounds]
+            E = Path(args.experiments_dir)
+            r = avg.average_cells(out, sources, ev.jobs_from_axes_file(Path(args.axes_file), E), E, Path(args.instructions_dir))
+            refused += [f"{out}: {line}" for line in r.refused]
+            print(f"{out}: {r.made} cells derived, {r.kept} up to date, {len(r.refused)} refused")
+    for line in refused:
+        print(f"REFUSED {line}", file=sys.stderr)
+    return 1 if refused else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -7,14 +7,15 @@ import pytest
 from results_analysis import judge_descriptions as jd
 from results_analysis import judge_tier_cost_eval as ev
 from results_analysis.tests.test_judge_tier_cost_eval import (  # noqa: F401 -- the fixture
-    AXES, ENTITIES, FakeAnthropic, FakeOpenAI, FlakyOpenAI, batch_score, world,
+    AXES, ENTITIES, FakeAnthropic, FakeGeminiBatch, FakeOpenAI, FlakyOpenAI, batch_score, world,
 )
 
 
 def test_the_decision_is_the_default():
     args = jd.build_parser().parse_args(["--axes_file", "x"])
     assert (args.entities_per_call, args.passes, args.judge_model) == (20, 2, None)
-    assert jd.DESCRIPTION_JUDGES == ("gpt-5.6-luna", "claude-haiku-5-5")
+    # Gemini joined the default on 2026-11-03 (Roger: "Luna + Haiku + Gemini at 2x each")
+    assert jd.DESCRIPTION_JUDGES == ("gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite")
     assert jd.DESCRIPTION_RUBRIC == "b10" and args.name_format == "judge_label" and args.transport == "auto"
 
 
@@ -43,20 +44,25 @@ def _args(world, *extra):
 
 def test_a_run_writes_the_passes_the_averages_and_the_blend(world, monkeypatch):
     _in_process(monkeypatch)
-    flex, anthropic = FakeOpenAI(), FakeAnthropic()
+    flex, anthropic, gemini = FakeOpenAI(), FakeAnthropic(), FakeGeminiBatch()
     monkeypatch.setattr(ev, "make_openai_client", lambda service_tier=None: flex)
     monkeypatch.setattr(ev, "make_anthropic_client", lambda: anthropic)
+    monkeypatch.setattr(ev, "make_gemini_client", lambda: gemini)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-used")
     assert jd.main(_args(world)) == 0
     tier = world.exp / f"{AXES[0][0]}_tier_eval"
     names = {p.name for p in tier.iterdir()}
+    trio = "gpt-5.6-luna+claude-haiku-5-5+gemini-3.1-flash-lite@b10n3x2"     # the three judges since 2026-11-03
     assert {"gpt-5.6-luna@b10n3s1", "gpt-5.6-luna@b10n3s2", "gpt-5.6-luna@b10n3x2", "claude-haiku-5-5@b10n3s1", "claude-haiku-5-5@b10n3s2",
-            "claude-haiku-5-5@b10n3x2", "gpt-5.6-luna+claude-haiku-5-5@b10n3x2"} <= names
+            "claude-haiku-5-5@b10n3x2", "gemini-3.1-flash-lite@b10n3x2", trio} <= names
     want = {e: float(batch_score(e, True)) for e in ENTITIES}
-    blend = json.loads((tier / "gpt-5.6-luna+claude-haiku-5-5@b10n3x2" / "scores_descriptions.json").read_text())
-    assert blend["result"] == want and len(blend["_provenance"]["averaged"]["sources"]) == 4
+    blend = json.loads((tier / trio / "scores_descriptions.json").read_text())
+    assert blend["result"] == want and len(blend["_provenance"]["averaged"]["sources"]) == 6
+    assert blend["_provenance"]["averaged"]["judge_weights"] == pytest.approx(
+        {"gpt-5.6-luna": 0.4, "claude-haiku-5-5": 0.3, "gemini-3.1-flash-lite": 0.3})
     assert all(c["reasoning_effort"] == "none" and c["service_tier"] == "flex" for c in flex.calls)
-    usage = json.loads((tier / "gpt-5.6-luna+claude-haiku-5-5@b10n3x2" / "usage.json").read_text())
-    assert set(usage["per_model"]) == {"gpt-5.6-luna:flex", "claude-haiku-5-5:batch"}
+    usage = json.loads((tier / trio / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"gpt-5.6-luna:flex", "claude-haiku-5-5:batch", "gemini-3.1-flash-lite:batch"}
     # run again: nothing asked, nothing rederived
     n = len(flex.calls)
     assert jd.main(_args(world)) == 0 and len(flex.calls) == n

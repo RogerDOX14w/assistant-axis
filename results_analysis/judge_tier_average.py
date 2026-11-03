@@ -1,5 +1,8 @@
 """Averaged judge cells: the passes of one judge (shuffle seeds), or the passes of several judges (a
-blend).  Per entity the mean of the scores present, usage the sum of all, correlations recomputed.
+blend).  Per entity the mean of the scores present; in a blend, each judge's mean over its own passes,
+then the judges weighted by ``judge_score_combine.tier_judge_weights`` (Luna 4, another judge 3, since
+2026-11-03; equal before), recorded as ``averaged.judge_weights``.  Usage the sum of all, correlations
+recomputed.  A blend made under other weights is made again.
 
 A source holding under ``min_coverage`` of the axis's entities is refused.  On 2026-11-02 eight empty
 cells, left by an outage, were averaged in without a word, and quietly turned two passes into one on
@@ -16,6 +19,7 @@ from typing import List, Optional, Sequence, Tuple
 
 from assistant_axis.atomic_io import atomic_write_text
 from assistant_axis.judge_pricing import MultiModelUsage
+from assistant_axis.judge_score_combine import combine_tier_judges, tier_judge_weights
 from results_analysis import judge_tier_cost_eval as ev
 from results_analysis.axis_judge_correlation import compute_correlations
 
@@ -48,19 +52,27 @@ def average_cells(out: str, sources: Sequence[str], jobs: Sequence["ev.AxisJob"]
         raise ValueError("averaging needs at least two source cells")
     E = Path(experiments_dir)
     result = AverageResult()
+    judge_of = {s: s.split("@", 1)[0] for s in sources}
+    judges = list(dict.fromkeys(judge_of.values()))
+    weights = tier_judge_weights(judges) if len(judges) > 1 else None
     for job in jobs:
         axis = job.axis_dir
         ds = [E / f"{axis}_tier_eval" / c for c in sources]
         do = E / f"{axis}_tier_eval" / out
         if not all((d / "usage.json").exists() for d in ds):
             continue
-        stamp = max(os.path.getmtime(d / "scores_descriptions.json") for d in ds)
+        paths = [ev.cell_scores_path(d) for d in ds]
+        if len({p.name for p in paths}) != 1:
+            raise ValueError(f"{axis}: the sources mix judging modes: {[p.name for p in paths]}")
+        scores_name = paths[0].name
+        mode = scores_name[len("scores_"):-len(".json")]
+        stamp = max(os.path.getmtime(p) for p in paths)
         if (do / "usage.json").exists():
-            prov = json.loads((do / "scores_descriptions.json").read_text())["_provenance"]
-            if prov.get("averaged", {}).get("source_mtime") == stamp:
+            done = json.loads((do / scores_name).read_text())["_provenance"].get("averaged", {})
+            if done.get("source_mtime") == stamp and done.get("judge_weights") == weights:
                 result.kept += 1
                 continue
-        loaded = [json.loads((d / "scores_descriptions.json").read_text()) for d in ds]
+        loaded = [json.loads(p.read_text()) for p in paths]
         if not job.projections:
             ev.load_axis(job, Path(instructions_dir), limit=limit)
         short = short_sources(loaded, sources, len(job.entities), min_coverage)
@@ -69,11 +81,13 @@ def average_cells(out: str, sources: Sequence[str], jobs: Sequence["ev.AxisJob"]
                                   + ", ".join(f"{s} holds {n}" for s, n in short)
                                   + f" (under {min_coverage:.0%}); judge it again, then rerun this")
             continue
-        scores = {}
-        for k in set().union(*(x["result"] for x in loaded)):
-            v = [x["result"][k] for x in loaded if k in x["result"]]
-            scores[k] = sum(v) / len(v)
-        corr = compute_correlations(scores_by_mode={"descriptions": scores}, projections=job.projections,
+        per_judge = {}
+        for j in judges:
+            mine = [x["result"] for s, x in zip(sources, loaded) if judge_of[s] == j]
+            per_judge[j] = {k: sum(r[k] for r in mine if k in r) / sum(1 for r in mine if k in r)
+                            for k in set().union(*mine)}
+        scores = combine_tier_judges(per_judge, weights) if weights else per_judge[judges[0]]
+        corr = compute_correlations(scores_by_mode={mode: scores}, projections=job.projections,
                                     slots=list(job.projections.keys()), excluded_set=job.axis_spec.pole_entity_ids())
         usage = MultiModelUsage.load_or_create(ds[0] / "usage.json")
         for d in ds[1:]:
@@ -84,10 +98,11 @@ def average_cells(out: str, sources: Sequence[str], jobs: Sequence["ev.AxisJob"]
         prov["averaged"] = {"sources": list(sources),
                             "n_all": sum(1 for k in scores if all(k in x["result"] for x in loaded)),
                             "n_partial": sum(1 for k in scores if not all(k in x["result"] for x in loaded)),
+                            "judge_weights": weights,
                             "source_mtime": stamp, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
         do.mkdir(parents=True, exist_ok=True)
         atomic_write_text(json.dumps({"result": dict(sorted(scores.items())), "_provenance": prov}, indent=2),
-                          do / "scores_descriptions.json")
+                          do / scores_name)
         atomic_write_text(json.dumps(corr, indent=2), do / "correlations.json")
         # usage.json last: the file that says a cell is finished
         atomic_write_text(json.dumps(usage.as_dict(), indent=2, sort_keys=True), do / "usage.json")

@@ -1048,20 +1048,44 @@ Read the rule file itself first.
 <!-- claude: rule=judging -->
 
 **The decision:** the batched percentile rubric `b10`, N=20 entities per call, two
-passes in independent random orders, no reasoning, GPT-5.6 Luna + Haiku 5.5 blended by
-the mean of their scores: ρ 0.716 at $0.084 per axis on the 30 development axes, on the
-frontier in 12 of 12 projection variants, and confirmed on the 31 held out.  Two judges stay
-the default until a third is proven (Roger: the ensemble of two was significantly better than
-either alone, while three models bring three pairs and a trio to evaluate).  Gemini 3.1
-Flash-Lite is a supported third judge (0.720 at $0.152, +0.004 [−0.001, +0.010]; not run
-on the held-out axes), GPT-6 Luna alone the cheap end (0.680 at $0.019).  Gemini 3.5 is out
-of the running (0.653 at $0.108).  Run it with
+passes in independent random orders, no reasoning, and **since 2026-11-03 the three
+judges, GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite, blended Luna 4 : Haiku 3 :
+Gemini 3** (Roger: "Luna + Haiku + Gemini at 2× each"; `judge_score_combine.TIER_JUDGE_WEIGHTS`,
+§ "Combining judge scores"): ρ 0.752 at $0.076 an axis on the 61 axes (real price, May
+corpus), on the frontier in 9 of 12 projection variants, +0.0045 [+0.0016, +0.0075] over
+the two-judge default of 2026-11-02 (Luna + Haiku, 0.747 at $0.042).  The rule is the
+instruction one below: every model, and the passes the text needs (one description per
+entity, so two passes; a second pass adds 0.020 here against 0.005 on instructions, and
+Luna's fourth pass only matches Luna 2 + Haiku 1 at a third more).  GPT-6 Luna alone is the
+cheap end (0.680 at $0.019 list on the development axes); Gemini 3.5 is out of the running
+(0.653 at $0.108).  Run it with
 [`results_analysis/judge_descriptions.py`](./results_analysis/judge_descriptions.py); the
-defaults are the constants at its top.  Instruction and response judging are next, and
-the older consumers of `scores_descriptions.json` are not wired to this until they
-are settled.  The account: [`results_analysis/README.md`](./results_analysis/README.md)
-§ "Description judging: the settled method" and
-[`reports/judge_pareto/judge_tier_update_2026-11-01.md`](./reports/judge_pareto/judge_tier_update_2026-11-01.md).
+defaults are the constants at its top.  Response judging is next, and the older
+consumers of `scores_descriptions.json` are not wired to this until it is settled.  The
+account: [`results_analysis/README.md`](./results_analysis/README.md) § "Description
+judging: the settled method",
+[`reports/judge_pareto/judge_tier_update_2026-11-01.md`](./reports/judge_pareto/judge_tier_update_2026-11-01.md)
+and the figure
+[`judge_description_12way.png`](./roger/axis_judge_experiments/instruction_judging_12way/judge_description_12way.png).
+
+**Instruction judging: the settled method (Roger, 2026-11-03).**  Every judge judges each of
+an entity's five instructions once, one instruction per entity per call (`i1_p0`, the plain
+wrapper), N=20, in five rounds (round r the entity's instruction r, seed r+1), and the three
+judges, GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite, are blended Luna 4 : Haiku 3 :
+Gemini 3 (`judge_score_combine.TIER_JUDGE_WEIGHTS`): ρ 0.777 at $0.178 an axis on the 61
+axes (real price, May corpus), on the frontier in 7 of 12 projection variants, better than
+Luna alone on all 12 and than Luna + Haiku on 9.  Roger's rule, against choosing among some
+twenty arms a few thousandths apart: one pass of every model, since the cross-model
+ensemble helps and varies by axis, while repeat passes of one model are not consistently
+worth their cost (Luna's second, third and fourth passes give +0.005, +0.002, +0.001).
+Nx here means N passes over all five instructions, never N of the instructions.  Run it
+with [`scripts/judge_instruction_grid.py`](./scripts/judge_instruction_grid.py)
+`--design rounds`, whose defaults it is and which derives the blend cell
+`<judges>@i1_p0n20x1`; the comparison is
+[`scripts/judge_instruction_12way.py`](./scripts/judge_instruction_12way.py) (20 arms under
+the 12 variants, and `--mode descriptions` for description judging); the account is
+[`results_analysis/README.md`](./results_analysis/README.md) § "Instruction judging: the
+settled method".  About $62 of judging went into the choice.
 
 **One request layer.**  [`assistant_axis/judge.py`](./assistant_axis/judge.py) holds every
 judge's requests, the capability and settings tables, the Flex and retry loops and what a
@@ -2968,9 +2992,9 @@ status (§ "Judge-step provenance", the `corpus_instructions` bullet).
 ### Combining judge scores: use the canonical helpers and constants
 <!-- claude: rule=judge-scoring -->
 
-Three families of empirically-tuned mixing ratios live in
+The mixing ratios in
 [`assistant_axis/judge_score_combine.py`](assistant_axis/judge_score_combine.py)
-and govern how scripts reduce multiple judge × mode scores to a
+govern how scripts reduce multiple judge × mode scores to a
 single per-entity scalar.  Always import the constants instead of
 re-declaring magic floats so a future re-tuning propagates with one
 edit.
@@ -2981,6 +3005,7 @@ edit.
 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.625` | GPT / Sonnet within the desc+inst ensemble (per mode) (was `0.50` until 2026-05-12; retuned to the soft_shear=3 discrete grid peak w=0.625 on the 35-axis slot 6 sweep — see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.525` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; then `0.41` 2026-05-11→05-12 on the raw-projection v2 sweep; `0.625` 2026-05-12→05-22 on the canonical-whitening soft_shear=3 v2 sweep at 12 axes; **retuned to `0.525` on 2026-05-22 22-axis cohort** — discrete grid peak w=0.525 on the expanded set; see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
+| `TIER_JUDGE_WEIGHTS` | Luna `4`, others `3` (`TIER_JUDGE_DEFAULT_WEIGHT`) | between the batched tier judges (GPT-5.6 Luna, Haiku 5.5, Gemini 3.1 Flash-Lite) in description and instruction judging, each judge's own mean over its passes or rounds first: 4:3 in a pair with Luna, 4:3:3 in the trio, 1:1 without Luna (Roger, 2026-11-03: Luna alone beats Haiku and Gemini alone; equal before).  Set, not tuned: fitted weights lean to Luna but gain nothing out of sample.  `tier_judge_weights`, `combine_tier_judges`; used by `judge_tier_average.py` (blend cells record `averaged.judge_weights`; one made under other weights is made again) and `scripts/judge_instruction_12way.py` |
 
 > **RESOLVED 2026-05-14 — di-extension reconfirm done; all constants hold**
 >

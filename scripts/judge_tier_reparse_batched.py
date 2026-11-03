@@ -44,7 +44,7 @@ def main(argv=None) -> int:
             scores = {}
             for r in recs:
                 names = r.get("batch") or [r["name"]]
-                key = id(r["reply"]) if False else (tuple(names))
+                key = (tuple(names), r["reply"])
                 if key not in parsed_reply:
                     parsed_reply[key] = {} if r.get("truncated") or not r["reply"] else rubric.parse_batch(r["reply"], len(names))
                 k = names.index(r["name"]) + 1

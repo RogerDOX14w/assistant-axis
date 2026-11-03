@@ -2,19 +2,23 @@
 """Judge axes from the entities' descriptions by the settled method.
 
 The method, from the judge-tier evaluation of November 2026 (reports/judge_pareto/judge_tier_update_2026-11-01.md;
-Roger, 2026-11-02): the batched percentile rubric (b10, the judge places each entity by percentile among all of
-them on the axis), 20 entities per call, two passes in independent random orders, no reasoning, each judge's
-passes averaged, and the judges blended by the mean of their scores.  On the 30 development axes, slot 6, layer
-25, raw (rho against the activation projections, cost per axis at list price; 12 of 12 projection variants on the
-frontier unless noted):
+Roger, 2026-11-02, the judges revised 2026-11-03): the batched percentile rubric (b10, the judge places each
+entity by percentile among all of them on the axis), 20 entities per call, two passes in independent random
+orders, no reasoning, each judge's passes averaged, and the three judges, GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1
+Flash-Lite, blended Luna 4 : Haiku 3 : Gemini 3 (judge_score_combine.TIER_JUDGE_WEIGHTS).  On the 61 axes, slot
+6, layer 25, raw (rho against the activation projections, cost per axis at the real price, Flex and batch;
+scripts/judge_instruction_12way.py --mode descriptions):
 
-    gpt-6-luna alone                      0.680   $0.019    the cheap end
-    gpt-5.6-luna alone                    0.704   $0.042
-    gpt-5.6-luna + claude-haiku-5-5       0.716   $0.084    the default
-    the same + gemini-3.1-flash-lite      0.720   $0.152    +0.004 [-0.001, +0.010], frontier in 9 of 12
+    gpt-5.6-luna alone, 1 pass                                  0.712   $0.011    frontier in 12 of 12
+    gpt-5.6-luna + claude-haiku-5-5, 2 passes (the default to 2026-11-03)   0.747   $0.042    7 of 12
+    the three, 2 passes each (the default)                      0.752   $0.076    9 of 12
 
-Reasoning adds nothing to any of them, a third pass adds about 0.009 for half as much again, and N=5 and N=7 are
-never on a judge's frontier.  The defaults below are that decision: change them here, in one place.
+Roger's rule (2026-11-03), chosen over picking among twenty arms a few thousandths apart: every model we have,
+since the cross-model ensemble helps and varies by axis, and as many passes as the one text per entity needs
+(a second pass of one judge adds 0.02 here, against 0.005 on instructions, which have five texts).  Luna's third
+and fourth passes add 0.007 and 0.004 for the price of a second judge, which adds more.  Reasoning adds nothing to
+any judge, and N=5 and N=7 are never on a judge's frontier.  The defaults below are that decision: change them
+here, in one place.  Instruction judging has its own settled method, scripts/judge_instruction_grid.py.
 
 Each pass is a cell of judge_tier_cost_eval.py, <axis>_tier_eval/<judge>@b10n<N>s<seed>/, whose every answer is
 saved as it arrives, so a stopped or failed run is simply run again.  Then each judge's passes are averaged into
@@ -56,10 +60,9 @@ DESCRIPTION_ENTITIES_PER_CALL = 20
 DESCRIPTION_PASSES = 2
 #: Two judges until a third is proven (Roger, 2026-11-02): the ensemble of two was found significantly better
 #: than either alone, while three models bring three pairs and a trio to evaluate.
-DESCRIPTION_JUDGES = ("gpt-5.6-luna", "claude-haiku-5-5")
-#: Supported and measured, not in the default: pass them as --judge_model.  Gemini 3.1 Flash-Lite as a third
-#: judge, GPT-6 Luna alone for the cheap end.
-OPTIONAL_JUDGES = ("gemini-3.1-flash-lite", "gpt-6-luna")
+DESCRIPTION_JUDGES = ("gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite")
+#: Supported and measured, not in the default: pass them as --judge_model.  GPT-6 Luna alone for the cheap end.
+OPTIONAL_JUDGES = ("gpt-6-luna",)
 #: The reply cap per entity.  No reply reached these in the evaluation; Haiku 5.5 writes about twice as much.
 MAX_TOKENS_PER_ENTITY = 60
 MAX_TOKENS_PER_ENTITY_BY_PROVIDER = {"anthropic": 150}
@@ -165,7 +168,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--name_format", choices=list(NAME_FORMATS), default=DEFAULT_NAME_FORMAT,
                    help="how prompts show entity names (judge_tier_cost_eval.py)")
     p.add_argument("--transport", choices=list(ev.tt.TRANSPORT_CHOICES), default="auto",
-                   help="default auto: GPT-5.6 Luna by Flex, Haiku 5.5 by Message Batches, Gemini in real time")
+                   help="default auto: GPT-5.6 Luna by Flex, Haiku 5.5 by Message Batches, Gemini by its Batch API "
+                        "at half price (since 2026-11-03; realtime for its generateContent calls)")
     p.add_argument("--budget_usd", type=float, default=None,
                    help="per pass of a judge: stop issuing live and Flex requests past this measured spend (a batch "
                         "is submitted whole)")

@@ -499,3 +499,110 @@ def test_grid_analysis_records_its_inputs(tmp_path, monkeypatch):
     assert _png_inputs(tmp_path / "judge_tier_grid_dev30.png")
     res = json.loads((tmp_path / "judge_tier_grid_dev30.json").read_text())
     assert res["_provenance"]["inputs"] and {r["cell"] for r in res["result"]} == set(arms)
+
+
+# ---------------------------------------------------------------------------
+# scripts/judge_instruction_12way.py: Nx = N passes over all five instructions (Roger, 2026-11-03),
+# averaged over the choices of passes
+# ---------------------------------------------------------------------------
+
+def test_instruction_12way_arms_are_every_judge_set_at_1x_and_2x_luna_to_4x_and_the_mixes():
+    mod = _script("judge_instruction_12way")
+    arms = mod.arms()
+    assert len(arms) == 7 * 2 + 2 + 4 and len({lab for lab, _ in arms.values()}) == 20
+    assert arms["gpt-5.6-luna+claude-haiku-5-5@i1_p0n20x2"] == ("Luna + Haiku 2x", {"gpt-5.6-luna": 2, "claude-haiku-5-5": 2})
+    assert arms["gpt-5.6-luna@i1_p0n20x4"] == ("Luna 4x", {"gpt-5.6-luna": 4})          # Luna alone (Roger, 2026-11-03)
+    assert not any(k.endswith(("x3", "x4")) for k in arms if not k.startswith("gpt-5.6-luna@"))
+    assert arms["gpt-5.6-luna+claude-haiku-5-5+gemini-3.1-flash-lite@i1_p0n20m2-1-1"] == (
+        "Luna 2x + Haiku 1x + Gemini 1x", {"gpt-5.6-luna": 2, "claude-haiku-5-5": 1, "gemini-3.1-flash-lite": 1})
+    assert arms["gpt-5.6-luna+claude-haiku-5-5+gemini-3.1-flash-lite@i1_p0n20m2-2-1"][0] == "Luna 2x + Haiku 2x + Gemini 1x"
+    assert len(mod.replicates({"gpt-5.6-luna": 2, "claude-haiku-5-5": 2, "gemini-3.1-flash-lite": 1})) == 6 * 1 * 2
+    series = mod.series()
+    luna = next(s for s in series if s[0].startswith("gpt-5.6-luna@"))
+    assert [c[-2:] for c in luna] == ["x1", "x2", "x3", "x4"]
+    assert len(series) == 7 and all([c[-2:] for c in s] == ["x1", "x2"] for s in series if s is not luna)
+    assert sorted(c for s in series for c in s) == sorted(k for k, (_, spec) in arms.items() if len(set(spec.values())) == 1)
+    # every arm fits the passes judged
+    assert all(k <= mod.PASSES[m] for _, spec in arms.values() for m, k in spec.items())
+
+
+def test_instruction_12way_a_pass_is_all_five_instructions_and_choices_are_per_judge():
+    mod = _script("judge_instruction_12way")
+    assert list(mod.pass_rounds(0)) == [0, 1, 2, 3, 4] and list(mod.pass_rounds(3)) == [15, 16, 17, 18, 19]
+    passes = {"a": 4, "b": 2}
+    assert len(mod.replicates({"a": 1}, passes)) == 4 and len(mod.replicates({"a": 2}, passes)) == 6
+    assert len(mod.replicates({"a": 4}, passes)) == 1
+    mix = mod.replicates({"a": 2, "b": 1}, passes)
+    assert len(mix) == 6 * 2 and all(len(rep["a"]) == 10 and len(rep["b"]) == 5 for rep in mix)
+    assert {rep["b"] for rep in mix} == {(0, 1, 2, 3, 4), (5, 6, 7, 8, 9)}
+    # Luna's two judgements average to 2, Haiku says 6: per judge, then Luna 4 to Haiku 3 (Roger, 2026-11-03), not
+    # (1 + 3 + 6) / 3; an entity Haiku left out is Luna's alone; two judges without Luna weigh alike
+    assert mod.combine({"gpt-5.6-luna": [{"e": 1, "f": 5}, {"e": 3}], "claude-haiku-5-5": [{"e": 6}]}) == pytest.approx(
+        {"e": (4 * 2 + 3 * 6) / 7, "f": 5.0})
+    assert mod.combine({"a": [{"e": 1}, {"e": 3}], "b": [{"e": 6}]}) == {"e": 4.0}
+
+
+def test_instruction_12way_table_costs_whole_passes_and_averages_over_the_choices():
+    mod = _script("judge_instruction_12way")
+    rng = np.random.default_rng(3)
+    names = [f"t{i}" for i in range(40)]
+    proj = {n: float(rng.normal()) for n in names}
+    ax = jtr.AxisDef("x_vs_y", "x", "y", "traits")
+    vkeys = ["v1", "v2"]
+    projections = {"x_vs_y": {"v1": proj, "v2": {n: -p for n, p in proj.items()}}}
+    scores, costs = {}, {}
+    for r in range(10):
+        scores["x_vs_y", "good", r] = dict(proj)                                    # agrees with v1 exactly
+        scores["x_vs_y", "noise", r] = {n: float(rng.normal()) for n in names}
+        costs["x_vs_y", "good", r], costs["x_vs_y", "noise", r] = 0.01 * (r + 1), 0.02
+    passes = {"good": 2, "noise": 2}
+    rho, cost, per_choice = mod.arm_table({"good@x1": {"good": 1}, "good+noise@x2": {"good": 2, "noise": 2}},
+                                          [ax], scores, costs, projections, vkeys, passes=passes)
+    assert rho["good@x1"]["x_vs_y"]["v1"] == pytest.approx(1.0) and rho["good@x1"]["x_vs_y"]["v2"] == pytest.approx(-1.0)
+    assert cost["good@x1"] == pytest.approx((0.15 + 0.40) / 2)                      # a whole pass, either of the two
+    assert cost["good+noise@x2"] == pytest.approx(0.55 + 10 * 0.02)                 # both passes of each judge
+    assert len(per_choice["good@x1"]["v1"]) == 2 and len(per_choice["good+noise@x2"]["v1"]) == 1
+    assert 0 < rho["good+noise@x2"]["x_vs_y"]["v1"] < 1
+
+
+def test_instruction_12way_fits_the_mix_weights_and_checks_them_out_of_sample():
+    mod = _script("judge_instruction_12way")
+    rng = np.random.default_rng(5)
+    axes = [jtr.AxisDef(f"a{i}_vs_b{i}", f"a{i}", f"b{i}", "traits") for i in range(6)]
+    scores, projection = {}, {}
+    for ax in axes:
+        names = [f"t{i}|T" for i in range(60)]
+        proj = {n: float(rng.normal()) for n in names}
+        projection[ax.axis_dir] = proj
+        for r in range(10):       # "good" tracks the projection with a little noise, "noise" does not
+            scores[ax.axis_dir, "good", r] = {n: p + 0.3 * float(rng.normal()) for n, p in proj.items()}
+            scores[ax.axis_dir, "noise", r] = {n: float(rng.normal()) for n in names}
+    spec, passes = {"good": 2, "noise": 1}, {"good": 2, "noise": 2}
+    grid = mod.weight_grid(2)
+    assert len(grid) == 21 and np.allclose(grid.sum(1), 1)
+    assert len(mod.weight_grid(3)) == 231
+    G = mod.fit_rho(spec, axes, scores, projection, grid, passes=passes)
+    fit = mod.fit_weights(G, grid, np.array([True, False] * 3), list(spec))
+    assert fit["weights"]["good"] >= 0.9 and fit["in_sample_gain"] > 0
+    assert set(fit["split_half_weights"]) == {"dev", "held"} and fit["leave_one_axis_out_gain"] > 0
+    # the fitted weights reach the table, the others keep the default
+    projections = {a: {"v": p} for a, p in projection.items()}
+    costs = {k: 0.01 for k in scores}
+    rho_fit, _, _ = mod.arm_table({"m": spec}, axes, scores, costs, projections, ["v"], passes=passes,
+                                  weights={"m": fit["weights"]})
+    rho_def, _, _ = mod.arm_table({"m": spec}, axes, scores, costs, projections, ["v"], passes=passes)
+    assert np.mean([r["v"] for r in rho_fit["m"].values()]) > np.mean([r["v"] for r in rho_def["m"].values()])
+
+
+def test_instruction_12way_descriptions_mode_reads_the_jl_cells_two_passes_each():
+    mod = _script("judge_instruction_12way")
+    d = mod.MODES["descriptions"]
+    assert d.cell("gpt-5.6-luna", 0) == "gpt-5.6-luna@none@b10n20s1jl" and d.cell("claude-haiku-5-5", 1) == "claude-haiku-5-5@b10n20s2jl"
+    assert d.rounds_per_pass == 1 and d.passes == {"gpt-5.6-luna": 4, "claude-haiku-5-5": 2, "gemini-3.1-flash-lite": 2}
+    arms = mod.arms(d)
+    assert len(arms) == 7 * 2 + 2 + 4 and all(k <= d.passes[m] for _, spec in arms.values() for m, k in spec.items())
+    assert "gpt-5.6-luna@b10n20jlx4" in arms and "claude-haiku-5-5@b10n20jlx3" not in arms
+    assert len(mod.replicates({"gpt-5.6-luna": 2, "claude-haiku-5-5": 1}, d.passes, d.rounds_per_pass)) == 6 * 2
+    assert mod.replicates({"a": 1}, {"a": 2}, 1) == [{"a": (0,)}, {"a": (1,)}]
+    assert sorted(len(s) for s in mod.series(d)) == [2] * 6 + [4]
+    assert mod.INSTRUCTIONS.cell("gpt-5.6-luna", 7) == "gpt-5.6-luna@i1_p0n20r7"

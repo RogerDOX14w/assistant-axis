@@ -61,7 +61,7 @@ def main(argv=None) -> int:
             groups = {}
             for rec in answers_of(d / "answers.jsonl.gz"):
                 if rec.get("batch"):
-                    groups.setdefault(tuple(rec["batch"]), rec)
+                    groups.setdefault(tuple(rec["batch"]), {})[rec["name"]] = rec
             built = ev.axis_groups(SimpleNamespace(entities=listed), SimpleNamespace(
                 shuffle_seed=prov.get("shuffle_seed", 0), entities_per_call=prov.get("entities_per_call", 1),
                 batch_design=prov.get("batch_design", "shuffle")))
@@ -70,7 +70,8 @@ def main(argv=None) -> int:
             n["groups_same"] += same
             if prov.get("batch_design", "shuffle") == "shuffle" and same != len(built):
                 n["cells_with_other_groups"] += 1
-            for names, rec in groups.items():
+            for names, recs in groups.items():
+                rec = next(iter(recs.values()))
                 n["prompts"] += 1
                 if not all(x in entities for x in names):
                     n["entity_gone"] += 1
@@ -81,10 +82,12 @@ def main(argv=None) -> int:
                 else:
                     n["prompt_differs"] += 1
                     bad.append(f"prompt: {job.axis_dir} {d.name} {names[0]}")
-                if rec.get("truncated") or not rec.get("reply"):
-                    continue
-                parsed = rubric.parse_batch(rec["reply"], len(names))
                 for k, name in enumerate(names, 1):
+                    own = recs.get(name)
+                    if own is None or own.get("truncated") or not own.get("reply"):
+                        continue
+                    # a member's record holds the reply that gave it a line: a re-asked group has several
+                    parsed = rubric.parse_batch(own["reply"], len(names))
                     seen.add(name)
                     new, old = parsed.get(k), result.get(name)
                     n["ratings"] += 1

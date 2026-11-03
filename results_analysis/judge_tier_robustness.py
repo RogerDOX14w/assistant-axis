@@ -187,6 +187,7 @@ from results_analysis.judge_tier_cost_plot_pooled import (  # noqa: E402
     display_name,
     label_key,
     place_labels as _place_labels,
+    DEFAULT_PRICE_BASIS,
     PRICE_BASES,
     PRICE_BASIS_LABEL,
     PROVIDER_COLOR,
@@ -194,6 +195,7 @@ from results_analysis.judge_tier_cost_plot_pooled import (  # noqa: E402
     estimate_cost,
     load_measured_cost,
     pareto_frontier,
+    price_factor,
     provider_of,
 )
 
@@ -203,7 +205,9 @@ DEFAULT_SLOTS = [0, 6]
 DEFAULT_LAYERS = [25, 49]
 REGIMES = ("raw", "soft_K", "soft_shear")
 DEFAULT_VARIANT = "s6_l25_raw"   # Konstantinos' projections: slot 6, layer 25, raw
-DEFAULT_PRICE_BAND = 0.25        # USD per axis
+#: USD per axis at DEFAULT_PRICE_BASIS: $0.25 at list price until 2026-11-03, halved with the move to the
+#: real price (every judge here half price), so that the band holds the same judges.
+DEFAULT_PRICE_BAND = 0.125
 DEFAULT_BOOTSTRAP_DRAWS = 2000
 DEFAULT_BOOTSTRAP_SEED = 20261101
 TIER_EVAL_SUFFIX = "_tier_eval"
@@ -394,14 +398,13 @@ def _bare(key: str) -> str:
 
 
 def load_cells(axes: Sequence[AxisDef], experiments_dir: Path, tier_eval_dir: Path,
-               kinds_for_name: Dict[str, set], price_basis: str = "list",
+               kinds_for_name: Dict[str, set], price_basis: str = DEFAULT_PRICE_BASIS,
                inputs: Optional[list] = None,
                include_legacy: bool = True, policy: str = "warn") -> Tuple[Dict[str, Dict[str, Cell]], List[dict]]:
     """``({model: {axis_dir: Cell}}, skipped)``.  Tier cells first; a legacy
     cell fills an axis only where no tier cell of the same label exists."""
     cells: Dict[str, Dict[str, Cell]] = {}
     skipped: List[dict] = []
-    factor = 0.5 if price_basis == "batch" else 1.0
 
     def _load(path: Path, dep_key: str) -> dict:
         payload, _spec, _check = load_and_register(path, dep_key=dep_key, inputs=inputs, policy=policy)
@@ -438,7 +441,7 @@ def load_cells(axes: Sequence[AxisDef], experiments_dir: Path, tier_eval_dir: Pa
             n_scored = sum(1 for k in raw if _bare(k) not in poles)
             cells.setdefault(model, {})[ax.axis_dir] = Cell(
                 model, ax.axis_dir, lift_scores(raw, kinds_for_name), n_scored,
-                estimate_cost(n_scored, rin, rout) * factor, False, sp)
+                estimate_cost(n_scored, rin, rout) * price_factor(model.split(" (")[0], price_basis), False, sp)
     return cells, skipped
 
 
@@ -1035,8 +1038,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Goal/no-goal subspaces for the shear (default: combined).")
     p.add_argument("--default_variant", default=DEFAULT_VARIANT,
                    help=f"The variant the others are compared with (default: {DEFAULT_VARIANT}).")
-    p.add_argument("--price_basis", choices=PRICE_BASES, default="list",
-                   help="Cost basis, as judge_tier_cost_plot_pooled.py (default: list).")
+    p.add_argument("--price_basis", choices=PRICE_BASES, default=DEFAULT_PRICE_BASIS,
+                   help=f"Cost basis, as judge_tier_cost_plot_pooled.py (default: {DEFAULT_PRICE_BASIS}, the real "
+                        f"price, since 2026-11-03; list before).")
     p.add_argument("--legacy", action="store_true",
                    help="Also compare the May 2026 cells, \"gpt-4.1-mini (May)\" and \"claude-sonnet-4 (May)\" "
                         "(T=0, max_tokens 1024, mixed rubric versions; the Sonnet cells mix two models).  Off "

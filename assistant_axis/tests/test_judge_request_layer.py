@@ -262,6 +262,11 @@ def test_gemini_stops_on_a_daily_quota_and_a_bad_request():
     daily = {"error": {"details": [{"violations": [{"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]}]}}
     with pytest.raises(J.BillingError):
         run(J.call_gemini_judge(FakeGemini(http(429, daily)), "P", "gemini-3.1-flash-lite", 9, RATE))
+    depleted = {"error": {"code": 402, "message": "Your prepayment credits are depleted."}}
+    client = FakeGemini(http(402, depleted))
+    with pytest.raises(J.BillingError, match="topped up"):
+        run(J.call_gemini_judge(client, "P", "gemini-3.1-flash-lite", 9, RATE))
+    assert len(client.posts) == 1
     with pytest.raises(J.JudgeRequestError):
         run(J.call_gemini_judge(FakeGemini(http(404, {"error": "no such model"})), "P", "gemini-2.5-flash-lite", 9, RATE))
 

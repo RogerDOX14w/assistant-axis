@@ -60,3 +60,9 @@ $PY results_analysis/judge_tier_robustness.py --experiments_dir $E --data_dir "$
 $PY scripts/judge_tier_grid_analysis.py --experiments_dir $E --axes_file $DEV
 $PY scripts/judge_tier_grid_12way.py --robustness_json $G/judge_tier_grid_12way_rho.json --output_dir $G
 $PY scripts/judge_tier_grid_shapes.py --robustness_json $G/judge_tier_grid_12way_rho.json --output_dir $G
+
+# Judge sets by passes, instruction and description judging, on the 61 axes (about 4 minutes each; the
+# slice cache above)
+I=$E/instruction_judging_12way
+$PY scripts/judge_instruction_12way.py --experiments_dir $E --data_dir "$D" --cache_dir $C --output_dir $I
+$PY scripts/judge_instruction_12way.py --experiments_dir $E --data_dir "$D" --cache_dir $C --output_dir $I --mode descriptions

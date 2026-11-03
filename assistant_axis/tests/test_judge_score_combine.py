@@ -475,3 +475,23 @@ class TestCohortMeanCurves:
         }
         avg_rs, _, _ = cohort_mean_curves(rho_table, pair_keys, min_axes=1)
         assert isinstance(avg_rs[0], float)
+
+
+class TestTierJudgeWeights:
+    """Luna 4, any other judge 3 (Roger, 2026-11-03)."""
+
+    def test_weights_by_model_whatever_the_cell_label(self):
+        from assistant_axis.judge_score_combine import tier_judge_weights
+        assert tier_judge_weights(["gpt-5.6-luna", "claude-haiku-5-5"]) == pytest.approx(
+            {"gpt-5.6-luna": 4 / 7, "claude-haiku-5-5": 3 / 7})
+        trio = tier_judge_weights(["gpt-5.6-luna@none@b10n20x2", "claude-haiku-5-5@b10n20x2", "gemini-3.1-flash-lite@b10n20x2"])
+        assert list(trio.values()) == pytest.approx([0.4, 0.3, 0.3])
+        assert tier_judge_weights(["claude-haiku-5-5", "gemini-3.1-flash-lite"]) == pytest.approx(
+            {"claude-haiku-5-5": 0.5, "gemini-3.1-flash-lite": 0.5})
+
+    def test_combine_renormalises_over_the_judges_present(self):
+        from assistant_axis.judge_score_combine import combine_tier_judges
+        out = combine_tier_judges({"gpt-5.6-luna": {"a": 1.0, "b": 2.0},
+                                   "claude-haiku-5-5": {"a": 8.0, "c": 5.0, "d": None}})
+        assert out == pytest.approx({"a": (4 * 1 + 3 * 8) / 7, "b": 2.0, "c": 5.0})
+        assert combine_tier_judges({}) == {}

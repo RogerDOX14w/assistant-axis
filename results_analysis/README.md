@@ -2740,20 +2740,37 @@ drift on resume".
 [`judge_descriptions.py`](./judge_descriptions.py) judges axes from the entities'
 descriptions as the judge-tier evaluation settled it: the batched percentile rubric
 `b10`, 20 entities per call, two passes in independent random orders, no reasoning,
-each judge's passes averaged and the judges blended by the mean of their scores.
-The defaults are the constants at the top of that script, one place to change them.
+each judge's passes averaged, and **since 2026-11-03 the three judges, GPT-5.6 Luna,
+Haiku 5.5 and Gemini 3.1 Flash-Lite, blended Luna 4 : Haiku 3 : Gemini 3** (Roger: "Luna +
+Haiku + Gemini at 2× each"; `judge_score_combine.TIER_JUDGE_WEIGHTS`).  The defaults are
+the constants at the top of that script, one place to change them.
 
-| judges, at N=20 and 2 passes (30 development axes, slot 6, layer 25, raw) | ρ | $ per axis, list price | on the frontier, of 12 variants |
+The choice on the 61 axes under the 12 projection variants, 20 arms (every set of judges at
+1x and 2x, Luna alone to 4x, and mixes), each averaged over every choice of its passes
+([`judge_description_12way.png`](../roger/axis_judge_experiments/instruction_judging_12way/judge_description_12way.png),
+`scripts/judge_instruction_12way.py --mode descriptions`; slot 6, layer 25, raw; the real
+price, Flex and batch, May corpus):
+
+| judges, N=20 (61 axes) | ρ | $ per axis | on the frontier, of 12 variants |
 |---|---:|---:|---:|
-| GPT-6 Luna alone (the cheap end) | 0.680 | 0.019 | 12 |
-| GPT-5.6 Luna alone | 0.704 | 0.042 | 12 |
-| **GPT-5.6 Luna + Haiku 5.5 (the default)** | **0.716** | **0.084** | **12** |
-| the same + Gemini 3.1 Flash-Lite (`--judge_model`, optional) | 0.720 | 0.152 | 9 |
+| GPT-5.6 Luna, 1 pass | 0.712 | 0.011 | 12 |
+| Luna + Haiku, 1 pass each | 0.735 | 0.021 | 11 |
+| Luna 2 passes + Haiku 1 (fitted 0.65 : 0.35) | 0.744 | 0.032 | 11 |
+| Luna, 4 passes | 0.744 | 0.042 | 1 |
+| Luna + Haiku, 2 passes each (the default from 2026-11-02 to 2026-11-03) | 0.747 | 0.042 | 7 |
+| Luna 2 + Haiku 2 + Gemini 1 (fitted 0.50 : 0.35 : 0.15) | 0.750 | 0.059 | 9 |
+| **Luna + Haiku + Gemini, 2 passes each (the default)** | **0.752** | **0.076** | **9** |
 
-The third judge's gain is +0.004 [−0.001, +0.010], and a third pass of Luna and Haiku
-at N=10 ($0.143) gives as much, +0.005 [+0.001, +0.009].  Gemini 3.1 is not on the frontier alone, and
-behaves as the others do on batch size and passes, except that reasoning hurts it.
-Gemini 3.1 Flash-Lite's earliest shutdown is 2027-05-07.
+The rule is the one settled for instructions the same day (below): every model we have,
+since the cross-model ensemble helps and its gains vary by axis, and repeat passes of one
+model are the worse buy at every price (Luna's fourth pass only matches Luna 2 + Haiku 1 at
+a third more).  What differs is how many passes the text needs: a second pass of a judge
+adds 0.020 here, against 0.005 on instructions, because a description is one text per
+entity where an entity has five instructions, so descriptions take two passes of each
+judge.  The trio at 2x is +0.0045 [+0.0016, +0.0075] over the earlier default at $0.034
+more an axis (about $8 for 200 axes at the May size), on the frontier or tied with it in
+every variant.  Reasoning adds nothing to any judge, and N=5 and N=7 are never on a judge's
+frontier.  Gemini 3.1 Flash-Lite's earliest shutdown is 2027-05-07.
 
 ```bash
 # New data: projections first (no judge calls)
@@ -2767,7 +2784,9 @@ uv run python results_analysis/judge_descriptions.py --axes_file AXES.tsv --budg
 Cells go to `<axis>_tier_eval/<judge>@b10n20s<seed>/`, the averages to
 `<judge>@b10n20x2/` and the blend to `<judge>+<judge>@b10n20x2/`
 ([`judge_tier_average.py`](./judge_tier_average.py), which refuses a source holding
-under 90% of the axis).  **Not yet wired to the older consumers**: the scripts that
+under 90% of the axis; since 2026-11-03 the blend weighs Luna 4 to Haiku 3,
+`judge_score_combine.TIER_JUDGE_WEIGHTS`, and a blend made at equal weights before then
+is made again on the next run).  **Not yet wired to the older consumers**: the scripts that
 read `<axis>/gpt/scores_descriptions.json` (the weight sweeps, `optimal_axis_for_judge.py`)
 still read `axis_judge_correlation.py --score_descriptions`' one-entity −3..+3 scores.
 That waits until instruction and response judging are settled, since they change the
@@ -2779,6 +2798,48 @@ one and to the provider's default otherwise, a request or account the provider
 refuses stops the run instead of giving every entity None, and a reply cut at
 `--max_tokens` is counted and never parsed.  Its requests for the older judges are
 byte-for-byte as they were.
+
+### Instruction judging: the settled method (Roger, 2026-11-03)
+
+[`scripts/judge_instruction_grid.py`](../scripts/judge_instruction_grid.py) `--design rounds`
+judges axes from the entities' instructions: **every judge judges each of an entity's five
+instructions once, one instruction per entity per call (the `i1_p0` rubric, the plain
+wrapper), 20 entities a call, in five rounds (round r the entity's instruction r, batched by
+seed r+1), and the three judges, GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite, are
+blended Luna 4 : Haiku 3 : Gemini 3** (`judge_score_combine.TIER_JUDGE_WEIGHTS`).  The
+defaults are the constants at the top of that script; it derives the blend cell
+`gpt-5.6-luna+claude-haiku-5-5+gemini-3.1-flash-lite@i1_p0n20x1` once the fifteen cells are
+in ([`judge_tier_average.py`](./judge_tier_average.py)).  Roger's rule, chosen to avoid
+picking among some twenty arms that differ by thousandths of ρ: one pass of every model,
+because the cross-model ensemble helps and varies by axis, and repeat passes of one model
+are not consistently worth their cost.
+
+| judges, each instruction judged once (61 axes, slot 6, layer 25, raw; real price, May corpus) | ρ | $ per axis | on the frontier, of 12 variants |
+|---|---:|---:|---:|
+| Luna alone | 0.767 | 0.050 | 11 |
+| Luna + Haiku | 0.774 | 0.098 | 11 |
+| **Luna + Haiku + Gemini (the default)** | **0.777** | **0.178** | **7** |
+| Luna 2x + Haiku 1x + Gemini 1x (fitted 0.55 : 0.25 : 0.20) | 0.779 | 0.228 | 3 |
+| Luna + Haiku + Gemini, 2x | 0.779 | 0.356 | 7 |
+
+The trio beats Luna alone on all 12 projection variants at 1.21 quality (1/(1-ρ)) per
+dollar per axis, more than Luna's own second pass earns (1.09), and Luna + Haiku on 9 of
+12 (+0.0027 [+0.0004, +0.0051] over the variants' mean) at 0.54.  Nothing dearer is
+distinguishable from it: Luna 2x + Haiku 1x + Gemini 1x and the trio at 2x are within
+noise of each other and of the 2-2-1 mix.  Luna's passes alone give +0.005, +0.002 and
++0.001 for the second, third and fourth, so a second judge is worth far more than a repeat.
+The full comparison, 20 arms under the 12 variants, is
+[`judge_instruction_12way.png`](../roger/axis_judge_experiments/instruction_judging_12way/judge_instruction_12way.png)
+(the script, under "Regenerating the judge-tier figures").  On the current corpus (1,270
+entities an axis, instructions 40 tokens against the May corpus' 24) the trio costs about
+$0.42 an axis, $84 for 200 axes at Flex and batch prices; Luna + Haiku about $46.
+
+```bash
+# The cost, then the run (a rerun resumes; finished cells are kept; the blend follows)
+uv run python scripts/judge_instruction_grid.py --design rounds --axes_file AXES.tsv --instructions_dir DATA --dry_run
+uv run python scripts/judge_instruction_grid.py --design rounds --axes_file AXES.tsv --instructions_dir DATA \
+    --budget_usd_per_cell 2.5 --logs LOGS
+```
 
 ### Evaluating a new judge tier without recomputing activations
 
@@ -2885,8 +2946,21 @@ warning instead; add such a model to `judge.PROMPT_CACHE_OFF_MODELS`.
 
 **Gemini** (2026-11-02): a `gemini-*` judge is reached directly at Google's
 generateContent endpoint over HTTPS (httpx; the key, `GEMINI_API_KEY`, travels
-in the `x-goog-api-key` header, never in the URL), in real time only (no
-Flex; Google's batch mode is not wired up).  Default settings: temperature 0
+in the `x-goog-api-key` header, never in the URL).
+Since 2026-11-03 it goes through Google's Batch API at half price by default
+(`--transport auto` or `batch`; `realtime` for generateContent calls; Roger:
+"we're not done experimenting with Gemini, so add batch mode for
+it"; [`assistant_axis/gemini_batch.py`](../assistant_axis/gemini_batch.py), the
+runner the tool drives as it drives the OpenAI and Anthropic ones): requests go
+inline, at most 15 MB a batch (Google's limit is 20 MB), usage is kept under
+`<model>:batch`, a batch created but not recorded is found again by its display
+name, and what a batch fails to answer is judged in real time.  Google states a
+24-hour target and expires a batch after 48 hours; here one request came back in
+1 min 47 s and each round of instruction judging (1,769 requests, 8.7 MB) in about
+3 minutes (2026-11-03), so `auto` chooses it.  Gemini's Flex tier (half
+price, a preview) is not wired.  An HTTP 402 (prepaid credit used up) raises
+`BillingError` in real time and `GeminiBatchError` in batch, stopping the run.
+Default settings: temperature 0
 (Gemini takes it) and `thinkingConfig.thinkingLevel` "minimal" (no thought
 tokens on 3.1 Flash-Lite; "low" added about 120 per call).  Thought tokens are
 charged as output.  A 429 or 5xx is retried eight times with growing sleeps.
@@ -2925,10 +2999,34 @@ pole's name is judged.
 provider failure comes back as `judge.FAILED`, not None: nothing was charged and
 nothing is known, so its entities stay unscored, live and Flex runs ask them again
 up to `REASK_ROUNDS` times, a minute apart, and what is still open at the end leaves
-its cell without a `usage.json`, for a rerun (exit status 4).  A refusal, a content
-flag and an unparseable reply are outcomes: asking again would repeat them.  A Mac
-asleep for three hours that day left eight empty cells marked finished, which is
-why this exists.
+its cell without a `usage.json`, for a rerun (exit status 4).  A refusal and a content
+flag are outcomes: asking again would repeat them.  A batched reply that leaves
+members unread is asked again (below).  A Mac asleep for three hours that day left
+eight empty cells marked finished, which is why this exists.
+
+**Unread members are asked again** (Roger, 2026-11-03: "In the case of rare parse
+errors, should we retry, since we're not at T=0? (At least a couple of times)").  A
+batched reply that gives some members no line (Luna stopping right after a score in
+words, `SCORE:  thirty?`, in 7 of 6,960 instruction replies; Haiku writing `Score 45`
+with no colon before the parser read it) is followed by the same prompt again, up to
+`PARSE_RETRIES` (3) times, in every transport (the Batch API's in real time after
+collection).  The judges run at temperature 1, so a re-ask is a new sample.  Each
+member keeps the first reply that gives it a line, so a re-ask only fills gaps; what
+the last reply leaves unread goes unscored.  Every re-asked reply is kept on a
+`reask` line of the answer log with its charges, and the cell's provenance counts
+them (`parse_retries`).  A refusal still goes to the split, and a reply cut at the
+cap to its repair.  For cells already written,
+[`scripts/judge_tier_reask.py`](../scripts/judge_tier_reask.py) `--mode unread`
+does the same in place: groups rebuilt from the recorded seed (and checked against
+the cell's own log when it has one), only the gaps filled, the re-asks in the cell's
+`reask_log.jsonl.gz` and its `usage.json`.  Its `--mode names` gives a cell judged
+before 2026-11-02 under mechanical names a sibling `<cell>jl` under the judge display
+form: the groups whose prompt changes (those holding one of the 13 entities whose
+label differs, `big-picture`, `devil's advocate`; every group on
+`systems_thinker_vs_analytical`, whose pole is one) are asked afresh, the rest keep
+their ratings, and the source is untouched.  Such a cell's `usage.json` holds only the
+re-asks, so `judge_tier_cost_eval.cell_usage_path` costs it as its source
+(`reasked_from`), as `scripts/judge_tier_compare_arms.py` does.
 
 **Scores in words** (2026-11-02, [`assistant_axis/judge_score_words.py`](../assistant_axis/judge_score_words.py)).
 GPT-5.6 Luna now and then writes `SCORE: thirty-five`, usually for a whole batch,
@@ -3019,10 +3117,30 @@ point.
 - **Coverage.**  A model judged on fewer axes than the headline count (the
   most any model has) is left off and named in the title; `--min_axes N`
   lowers the bar.
-- **Cost.**  `--price_basis list` (default) recomputes every cell from its
-  token counts at the real-time list price, so batch and Flex cells compare
-  with real-time ones; `batch` halves that; `recorded` takes `usage.json` as
-  billed.
+- **Cost.**  Every cell is recomputed from its token counts, whatever
+  transport it went by.  **Since 2026-11-03 the default is `--price_basis
+  batch`, the real price** (Roger: "We should probably be computing Pareto at
+  real price, in case someone offered a bigger or smaller discount for
+  batch"): each model at its own batch or Flex rate (`_BATCH_PRICE_FACTORS`
+  in [`judge_pricing.py`](../assistant_axis/judge_pricing.py); the list
+  price for a model with none), so a provider whose discount differed would
+  show it.  Every judge compared so far is half price that way, so the
+  frontiers are the ones the list price drew and the dollars are half: **the
+  tables and figures made before 2026-11-03 are at list price**, `--price_basis
+  list`, twice these figures.  `recorded` takes `usage.json` as billed.  The
+  same default holds in `judge_tier_robustness.py` (whose `--price_band` went
+  from $0.25 to $0.125 an axis, so that it bounds the same judges),
+  `scripts/judge_tier_grid_analysis.py` and `scripts/judge_tier_compare_arms.py`.
+- **Frontier.**  **Since 2026-11-03 a point is on the frontier only if it is
+  also on the frontier's convex hull** (Roger: "Only count points on the Pareto
+  frontier if they are on its convex hull"): `pareto_frontier` keeps the
+  non-dominated points and drops any that lies under the chord of its
+  neighbours, the hull taken on mean ρ against linear cost, the units of an
+  exchange rate (ρ per $ per axis), at which such a point is never the best
+  choice.  Every judge-tier figure and frontier count shares the function
+  (this plot, `judge_tier_robustness.py`, the grid and tuning scripts,
+  `scripts/judge_instruction_12way.py`); figures and counts made before that
+  date used the non-dominated points alone (`hull=False`).
 - **ρ.**  `--robustness_json` takes each cell's ρ from
   `judge_tier_robustness.py`'s output (default variant `s6_l25_raw`), which
   drops the nine trait/role collision names on bare-keyed axes that the
@@ -3141,6 +3259,30 @@ checks itself against the cells' cached `correlations.json` at `s6_l25_raw`
 vectors (`--data_dir`) and caches the activation slices it needs
 (`--cache_dir`); it also takes `--exclude_models` and `--legacy`.
 
+[`scripts/judge_instruction_12way.py`](../scripts/judge_instruction_12way.py) (2026-11-03,
+Roger) draws the same layout for instruction judging: Luna, Haiku 5.5 and Gemini 3.1
+Flash-Lite alone, in pairs and as a trio at 1x and 2x, Luna alone also at 3x and 4x,
+Luna 2x with Haiku, Gemini or both at 1x, and Luna 2x + Haiku 2x + Gemini 1x.  **Nx means every judge in the arm judges each of
+an entity's five instructions, separately, N times** (Roger: "Nx is for reducing with T=1
+noise, not inter-instruction variation"): N passes over the five, a pass being five
+`@i1_p0n20r<r>` rounds (round r shows instruction r mod 5, batched by seed r+1; pass p is
+rounds 5p to 5p+4), so Nx costs N whole passes.  Passes judged: Luna 4 (rounds 0-19), Haiku
+and Gemini 2 (rounds 0-9).  Each arm's ρ and cost are averaged over every choice of its
+judges' passes, made for each judge apart.  It reuses this tool's slice cache, projections
+and figure, and writes no cells
+([`judge_instruction_12way.png`](../roger/axis_judge_experiments/instruction_judging_12way/judge_instruction_12way.png);
+a first version read Nx as N of the five instructions judged once, kept in
+[`coverage_reading/`](../roger/axis_judge_experiments/instruction_judging_12way/coverage_reading/)).
+An entity's score is each judge's mean over all its judgements, the judges then weighted
+Luna 4 to another judge's 3 (`judge_score_combine.TIER_JUDGE_WEIGHTS`, Roger, 2026-11-03:
+Luna alone beats Haiku and Gemini alone; [`judge_tier_average.py`](./judge_tier_average.py)'s
+blend cells use the same weights).  For equal passes that is a prior, not a tuning: weights
+fitted to maximise ρ leaned to Luna (0.55-0.60 in a pair) but gained at most +0.0008 in
+sample and nothing out of sample (split-half and leave-one-axis-out, within ±0.001).  The
+mixes, whose judges judge different numbers of times, take weights fitted to the most ρ at
+the default variant, with both checks recorded in the JSON.  Its frontier counts follow the
+convex-hull rule (the pooled plot's "Frontier" bullet above).
+
 The current results, with the commands that made them:
 [`pareto_pooled_61axes_notes.md`](../roger/axis_judge_experiments/pareto_pooled_61axes_notes.md)
 and [`pareto_pooled_20axes_notes.md`](../roger/axis_judge_experiments/pareto_pooled_20axes_notes.md).
@@ -3152,11 +3294,15 @@ figure from the recorded cells with no API calls, and each PNG records its comma
 and inputs: `judge_tier_robustness_*.png` (this tool), `pareto_pooled_*.png`
 ([`judge_tier_cost_plot_pooled.py`](./judge_tier_cost_plot_pooled.py); the arrows run from
 the old rubric to the batched method), the rubric tuning
-([`scripts/judge_tier_tuning_panels.py`](../scripts/judge_tier_tuning_panels.py)) and the
+([`scripts/judge_tier_tuning_panels.py`](../scripts/judge_tier_tuning_panels.py)), the
 optimisation grid: [`scripts/judge_tier_grid_12way.py`](../scripts/judge_tier_grid_12way.py),
 [`scripts/judge_tier_grid_analysis.py`](../scripts/judge_tier_grid_analysis.py) and
 [`scripts/judge_tier_grid_shapes.py`](../scripts/judge_tier_grid_shapes.py) (do the judges
-respond alike, and is each setting on the judge's own frontier).  The unfiltered vectors
+respond alike, and is each setting on the judge's own frontier), and the judge sets by
+passes for instruction and description judging
+([`scripts/judge_instruction_12way.py`](../scripts/judge_instruction_12way.py), its two
+modes, into
+[`instruction_judging_12way/`](../roger/axis_judge_experiments/instruction_judging_12way/)).  The unfiltered vectors
 behind `judge_tier_robustness_61axes_unfiltered.png` come from
 [`scripts/judge_tier_build_unfiltered_vectors.py`](../scripts/judge_tier_build_unfiltered_vectors.py),
 which needs the archive drive.

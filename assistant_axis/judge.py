@@ -1501,8 +1501,9 @@ async def call_gemini_judge(
     prompt, :data:`FAILED` for a call that got no answer, or :data:`SKIPPED`.  A
     connection error, a 429 or a 5xx (rate limits, "high demand" 503s) is tried
     :data:`GEMINI_ATTEMPTS` times with growing sleeps.  An HTTP 400, 401, 403 or 404
-    raises :class:`JudgeRequestError`, and a 429 naming a daily quota
-    :class:`BillingError`, since no retry within a run gets past it."""
+    raises :class:`JudgeRequestError`, and a 402 (prepaid credit used up) or a 429
+    naming a daily quota :class:`BillingError`, since no retry within a run gets past
+    it."""
     from .judge_pricing import TokenUsage
     stats = stats if stats is not None else CallStats()
     body = gemini_request_body(prompt, model, max_tokens, settings=settings)
@@ -1541,6 +1542,8 @@ async def call_gemini_judge(
             if resp.status_code in (400, 401, 403, 404):
                 logger.error(f"Error calling judge model {model}: {last}")
                 raise JudgeRequestError(f"{model}: {last}")
+            if resp.status_code == 402:     # "Your prepayment credits are depleted" (2026-11-03): every call would fail alike
+                raise BillingError(f"{model}: {last}; a rerun resumes once the credit is topped up")
             if resp.status_code == 429:
                 quotas = gemini_quota_ids(resp.text)
                 if any("PerDay" in q for q in quotas):

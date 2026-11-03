@@ -1,5 +1,5 @@
 """The rubric-tuning figure: one panel per judge, every rubric variant as a point (cost per axis at
-list price, quality 1/(1 - rho) at the default variant) from a judge_tier_robustness.json, labelled by
+the robustness file's price basis, quality 1/(1 - rho) at the default variant) from a judge_tier_robustness.json, labelled by
 the variant tokens.  No API calls.
 
 Usage: uv run python scripts/judge_tier_tuning_panels.py --robustness_json RHO.json --output OUT.png"""
@@ -10,7 +10,8 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from assistant_axis import png_metadata
 from assistant_axis.provenance import CACHE_POLICIES, load_and_register
-from results_analysis.judge_tier_cost_plot_pooled import PROVIDER_COLOR, cost_ticks, pareto_frontier, place_labels, provider_of
+from results_analysis.judge_tier_cost_plot_pooled import (PRICE_BASIS_LABEL, PROVIDER_COLOR, cost_ticks, pareto_frontier,
+                                                           place_labels, provider_of)
 
 JUDGES = ("gpt-6-luna", "claude-haiku-5-5", "gpt-5.6-luna@none", "gpt-4.1-mini")
 DEFAULT_TITLE = ("Rubric tuning, DESCRIPTION judging, 30 development axes: every variant per judge "
@@ -54,7 +55,7 @@ def main(argv=None) -> None:
         ticks = cost_ticks(min(xs) / 1.5, max(xs) * 1.5)
         ax.set_xticks(ticks); ax.set_xticklabels([f"\\${t:g}" for t in ticks]); ax.minorticks_off()
         ax.grid(True, alpha=0.3); ax.set_title(judge, fontsize=11)
-        ax.set_xlabel("cost per axis (USD, list price, log)"); ax.set_ylabel("1 / (1 − mean ρ)")
+        ax.set_xlabel(f"cost per axis (USD, {PRICE_BASIS_LABEL[r.get('config', {}).get('price_basis', 'list')]}, log)"); ax.set_ylabel("1 / (1 − mean ρ)")
         fig.canvas.draw()
         place_labels(ax, pts, labels, bold, fontsize=8.5)
     fig.suptitle(args.title, fontsize=12)
