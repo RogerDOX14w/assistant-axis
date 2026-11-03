@@ -164,6 +164,16 @@ def build_parser() -> argparse.ArgumentParser:
                              "gives its full mean and is marked short.  The activation file is "
                              "unchanged.  An entity is pending while either file is missing, and "
                              "an existing file is never rewritten.  Off by default")
+    # TOKEN_SOURCES, spelled out: the parser is built before the torch import
+    # below, ahead of the module-level names after it.
+    parser.add_argument("--token_source", choices=["auto", "ids", "text"], default="auto",
+                        help="Which tokens a response is prefilled as (the response-token-ids "
+                             "plan, 2026-11-02): auto (default), the ids step 1 stored when a "
+                             "record has them and a non-null content_token_range, else its text "
+                             "re-encoded; ids, the stored ids for every record (an entity with a "
+                             "record that has none fails); text, the stored text re-encoded for "
+                             "every record, as before (the comparison arm).  The counts are in "
+                             "the metadata, token_source")
     parser.add_argument("--prefix_token_layers", type=_layers_arg, default=None,
                         help="With --prefix_token_means: the layers its file keeps, a subset of "
                              "--layers in the same form (default: every extracted layer; at all "
@@ -377,6 +387,63 @@ class StoredTokens:
 
     ids: List[int]
     content_range: tuple
+
+
+# --token_source (the response-token-ids plan § 5.1, 2026-11-02): auto, a
+# record with stored ids and a non-null content range takes the ids path and
+# any other the text path; ids, every record must take the ids path; text,
+# the stored ids are ignored (today's step 2, the comparison arm).
+TOKEN_SOURCES = ("auto", "ids", "text")
+
+
+def record_key(resp: Dict) -> str:
+    """The activation key of a response record (``{label}_p{prompt}_q{question}``)."""
+    return f"{resp.get('label')}_p{resp.get('prompt_index')}_q{resp.get('question_index')}"
+
+
+def select_token_paths(responses: List[Dict], token_source: str, *,
+                       entity: str = "?") -> tuple[List[Optional[StoredTokens]], Dict[str, int]]:
+    """Which path each record takes under ``token_source`` (§ 5.1): per
+    record a :class:`StoredTokens` (the ids path) or None (the text path),
+    and the counts the activation file's metadata records, ``{"ids": n,
+    "text": n, "range_null": n}`` (``range_null``: records with stored ids
+    whose ``content_token_range`` is null or missing, which ``auto`` sends to
+    the text path; counted in ``text`` too).  Under ``ids`` a record without
+    stored ids or with a null range raises :class:`TokenSourceError` naming
+    how many there are; a range that is not two integers raises under
+    ``auto`` and ``ids`` alike."""
+    if token_source not in TOKEN_SOURCES:
+        raise ValueError(f"token_source {token_source!r} is not one of {TOKEN_SOURCES}")
+    records: List[Optional[StoredTokens]] = []
+    counts = {"ids": 0, "text": 0, "range_null": 0}
+    refused: List[str] = []
+    for resp in responses:
+        ids = resp.get("response_token_ids")
+        rng = resp.get("content_token_range")
+        if token_source == "text":
+            records.append(None)
+            counts["text"] += 1
+            continue
+        if ids is not None and rng is not None:
+            if (not isinstance(rng, (list, tuple)) or len(rng) != 2
+                    or not all(isinstance(x, int) and not isinstance(x, bool) for x in rng)):
+                raise TokenSourceError(f"{entity}: {record_key(resp)}: content_token_range "
+                                       f"{rng!r} is not [start, end]")
+            records.append(StoredTokens(ids=[int(i) for i in ids],
+                                        content_range=(int(rng[0]), int(rng[1]))))
+            counts["ids"] += 1
+            continue
+        if token_source == "ids":
+            why = "no stored ids" if ids is None else "a null range"
+            refused.append(f"{record_key(resp)} ({why})")
+        records.append(None)
+        counts["text"] += 1
+        counts["range_null"] += int(ids is not None)
+    if refused:
+        raise TokenSourceError(
+            f"{entity}: --token_source ids, but {len(refused)} of {len(responses)} records cannot "
+            f"take the ids path: {', '.join(refused[:5])}{' ...' if len(refused) > 5 else ''}")
+    return records, counts
 
 
 def build_ids_path_sequence(
@@ -838,12 +905,19 @@ def process_role(
     verify_spans: int = 0,
     prefix_tokens: Optional[List[int]] = None,
     prefix_layers: Optional[List[int]] = None,
+    token_source: str = "auto",
 ) -> tuple[bool, int]:
     """Process a single role file and save activations.
 
     ``layout`` is the worker's header layout (derived from the template when
     None); ``verify_spans`` > 0 runs :func:`verify_assistant_spans` on the
     first that many conversations before extracting anything.
+
+    ``token_source`` (``--token_source``, the response-token-ids plan § 5.1,
+    2026-11-02) picks each record's path (:func:`select_token_paths`): the
+    ids step 1 stored, prefilled (:func:`build_ids_path_sequence`), or the
+    stored text re-encoded (the text path, as before).  The counts are logged
+    and written in the metadata as ``token_source``.
 
     ``prefix_tokens`` (``--prefix_token_means``, the cap pilot, 2026-10-28)
     also writes ``<output_dir>/prefix_means/<role>.pt`` from the same forward
@@ -869,6 +943,8 @@ def process_role(
             yielded an activation, so nothing was saved.
         ContractError: a conversation has more than one assistant turn.
         SpanVerificationError: ``--verify_spans`` found a mismatch.
+        TokenSourceError: ``token_source="ids"`` and a record cannot take
+            the ids path, or a stored range does not fit its ids.
     """
     role = role_file.stem
     output_file = output_dir / f"{role}.pt"
@@ -908,6 +984,18 @@ def process_role(
 
     logger.info(f"Processing {role}: {len(conversations)} conversations")
 
+    # Which path each record takes (the response-token-ids plan § 5.1).
+    token_records, source_counts = select_token_paths(responses, token_source, entity=role)
+    if source_counts["ids"] or token_source != "auto":
+        logger.info(f"{role}: --token_source {token_source}: {source_counts['ids']} on the ids "
+                    f"path, {source_counts['text']} on the text path"
+                    + (f" ({source_counts['range_null']} with stored ids and a null range)"
+                       if source_counts["range_null"] else ""))
+    if source_counts["range_null"]:
+        logger.warning(f"{role}: {source_counts['range_null']} of {len(responses)} records have "
+                       f"stored ids whose range is null (step 1's decoding check failed); they "
+                       f"take the text path")
+
     if verify_spans > 0:
         bad = verify_assistant_spans(pm, conversations, verify_spans, entity=role)
         if bad:
@@ -925,6 +1013,7 @@ def process_role(
             layout=layout,
             extract_headers=extract_headers,
             entity=role,
+            token_records=token_records,
         )
         prefix_list = [None] * len(activations_list)
     else:
@@ -932,7 +1021,7 @@ def process_role(
             extract_activations_with_prefix_means(
                 pm, conversations, layers, list(prefix_tokens), batch_size, max_length,
                 prefix_layer_index=prefix_layer_index, layout=layout,
-                extract_headers=extract_headers, entity=role))
+                extract_headers=extract_headers, entity=role, token_records=token_records))
 
     if mismatches:
         logger.warning(
@@ -1011,6 +1100,10 @@ def process_role(
             "max_length": int(max_length),
             "batch_size": int(batch_size),
         })
+        # Since 2026-11-02 (the response-token-ids plan § 5.1): how many
+        # records took each path; a file may mix (records whose stored range
+        # is null take the text path under auto).
+        file_metadata["token_source"] = dict(source_counts)
         if write_activations:
             activations_dict["metadata"] = file_metadata
             torch_save_with_retry(
@@ -1135,6 +1228,7 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
                     verify_spans=getattr(args, "verify_spans", 0) if i == 0 else 0,
                     prefix_tokens=getattr(args, "prefix_token_means", None),
                     prefix_layers=getattr(args, "prefix_layers", None),
+                    token_source=getattr(args, "token_source", "auto"),
                 )
                 total_mismatches += n_mm
                 if saved:
@@ -1388,6 +1482,7 @@ def main():
                     verify_spans=args.verify_spans if i == 0 else 0,
                     prefix_tokens=args.prefix_token_means,
                     prefix_layers=args.prefix_layers,
+                    token_source=args.token_source,
                 )
             except NoActivationsError as e:
                 # Logged and carried on, like the multi-worker mode; any

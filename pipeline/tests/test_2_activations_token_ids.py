@@ -322,6 +322,185 @@ def test_the_boundary_trim_is_the_text_paths_rule(pm):
     assert enc.trim_boundary_whitespace(full, []) == []
 
 
+# ---------------------------------------------------------------------------
+# § 5.1: which path a record takes, through process_role (§ 5.8 items 1, 2, 5)
+# ---------------------------------------------------------------------------
+
+def _record(i, content, *, stored=None, null_range=False):
+    """A response record as step 1 writes it (the keys step 2 reads), with
+    ``stored`` (a StoredTokens) as response_token_ids / content_token_range."""
+    rec = {"conversation": _conv(content), "prompt_index": i % 2, "question_index": i,
+           "label": "pos"}
+    if stored is not None:
+        rec["response_token_ids"] = list(stored.ids)
+        rec["content_token_range"] = None if null_range else list(stored.content_range)
+    return rec
+
+
+def _write_jsonl(path, records):
+    import json
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(r) + "\n" for r in records))
+    return path
+
+
+def _run(mod, pm, out_dir, records, **kw):
+    f = _write_jsonl(out_dir / "pirate.jsonl", records)
+    kw.setdefault("batch_size", 2)
+    kw.setdefault("max_length", 2048)
+    saved, _ = mod.process_role(pm, f, out_dir, [0, 1, 2], **kw)
+    assert saved
+    acts = torch.load(out_dir / "pirate.pt", weights_only=False)
+    return acts, acts.pop("metadata")
+
+
+def _canonical_bytes(path) -> bytes:
+    """A file's content as bytes that do not depend on memory addresses: the
+    file loaded and saved again in torch's zip format, whose storage keys are
+    numbered in the order the pickle meets them.  The legacy format step 2
+    writes (``use_zipfile_serialization=False``) keys each storage by its
+    address (``str(storage._cdata)``) and writes the storages in the order of
+    those keys, so two runs of the same code on the same records never write
+    the same bytes.  Everything else survives the round trip and is compared
+    byte for byte: the dict's keys in order, the metadata, each tensor's
+    dtype, shape, strides, offset and storage, every byte of its data."""
+    import io
+    buf = io.BytesIO()
+    torch.save(torch.load(path, weights_only=False), buf)
+    return buf.getvalue()
+
+
+def _same_tensors(a, b):
+    assert sorted(a) == sorted(b)
+    for k in a:
+        assert a[k].dtype == b[k].dtype and a[k].shape == b[k].shape, k
+        assert torch.equal(_bits(a[k]), _bits(b[k])), k
+
+
+def test_ids_and_text_give_bit_identical_files_when_the_ids_are_the_re_encoding(mod, pm, tmp_path):
+    # § 5.8 item 1: every activation (all eight slots), the prefix means and
+    # every metadata key but the counts.
+    recs = [_record(i, c, stored=_stored(mod, pm.tokenizer, c)) for i, c in enumerate(EQUIVALENT)]
+    out = {}
+    for source in ("ids", "text"):
+        acts, meta = _run(mod, pm, tmp_path / source, recs, token_source=source,
+                          prefix_tokens=[2, 1000])
+        pfx = torch.load(tmp_path / source / "prefix_means" / "pirate.pt", weights_only=False)
+        out[source] = (acts, meta, pfx, pfx.pop("metadata"))
+    (a, ma, pa, pma), (b, mb, pb, pmb) = out["ids"], out["text"]
+    assert ma.pop("token_source") == pma.pop("token_source") == {"ids": 5, "text": 0,
+                                                                 "range_null": 0}
+    assert mb.pop("token_source") == pmb.pop("token_source") == {"ids": 0, "text": 5,
+                                                                 "range_null": 0}
+    assert ma == mb and pma == pmb
+    assert len(a) == 4                                       # the empty response has none
+    _same_tensors(a, b)
+    _same_tensors(pa, pb)
+
+
+def test_the_text_arm_is_todays_step_2(mod, pm, tmp_path):
+    # § 5.8 item 2: --token_source text on records with ids gives the same
+    # bytes as the same records without them (auto on them is the text path),
+    # but for the storage keys, which are memory addresses (_canonical_bytes).
+    tok = pm.tokenizer
+    plan = "Law rules. Yes no."
+    with_ids = [_record(0, "Arr matey.", stored=_stored(mod, tok, "Arr matey.", plan=plan,
+                                                         lead="\n\n")),
+                _record(1, "Yes", stored=_stored(mod, tok, "Yes")),
+                _record(2, "Arr.", stored=_stored(mod, tok, "Arr."), null_range=True)]
+    without = [{k: v for k, v in r.items()
+                if k not in ("response_token_ids", "content_token_range")} for r in with_ids]
+    _run(mod, pm, tmp_path / "text", with_ids, token_source="text", prefix_tokens=[2])
+    _run(mod, pm, tmp_path / "plain", without, prefix_tokens=[2])
+    for rel in ("pirate.pt", "prefix_means/pirate.pt"):
+        assert (_canonical_bytes(tmp_path / "text" / rel)
+                == _canonical_bytes(tmp_path / "plain" / rel)), rel
+    # The canonical form is not hiding a difference: the ids path on the
+    # same records (the plan prefilled) does not compare equal.
+    _run(mod, pm, tmp_path / "ids", with_ids, prefix_tokens=[2])
+    assert _canonical_bytes(tmp_path / "ids" / "pirate.pt") != _canonical_bytes(
+        tmp_path / "plain" / "pirate.pt")
+
+
+def test_the_canonical_bytes_ignore_addresses_and_nothing_else(tmp_path):
+    # Legacy saves of equal tensors at different addresses: other bytes, the
+    # same canonical bytes; one bit of difference, or another key order, is
+    # not the same.
+    keep = []
+
+    def save(name, d):
+        keep.append(d)                                      # alive: distinct addresses
+        torch.save(d, tmp_path / name, _use_new_zipfile_serialization=False)
+        return tmp_path / name
+
+    def make():
+        return {"a": torch.arange(4, dtype=torch.bfloat16),
+                "b": torch.ones(3, dtype=torch.bfloat16), "metadata": {"layers": [0]}}
+
+    x, y = save("x.pt", make()), save("y.pt", make())
+    assert x.read_bytes() != y.read_bytes()
+    assert _canonical_bytes(x) == _canonical_bytes(y)
+    flipped = make()
+    flipped["b"].view(torch.int16)[1] ^= 1
+    assert _canonical_bytes(save("z.pt", flipped)) != _canonical_bytes(x)
+    reordered = dict(reversed(list(make().items())))
+    assert _canonical_bytes(save("w.pt", reordered)) != _canonical_bytes(x)
+
+
+def test_a_mixed_file_takes_both_paths_and_counts_them(mod, pm, tmp_path, caplog):
+    # § 5.8 item 5: a record with a null range takes the text path under auto.
+    tok = pm.tokenizer
+    stored = _stored(mod, tok, "Arr matey.", plan="Law rules. Yes no.", lead="\n\n")
+    recs = [_record(0, "Arr matey.", stored=stored),
+            _record(1, "Arr matey.", stored=stored, null_range=True)]
+    with caplog.at_level("INFO"):
+        acts, meta = _run(mod, pm, tmp_path / "auto", recs)
+    assert meta["token_source"] == {"ids": 1, "text": 1, "range_null": 1}
+    assert "1 of 2 records have stored ids whose range is null" in caplog.text
+    # Record 0 is the ids path's (the plan is prefilled, so the content sits
+    # later), record 1 the text path's.
+    [ids_act], _, _ = mod.extract_activations_batch(pm, [recs[0]["conversation"]], [0, 1, 2],
+                                                    token_records=[stored])
+    [text_act], _, _ = mod.extract_activations_batch(pm, [recs[1]["conversation"]], [0, 1, 2])
+    assert torch.equal(_bits(acts["pos_p0_q0"]), _bits(ids_act))
+    assert torch.equal(_bits(acts["pos_p1_q1"]), _bits(text_act))
+    assert acts["pos_p0_q0"][0, 0, 0].item() > acts["pos_p1_q1"][0, 0, 0].item()
+    # ... and --token_source ids refuses the file, naming the record.
+    with pytest.raises(mod.TokenSourceError, match=r"1 of 2 records cannot take the ids "
+                                                   r"path: pos_p1_q1 \(a null range\)"):
+        _run(mod, pm, tmp_path / "ids", recs, token_source="ids")
+    assert not (tmp_path / "ids" / "pirate.pt").exists()
+
+
+def test_ids_without_a_range_key_take_the_text_path(mod, pm, tmp_path):
+    # A record with ids and no content_token_range at all (written by a step 1
+    # that kept the ids before it checked the ranges): the text path under auto.
+    rec = _record(0, "Yes", stored=_stored(mod, pm.tokenizer, "Yes"))
+    del rec["content_token_range"]
+    _, meta = _run(mod, pm, tmp_path, [rec])
+    assert meta["token_source"] == {"ids": 0, "text": 1, "range_null": 1}
+    with pytest.raises(mod.TokenSourceError, match="no stored ids|a null range"):
+        mod.select_token_paths([_record(0, "Yes")], "ids", entity="pirate")
+
+
+def test_a_range_that_is_not_two_integers_raises(mod):
+    rec = _record(0, "Yes", stored=mod.StoredTokens([1, 2], (0, 1)))
+    for bad in ([0], [0, 1, 2], ["0", "1"], [0.0, 1.0], [True, 1]):
+        rec["content_token_range"] = bad
+        with pytest.raises(mod.TokenSourceError, match="is not \\[start, end\\]"):
+            mod.select_token_paths([rec], "auto", entity="pirate")
+
+
+def test_the_token_source_flag(mod):
+    p = mod.build_parser()
+    base = ["--model", "m", "--responses_dir", "r", "--output_dir", "o"]
+    assert p.parse_args(base).token_source == "auto"
+    assert p.parse_args(base + ["--token_source", "ids"]).token_source == "ids"
+    with pytest.raises(SystemExit):
+        p.parse_args(base + ["--token_source", "both"])
+    assert set(mod.TOKEN_SOURCES) == {"auto", "ids", "text"}
+
+
 def test_an_anchor_at_the_spans_start_is_the_search_without_one(pm):
     # The text path's spans have no anchor; an anchor equal to the start
     # searches exactly as before.
