@@ -17,8 +17,10 @@ copy off the ones to keep before a volume is discarded):
   joined; pods that record two hashes or reply formats for one type refuse
   the merge), ``scores/abc_disagreements.jsonl`` (version 10's log of role
   replies whose SCORE line disagreed with their answers; the pods' rows
-  joined) and ``scores/_replies/`` (step 3's ``--save_replies``, which
-  ``3_judge.py --reread_replies`` needs);
+  joined), ``scores/_replies/`` (step 3's ``--save_replies``, which
+  ``3_judge.py --reread_replies`` needs) and ``scores/_sides/`` (a two-sided
+  rubric's per-side scores, which a rerun of step 3 reads; pods that record
+  other sides or side token caps for one type refuse the merge);
 * ``default/``: the default of ``--default_from`` (the first pod by
   default); the other pods' default vectors go to ``default/other_pods/``;
 * ``logs/<pod>/``: each pod's ``pipeline_*.log``;
@@ -67,6 +69,8 @@ TYPES = ("roles", "traits", "combinations")
 SIDE_CARS = ("usage.json", "judge_rubric.json", "batch_state.json")
 ABC_LOG = "abc_disagreements.jsonl"     # pipeline/3_judge.py ABC_LOG_FILENAME
 REPLIES = "_replies"                    # pipeline/3_judge.py REPLIES_DIRNAME
+SIDES = "_sides"                        # pipeline/3_judge.py SIDES_DIRNAME
+SIDE_STAMP_FIELDS = ("combination_sides", "side_max_tokens")   # step 3's stamp under such a rubric
 EXIT_SCAN = 3
 DEFAULT_MIN_COUNT = 30          # run_pipeline.sh's roger-mode MIN_COUNT
 
@@ -163,7 +167,12 @@ def plan(pods: Dict[str, Path]) -> Tuple[Dict[str, Dict[str, Path]], List[str]]:
 
 def _copy(src: Path, dst: Path) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
+    # An APFS clone on macOS (cp -c, which falls back to a copy on another file
+    # system): the October tree is 37 GB, and a second real copy beside the
+    # pull would not have fitted on the laptop (2026-11-02).
+    if sys.platform != "darwin" or subprocess.run(["cp", "-c", "-p", str(src), str(dst)],
+                                                  capture_output=True).returncode != 0:
+        shutil.copy2(src, dst)
     if dst.stat().st_size != src.stat().st_size:
         raise MergeRefused(f"copy of {src} is {dst.stat().st_size} bytes, not {src.stat().st_size}")
 
@@ -203,6 +212,9 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
             for f in _real_files(d / "scores" / REPLIES, "*.jsonl"):
                 _copy(f, tdir / "scores" / REPLIES / f.name)
                 c["replies"] = c.get("replies", 0) + 1
+            for f in _real_files(d / "scores" / SIDES, "*.json"):
+                _copy(f, tdir / "scores" / SIDES / f.name)
+                c["sides"] = c.get("sides", 0) + 1
             log = d / "scores" / ABC_LOG
             if log.is_file():
                 abc_rows += [line for line in log.read_text().splitlines() if line.strip()]
@@ -224,6 +236,10 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
                     rubric["reply_formats"].add(r["reply_format"])
                 # step 3's --mark_truncated (2026-10-28); a stamp without the field: no marker
                 rubric["truncation_markers"].add(r.get("truncation_marker"))
+                for k in SIDE_STAMP_FIELDS:
+                    if k in r and rubric.setdefault(k, r[k]) != r[k]:
+                        raise MergeRefused(f"{t}: pod {name} recorded {k} {r[k]}, another pod "
+                                           f"{rubric[k]}")
             gc = d / "responses" / GENERATION_CONFIG_NAME
             if gc.exists():
                 runs += [{**run, "pod": name} for run in json.loads(gc.read_text()).get("runs", [])]
@@ -247,6 +263,7 @@ def build(pods: Dict[str, Path], by_type: Dict[str, Dict[str, Path]], out: Path,
                 **({"prompt_sha256": rubric["prompt_sha256"]} if rubric["prompt_sha256"] else {}),
                 **({"reply_format": next(iter(rubric["reply_formats"]))} if rubric["reply_formats"] else {}),
                 "truncation_marker": next(iter(rubric["truncation_markers"]), None),
+                **{k: rubric[k] for k in SIDE_STAMP_FIELDS if k in rubric},
                 "merged_from_pods": sorted(dirs)}, indent=2, sort_keys=True) + "\n")
         if runs:
             (tdir / "responses" / GENERATION_CONFIG_NAME).write_text(

@@ -214,3 +214,35 @@ def test_two_hashes_for_one_version_refuse_the_merge(tmp_path, pods, capsys):
     assert _merge(tmp_path, pods) == 1 and not (tmp_path / "merged").exists()
     assert "rubric hash bbbb, another pod with aaaa" in capsys.readouterr().err
 
+
+
+def _stamp_sides(pod_root, sides, caps):
+    (pod_root / "combinations" / "scores" / "judge_rubric.json").write_text(json.dumps(
+        {"rubric_version": 20, "rubric_versions": [20], "judge_models": ["gpt-5.6-luna"],
+         "entity_type": "combination", "combination_sides": sides, "side_max_tokens": caps}))
+
+
+def test_a_two_sided_rubrics_side_scores_and_stamp_are_carried(tmp_path, pods):
+    """Version 20 (the October combinations, found before their merge on
+    2026-11-02): the per-side scores, which a rerun of step 3 reads, reach the
+    merged tree from both pods, and the stamp says which versions the sides were."""
+    sides, caps = {"role": 16, "trait": 17}, {"role": 256, "trait": 256}
+    for pod, stem in (("rcomb", "r_angel__bold"), ("tcomb", "t_chef__kind")):
+        s = pods[pod] / "combinations" / "scores"
+        (s / "_sides").mkdir()
+        (s / "_sides" / f"{stem}.json").write_text(json.dumps({"pos_p0_q0": {"role": 3, "trait": 1}}))
+        _stamp_sides(pods[pod], sides, caps)
+    assert _merge(tmp_path, pods) == 0
+    m = tmp_path / "merged" / "combinations" / "scores"
+    assert sorted(p.name for p in (m / "_sides").iterdir()) == ["r_angel__bold.json", "t_chef__kind.json"]
+    rb = json.loads((m / "judge_rubric.json").read_text())
+    assert rb["combination_sides"] == sides and rb["side_max_tokens"] == caps
+    rec = json.loads((tmp_path / "merged" / "MERGED.json").read_text())
+    assert rec["counts"]["combinations"]["sides"] == 2
+
+
+def test_pods_with_other_sides_refuse_the_merge(tmp_path, pods, capsys):
+    _stamp_sides(pods["rcomb"], {"role": 16, "trait": 17}, {"role": 256, "trait": 256})
+    _stamp_sides(pods["tcomb"], {"role": 16, "trait": 19}, {"role": 256, "trait": 256})
+    assert _merge(tmp_path, pods) == 1
+    assert "combination_sides" in capsys.readouterr().err
