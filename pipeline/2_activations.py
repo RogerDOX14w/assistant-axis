@@ -651,7 +651,9 @@ def check_generation_config(responses_dir: Path, pre: Preflight, *, ignore: bool
     # Logged, never refused (the response-token-ids plan § 5.7, 2026-11-02):
     # the stored ranges carry what the clean-up did, and the activation
     # metadata records it (recorded_response_cleanup).
-    log.info(f"{path}: step 1's response clean-up was {last.get('response_cleanup')!r}")
+    log.info(f"{path}: step 1's response clean-up was {last.get('response_cleanup')!r} "
+             f"(rule version {last.get('response_cleanup_version')!r}, flag "
+             f"{last.get('response_cleanup_override')!r})")
     return diffs
 
 
@@ -660,13 +662,67 @@ def recorded_response_cleanup(responses_dir: Path) -> Optional[str]:
     (the last run of its side-car: ``"strip_leaked_think"`` or ``"none"``,
     the clean-up applied to the texts; ``--response_cleanup keep`` records
     ``"none"``, with the flag beside it as ``response_cleanup_override``,
-    which step 2 does not read), or None when there is no side-car.  Step 2
-    writes it into every activation file's metadata (§ 5.7)."""
+    :func:`recorded_response_cleanup_override`), or None when there is no
+    side-car.  Step 2 writes it into every activation file's metadata
+    (§ 5.7)."""
+    return _last_run_field(responses_dir, "response_cleanup")
+
+
+def recorded_response_cleanup_override(responses_dir: Path) -> Optional[str]:
+    """The ``--response_cleanup`` flag step 1 recorded for this responses
+    directory (the last run's ``response_cleanup_override``: ``"family"`` or
+    ``"keep"``), or None when there is no side-car or the run predates the
+    field (an October-era tree).  Step 2 reads it for the keep-tree guard
+    (Roger, 2026-11-03): a kept plan is in the stored text, and the real
+    Qwen3 template re-renders a turn whose content holds ``</think>`` with
+    the text before it inside a think block, which the model never saw; so a
+    keep tree takes the ids path (:func:`apply_keep_tree_guard`)."""
+    return _last_run_field(responses_dir, "response_cleanup_override")
+
+
+def _last_run_field(responses_dir: Path, key: str):
     from assistant_axis.generation import read_generation_config
     cfg = read_generation_config(Path(responses_dir))
     if not cfg or not cfg.get("runs"):
         return None
-    return cfg["runs"][-1].get("response_cleanup")
+    return cfg["runs"][-1].get(key)
+
+
+class KeepTreeError(RuntimeError):
+    """``--token_source text`` on a responses directory generated with
+    ``--response_cleanup keep`` (the keep-tree guard, 2026-11-03)."""
+
+
+def apply_keep_tree_guard(responses_dir: Path, token_source: str, log=None) -> str:
+    """The ``--token_source`` to run with, given step 1's recorded flag
+    (Roger, 2026-11-03).  A tree generated with ``--response_cleanup keep``
+    has the leaked plan in its stored texts, and the real Qwen3 template
+    re-renders an assistant turn whose content holds ``</think>`` with the
+    text before it inside the think block, so on the text path the chatml
+    think filter takes the plan out of slot 0 and the header moves beyond
+    the header search's reach (NaN slots): such a tree takes the ids path.
+    ``text`` raises :class:`KeepTreeError`; ``auto`` is promoted to ``ids``
+    (so a null range is a ``TokenSourceError`` naming the record, not a
+    silent fallback), with an INFO line; ``ids`` stays.  A tree without a
+    side-car, or whose last run records ``family`` or no flag, is unchanged.
+    (The fakes' template has no ``</think>`` split, so the hazard itself is
+    not modelled in the tests; this guard keeps any run from reaching it.)"""
+    log = log or logger
+    if recorded_response_cleanup_override(responses_dir) != "keep":
+        return token_source
+    if token_source == "text":
+        raise KeepTreeError(
+            f"{responses_dir} was generated with --response_cleanup keep: its stored texts hold "
+            f"the leaked plans, and the text path re-renders a kept plan inside a think block, "
+            f"which the model never saw (the chatml think filter would take it out of slot 0 "
+            f"and put the header beyond reach).  A keep tree takes the ids path: run with "
+            f"--token_source ids or auto")
+    if token_source == "auto":
+        log.info(f"{responses_dir} was generated with --response_cleanup keep: --token_source "
+                 f"auto is promoted to ids (a record without a usable range raises instead of "
+                 f"taking the text path, which re-renders a kept plan inside a think block)")
+        return "ids"
+    return token_source
 
 
 def log_layout(layout: Optional[ChatLayout], log=None) -> None:
@@ -1755,6 +1811,13 @@ def main():
         sys.exit(1)
     # Step 1's clean-up, for every activation file's metadata (§ 5.7).
     args.response_cleanup_recorded = recorded_response_cleanup(responses_dir)
+    # A keep tree takes the ids path (Roger, 2026-11-03), still before any
+    # model loads: text is refused, auto is promoted to ids.
+    try:
+        args.token_source = apply_keep_tree_guard(responses_dir, args.token_source)
+    except KeepTreeError as e:
+        logger.error(str(e))
+        sys.exit(1)
     args.hf_load_kwargs = dict(pre.family.hf_load_kwargs)
     args.expected_header_ids = (list(pre.layout.header_ids)
                                 if pre.layout is not None and not args.no_headers else None)

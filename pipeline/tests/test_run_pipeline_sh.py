@@ -679,6 +679,10 @@ def test_the_step_2_token_flags_in_christina_mode(tmp_path):
     (("--verify-ids", "-1"), "Invalid --verify-ids"),
     (("--content-span", "turn", "--token-source", "text"),
      "Invalid --content-span turn with --token-source text"),
+    (("--response-cleanup", "keep", "--token-source", "text"),          # Roger, 2026-11-03
+     "Invalid --response-cleanup keep with --token-source text"),
+    (("--token-source", "text", "--response-cleanup", "keep"),
+     "Invalid --response-cleanup keep with --token-source text"),
 ])
 def test_bad_step_2_token_flags_are_refused_before_any_step(tmp_path, args, message):
     proc, calls = _run_full(tmp_path, None, *args)

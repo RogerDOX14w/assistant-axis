@@ -460,6 +460,14 @@ if [ "$STEP2_CONTENT_SPAN" = "turn" ] && [ "$STEP2_TOKEN_SOURCE" = "text" ]; the
     echo "Invalid --content-span turn with --token-source text (turn is an ids-path variant)" >&2
     exit 1
 fi
+# A keep tree takes the ids path (Roger, 2026-11-03): the text path re-renders a
+# kept plan inside a think block, which the model never saw.  Step 2 refuses
+# it too, but only after step 1 has run.
+if [ "${STEP1_ARGS[1]-}" = "keep" ] && [ "$STEP2_TOKEN_SOURCE" = "text" ]; then
+    echo "Invalid --response-cleanup keep with --token-source text (a keep tree takes the ids" \
+         "path: the text path re-renders a kept plan inside a think block)" >&2
+    exit 1
+fi
 # How step 3 reaches the judge: Flex in roger mode (Roger, 2026-10-30), the
 # Batch API in christina mode, unless a --judge-flex / --judge-batch /
 # --judge-realtime flag said otherwise.  The mode's arguments go first, so

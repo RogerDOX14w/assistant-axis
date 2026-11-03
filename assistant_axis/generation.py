@@ -56,6 +56,18 @@ def chat_template_kwargs_for(family) -> Dict[str, Any]:
 # stripping it?" settles the default going forward (Roger, 2026-11-02).
 RESPONSE_CLEANUP_OVERRIDES = ("family", "keep")
 
+# The version of the clean-up rules this code applies, recorded in the
+# side-car as response_cleanup_version under every clean-up ("none" included:
+# it names the rule set the code applied) and compared by
+# settings_differences.  1: the rule that made the October texts (cut to the
+# last </think>, then .strip()); 2: the surgical cut of 2026-11-03
+# (strip_leaked_plan; Roger).  Bump it whenever a clean-up changes what it does
+# to a text.  A side-car written before the field has no key, so a rerun into
+# such a directory is refused as None -> 2, which is right (the new stripped
+# texts keep edge whitespace the old ones lost); --allow_mixed_settings
+# overrides it as any other setting.
+RESPONSE_CLEANUP_VERSION = 2
+
 
 def response_cleanup_for(family, override: Optional[str] = None) -> str:
     """The clean-up applied to each generated text: the family row's
@@ -138,7 +150,10 @@ def strip_leaked_plan(text: str) -> str:
     and stays.  Until 2026-11-03 the cut was followed by ``.strip()``, which
     took that whitespace too, and step 1's content range started one token
     early, at the ``"\\n\\n"``; :func:`token_ranges` now cuts where this
-    does."""
+    does.  A text without ``</think>`` raises ``ValueError`` (``rfind``
+    would give -1 and cut its first seven characters)."""
+    if "</think>" not in text:
+        raise ValueError("strip_leaked_plan: the text has no </think> to cut at")
     rest = text[text.rfind("</think>") + len("</think>"):]
     if rest.startswith(PLAN_SEPARATOR):
         rest = rest[len(PLAN_SEPARATOR):]
@@ -259,10 +274,18 @@ def add_token_ranges(details: List[Dict[str, Any]], tokenizer, log=None) -> int:
     detail dict of :meth:`VLLMGenerator.generate_batch_detailed`
     (:func:`token_ranges`) and log the batch's null content ranges; returns
     their number.  A null range never stops the run: step 2 takes the text
-    path for that response."""
+    path for that response.  A tokenizer without ``all_special_ids`` is an
+    error (2026-11-03): with no special ids the stop token would stay inside
+    every range, and step 2 would refuse every record; step 1 is the place
+    to fail."""
     log = log or logger
+    special_ids = getattr(tokenizer, "all_special_ids", None)
+    if special_ids is None:
+        raise AttributeError(
+            f"the tokenizer ({type(tokenizer).__name__}) has no all_special_ids; step 1 needs "
+            f"them to leave the stop token out of each response's content range")
+    special_ids = list(special_ids)
     think_end_id = think_end_token_id(tokenizer)
-    special_ids = list(getattr(tokenizer, "all_special_ids", None) or [])
     n_null = n_pieces = 0
     for d in details:
         thinking, content = token_ranges(
@@ -368,7 +391,9 @@ def build_generation_run_record(
     keep``, since 2026-11-02); ``response_cleanup_override`` (since
     2026-11-03) is the flag's value, ``"family"`` or ``"keep"``, kept for the
     record and not compared by the side-car check
-    (:func:`response_cleanup_for`)."""
+    (:func:`response_cleanup_for`); ``response_cleanup_version`` (since
+    2026-11-03) is :data:`RESPONSE_CLEANUP_VERSION`, the version of the
+    clean-up rules, compared by the check."""
     from .atomic_io import read_jsonl_with_retry, read_text_with_retry
     q_text = read_text_with_retry(questions_file, logger_obj=logger)
     n_all = len(read_jsonl_with_retry(questions_file, skip_malformed=False, logger_obj=logger))
@@ -386,6 +411,7 @@ def build_generation_run_record(
         "system_prompt": system_prompt,
         "response_cleanup": response_cleanup_for(family, override=response_cleanup_override),
         "response_cleanup_override": response_cleanup_override or "family",
+        "response_cleanup_version": RESPONSE_CLEANUP_VERSION,
         "sampling": {"temperature": temperature, "top_p": top_p,
                      "max_tokens": max_tokens, "max_model_len": max_model_len},
         "questions": {"file": str(questions_file), "sha256": _sha256_text(q_text),
@@ -402,9 +428,11 @@ def build_generation_run_record(
 # settings.  Instructions may differ (they are reported per entity instead).
 # model_type and header_ids since the multi-model plan (2026-10-13), so that
 # step 1, tools/merge_pod_outputs.py and step 2's side-car check refuse the
-# same differences.
+# same differences.  response_cleanup_version since 2026-11-03: a record
+# written before has none, so a rerun into such a directory is refused as
+# None -> 2 (RESPONSE_CLEANUP_VERSION).
 SETTINGS_KEYS = ("model_name", "model_type", "template_kwargs", "header_ids",
-                 "response_cleanup", "sampling")
+                 "response_cleanup", "response_cleanup_version", "sampling")
 QUESTION_KEYS = ("sha256", "question_count", "reduce_questions")
 
 

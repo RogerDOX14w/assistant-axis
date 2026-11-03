@@ -504,6 +504,36 @@ def test_response_cleanup_keep_is_recorded_and_refuses_a_family_rerun(mod, monke
     assert [r["response_cleanup_override"] for r in _config(data)["runs"]] == ["keep", "keep"]
 
 
+def test_the_clean_up_rule_version_is_recorded_and_compared(mod, monkeypatch, data, caplog):
+    """Review fix (Roger, 2026-11-03): response_cleanup_version is a setting.
+    1 made the October texts (cut, then .strip()), 2 is the surgical cut; a
+    side-car written before the field has none, and a rerun into it is
+    refused as None -> 2."""
+    from assistant_axis.generation import RESPONSE_CLEANUP_VERSION
+    assert RESPONSE_CLEANUP_VERSION == 2
+    _run_main(mod, monkeypatch, data, bad={"y"})
+    assert _config(data)["runs"][0]["response_cleanup_version"] == 2
+    path = data / "out" / "generation_config.json"
+    for recorded, named in ((1, "response_cleanup_version: 1 -> 2"),
+                            (None, "response_cleanup_version: None -> 2")):
+        cfg = _config(data)
+        cfg["runs"][-1]["response_cleanup_version"] = recorded
+        if recorded is None:
+            del cfg["runs"][-1]["response_cleanup_version"]       # an October-era record
+        path.write_text(json.dumps(cfg))
+        caplog.clear()
+        with caplog.at_level(logging.ERROR):
+            code, saved = _run_main(mod, monkeypatch, data)
+        assert code == 1 and saved == [] and named in caplog.text
+    # --allow_mixed_settings lets it in, as for any setting; the same version is no difference.
+    code, saved = _run_main(mod, monkeypatch, data, "--allow_mixed_settings")
+    assert code == 0 and saved == ["y"]
+    assert _config(data)["runs"][-1]["response_cleanup_version"] == 2
+    from assistant_axis.generation import settings_differences
+    last = _config(data)["runs"][-1]
+    assert settings_differences(last, dict(last)) == []
+
+
 def test_the_default_clean_up_is_the_family_rule(mod, monkeypatch, data):
     _run_main(mod, monkeypatch, data, bad={"y"})
     code, saved = _run_main(mod, monkeypatch, data, "--response_cleanup", "family")

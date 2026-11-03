@@ -499,6 +499,37 @@ def test_token_ranges_a_strip_without_detection_is_a_bug():
         _ranges(ids_of("Arr."), "Arr.", stripped=True)
 
 
+def test_the_strip_refuses_a_text_without_the_end_tag():
+    # Review fix (Roger, 2026-11-03): rfind would give -1 and cut seven characters.
+    with pytest.raises(ValueError, match="no </think>"):
+        g.strip_leaked_plan("Answer without a plan.")
+
+
+def test_a_tokenizer_without_special_ids_fails_in_step_1():
+    # Review fix (Roger, 2026-11-03): with no special ids the stop token would
+    # stay inside every range and step 2 would refuse every record.
+    details = [{"text": "Arr.", "token_ids": ids_of("Arr.") + [STOP], "leaked": False,
+                "thinking_stripped": False}]
+
+    class NoneSpecial(FakeTokenizer):
+        all_special_ids = None
+
+    class Bare:                                       # no all_special_ids attribute at all
+        def decode(self, ids, **kw):
+            return FakeTokenizer().decode(ids, **kw)
+
+        def convert_tokens_to_ids(self, token):
+            return FakeTokenizer().convert_tokens_to_ids(token)
+
+    assert not hasattr(Bare(), "all_special_ids")
+
+    for tok in (NoneSpecial(), Bare()):
+        with pytest.raises(AttributeError, match="all_special_ids"):
+            g.add_token_ranges([dict(d) for d in details], tok)
+    g.add_token_ranges(details, FakeTokenizer())                    # the fake has them
+    assert details[0]["content_token_range"] == [0, 4]
+
+
 def test_the_end_tag_id_is_accepted_only_when_it_decodes_to_the_tag():
     assert g.think_end_token_id(FakeTokenizer()) == THINK_END
 

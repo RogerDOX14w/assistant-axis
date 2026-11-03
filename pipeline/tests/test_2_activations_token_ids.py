@@ -781,7 +781,10 @@ def test_the_verify_ids_flag(mod):
 # § 5.7: the metadata and the side-car's clean-up
 # ---------------------------------------------------------------------------
 
-def _sidecar(mod, responses, *, response_cleanup):
+def _sidecar(mod, responses, *, response_cleanup, **extra):
+    """A side-car run record step 2 accepts for the Qwen3-like fake, with
+    ``response_cleanup`` and any ``extra`` fields (``response_cleanup_override``,
+    ``response_cleanup_version``); returns the matching preflight."""
     from assistant_axis.generation import prompt_token_ids, write_generation_config
     from assistant_axis.model_families import FAMILIES
     tok = make_fake_probing_model(N_LAYERS).tokenizer
@@ -793,8 +796,24 @@ def _sidecar(mod, responses, *, response_cleanup):
         "created_at": "2026-11-02T00:00:00+00:00", "model_type": "qwen3",
         "template_kwargs": dict(THINKING_OFF), "header_ids": list(pre.layout.header_ids),
         "sample_conversation": sample, "response_cleanup": response_cleanup,
-        "sample_prompt_ids": prompt_token_ids(tok, sample, THINKING_OFF)})
+        "sample_prompt_ids": prompt_token_ids(tok, sample, THINKING_OFF), **extra})
     return pre
+
+
+def _main(mod, monkeypatch, argv):
+    """Run step 2's main with the logging handler it adds removed afterwards."""
+    import logging
+    import sys
+    monkeypatch.setattr(sys, "argv", ["2_activations.py", *argv])
+    root = logging.getLogger()
+    before = list(root.handlers)
+    try:
+        mod.main()
+    finally:
+        for h in root.handlers[:]:                          # main() adds a file handler
+            if h not in before:
+                root.removeHandler(h)
+                h.close()
 
 
 def test_the_recorded_clean_up_is_logged_and_read(mod, tmp_path, caplog, monkeypatch):
@@ -847,6 +866,230 @@ def test_main_passes_the_flags_and_the_recorded_clean_up(mod, pm, tmp_path, monk
                 h.close()
     assert (seen["token_source"], seen["content_span"], seen["verify_ids"]) == ("ids", "turn", 7)
     assert seen["response_cleanup"] == "strip_leaked_think"
+
+
+# ---------------------------------------------------------------------------
+# Step 1 and step 2 on one tokenizer (review fix, Roger, 2026-11-03): step 1's
+# generate_batch_detailed (the strip, the ranges) on vLLM's output faked with
+# the Qwen3-like tokenizer's own ids, its record through step 2's
+# select_token_paths and build_ids_path_sequence on the same tokenizer; the
+# ids-path span must decode to exactly the stored text.  (The two halves'
+# own tests use different fakes; this is the second reviewer's cross-check.)
+# ---------------------------------------------------------------------------
+
+class _OneReplyLLM:
+    """A fake vLLM answering every prompt with ``text`` and ``ids``."""
+
+    def __init__(self, tok, text, ids, finish_reason):
+        self.tok, self.text, self.ids, self.finish_reason = tok, text, ids, finish_reason
+
+    def get_tokenizer(self):
+        return self.tok
+
+    def generate(self, prompts, sampling_params):
+        from types import SimpleNamespace
+        return [SimpleNamespace(outputs=[SimpleNamespace(
+            text=self.text, finish_reason=self.finish_reason, token_ids=tuple(self.ids))])
+            for _ in prompts]
+
+
+def _both_steps(mod, tok, text, ids, *, keep=False, finish_reason="stop"):
+    """Step 1 on vLLM's ``text`` and ``ids``, then step 2's ids path on its
+    record: (step 1's detail dict, the record, full_ids, spans), the last
+    two None when the record takes the text path."""
+    from assistant_axis import generation as g
+    from assistant_axis.internals.chat_layout import derive_turn_end_ids
+    from assistant_axis.model_families import FAMILIES
+    gen = g.VLLMGenerator("Qwen/Qwen3-32B", family=FAMILIES["qwen3"],
+                          response_cleanup_override="keep" if keep else None)
+    gen.llm = _OneReplyLLM(tok, text, ids, finish_reason)
+    gen.sampling_params = object()
+    prompt = _conv("")[:-1]
+    [d] = gen.generate_batch_detailed([prompt])
+    rec = _record(0, d["text"])
+    rec["conversation"] = prompt + [{"role": "assistant", "content": d["text"]}]
+    rec["response_token_ids"] = d["token_ids"]
+    rec["content_token_range"] = d["content_token_range"]
+    [stored], _ = mod.select_token_paths([rec], "auto", entity="pirate")
+    if stored is None:
+        return d, rec, None, None
+    enc = ConversationEncoder(tok, "Qwen/Qwen3-32B", span_builder="chatml")
+    full, spans = mod.build_ids_path_sequence(
+        enc, rec["conversation"], stored, template_kwargs=THINKING_OFF,
+        turn_end_ids=list(derive_turn_end_ids(tok, FAMILIES["qwen3"])),
+        special_ids=set(tok.all_special_ids))
+    return d, rec, full, spans
+
+
+PLAN = "Law rules. Yes no."
+
+# (vLLM's text, step 1's stored content, keep)
+END_TO_END = [
+    ("Arr matey. Law rules!", "Arr matey. Law rules!", False),                 # clean
+    (PLAN + "</think>\n\nArr matey.", "Arr matey.", False),                      # the \n\n token
+    (PLAN + "</think>\nArr matey.", "\nArr matey.", False),                      # a single \n
+    (PLAN + "</think> Arr matey.", " Arr matey.", False),                        # a leading space
+    (PLAN + "</think>\n\n Arr matey.", " Arr matey.", False),                    # \n\n, a space
+    ("Law rules.</think>", "", False),                                           # a plan only
+    ("Law rules.</think>\n\n", "", False),                                       # and its \n\n
+    ("\n\nArr matey!\n", "\n\nArr matey!\n", False),                             # both ends
+    ("Arr matey.\n\n", "Arr matey.\n\n", False),                                 # trailing
+    (PLAN + "</think>\n\nArr matey.", PLAN + "</think>\n\nArr matey.", True),    # keep
+]
+
+
+@pytest.mark.parametrize("stop", [True, False], ids=["stop", "no stop"])
+@pytest.mark.parametrize("raw, content, keep", END_TO_END)
+def test_step_1s_range_is_step_2s_span_on_one_tokenizer(mod, pm, raw, content, keep, stop):
+    tok = pm.tokenizer
+    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    ids = _ids(tok, raw) + ([im_end] if stop else [])
+    d, rec, full, spans = _both_steps(mod, tok, raw, ids, keep=keep,
+                                      finish_reason="stop" if stop else "length")
+    assert rec["conversation"][-1]["content"] == content
+    assert d["thinking_stripped"] is ("</think>" in raw and not keep)
+    s, e = d["content_token_range"]
+    assert tok.decode(ids[s:e]) == content                    # step 1's check, plainly
+    if d["thinking_token_range"] is not None:
+        k = d["thinking_token_range"][1]
+        assert tok.decode(ids[:k]).endswith(("</think>", "</think>\n\n"))
+        assert s == (0 if keep else k)                         # the two ranges partition the ids
+    from assistant_axis.generation import prompt_token_ids
+    p = len(prompt_token_ids(tok, rec["conversation"][:-1], THINKING_OFF))
+    assert full[-2:] == tok.convert_tokens_to_ids(["<|im_end|>", "\n"])
+    assert full[p:-2] == [i for i in ids if i != im_end]       # the ids, prefilled as generated
+    if content:
+        [span] = spans
+        assert (span["start"], span["end"]) == (p + s, p + e)
+        assert tok.decode(full[span["start"]:span["end"]]) == content
+    else:
+        assert spans == []                                     # a plan only: nothing averaged
+
+
+def test_three_newlines_the_tokenizer_has_no_token_for_take_the_text_path(mod, pm):
+    # The Qwen3-like fake has no "\n\n\n" token: the run is its [UNK], a
+    # special id, so no range decodes to the stored "\nArr matey." and the
+    # record takes the text path (as a one-token "\n\n\n" would in Qwen3).
+    tok = pm.tokenizer
+    raw = PLAN + "</think>\n\n\nArr matey."
+    ids = _ids(tok, raw) + [tok.convert_tokens_to_ids("<|im_end|>")]
+    assert tok.convert_tokens_to_ids("[UNK]") in ids
+    d, rec, full, spans = _both_steps(mod, tok, raw, ids)
+    assert rec["conversation"][-1]["content"] == "\nArr matey."
+    assert d["content_token_range"] is None and full is None
+
+
+def test_a_partial_character_at_the_cap_is_prefilled_and_not_averaged(mod):
+    # The word-level fake has no byte tokens: a token that decodes to U+FFFD
+    # alone stands for the first byte of a character the cap cut.
+    from assistant_axis.tests.internals_fakes import make_qwen3_like_tokenizer
+    tok = make_qwen3_like_tokenizer()
+    tok.add_tokens([chr(0xFFFD)])
+    partial = tok.convert_tokens_to_ids(chr(0xFFFD))
+    assert tok.decode([partial]) == chr(0xFFFD)
+    ids = _ids(tok, "Arr matey") + [partial]                  # capped: no stop token
+    d, rec, full, spans = _both_steps(mod, tok, "Arr matey", ids, finish_reason="length")
+    assert d["content_token_range"] == [0, 3]
+    [span] = spans
+    assert tok.decode(full[span["start"]:span["end"]]) == "Arr matey"
+    assert partial in full[span["end"]:]                      # prefilled, past the span
+
+
+# ---------------------------------------------------------------------------
+# The keep-tree guard (review fix, Roger, 2026-11-03).  The real Qwen3
+# template re-renders an assistant turn whose content holds </think> with the
+# text before it inside the think block; the fakes' template has no such
+# split, so the hazard is not modelled: the guard keeps any run from it.
+# ---------------------------------------------------------------------------
+
+KEPT = "Law rules.</think>\n\nArr matey."
+
+
+def _keep_tree(mod, pm, tmp_path, monkeypatch, *, override, null_second=False):
+    """A responses directory as step 1 writes it under --response_cleanup
+    keep (the side-car's flag ``override``; None: a record without the
+    field), with two kept records; returns it."""
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    responses = tmp_path / "responses"
+    extra = {} if override is None else {"response_cleanup_override": override}
+    pre = _sidecar(mod, responses, response_cleanup="none", **extra)
+    tok = pm.tokenizer
+    ids = _ids(tok, KEPT) + [tok.convert_tokens_to_ids("<|im_end|>")]
+    st = mod.StoredTokens(ids=ids, content_range=(0, len(ids) - 1))
+    _write_jsonl(responses / "alpha.jsonl",
+                 [_record(0, KEPT, stored=st), _record(1, KEPT, stored=st, null_range=null_second)])
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")         # single-worker mode
+    monkeypatch.setattr(mod, "preflight_model", lambda name, **kw: pre)
+    monkeypatch.setattr(mod, "load_worker_model", lambda args, log=None: (pm, [0, 1, 2], None))
+    return responses
+
+
+def _argv(tmp_path, responses, token_source):
+    return ["--model", "Qwen/Qwen3-32B", "--responses_dir", str(responses),
+            "--output_dir", str(tmp_path / "out"), "--token_source", token_source]
+
+
+def test_a_keep_tree_refuses_the_text_path_before_any_model_loads(mod, pm, tmp_path,
+                                                                   monkeypatch, caplog):
+    responses = _keep_tree(mod, pm, tmp_path, monkeypatch, override="keep")
+
+    def no_load(args, log=None):
+        raise AssertionError("the model was loaded")
+
+    monkeypatch.setattr(mod, "load_worker_model", no_load)
+    with caplog.at_level("ERROR"):
+        with pytest.raises(SystemExit) as e:
+            _main(mod, monkeypatch, _argv(tmp_path, responses, "text"))
+    assert e.value.code == 1
+    assert "--response_cleanup keep" in caplog.text
+    assert "re-renders a kept plan inside a think block" in caplog.text
+    assert not (tmp_path / "out" / "alpha.pt").exists()
+
+
+def test_a_keep_tree_promotes_auto_to_ids(mod, pm, tmp_path, monkeypatch, caplog):
+    responses = _keep_tree(mod, pm, tmp_path, monkeypatch, override="keep")
+    with caplog.at_level("INFO"):
+        _main(mod, monkeypatch, _argv(tmp_path, responses, "auto"))
+    assert "--token_source auto is promoted to ids" in caplog.text
+    meta = torch.load(tmp_path / "out" / "alpha.pt", weights_only=False)["metadata"]
+    assert meta["token_source"] == {"ids": 2, "text": 0, "range_null": 0}
+    assert meta["response_cleanup"] == "none"
+
+
+def test_a_null_range_in_a_keep_tree_is_an_error_naming_the_record(mod, pm, tmp_path,
+                                                                    monkeypatch):
+    responses = _keep_tree(mod, pm, tmp_path, monkeypatch, override="keep", null_second=True)
+    with pytest.raises(mod.TokenSourceError, match=r"pos_p1_q1 \(a null range\)"):
+        _main(mod, monkeypatch, _argv(tmp_path, responses, "auto"))
+    assert not (tmp_path / "out" / "alpha.pt").exists()
+
+
+@pytest.mark.parametrize("override", ["family", None])
+def test_a_family_or_october_era_tree_is_unchanged(mod, pm, tmp_path, monkeypatch, override):
+    responses = _keep_tree(mod, pm, tmp_path, monkeypatch, override=override, null_second=True)
+    _main(mod, monkeypatch, _argv(tmp_path, responses, "auto"))       # no error: the text path
+    meta = torch.load(tmp_path / "out" / "alpha.pt", weights_only=False)["metadata"]
+    assert meta["token_source"] == {"ids": 1, "text": 1, "range_null": 1}
+
+
+def test_the_keep_tree_guard_on_its_own(mod, tmp_path, caplog):
+    nothing = tmp_path / "no_side_car"
+    nothing.mkdir()
+    for source in ("auto", "ids", "text"):                  # no side-car: unchanged
+        assert mod.apply_keep_tree_guard(nothing, source) == source
+    keep = tmp_path / "keep"
+    _sidecar(mod, keep, response_cleanup="none", response_cleanup_override="keep")
+    assert mod.recorded_response_cleanup_override(keep) == "keep"
+    assert mod.apply_keep_tree_guard(keep, "ids") == "ids"
+    assert mod.apply_keep_tree_guard(keep, "auto") == "ids"
+    with pytest.raises(mod.KeepTreeError):
+        mod.apply_keep_tree_guard(keep, "text")
+    family = tmp_path / "family"
+    _sidecar(mod, family, response_cleanup="strip_leaked_think",
+             response_cleanup_override="family")
+    assert [mod.apply_keep_tree_guard(family, s) for s in ("auto", "ids", "text")] == [
+        "auto", "ids", "text"]
+    assert mod.recorded_response_cleanup_override(nothing) is None
 
 
 def test_step_4_copies_the_new_keys_into_the_vector_and_step_5_refuses_nothing_new(mod, pm,

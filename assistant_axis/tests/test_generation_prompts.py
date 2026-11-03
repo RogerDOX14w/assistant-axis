@@ -192,6 +192,17 @@ def _record(tmp_path, tok, family, **over):
     return g.build_generation_run_record(**kw)
 
 
+def test_the_side_car_records_the_clean_up_rule_version_under_every_clean_up(tmp_path):
+    # Review fix (Roger, 2026-11-03): the version names the rule set the code
+    # applied, so a row whose clean-up is none records it too.
+    rec = _record(tmp_path, fakes.make_qwen3_like_tokenizer(), FAMILIES["qwen3"])
+    assert rec["response_cleanup"] == "strip_leaked_think"
+    assert rec["response_cleanup_version"] == g.RESPONSE_CLEANUP_VERSION == 2
+    rec = _record(tmp_path, fakes.make_llama3_like_tokenizer(), FAMILIES["llama"])
+    assert rec["response_cleanup"] == "none" and rec["response_cleanup_version"] == 2
+    assert "response_cleanup_version" in g.SETTINGS_KEYS
+
+
 def test_the_side_car_has_the_plans_schema_and_appends(tmp_path, monkeypatch):
     monkeypatch.setenv("TMPDIR", str(tmp_path))
     tok = fakes.make_qwen3_like_tokenizer()
