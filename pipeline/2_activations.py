@@ -174,6 +174,11 @@ def build_parser() -> argparse.ArgumentParser:
                              "record that has none fails); text, the stored text re-encoded for "
                              "every record, as before (the comparison arm).  The counts are in "
                              "the metadata, token_source")
+    parser.add_argument("--content_span", choices=["range", "turn"], default="range",
+                        help="What slot 0 averages on the ids path: range (default), the tokens "
+                             "behind the stored content; turn, everything generated, a leaked "
+                             "plan included.  Refused with --token_source text; recorded in the "
+                             "metadata, content_span")
     parser.add_argument("--prefix_token_layers", type=_layers_arg, default=None,
                         help="With --prefix_token_means: the layers its file keeps, a subset of "
                              "--layers in the same form (default: every extracted layer; at all "
@@ -395,6 +400,13 @@ class StoredTokens:
 # the stored ids are ignored (today's step 2, the comparison arm).
 TOKEN_SOURCES = ("auto", "ids", "text")
 
+# --content_span (§ 5.5, 2026-11-02): what slot 0 averages on the ids path:
+# range, the tokens behind the stored content (the default for now); turn,
+# everything generated, from the prompt's end (a leaked plan included: the
+# sample's variant 3).  The AGENT_NOTES TODO "keep leaked thinking instead of
+# stripping it?" settles the default going forward (Roger, 2026-11-02).
+CONTENT_SPANS = ("range", "turn")
+
 
 def record_key(resp: Dict) -> str:
     """The activation key of a response record (``{label}_p{prompt}_q{question}``)."""
@@ -456,6 +468,7 @@ def build_ids_path_sequence(
     special_ids,
     entity: str = "?",
     index: int = 0,
+    content_span: str = "range",
 ) -> tuple[List[int], List[Dict]]:
     """``(full_ids, spans)`` of one conversation on the ids path (the
     response-token-ids plan § 5.2, 2026-11-02): the prompt the way step 1 sent
@@ -472,6 +485,9 @@ def build_ids_path_sequence(
     ``n_tokens``, ``text``) and ``header_anchor``, the prompt's end, where the
     header search starts (:meth:`SpanMapper.map_spans`).  No span when the
     range is empty after the trim (as an empty response on the text path).
+    With ``content_span="turn"`` (``--content_span turn``, § 5.5) the span
+    starts at the prompt's end instead, so that slot 0 is the mean over the
+    whole generated turn, a leaked plan included (the trim still applies).
 
     Raises :class:`ContractError` when the conversation does not end in its
     one assistant turn, :class:`TokenSourceError` when the range does not fit
@@ -492,9 +508,12 @@ def build_ids_path_sequence(
         raise TokenSourceError(
             f"{entity}: conversation {index}: the content range [{start}, {end}) does not fit "
             f"its {len(ids)} stored ids ({len(response_ids)} without trailing special tokens)")
+    if content_span not in CONTENT_SPANS:
+        raise ValueError(f"content_span {content_span!r} is not one of {CONTENT_SPANS}")
     p = len(prompt_ids)
     full_ids = prompt_ids + response_ids + [int(i) for i in turn_end_ids]
-    indices = encoder.trim_boundary_whitespace(full_ids, list(range(p + start, p + end)))
+    span_start = p if content_span == "turn" else p + start
+    indices = encoder.trim_boundary_whitespace(full_ids, list(range(span_start, p + end)))
     spans = []
     if indices:
         spans.append({
@@ -663,6 +682,7 @@ def extract_activations_batch(
     extract_headers: bool = True,
     entity: str = "?",
     token_records: Optional[List[Optional[StoredTokens]]] = None,
+    content_span: str = "range",
 ) -> tuple[List[Optional[torch.Tensor]], List[Dict], Dict]:
     """Extract mean response activations for a batch of conversations.
 
@@ -679,6 +699,9 @@ def extract_activations_batch(
     the ids path (step 1's ids prefilled, :func:`build_ids_path_sequence`),
     None for one that takes the text path (the stored text re-encoded, as
     before); None for all: every conversation on the text path.
+    ``content_span`` (``--content_span``, § 5.5): what slot 0 averages on the
+    ids path, ``"range"`` (the stored content range) or ``"turn"`` (all of
+    the generated turn).
 
     Returns:
         (activations_list, all_mismatches, header_metadata) -- one activation
@@ -691,7 +714,7 @@ def extract_activations_batch(
     acts, _, mismatches, header_metadata = _extract_batches(
         pm, conversations, layers, batch_size, max_length,
         layout=layout, extract_headers=extract_headers, entity=entity,
-        token_records=token_records)
+        token_records=token_records, content_span=content_span)
     return acts, mismatches, header_metadata
 
 
@@ -708,13 +731,14 @@ def extract_activations_with_prefix_means(
     extract_headers: bool = True,
     entity: str = "?",
     token_records: Optional[List[Optional[StoredTokens]]] = None,
+    content_span: str = "range",
 ) -> tuple[List[Optional[torch.Tensor]], List[Optional[tuple]], List[Dict], Dict]:
     """:func:`extract_activations_batch` plus ``--prefix_token_means``, from
     the same forward passes: for each conversation with an activation, slot
     0's mean over the first N content tokens of its response for each N in
     ``prefix_tokens`` (:meth:`SpanMapper.prefix_means`), at the positions
     ``prefix_layer_index`` of the layer axis (default all).  ``token_records``
-    as for :func:`extract_activations_batch`.
+    and ``content_span`` as for :func:`extract_activations_batch`.
 
     Returns:
         (activations_list, prefix_list, all_mismatches, header_metadata);
@@ -726,7 +750,7 @@ def extract_activations_with_prefix_means(
     return _extract_batches(pm, conversations, layers, batch_size, max_length,
                             layout=layout, extract_headers=extract_headers, entity=entity,
                             prefix_tokens=prefix_tokens, prefix_layer_index=prefix_layer_index,
-                            token_records=token_records)
+                            token_records=token_records, content_span=content_span)
 
 
 def _extract_batches(
@@ -742,6 +766,7 @@ def _extract_batches(
     prefix_tokens: Optional[List[int]] = None,
     prefix_layer_index: Optional[List[int]] = None,
     token_records: Optional[List[Optional[StoredTokens]]] = None,
+    content_span: str = "range",
 ) -> tuple[List[Optional[torch.Tensor]], List[Optional[tuple]], List[Dict], Dict]:
     """The loop behind both extraction functions.  Without
     ``prefix_tokens`` it computes exactly what it did before 2026-10-28 (the
@@ -814,7 +839,8 @@ def _extract_batches(
             encoder.build_turn_spans(conv, **chat_kwargs) if rec is None
             else build_ids_path_sequence(
                 encoder, conv, rec, template_kwargs=chat_kwargs, turn_end_ids=turn_end_ids,
-                special_ids=special_ids, entity=entity, index=batch_start + local)
+                special_ids=special_ids, entity=entity, index=batch_start + local,
+                content_span=content_span)
             for local, (conv, rec) in enumerate(zip(batch_conversations,
                                                     token_records[batch_start:batch_end]))]
         batch_full_ids, batch_spans, span_metadata = ConversationEncoder.assemble_batch(
@@ -906,6 +932,7 @@ def process_role(
     prefix_tokens: Optional[List[int]] = None,
     prefix_layers: Optional[List[int]] = None,
     token_source: str = "auto",
+    content_span: str = "range",
 ) -> tuple[bool, int]:
     """Process a single role file and save activations.
 
@@ -917,7 +944,10 @@ def process_role(
     2026-11-02) picks each record's path (:func:`select_token_paths`): the
     ids step 1 stored, prefilled (:func:`build_ids_path_sequence`), or the
     stored text re-encoded (the text path, as before).  The counts are logged
-    and written in the metadata as ``token_source``.
+    and written in the metadata as ``token_source``.  ``content_span``
+    (``--content_span``, § 5.5) is what slot 0 averages on the ids path:
+    ``"range"``, the stored content range, or ``"turn"``, the whole generated
+    turn (refused with ``token_source="text"``); written in the metadata.
 
     ``prefix_tokens`` (``--prefix_token_means``, the cap pilot, 2026-10-28)
     also writes ``<output_dir>/prefix_means/<role>.pt`` from the same forward
@@ -947,6 +977,11 @@ def process_role(
             the ids path, or a stored range does not fit its ids.
     """
     role = role_file.stem
+    if content_span not in CONTENT_SPANS:
+        raise ValueError(f"content_span {content_span!r} is not one of {CONTENT_SPANS}")
+    if content_span == "turn" and token_source == "text":
+        raise ValueError("content_span 'turn' is an ids-path variant; refused with "
+                         "token_source 'text'")
     output_file = output_dir / f"{role}.pt"
     prefix_file = prefix_means_file(output_dir, role) if prefix_tokens else None
     # Without --prefix_token_means the activation file is written as before
@@ -995,6 +1030,9 @@ def process_role(
         logger.warning(f"{role}: {source_counts['range_null']} of {len(responses)} records have "
                        f"stored ids whose range is null (step 1's decoding check failed); they "
                        f"take the text path")
+    if content_span == "turn" and source_counts["text"]:
+        logger.warning(f"{role}: --content_span turn: the {source_counts['text']} record(s) on "
+                       f"the text path average their stored content only")
 
     if verify_spans > 0:
         bad = verify_assistant_spans(pm, conversations, verify_spans, entity=role)
@@ -1014,6 +1052,7 @@ def process_role(
             extract_headers=extract_headers,
             entity=role,
             token_records=token_records,
+            content_span=content_span,
         )
         prefix_list = [None] * len(activations_list)
     else:
@@ -1021,7 +1060,8 @@ def process_role(
             extract_activations_with_prefix_means(
                 pm, conversations, layers, list(prefix_tokens), batch_size, max_length,
                 prefix_layer_index=prefix_layer_index, layout=layout,
-                extract_headers=extract_headers, entity=role, token_records=token_records))
+                extract_headers=extract_headers, entity=role, token_records=token_records,
+                content_span=content_span))
 
     if mismatches:
         logger.warning(
@@ -1102,8 +1142,10 @@ def process_role(
         })
         # Since 2026-11-02 (the response-token-ids plan § 5.1): how many
         # records took each path; a file may mix (records whose stored range
-        # is null take the text path under auto).
+        # is null take the text path under auto); and (§ 5.5) what slot 0
+        # averaged on the ids path.
         file_metadata["token_source"] = dict(source_counts)
+        file_metadata["content_span"] = content_span
         if write_activations:
             activations_dict["metadata"] = file_metadata
             torch_save_with_retry(
@@ -1229,6 +1271,7 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
                     prefix_tokens=getattr(args, "prefix_token_means", None),
                     prefix_layers=getattr(args, "prefix_layers", None),
                     token_source=getattr(args, "token_source", "auto"),
+                    content_span=getattr(args, "content_span", "range"),
                 )
                 total_mismatches += n_mm
                 if saved:
@@ -1382,6 +1425,9 @@ def resolve_prefix_layers(parser, args, n_layers: Optional[int],
 def main():
     parser = build_parser()
     args = parser.parse_args()
+    if args.content_span == "turn" and args.token_source == "text":
+        parser.error("--content_span turn averages the generated turn on the ids path; it is "
+                     "refused with --token_source text")
 
     # Set up file logging (append to output_dir/activations.log)
     output_dir = Path(args.output_dir)
@@ -1483,6 +1529,7 @@ def main():
                     prefix_tokens=args.prefix_token_means,
                     prefix_layers=args.prefix_layers,
                     token_source=args.token_source,
+                    content_span=args.content_span,
                 )
             except NoActivationsError as e:
                 # Logged and carried on, like the multi-worker mode; any

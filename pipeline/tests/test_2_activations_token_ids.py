@@ -501,6 +501,73 @@ def test_the_token_source_flag(mod):
     assert set(mod.TOKEN_SOURCES) == {"auto", "ids", "text"}
 
 
+# ---------------------------------------------------------------------------
+# § 5.5: --content_span turn, slot 0 over the whole generated turn (§ 5.8 item 3)
+# ---------------------------------------------------------------------------
+
+def test_content_span_turn_averages_the_plan_and_the_content(mod, pm, tmp_path):
+    from assistant_axis.generation import prompt_token_ids
+    tok = pm.tokenizer
+    conv = _conv("Arr matey.")
+    rec = _stored(mod, tok, "Arr matey.", plan="\n Law rules. Yes no.", lead="\n\n")
+    [rng], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[rec])
+    [turn], mm, meta = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[rec],
+                                                     content_span="turn")
+    seen = pm.model.calls[-1]["input_ids"][0].tolist()
+    p = len(prompt_token_ids(tok, conv[:-1], THINKING_OFF))
+    e = rec.content_range[1]
+    nonblank = [i for i in range(p, p + e) if tok.decode([seen[i]]).strip()]
+    span = list(range(nonblank[0], nonblank[-1] + 1))         # the trim still applies
+    assert span[0] == p + 2                                   # "\n" and " " before "Law" popped
+    assert tok.decode([seen[i] for i in span]) == "Law rules. Yes no.</think>\n\nArr matey."
+    assert turn[0, 0, 0].item() == _bf16(sum(span) / len(span))
+    assert torch.equal(_bits(turn[1:]), _bits(rng[1:]))        # the header slots are the same
+    assert mm == []
+    # With a record that has no plan, turn and range are the same span.
+    plain = _stored(mod, tok, "Arr matey.")
+    [a], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[plain])
+    [b], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[plain],
+                                              content_span="turn")
+    assert torch.equal(_bits(a), _bits(b))
+
+
+def test_content_span_is_recorded_and_refused_on_the_text_path(mod, pm, tmp_path, caplog):
+    tok = pm.tokenizer
+    stored = _stored(mod, tok, "Arr matey.", plan="Law rules.")
+    recs = [_record(0, "Arr matey.", stored=stored),
+            _record(1, "Yes", stored=_stored(mod, tok, "Yes"), null_range=True)]
+    with caplog.at_level("WARNING"):
+        _, meta = _run(mod, pm, tmp_path / "turn", recs, content_span="turn")
+    assert meta["content_span"] == "turn"
+    assert "the 1 record(s) on the text path average their stored content only" in caplog.text
+    _, meta = _run(mod, pm, tmp_path / "range", recs)
+    assert meta["content_span"] == "range"
+    with pytest.raises(ValueError, match="refused with token_source 'text'"):
+        _run(mod, pm, tmp_path / "text", recs, token_source="text", content_span="turn")
+    with pytest.raises(ValueError, match="content_span"):
+        _run(mod, pm, tmp_path / "bad", recs, content_span="all")
+
+
+def test_the_content_span_flag_is_refused_with_the_text_source(mod, monkeypatch, tmp_path,
+                                                               capsys):
+    import sys
+    responses = tmp_path / "responses"
+    responses.mkdir()
+    (responses / "alpha.jsonl").write_text("{}\n")
+    monkeypatch.setattr(sys, "argv", ["2_activations.py", "--model", "Qwen/Qwen3-32B",
+                                      "--responses_dir", str(responses),
+                                      "--output_dir", str(tmp_path / "out"),
+                                      "--token_source", "text", "--content_span", "turn"])
+    with pytest.raises(SystemExit) as e:
+        mod.main()
+    assert e.value.code == 2
+    assert "refused with --token_source text" in capsys.readouterr().err
+    p = mod.build_parser()
+    base = ["--model", "m", "--responses_dir", "r", "--output_dir", "o"]
+    assert p.parse_args(base).content_span == "range"
+    assert p.parse_args(base + ["--content_span", "turn"]).content_span == "turn"
+
+
 def test_an_anchor_at_the_spans_start_is_the_search_without_one(pm):
     # The text path's spans have no anchor; an anchor equal to the start
     # searches exactly as before.
