@@ -94,14 +94,16 @@ class FakeLLM:
             text = "".join(chr(i) for i in p["prompt_token_ids"])
             q = text.split("|")[-1].replace("<gen>", "")
             text, reason, *ids = self.replies[q]
-            ids = tuple(ids[0]) if ids else tuple(ids_of(text) + ([STOP] if reason == "stop" else []))
+            if not ids:
+                ids = [ids_of(text) + ([STOP] if reason == "stop" else [])]
+            ids = tuple(ids[0])
             out.append(SimpleNamespace(outputs=[SimpleNamespace(text=text, finish_reason=reason,
                                                                 token_ids=ids)]))
         return out
 
 
-def _generator(replies, model="Qwen/Qwen3-32B", family="qwen3"):
-    gen = g.VLLMGenerator(model, family=FAMILIES[family])
+def _generator(replies, model="Qwen/Qwen3-32B", family="qwen3", **kw):
+    gen = g.VLLMGenerator(model, family=FAMILIES[family], **kw)
     gen.llm = FakeLLM(replies)
     gen.sampling_params = object()
     return gen
@@ -190,9 +192,9 @@ def _old_record(content, *, finish_reason="stop", thinking_stripped=False, quest
             "thinking_stripped": thinking_stripped, "thinking_suspected": False}
 
 
-def _one(monkeypatch, reply, family="qwen3"):
+def _one(monkeypatch, reply, family="qwen3", **gen_kw):
     monkeypatch.setattr(g, "supports_system_prompt", lambda tok: True)
-    gen = _generator({"q0": reply}, family=family)
+    gen = _generator({"q0": reply}, family=family, **gen_kw)
     [rec] = gen.generate_for_role(["You are a sailor."], ["q0"], question_ids=[7])
     return rec
 
@@ -302,6 +304,44 @@ def test_a_sampled_special_token_is_kept_in_the_ids_and_the_range(monkeypatch):
     assert rec["response_token_ids"] == ids
     assert rec["content_token_range"] == [0, len(ids) - 1]   # the special token inside it
     assert SPECIAL in ids[slice(*rec["content_token_range"])]
+
+
+def test_keep_leaves_the_plan_in_the_text_and_records_where_it_is(monkeypatch, caplog):
+    # --response_cleanup keep (§ 4.3, § 4.5 item 7)
+    raw = "Okay, so the user is asking about tides.\n</think>\n\nTides come from the moon."
+    stripped = _one(monkeypatch, (raw, "stop"))
+    with caplog.at_level(logging.WARNING):
+        kept = _one(monkeypatch, (raw, "stop"), response_cleanup_override="keep")
+    assert kept["conversation"][-1]["content"] == raw              # vLLM's text, plan and all
+    assert kept["thinking_stripped"] is False and "raw_text" not in kept
+    assert kept["thinking_token_range"] == stripped["thinking_token_range"] is not None
+    ids = kept["response_token_ids"]
+    assert ids == stripped["response_token_ids"]
+    assert kept["content_token_range"] == [0, len(ids) - 1]
+    assert _decoded(ids, kept["content_token_range"]) == raw
+    assert kept["thinking_suspected"] is True                       # the heuristic sees the plan
+    assert "Kept orphaned thinking content in 1/1 responses" in caplog.text
+    # "family" is the row's rule, as no override.
+    assert _one(monkeypatch, (raw, "stop"), response_cleanup_override="family") == stripped
+
+
+def test_the_override_is_checked_and_named_in_the_side_car_rule():
+    assert g.response_cleanup_for(FAMILIES["qwen3"], override="keep") == "keep"
+    assert g.response_cleanup_for(FAMILIES["qwen3"], override="family") == "strip_leaked_think"
+    assert g.response_cleanup_for(FAMILIES["llama"], override=None) == "none"
+    with pytest.raises(ValueError):
+        g.response_cleanup_for(FAMILIES["qwen3"], override="strip")
+    with pytest.raises(ValueError):
+        g.VLLMGenerator("Qwen/Qwen3-32B", family=FAMILIES["qwen3"],
+                        response_cleanup_override="none")
+
+
+def test_the_override_reaches_the_generator(tmp_path):
+    rg = g.RoleResponseGenerator(model_name="fake/model", roles_dir=str(tmp_path),
+                                 output_dir=str(tmp_path / "out"),
+                                 questions_file=str(tmp_path / "q.jsonl"), short_name="F",
+                                 response_cleanup_override="keep")
+    assert rg.generator.response_cleanup_override == "keep"
 
 
 def test_ids_that_are_not_the_text_get_a_null_range(monkeypatch, caplog):

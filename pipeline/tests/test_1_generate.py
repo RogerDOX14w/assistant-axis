@@ -480,6 +480,67 @@ def test_changed_instructions_are_named_not_refused(mod, monkeypatch, data, capl
     assert len(warn) == 1 and ": x." in warn[0] and "patient" not in warn[0]
 
 
+def test_response_cleanup_keep_is_recorded_and_refuses_a_family_rerun(mod, monkeypatch, data,
+                                                                      caplog):
+    """The response-token-ids plan § 4.3 (2026-11-02): --response_cleanup keep
+    is a recorded setting, so a rerun under the family rule into the same
+    directory is refused like any other change of settings."""
+    with caplog.at_level(logging.WARNING):
+        code, _ = _run_main(mod, monkeypatch, data, "--response_cleanup", "keep", bad={"y"})
+    assert code == 1                                  # y failed; x and patient were saved
+    assert _config(data)["runs"][0]["response_cleanup"] == "keep"
+    assert "--response_cleanup keep" in caplog.text
+    caplog.clear()
+    with caplog.at_level(logging.ERROR):
+        code, saved = _run_main(mod, monkeypatch, data)            # the family rule
+    assert code == 1 and saved == []
+    assert "response_cleanup: 'keep' -> 'strip_leaked_think'" in caplog.text
+    code, saved = _run_main(mod, monkeypatch, data, "--response_cleanup", "keep")
+    assert code == 0 and saved == ["y"]
+    assert [r["response_cleanup"] for r in _config(data)["runs"]] == ["keep", "keep"]
+
+
+def test_the_default_clean_up_is_the_family_rule(mod, monkeypatch, data):
+    _run_main(mod, monkeypatch, data, bad={"y"})
+    code, saved = _run_main(mod, monkeypatch, data, "--response_cleanup", "family")
+    assert code == 0 and saved == ["y"]
+    assert [r["response_cleanup"] for r in _config(data)["runs"]] == ["strip_leaked_think"] * 2
+
+
+def test_the_clean_up_override_reaches_both_generators(mod, monkeypatch, data, tmp_path):
+    seen = []
+
+    class Gen:
+        def __init__(self, **kw):
+            seen.append(kw.get("response_cleanup_override"))
+            self.generator = argparse.Namespace(load=lambda: None)
+
+        def load_role(self, path):
+            return {"instruction": [{"pos": "p"}]}
+
+        def generate_role_responses(self, name, data):
+            return []
+
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0")
+    monkeypatch.setattr(mod, "RoleResponseGenerator", Gen)
+    monkeypatch.setattr(sys, "argv", _main_args(data, "--response_cleanup", "keep"))
+    with pytest.raises(SystemExit):
+        mod.main()                                   # single worker; no responses: exit 1
+    args = _worker_args(tmp_path)
+    args.response_cleanup = "keep"
+    item = {"output_name": "a", "type": "standalone", "file_path": str(tmp_path / "a.json")}
+    with pytest.raises(SystemExit):
+        mod.process_items_on_worker(0, [0], [item], args)          # a multi-worker worker
+    assert seen == ["keep", "keep"]
+
+
+def test_an_unknown_clean_up_is_an_argparse_error(mod, monkeypatch, data):
+    monkeypatch.setattr(sys, "argv", _main_args(data, "--response_cleanup", "strip"))
+    with pytest.raises(SystemExit) as exc:
+        mod.main()
+    assert exc.value.code == 2
+
+
 def test_nothing_to_do_writes_no_record(mod, monkeypatch, data):
     _run_main(mod, monkeypatch, data)
     _run_main(mod, monkeypatch, data)

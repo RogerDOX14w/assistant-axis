@@ -49,10 +49,25 @@ def chat_template_kwargs_for(family) -> Dict[str, Any]:
     return dict(family.template_kwargs)
 
 
-def response_cleanup_for(family) -> str:
+# Step 1's --response_cleanup (the response-token-ids plan § 4.3,
+# 2026-11-02): "family" applies the family row's rule (today's behaviour),
+# "keep" leaves vLLM's text as it came, leaked plan and all.  "family" is the
+# default for now; the AGENT_NOTES TODO "keep leaked thinking instead of
+# stripping it?" settles the default going forward (Roger, 2026-11-02).
+RESPONSE_CLEANUP_OVERRIDES = ("family", "keep")
+
+
+def response_cleanup_for(family, override: Optional[str] = None) -> str:
     """The clean-up applied to each generated text: the family row's
-    (``strip_leaked_think`` for Qwen3, ``none`` otherwise)."""
-    return family.response_cleanup
+    (``strip_leaked_think`` for Qwen3, ``none`` otherwise), or ``"keep"``
+    under ``override="keep"`` (``--response_cleanup keep``).  The side-car
+    records this name, so a directory refuses a run under another one."""
+    if override is None or override == "family":
+        return family.response_cleanup
+    if override == "keep":
+        return "keep"
+    raise ValueError(f"response clean-up override {override!r} is not one of "
+                     f"{RESPONSE_CLEANUP_OVERRIDES}")
 
 
 def prompt_token_ids(tokenizer, conversation: List[Dict[str, str]],
@@ -293,6 +308,7 @@ def build_generation_run_record(
     instruction_dirs: Mapping[str, Path],
     selection: Optional[Mapping[str, Any]] = None,
     script: str = "pipeline/1_generate.py",
+    response_cleanup_override: Optional[str] = None,
 ) -> Dict[str, Any]:
     """One run's entry of ``generation_config.json``.  The field names are
     the multi-model plan's (§ 7: ``script``, ``created_at``, ``git_sha``,
@@ -309,7 +325,10 @@ def build_generation_run_record(
     them to be its prefix.  Added beside the plan's fields (walk-through P2):
     the questions file's ``sha256`` and the number of questions kept,
     ``instructions`` (:func:`instruction_dir_record` per directory read) and
-    ``selection`` (mode, flags, goal file and its hash, the work items)."""
+    ``selection`` (mode, flags, goal file and its hash, the work items).
+    ``response_cleanup`` is the rule in force: the row's, or ``"keep"`` under
+    ``response_cleanup_override="keep"`` (``--response_cleanup keep``, since
+    2026-11-02)."""
     from .atomic_io import read_jsonl_with_retry, read_text_with_retry
     q_text = read_text_with_retry(questions_file, logger_obj=logger)
     n_all = len(read_jsonl_with_retry(questions_file, skip_malformed=False, logger_obj=logger))
@@ -325,7 +344,7 @@ def build_generation_run_record(
         "header_ids": list(layout.header_ids),
         "generation_prompt_ids": list(layout.generation_prompt_ids),
         "system_prompt": system_prompt,
-        "response_cleanup": response_cleanup_for(family),
+        "response_cleanup": response_cleanup_for(family, override=response_cleanup_override),
         "sampling": {"temperature": temperature, "top_p": top_p,
                      "max_tokens": max_tokens, "max_model_len": max_model_len},
         "questions": {"file": str(questions_file), "sha256": _sha256_text(q_text),
@@ -592,6 +611,7 @@ class VLLMGenerator:
         top_p: float = 0.9,
         family=None,
         expected_header_ids: Optional[List[int]] = None,
+        response_cleanup_override: Optional[str] = None,
     ):
         """
         Initialize vLLM generator.
@@ -609,7 +629,13 @@ class VLLMGenerator:
             expected_header_ids: the header ids step 1's preflight derived
                 (and recorded in the side-car); the layout derived from vLLM's
                 tokenizer at :meth:`load` must have the same
+            response_cleanup_override: ``--response_cleanup``: None or
+                ``"family"`` (the row's rule) or ``"keep"`` (no strip;
+                :func:`response_cleanup_for`)
         """
+        if response_cleanup_override not in (None,) + RESPONSE_CLEANUP_OVERRIDES:
+            raise ValueError(f"response_cleanup_override {response_cleanup_override!r} is not "
+                             f"one of {RESPONSE_CLEANUP_OVERRIDES}")
         self.model_name = model_name
         self.max_model_len = max_model_len
         self.tensor_parallel_size = tensor_parallel_size
@@ -620,6 +646,7 @@ class VLLMGenerator:
         self.family = family
         self.expected_header_ids = (list(expected_header_ids)
                                     if expected_header_ids is not None else None)
+        self.response_cleanup_override = response_cleanup_override
         self.layout = None
 
         self.llm = None
@@ -739,13 +766,22 @@ class VLLMGenerator:
         # tag but leaves </think> and the preceding thinking text in the
         # output. Strip everything up to the last </think>.  The text before
         # the strip is kept as raw_text (2026-11-02), for readers that have
-        # no tokenizer.
-        if response_cleanup_for(self.family) == "strip_leaked_think":
-            cleaned = 0
+        # no tokenizer.  The detection is the family rule's and runs under
+        # --response_cleanup keep too (the response-token-ids plan § 4.3):
+        # then the text is left as vLLM gave it and only the plan's token
+        # range records where the plan is.
+        detect = self.family.response_cleanup == "strip_leaked_think"
+        strip = (response_cleanup_for(self.family, override=self.response_cleanup_override)
+                 == "strip_leaked_think")
+        if detect:
+            cleaned = kept = 0
             for d in details:
                 resp = d["text"]
                 if '</think>' in resp and '<think>' not in resp:
                     d["leaked"] = True
+                    if not strip:
+                        kept += 1
+                        continue
                     d["raw_text"] = resp
                     d["text"] = resp[resp.rfind('</think>') + len('</think>'):].strip()
                     d["thinking_stripped"] = True
@@ -754,6 +790,11 @@ class VLLMGenerator:
                 logger.warning(
                     f"Stripped orphaned thinking content from {cleaned}/{len(details)} "
                     f"responses (vLLM/Qwen thinking leak)")
+            if kept:
+                logger.warning(
+                    f"Kept orphaned thinking content in {kept}/{len(details)} responses "
+                    f"(--response_cleanup keep: the stored text, which step 3 judges, holds "
+                    f"the plan)")
         for d in details:
             d["thinking_suspected"] = looks_like_leaked_thinking(d["text"])
         # The two token ranges, checked against the text they point at
@@ -891,6 +932,7 @@ class RoleResponseGenerator:
         short_name: Optional[str] = None,
         family=None,
         expected_header_ids: Optional[List[int]] = None,
+        response_cleanup_override: Optional[str] = None,
     ):
         """
         Initialize role response generator.
@@ -910,7 +952,8 @@ class RoleResponseGenerator:
             top_p: Top-p sampling
             prompt_indices: Which prompt indices to use (default: 0-4)
             short_name: Short model name for formatting (auto-detected if None)
-            family, expected_header_ids: passed to :class:`VLLMGenerator`
+            family, expected_header_ids, response_cleanup_override: passed to
+                :class:`VLLMGenerator`
         """
         self.model_name = model_name
         self.roles_dir = Path(roles_dir)
@@ -938,6 +981,7 @@ class RoleResponseGenerator:
             top_p=top_p,
             family=family,
             expected_header_ids=expected_header_ids,
+            response_cleanup_override=response_cleanup_override,
         )
 
         self.questions = None

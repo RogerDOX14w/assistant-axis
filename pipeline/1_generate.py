@@ -55,6 +55,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from assistant_axis.generation import (
     GENERATION_CONFIG_NAME,
+    RESPONSE_CLEANUP_OVERRIDES,
     RoleResponseGenerator,
     build_generation_run_record,
     changed_instructions,
@@ -421,6 +422,7 @@ def process_items_on_worker(
             top_p=args.top_p,
             family=getattr(args, "family", None),
             expected_header_ids=getattr(args, "expected_header_ids", None),
+            response_cleanup_override=getattr(args, "response_cleanup", None),
         )
         generator.generator.load()
 
@@ -601,7 +603,8 @@ def generation_run_record(args, all_items: List[Dict], pending: List[Dict],
         temperature=args.temperature, top_p=args.top_p,
         max_tokens=args.max_tokens, max_model_len=args.max_model_len,
         questions_file=args.questions_file, question_count=args.question_count,
-        reduce_questions=args.reduce_questions, instruction_dirs=dirs, selection=selection)
+        reduce_questions=args.reduce_questions, instruction_dirs=dirs, selection=selection,
+        response_cleanup_override=getattr(args, "response_cleanup", None))
 
 
 def check_and_record_generation_config(args, output_dir: Path, all_items: List[Dict],
@@ -751,6 +754,15 @@ def main():
                              "that holds responses and no record at all (a tree made before "
                              "2026-10-12).  Off by default: every extraction runs into a fresh "
                              "output directory, since every skip test is file-existence only.")
+    parser.add_argument("--response_cleanup", choices=list(RESPONSE_CLEANUP_OVERRIDES),
+                        default="family",
+                        help="family (default): the family row's clean-up of each generated "
+                             "text (Qwen3: strip a leaked plan up to its last </think>); keep: "
+                             "leave vLLM's text as it came, so the stored content, which step 3 "
+                             "judges, holds the plan.  Either way the ids and the plan's token "
+                             "range are stored.  Recorded in the side-car as 'keep' or the "
+                             "row's rule, so a directory refuses a run under the other "
+                             "(the response-token-ids plan § 4.3, 2026-11-02)")
 
     args = parser.parse_args()
 
@@ -811,6 +823,13 @@ def main():
                 f"(ids {list(pre.layout.header_ids)})")
     args.family = pre.family
     args.expected_header_ids = list(pre.layout.header_ids)
+    if args.response_cleanup == "keep" and pre.family.response_cleanup != "none":
+        # A deliberate, recorded setting, never a side effect (Roger,
+        # 2026-11-02): the judged text keeps what the row's rule would strip.
+        logger.warning(f"--response_cleanup keep: the {pre.family.response_cleanup!r} clean-up "
+                       f"of the {pre.family.model_type!r} row is not applied; the stored text, "
+                       f"which step 3 judges, keeps any leaked plan (its token range is "
+                       f"recorded); the side-car records 'keep'")
 
     # The run's side-car (walk-through P2, 2026-10-12), checked against the
     # runs already recorded here and written before anything is generated.
@@ -851,6 +870,7 @@ def main():
             top_p=args.top_p,
             family=args.family,
             expected_header_ids=args.expected_header_ids,
+            response_cleanup_override=args.response_cleanup,
         )
         generator.generator.load()
 

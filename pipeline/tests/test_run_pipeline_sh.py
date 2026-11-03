@@ -609,6 +609,39 @@ def test_the_cap_and_batch_size_flags(tmp_path, args, cap, batch):
     assert all(c.endswith(f"--batch_size {batch}") for c in calls if "2_activations.py" in c)
 
 
+def test_response_cleanup_reaches_every_step_1_call(tmp_path):
+    """The response-token-ids plan § 4.3 (2026-11-02): --response-cleanup keep goes to every
+    step-1 call, step 0's default included, so a run's trees share one rule."""
+    proc, calls = _run_full(tmp_path, None, "--response-cleanup", "keep",
+                            types="roles traits r_combinations")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    gen = [c for c in calls if "1_generate.py" in c]
+    assert len(gen) == 4 and all("--response_cleanup keep " in c for c in gen)
+    assert not any("--response_cleanup" in c for c in calls if "1_generate.py" not in c)
+    assert "Clean-up: keep (step 1's --response_cleanup)" in proc.stdout
+
+
+def test_response_cleanup_is_not_passed_when_not_given(tmp_path):
+    proc, calls = _run_full(tmp_path, None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert not any("--response_cleanup" in c for c in calls)
+    assert "Clean-up:" not in proc.stdout
+
+
+def test_response_cleanup_in_christina_mode(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina", "--response-cleanup", "keep",
+                            "--roles_dir", "../data/traits/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    gen = [c for c in calls if "1_generate.py" in c]
+    assert len(gen) == 2 and all("--response_cleanup keep " in c for c in gen)
+
+
+def test_an_unknown_response_cleanup_is_refused_before_any_step(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--response-cleanup", "strip")
+    assert proc.returncode == 1 and "Invalid --response-cleanup" in proc.stderr and calls == []
+
+
 def test_the_drivers_cap_default_for_christina_mode_is_step_1s():
     import re
     m = re.search(r'add_argument\("--max_tokens", type=int, default=(\d+)',

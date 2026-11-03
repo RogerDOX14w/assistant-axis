@@ -47,6 +47,8 @@
 #   ./run_pipeline.sh --types r_combinations --to-step 2
 #                                                     # steps 1 and 2 only; judge later
 #                                                     # with --from-step 3
+#   ./run_pipeline.sh --response-cleanup keep         # step 1 keeps a leaked plan in the
+#                                                     # stored (judged) text; default family
 #
 # Response cap, step 2's batch size and step 4's threads (2026-10-29):
 # step 1 generates at --max_tokens 1024 in roger mode, the October
@@ -243,6 +245,13 @@ TO_STEP=5
 # every run was at 512.
 MAX_TOKENS=""
 ROGER_MAX_TOKENS_DEFAULT=1024
+# Step 1's --response_cleanup (family: the family row's clean-up, Qwen3's
+# leaked-plan strip; keep: the stored text keeps the plan), set with
+# --response-cleanup and passed to every step-1 call, step 0's included, so
+# that every tree of a run is generated under one rule.  Not passed when not
+# given (step 1's default, family).  The response-token-ids plan § 4.3,
+# 2026-11-02; family is the default for now.
+STEP1_ARGS=()
 # 1_generate.py's default --max_tokens (a test pins the two together).
 GENERATE_MAX_TOKENS_DEFAULT=512
 # Step 2's batch size (2_activations.py --batch_size), set with
@@ -337,6 +346,13 @@ while [[ $# -gt 0 ]]; do
         --max_tokens)
             # step 1's --max_tokens (roger mode 1024, christina mode 512)
             MAX_TOKENS="$2"; shift 2 ;;
+        --response-cleanup)
+            # step 1's --response_cleanup: family (its default) or keep
+            case "$2" in
+                family|keep) STEP1_ARGS=(--response_cleanup "$2") ;;
+                *) echo "Invalid --response-cleanup: $2 (must be family or keep)" >&2; exit 1 ;;
+            esac
+            shift 2 ;;
         --step2-batch-size)
             STEP2_BATCH_SIZE="$2"; shift 2 ;;
         --step4-threads)
@@ -495,6 +511,9 @@ else
 fi
 if [ "$FROM_STEP" -le 2 ]; then
     echo "Cap:    $MAX_TOKENS response tokens (step 1); step 2 batch size $STEP2_BATCH_SIZE"
+    if [ "${#STEP1_ARGS[@]}" -gt 0 ]; then
+        echo "Clean-up: ${STEP1_ARGS[1]} (step 1's --response_cleanup)"
+    fi
 fi
 # step 4 for the types, or step 0's for the default vector
 if { [ "$FROM_STEP" -le 4 ] && [ "$TO_STEP" -ge 4 ]; } || [ "$FROM_STEP" -eq 1 ]; then
@@ -824,6 +843,7 @@ run_step0_default() {
             --roles default \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
             --max_tokens "$MAX_TOKENS" \
+            "${STEP1_ARGS[@]}" \
             --output_dir "$DEFAULT_RESP"
     else
         echo "  default.jsonl already exists, skipping generation."
@@ -893,6 +913,7 @@ if [ "$MODE" = "christina" ]; then
             --roles_dir "$ROLES_DIR" \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
             --max_tokens "$MAX_TOKENS" \
+            "${STEP1_ARGS[@]}" \
             --output_dir "$OUTPUT_DIR/responses"
 
         echo ""
@@ -1036,6 +1057,7 @@ else
                         --no_traits $subset_flag \
                         --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                         --max_tokens "$MAX_TOKENS" \
+                        "${STEP1_ARGS[@]}" \
                         --output_dir "$TYPE_DIR/responses"
                     ;;
                 roles)
@@ -1046,6 +1068,7 @@ else
                         --roles_only \
                         --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                         --max_tokens "$MAX_TOKENS" \
+                        "${STEP1_ARGS[@]}" \
                         --output_dir "$TYPE_DIR/responses"
                     ;;
                 traits)
@@ -1056,6 +1079,7 @@ else
                         --traits_only \
                         --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                         --max_tokens "$MAX_TOKENS" \
+                        "${STEP1_ARGS[@]}" \
                         --output_dir "$TYPE_DIR/responses"
                     ;;
             esac
