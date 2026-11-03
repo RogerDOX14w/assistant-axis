@@ -1473,7 +1473,7 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
                 else:
                     empty_count += 1
             except (SpanVerificationError, TokenPathVerificationError):
-                raise                     # the spans (or the ids path) are wrong for every entity: stop
+                raise                     # the spans or the ids path are wrong for all: stop
             except Exception as e:
                 failed_count += 1
                 worker_logger.error(f"Exception processing {role_file.stem}: {e}",
