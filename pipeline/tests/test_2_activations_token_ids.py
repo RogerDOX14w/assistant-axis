@@ -89,3 +89,63 @@ def test_extract_batches_runs_one_forward_pass_per_batch(mod, pm):
     acts, _, _ = mod.extract_activations_batch(pm, CONVS, list(range(N_LAYERS)), batch_size=2)
     assert len(pm.model.calls) == 3 and len(acts) == len(CONVS)
     assert acts[2] is None and all(a is not None for i, a in enumerate(acts) if i != 2)
+
+
+# ---------------------------------------------------------------------------
+# § 5.3: the header is searched for from the span's header_anchor (§ 5.8 item 4)
+# ---------------------------------------------------------------------------
+
+def _ids(tok, text):
+    return tok(text, add_special_tokens=False)["input_ids"]
+
+
+def _map_one(pm, full_ids, span):
+    """map_spans on one conversation whose ids are given, with the Qwen3-like
+    layout; returns (activation (1+7, layers, hidden), mismatches)."""
+    from assistant_axis.internals import SpanMapper
+    from assistant_axis.internals.chat_layout import derive_chat_layout
+    from assistant_axis.model_families import FAMILIES
+    layout = derive_chat_layout(pm.tokenizer, FAMILIES["qwen3"])
+    enc = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder="chatml")
+    ids, spans, meta = ConversationEncoder.assemble_batch([(full_ids, [span])])
+    acts, bmeta = ActivationExtractor(pm, enc).batch_token_ids(ids, meta, layer=[0, 1, 2])
+    mapper = SpanMapper(pm.tokenizer, header_ids=layout.header_ids,
+                        search_distance=layout.search_distance)
+    convs, mismatches, roles = mapper.map_spans(acts, spans, bmeta, batch_full_ids=ids)
+    assert roles == [["assistant"]]
+    return convs[0][:, 0], mismatches, layout
+
+
+def test_the_header_is_found_from_the_anchor_past_a_long_plan(pm):
+    from assistant_axis.generation import prompt_token_ids
+    tok = pm.tokenizer
+    prompt = prompt_token_ids(tok, _conv("")[:-1], THINKING_OFF)      # ends with the header
+    plan = _ids(tok, "Law rules " * 10)                                # 40 ids, past the reach
+    assert len(plan) > 14
+    content = _ids(tok, "Arr matey.")
+    full = prompt + plan + content + _ids(tok, "<|im_end|>\n")
+    p, c = len(prompt), len(prompt) + len(plan)
+    span = {"turn": 1, "role": "assistant", "start": c, "end": c + len(content),
+            "n_tokens": len(content), "text": "Arr matey."}
+    act, mm, layout = _map_one(pm, full, dict(span, header_anchor=p))
+    assert mm == []
+    assert [act[k, 0, 0].item() for k in range(1, 8)] == list(range(p - 7, p))
+    assert [int(act[k, 0, 2].item()) for k in range(1, 8)] == list(layout.header_ids)
+    assert act[0, 0, 0].item() == torch.tensor(sum(range(c, c + len(content)))
+                                               / len(content)).to(torch.bfloat16).item()
+    # Without the anchor the search starts at the content and the plan puts the
+    # header out of reach: the seven slots are NaN (what the anchor is for).
+    act, mm, _ = _map_one(pm, full, span)
+    assert mm and torch.isnan(act[1:]).all()
+
+
+def test_an_anchor_at_the_spans_start_is_the_search_without_one(pm):
+    # The text path's spans have no anchor; an anchor equal to the start
+    # searches exactly as before.
+    enc = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder="chatml")
+    full, spans = enc.build_turn_spans(_conv("\n\nArr matey!\n"), **THINKING_OFF)
+    [span] = [s for s in spans if s["role"] == "assistant"]
+    assert "header_anchor" not in span
+    a, mm_a, _ = _map_one(pm, full, span)
+    b, mm_b, _ = _map_one(pm, full, dict(span, header_anchor=span["start"]))
+    assert mm_a == mm_b == [] and torch.equal(_bits(a), _bits(b))

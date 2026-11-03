@@ -154,7 +154,10 @@ class SpanMapper:
 
         Args:
             batch_activations: (num_layers, batch_size, max_seq_len, hidden_size)
-            batch_spans: span dicts with conversation_id and local indices
+            batch_spans: span dicts with conversation_id and local indices;
+                an assistant span may carry ``header_anchor``, the position
+                the header search starts back from (default: the span's
+                start; step 2's ids path, 2026-11-02)
             batch_metadata: dict with batching information
             batch_full_ids: per-conversation token ID lists (needed for header extraction)
             extract_headers: if True, this mapper has ``header_ids`` and
@@ -254,8 +257,16 @@ class SpanMapper:
                     slots = [mean_activation]
 
                     if span.get('role') == 'assistant' and full_ids is not None:
+                        # The header is searched for backwards from the span's
+                        # start, or from its "header_anchor" when it has one:
+                        # step 2's ids path puts the anchor at the end of the
+                        # prompt, since a leaked plan between the header and
+                        # the content would put the header out of reach (the
+                        # response-token-ids plan § 5.3, 2026-11-02).  The text
+                        # path's spans have no anchor: the search is as before.
+                        anchor = span.get('header_anchor', start_idx)
                         hdr_start, mm = self._find_header(
-                            full_ids, start_idx, header_ids  # type: ignore[arg-type]
+                            full_ids, anchor, header_ids  # type: ignore[arg-type]
                         )
                         for pos_idx, exp_id, act_id in mm:
                             all_mismatches.append({
@@ -268,8 +279,8 @@ class SpanMapper:
 
                         if hdr_start is None and mm:
                             max_dist = self._max_dist(N)
-                            w_start = max(0, start_idx - max_dist - 5)
-                            w_end = min(len(full_ids), start_idx + 5)
+                            w_start = max(0, anchor - max_dist - 5)
+                            w_end = min(len(full_ids), anchor + 5)
                             window_ids = full_ids[w_start:w_end]
                             try:
                                 window_toks = [
@@ -278,17 +289,17 @@ class SpanMapper:
                                 ]
                             except Exception:
                                 window_toks = ["?"] * len(window_ids)
-                            marker = start_idx - w_start
+                            marker = anchor - w_start
                             logger.warning(
                                 "HEADER NOT FOUND: conv=%d turn=%s "
                                 "span_start=%d full_ids_len=%d "
                                 "actual_length=%d search=[%d..%d)",
                                 conv_id, span.get("turn"), start_idx,
                                 len(full_ids), actual_length,
-                                max(0, start_idx - max_dist), start_idx,
+                                max(0, anchor - max_dist), anchor,
                             )
                             logger.warning(
-                                "  ids[%d:%d]: %s  (^ = span_start at offset %d)",
+                                "  ids[%d:%d]: %s  (^ = search anchor at offset %d)",
                                 w_start, w_end, window_ids, marker,
                             )
                             logger.warning(
@@ -299,7 +310,8 @@ class SpanMapper:
                                 "  expected header ids: %s  span: %s",
                                 header_ids, {k: span[k] for k in
                                              ('role', 'turn', 'start', 'end',
-                                              'n_tokens', 'conversation_id')
+                                              'n_tokens', 'conversation_id',
+                                              'header_anchor')
                                              if k in span},
                             )
 
