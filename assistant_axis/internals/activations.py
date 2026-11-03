@@ -268,12 +268,45 @@ class ActivationExtractor:
             Tuple of (batch_activations, batch_metadata):
             - batch_activations: torch.Tensor shape (num_layers, batch_size, max_seq_len, hidden_size)
             - batch_metadata: Dict with batching information (lengths, attention_mask, etc.)
+
+        Since 2026-11-02 (the response-token-ids plan § 5.4,
+        reports/pipeline/response_token_ids/plan.md) a wrapper: the ids are
+        built here (``encoder.build_batch_turn_spans``) and
+        :meth:`batch_token_ids` pads them, runs the model and returns the
+        same two values as before.
         """
         # Get tokenized conversations and spans
         batch_full_ids, batch_spans, span_metadata = self.encoder.build_batch_turn_spans(
             conversations, **chat_kwargs
         )
+        return self.batch_token_ids(batch_full_ids, span_metadata, layer=layer,
+                                    max_length=max_length)
 
+    def batch_token_ids(
+        self,
+        batch_full_ids: List[List[int]],
+        span_metadata: Dict,
+        layer: Optional[Union[int, List[int]]] = None,
+        max_length: int = 4096,
+    ) -> tuple[torch.Tensor, Dict]:
+        """
+        Extract activations for a batch of prepared token-id sequences: the
+        padding, the forward hooks, the forward pass and the batch metadata
+        of :meth:`batch_conversations`, from ids the caller built (step 2's
+        ids path prefills the ids step 1 stored; the response-token-ids plan
+        § 5.4, 2026-11-02).
+
+        Args:
+            batch_full_ids: one token-id list per conversation
+            span_metadata: ``conversation_lengths``, ``total_conversations``
+                and ``conversation_offsets``, as
+                ``ConversationEncoder.build_batch_turn_spans`` gives them
+            layer: int for single layer, list of ints for multiple layers, or None for all layers
+            max_length: Maximum sequence length for padding
+
+        Returns:
+            (batch_activations, batch_metadata), as :meth:`batch_conversations`
+        """
         # Handle layer specification
         if isinstance(layer, int):
             layer_list = [layer]

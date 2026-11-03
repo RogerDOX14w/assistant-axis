@@ -697,20 +697,31 @@ class ConversationEncoder:
             - batch_spans: List of span dicts with conversation_id, local and global indices
             - batch_metadata: Dict with batching information (lengths, padding info, etc.)
         """
+        # Get spans for each conversation using existing function
+        return self.assemble_batch(
+            [self.build_turn_spans(conversation, **chat_kwargs) for conversation in conversations])
+
+    @staticmethod
+    def assemble_batch(
+        per_conversation: List[Tuple[List[int], List[Dict[str, Any]]]],
+    ) -> Tuple[List[List[int]], List[Dict[str, Any]], Dict[str, Any]]:
+        """The batch structures of :meth:`build_batch_turn_spans` from each
+        conversation's ``(full_ids, spans)``, however they were built (step
+        2's ids path builds them from the ids step 1 stored; the
+        response-token-ids plan § 5.4, 2026-11-02): the ids, the spans with
+        ``conversation_id``, ``local_*`` and ``global_*`` added, and the
+        lengths and offsets."""
         batch_full_ids = []
         batch_spans = []
         batch_metadata = {
             'conversation_lengths': [],
-            'total_conversations': len(conversations),
+            'total_conversations': len(per_conversation),
             'conversation_offsets': []  # Global token offsets for each conversation in batch
         }
 
         global_offset = 0
 
-        for conv_id, conversation in enumerate(conversations):
-            # Get spans for this conversation using existing function
-            full_ids, spans = self.build_turn_spans(conversation, **chat_kwargs)
-
+        for conv_id, (full_ids, spans) in enumerate(per_conversation):
             batch_full_ids.append(full_ids)
             batch_metadata['conversation_lengths'].append(len(full_ids))
             batch_metadata['conversation_offsets'].append(global_offset)

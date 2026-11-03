@@ -623,18 +623,20 @@ def _extract_batches(
         batch_end = min(batch_start + batch_size, num_conversations)
         batch_conversations = conversations[batch_start:batch_end]
 
-        # Use ActivationExtractor.batch_conversations to get activations
-        batch_activations, batch_metadata = extractor.batch_conversations(
-            batch_conversations,
-            layer=layers,
-            max_length=max_length,
-            **chat_kwargs,
-        )
+        # Each conversation's ids and spans, built once and assembled as
+        # build_batch_turn_spans assembles them; batch_token_ids pads them
+        # and runs the model (the response-token-ids plan § 5.4, 2026-11-02:
+        # until then ActivationExtractor.batch_conversations built the ids
+        # and spans, and this loop built them a second time for the span
+        # mapper; the golden gate checks that nothing changed).
+        per_conversation = [encoder.build_turn_spans(conv, **chat_kwargs)
+                            for conv in batch_conversations]
+        batch_full_ids, batch_spans, span_metadata = ConversationEncoder.assemble_batch(
+            per_conversation)
+        batch_activations, batch_metadata = extractor.batch_token_ids(
+            batch_full_ids, span_metadata, layer=layers, max_length=max_length)
 
         # batch_activations shape: (num_layers, batch_size, max_seq_len, hidden_size)
-
-        # Build spans for this batch
-        batch_full_ids, batch_spans, span_metadata = encoder.build_batch_turn_spans(batch_conversations, **chat_kwargs)
 
         # Debug: print first 2 assistant spans
         if batch_start == 0:
