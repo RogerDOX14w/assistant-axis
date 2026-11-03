@@ -139,6 +139,189 @@ def test_the_header_is_found_from_the_anchor_past_a_long_plan(pm):
     assert mm and torch.isnan(act[1:]).all()
 
 
+def _stored(mod, tok, content, *, plan=None, stop=True, extra=(), lead=""):
+    """What step 1 would store for ``content``: the ids of ``plan`` and
+    ``</think>`` (a stripped record), ``lead`` (whitespace the strip took),
+    the content's ids, ``extra`` ids past the range (a partial character at
+    the cap) and the stop token; the range is the content's ids."""
+    ids, start = [], 0
+    if plan is not None:
+        ids += _ids(tok, plan) + [tok.convert_tokens_to_ids("</think>")]
+        start = len(ids)
+    ids += _ids(tok, lead + content)
+    end = len(ids)
+    ids += list(extra)
+    if stop:
+        ids.append(tok.convert_tokens_to_ids("<|im_end|>"))
+    return mod.StoredTokens(ids=ids, content_range=(start, end))
+
+
+def _bf16(x):
+    return torch.tensor(float(x)).to(torch.bfloat16).item()
+
+
+# ---------------------------------------------------------------------------
+# § 5.2: the sequence the ids path prefills, through extract_activations_batch
+# ---------------------------------------------------------------------------
+
+def test_the_end_of_turn_is_read_off_the_template(pm):
+    from assistant_axis.internals.chat_layout import derive_turn_end_ids
+    from assistant_axis.model_families import FAMILIES
+    from assistant_axis.tests.internals_fakes import make_llama3_like_tokenizer
+    tok = pm.tokenizer
+    assert list(derive_turn_end_ids(tok, FAMILIES["qwen3"])) == tok.convert_tokens_to_ids(
+        ["<|im_end|>", "\n"])
+    llama = make_llama3_like_tokenizer()
+    assert list(derive_turn_end_ids(llama, FAMILIES["llama"])) == [
+        llama.convert_tokens_to_ids("<|eot_id|>")]
+
+
+EQUIVALENT = ["Arr matey. Law rules!", " Yes", "Yes \n", "", "The sea is wide."]
+
+
+def test_ids_equal_to_the_re_encoding_give_the_text_paths_activations(mod, pm):
+    # § 5.8 item 1 at the extraction level: stored ids that are the content's
+    # re-encoding (plus the stop token) give bit-identical activations.
+    convs = [_conv(c, system=None if i % 2 else "You are a pirate")
+             for i, c in enumerate(EQUIVALENT)]
+    records = [_stored(mod, pm.tokenizer, c) for c in EQUIVALENT]
+    text, mm_t, meta_t = mod.extract_activations_batch(pm, convs, [0, 1, 2], batch_size=2)
+    text_ids = [c["input_ids"] for c in pm.model.calls]
+    ids, mm_i, meta_i = mod.extract_activations_batch(pm, convs, [0, 1, 2], batch_size=2,
+                                                      token_records=records)
+    ids_ids = [c["input_ids"] for c in pm.model.calls[len(text_ids):]]
+    assert len(ids_ids) == len(text_ids) == 3                 # the model saw the same ids
+    assert all(torch.equal(a, b) for a, b in zip(text_ids, ids_ids))
+    assert mm_t == mm_i == [] and meta_t == meta_i
+    assert [a is None for a in text] == [a is None for a in ids] == [False, False, False, True,
+                                                                     False]
+    for a, b in zip(text, ids):
+        if a is not None:
+            assert torch.equal(_bits(a), _bits(b))
+
+
+def test_a_llama_like_model_takes_the_ids_path_too(mod):
+    from assistant_axis.tests.internals_fakes import make_llama3_like_tokenizer
+    tok = make_llama3_like_tokenizer()
+    pm = make_fake_probing_model(N_LAYERS, model_name="meta-llama/x", model_type="llama",
+                                 tokenizer=tok)
+    convs = [_conv("Arr matey. Law rules!"), _conv("Yes")]
+    eot = tok.convert_tokens_to_ids("<|eot_id|>")
+    records = [mod.StoredTokens(ids=_ids(tok, c[-1]["content"]) + [eot],
+                                content_range=(0, len(_ids(tok, c[-1]["content"]))))
+               for c in convs]
+    text, _, _ = mod.extract_activations_batch(pm, convs, [0, 1, 2])
+    ids, _, _ = mod.extract_activations_batch(pm, convs, [0, 1, 2], token_records=records)
+    assert torch.equal(pm.model.calls[0]["input_ids"], pm.model.calls[1]["input_ids"])
+    assert all(torch.equal(_bits(a), _bits(b)) for a, b in zip(text, ids))
+
+
+def test_the_plan_is_prefilled_and_slot_0_is_the_content_only(mod, pm):
+    # § 5.8 item 3: a stripped record, "plan </think> \n\n content".
+    tok = pm.tokenizer
+    conv = _conv("Arr matey.")
+    rec = _stored(mod, tok, "Arr matey.", plan="Law rules. Yes no.", lead="\n\n")
+    [act], mm, meta = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[rec])
+    from assistant_axis.generation import prompt_token_ids
+    prompt = prompt_token_ids(tok, conv[:-1], THINKING_OFF)
+    p, k, e = len(prompt), rec.content_range[0], rec.content_range[1]
+    seen = pm.model.calls[-1]["input_ids"][0].tolist()
+    assert seen[:p] == prompt
+    assert seen[p:p + k] == rec.ids[:k]                       # the plan, after the header
+    assert seen[p + k:] == rec.ids[k:-1] + tok.convert_tokens_to_ids(["<|im_end|>", "\n"])
+    nonblank = [i for i in range(p + k, p + e) if tok.decode([seen[i]]).strip()]
+    content = list(range(nonblank[0], nonblank[-1] + 1))      # first to last non-whitespace
+    assert tok.decode([seen[i] for i in content]) == "Arr matey."
+    assert act[0, 0, 0].item() == _bf16(sum(content) / len(content))
+    assert [act[j, 0, 0].item() for j in range(1, 8)] == list(range(p - 7, p))
+    assert [int(act[j, 0, 2].item()) for j in range(1, 8)] == meta["header_ids"]
+    assert mm == []
+
+
+def test_the_stop_token_and_the_end_of_turn(mod, pm):
+    # § 5.8 item 6: ids ending in the stop token and ids without it give the
+    # same slots, and the sequence ends in the template's end of turn once.
+    tok = pm.tokenizer
+    conv = _conv("Arr matey.")
+    with_stop = _stored(mod, tok, "Arr matey.")
+    without = _stored(mod, tok, "Arr matey.", stop=False)
+    [a], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[with_stop])
+    seen_a = pm.model.calls[-1]["input_ids"][0].tolist()
+    [b], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[without])
+    seen_b = pm.model.calls[-1]["input_ids"][0].tolist()
+    assert seen_a == seen_b and torch.equal(_bits(a), _bits(b))
+    im_end = tok.convert_tokens_to_ids("<|im_end|>")
+    assert seen_a[-2:] == [im_end, tok.convert_tokens_to_ids("\n")]
+    assert seen_a.count(im_end) == 3                          # system, user, assistant
+
+
+def test_a_sampled_special_token_is_prefilled_and_averaged(mod, pm):
+    # § 5.8 item 7: a special token the model sampled inside the content.
+    tok = pm.tokenizer
+    special = tok.convert_tokens_to_ids("<|endoftext|>")
+    arr, matey = _ids(tok, "Arr "), _ids(tok, "matey.")
+    rec = mod.StoredTokens(ids=arr + [special] + matey + [tok.convert_tokens_to_ids("<|im_end|>")],
+                           content_range=(0, len(arr) + 1 + len(matey)))
+    conv = _conv("Arr matey.")                                # the text has no special token
+    [ids_act], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[rec])
+    seen = pm.model.calls[-1]["input_ids"][0].tolist()
+    [text_act], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2])
+    assert special in seen[:-2]
+    assert special not in pm.model.calls[-1]["input_ids"][0].tolist()[:-1]
+    from assistant_axis.generation import prompt_token_ids
+    p = len(prompt_token_ids(tok, conv[:-1], THINKING_OFF))
+    span = list(range(p, p + len(arr) + 1 + len(matey)))       # the special token included
+    assert ids_act[0, 0, 0].item() == _bf16(sum(span) / len(span))
+    assert ids_act[0, 0, 2].item() == _bf16(sum(seen[i] for i in span) / len(span))
+    assert not torch.equal(_bits(ids_act[0]), _bits(text_act[0]))
+
+
+def test_ids_past_the_range_are_prefilled_and_not_averaged(mod, pm):
+    # § 5.8 item 8: a partial character at the cap; its ids are not behind
+    # the text, so the range ends before them.
+    tok = pm.tokenizer
+    extra = _ids(tok, "??")                                   # not special, so not stripped
+    rec = _stored(mod, tok, "Arr matey", stop=False, extra=extra)
+    conv = _conv("Arr matey")
+    [act], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[rec])
+    seen = pm.model.calls[-1]["input_ids"][0].tolist()
+    from assistant_axis.generation import prompt_token_ids
+    p = len(prompt_token_ids(tok, conv[:-1], THINKING_OFF))
+    assert seen[p + 3:p + 5] == extra                         # prefilled
+    assert act[0, 0, 0].item() == _bf16(sum(range(p, p + 3)) / 3)   # "Arr", " ", "matey" only
+
+
+def test_a_range_that_does_not_fit_its_ids_raises(mod, pm):
+    tok = pm.tokenizer
+    ids = _ids(tok, "Arr matey.") + [tok.convert_tokens_to_ids("<|im_end|>")]
+    for bad in ((0, len(ids)), (3, 2), (-1, 2)):               # the stop token; reversed; negative
+        with pytest.raises(mod.TokenSourceError, match="does not fit"):
+            mod.extract_activations_batch(pm, [_conv("Arr matey.")], [0],
+                                          token_records=[mod.StoredTokens(ids, bad)],
+                                          entity="pirate")
+
+
+def test_the_ids_path_needs_the_conversation_to_end_in_its_assistant_turn(mod, pm):
+    tok = pm.tokenizer
+    rec = _stored(mod, tok, "Yes")
+    two = _conv("Arr.") + [{"role": "user", "content": "What is law?"},
+                           {"role": "assistant", "content": "Yes"}]
+    for conv in (two, _conv("Yes")[:-1]):
+        with pytest.raises(mod.ContractError, match="pirate: conversation 0"):
+            mod.extract_activations_batch(pm, [conv], [0], token_records=[rec], entity="pirate")
+
+
+def test_the_boundary_trim_is_the_text_paths_rule(pm):
+    enc = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder="chatml")
+    tok = pm.tokenizer
+    full = _ids(tok, "\n\n Arr matey. \n")          # \n\n, " ", Arr, " ", matey, ".", " ", \n
+    assert enc.trim_boundary_whitespace(full, list(range(len(full)))) == [2, 3, 4, 5]
+    clean = _ids(tok, "Arr matey.")
+    assert enc.trim_boundary_whitespace(clean, [0, 1, 2]) == [0, 1, 2]
+    assert enc.trim_boundary_whitespace(full, [0, 1]) == []
+    assert enc.trim_boundary_whitespace(full, []) == []
+
+
 def test_an_anchor_at_the_spans_start_is_the_search_without_one(pm):
     # The text path's spans have no anchor; an anchor equal to the start
     # searches exactly as before.

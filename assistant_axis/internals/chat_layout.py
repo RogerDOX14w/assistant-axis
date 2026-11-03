@@ -207,3 +207,32 @@ def derive_chat_layout(tokenizer, family, *, probe_system: str = PROBE_SYSTEM,
         probe=tuple(dict(m) for m in probe),
         search_distance=len(header) + SEARCH_SLACK,
     )
+
+
+def derive_turn_end_ids(tokenizer, family, *, probe_system: str = PROBE_SYSTEM,
+                        probe_user: str = PROBE_USER,
+                        probe_content: str = PROBE_CONTENT) -> Tuple[int, ...]:
+    """What the template writes after a stored assistant turn's content (for
+    Qwen3 ``<|im_end|>\\n``), read off the template as the header is: the
+    probe conversation with an assistant turn, rendered with the family's
+    template kwargs, and the ids after the probe content.
+
+    Step 2's ids path appends these to the prompt and the stored response
+    ids (the response-token-ids plan § 5.2, 2026-11-02), so that the
+    sequence it prefills ends as the text path's rendering does.  Raises
+    :class:`LayoutError` when the content is not found exactly once."""
+    kwargs = dict(family.template_kwargs)
+    probe = ([{"role": "system", "content": probe_system}]
+             if family.system_prompt == "native" else []) + [
+        {"role": "user", "content": probe_user}]
+    base = chat_ids(tokenizer, probe, add_generation_prompt=False, template_kwargs=kwargs)
+    full = chat_ids(tokenizer, probe + [{"role": "assistant", "content": probe_content}],
+                    add_generation_prompt=False, template_kwargs=kwargs)
+    c_ids = _plain_ids(tokenizer, probe_content)
+    hits = _occurrences(full, c_ids, len(base))
+    if len(hits) != 1:
+        raise LayoutError(
+            f"{family.model_type}: the probe's content {probe_content!r} ({len(hits)} times) "
+            f"is not found exactly once in {_decode(tokenizer, full[len(base):])!r}, so the "
+            f"end of the assistant turn cannot be read off the template")
+    return tuple(full[hits[0] + len(c_ids):])

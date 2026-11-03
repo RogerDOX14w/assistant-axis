@@ -225,7 +225,9 @@ from assistant_axis.internals.chat_layout import (  # noqa: E402
     LayoutError,
     chat_ids,
     derive_chat_layout,
+    derive_turn_end_ids,
 )
+from assistant_axis.generation import prompt_token_ids  # noqa: E402
 from assistant_axis.model_families import (  # noqa: E402
     FamilyNotBuiltError,
     FamilySpec,
@@ -358,6 +360,86 @@ class ContractError(RuntimeError):
 class SpanVerificationError(RuntimeError):
     """``--verify_spans`` found an assistant span that does not decode to the
     stored content."""
+
+
+class TokenSourceError(RuntimeError):
+    """A record cannot take the ids path: ``--token_source ids`` and a record
+    without stored ids or with a null range, or a stored range that does not
+    fit its ids (the response-token-ids plan § 5, 2026-11-02)."""
+
+
+@dataclass(frozen=True)
+class StoredTokens:
+    """What step 1 stored for one response and the ids path prefills (the
+    response-token-ids plan § 3): ``ids``, vLLM's ids verbatim
+    (``response_token_ids``), and ``content_range``, ``[start, end)`` into
+    them of the tokens behind the stored content (``content_token_range``)."""
+
+    ids: List[int]
+    content_range: tuple
+
+
+def build_ids_path_sequence(
+    encoder: ConversationEncoder,
+    conversation: List[Dict[str, str]],
+    stored: StoredTokens,
+    *,
+    template_kwargs: Dict,
+    turn_end_ids: List[int],
+    special_ids,
+    entity: str = "?",
+    index: int = 0,
+) -> tuple[List[int], List[Dict]]:
+    """``(full_ids, spans)`` of one conversation on the ids path (the
+    response-token-ids plan § 5.2, 2026-11-02): the prompt the way step 1 sent
+    it to vLLM (:func:`assistant_axis.generation.prompt_token_ids`, the
+    conversation without its assistant turn), then the stored ids without
+    their trailing special ids (the stop token: the template's end of turn
+    follows), then the template's end of turn (``turn_end_ids``,
+    :func:`derive_turn_end_ids`).
+
+    One span, the assistant's: the stored content range shifted past the
+    prompt, then the chatml boundary rule
+    (:meth:`ConversationEncoder.trim_boundary_whitespace`, the text path's),
+    with the text path's keys (``turn``, ``role``, ``start``, ``end``,
+    ``n_tokens``, ``text``) and ``header_anchor``, the prompt's end, where the
+    header search starts (:meth:`SpanMapper.map_spans`).  No span when the
+    range is empty after the trim (as an empty response on the text path).
+
+    Raises :class:`ContractError` when the conversation does not end in its
+    one assistant turn, :class:`TokenSourceError` when the range does not fit
+    the ids."""
+    roles = [m["role"] for m in conversation]
+    if roles.count("assistant") != 1 or roles[-1] != "assistant":
+        raise ContractError(
+            f"{entity}: conversation {index} has {roles.count('assistant')} assistant turns "
+            f"(roles {roles}); the ids path needs exactly one, last")
+    prompt_ids = prompt_token_ids(encoder.tokenizer, conversation[:-1], template_kwargs)
+    ids = [int(i) for i in stored.ids]
+    end_ids = len(ids)
+    while end_ids > 0 and ids[end_ids - 1] in special_ids:
+        end_ids -= 1
+    response_ids = ids[:end_ids]
+    start, end = (int(x) for x in stored.content_range)
+    if not 0 <= start <= end <= len(response_ids):
+        raise TokenSourceError(
+            f"{entity}: conversation {index}: the content range [{start}, {end}) does not fit "
+            f"its {len(ids)} stored ids ({len(response_ids)} without trailing special tokens)")
+    p = len(prompt_ids)
+    full_ids = prompt_ids + response_ids + [int(i) for i in turn_end_ids]
+    indices = encoder.trim_boundary_whitespace(full_ids, list(range(p + start, p + end)))
+    spans = []
+    if indices:
+        spans.append({
+            "turn": sum(1 for r in roles[:-1] if r != "system"),   # the text path's numbering
+            "role": "assistant",
+            "start": min(indices),
+            "end": max(indices) + 1,    # exclusive
+            "n_tokens": len(indices),
+            "text": conversation[-1].get("content", ""),
+            "header_anchor": p,
+        })
+    return full_ids, spans
 
 
 @dataclass
@@ -513,6 +595,7 @@ def extract_activations_batch(
     layout: Optional[ChatLayout] = None,
     extract_headers: bool = True,
     entity: str = "?",
+    token_records: Optional[List[Optional[StoredTokens]]] = None,
 ) -> tuple[List[Optional[torch.Tensor]], List[Dict], Dict]:
     """Extract mean response activations for a batch of conversations.
 
@@ -524,6 +607,12 @@ def extract_activations_batch(
     turn's, ``(1 + N, n_layers, hidden)`` with headers, ``(n_layers,
     hidden)`` without; none when the response is empty or cut away.
 
+    ``token_records`` (the response-token-ids plan, 2026-11-02), parallel to
+    ``conversations``: a :class:`StoredTokens` for a conversation that takes
+    the ids path (step 1's ids prefilled, :func:`build_ids_path_sequence`),
+    None for one that takes the text path (the stored text re-encoded, as
+    before); None for all: every conversation on the text path.
+
     Returns:
         (activations_list, all_mismatches, header_metadata) -- one activation
         tensor per conversation (or None), accumulated header-token mismatch
@@ -534,7 +623,8 @@ def extract_activations_batch(
     """
     acts, _, mismatches, header_metadata = _extract_batches(
         pm, conversations, layers, batch_size, max_length,
-        layout=layout, extract_headers=extract_headers, entity=entity)
+        layout=layout, extract_headers=extract_headers, entity=entity,
+        token_records=token_records)
     return acts, mismatches, header_metadata
 
 
@@ -550,12 +640,14 @@ def extract_activations_with_prefix_means(
     layout: Optional[ChatLayout] = None,
     extract_headers: bool = True,
     entity: str = "?",
+    token_records: Optional[List[Optional[StoredTokens]]] = None,
 ) -> tuple[List[Optional[torch.Tensor]], List[Optional[tuple]], List[Dict], Dict]:
     """:func:`extract_activations_batch` plus ``--prefix_token_means``, from
     the same forward passes: for each conversation with an activation, slot
     0's mean over the first N content tokens of its response for each N in
     ``prefix_tokens`` (:meth:`SpanMapper.prefix_means`), at the positions
-    ``prefix_layer_index`` of the layer axis (default all).
+    ``prefix_layer_index`` of the layer axis (default all).  ``token_records``
+    as for :func:`extract_activations_batch`.
 
     Returns:
         (activations_list, prefix_list, all_mismatches, header_metadata);
@@ -566,7 +658,8 @@ def extract_activations_with_prefix_means(
     """
     return _extract_batches(pm, conversations, layers, batch_size, max_length,
                             layout=layout, extract_headers=extract_headers, entity=entity,
-                            prefix_tokens=prefix_tokens, prefix_layer_index=prefix_layer_index)
+                            prefix_tokens=prefix_tokens, prefix_layer_index=prefix_layer_index,
+                            token_records=token_records)
 
 
 def _extract_batches(
@@ -581,15 +674,33 @@ def _extract_batches(
     entity: str,
     prefix_tokens: Optional[List[int]] = None,
     prefix_layer_index: Optional[List[int]] = None,
+    token_records: Optional[List[Optional[StoredTokens]]] = None,
 ) -> tuple[List[Optional[torch.Tensor]], List[Optional[tuple]], List[Dict], Dict]:
     """The loop behind both extraction functions.  Without
     ``prefix_tokens`` it computes exactly what it did before 2026-10-28 (the
     golden gate, test_step2_qwen3_golden.py) and the prefix list is all
-    None."""
+    None; the conversations without a ``token_records`` entry take the text
+    path, exactly as before 2026-11-02."""
     family = pm.family
     chat_kwargs = dict(family.template_kwargs)
     encoder = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder=family.span_builder)
     extractor = ActivationExtractor(pm, encoder)
+
+    if token_records is None:
+        token_records = [None] * len(conversations)
+    if len(token_records) != len(conversations):
+        raise ValueError(f"{entity}: {len(token_records)} token records for "
+                         f"{len(conversations)} conversations")
+    # The ids path's fixed parts, derived once when any conversation takes it
+    # (the response-token-ids plan § 5.2): the template's end of turn, and
+    # the special ids a stored response ends in (its stop token).
+    turn_end_ids: List[int] = []
+    special_ids: set = set()
+    if any(r is not None for r in token_records):
+        turn_end_ids = list(derive_turn_end_ids(pm.tokenizer, family))
+        special_ids = set(int(i) for i in pm.tokenizer.all_special_ids)
+        logger.info(f"{entity}: ids path: the end of turn after the stored ids is "
+                    f"{turn_end_ids} ({pm.tokenizer.decode(turn_end_ids)!r})")
 
     header_metadata: Dict = {}
     if extract_headers:
@@ -629,8 +740,16 @@ def _extract_batches(
         # until then ActivationExtractor.batch_conversations built the ids
         # and spans, and this loop built them a second time for the span
         # mapper; the golden gate checks that nothing changed).
-        per_conversation = [encoder.build_turn_spans(conv, **chat_kwargs)
-                            for conv in batch_conversations]
+        # A conversation with stored tokens takes the ids path (the
+        # response-token-ids plan § 5.2, 2026-11-02); the others the text
+        # path, built exactly as before.
+        per_conversation = [
+            encoder.build_turn_spans(conv, **chat_kwargs) if rec is None
+            else build_ids_path_sequence(
+                encoder, conv, rec, template_kwargs=chat_kwargs, turn_end_ids=turn_end_ids,
+                special_ids=special_ids, entity=entity, index=batch_start + local)
+            for local, (conv, rec) in enumerate(zip(batch_conversations,
+                                                    token_records[batch_start:batch_end]))]
         batch_full_ids, batch_spans, span_metadata = ConversationEncoder.assemble_batch(
             per_conversation)
         batch_activations, batch_metadata = extractor.batch_token_ids(

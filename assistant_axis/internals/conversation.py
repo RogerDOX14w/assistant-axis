@@ -596,22 +596,8 @@ class ConversationEncoder:
                                 filtered_indices.append(idx)
 
                             # Clean up extracted text by removing extra whitespace/newlines at boundaries
-                            if filtered_indices:
-                                # Get the text to check for leading/trailing cleanup
-                                extracted_token_ids = [full_ids[idx] for idx in filtered_indices]
-                                extracted_text = self.tokenizer.decode(extracted_token_ids)
-
-                                # If text starts/ends with excessive whitespace, find better boundaries
-                                if extracted_text.strip() != extracted_text:
-                                    # Remove leading whitespace-only tokens
-                                    while (filtered_indices and
-                                           self.tokenizer.decode([full_ids[filtered_indices[0]]]).strip() == ''):
-                                        filtered_indices.pop(0)
-
-                                    # Remove trailing whitespace-only tokens
-                                    while (filtered_indices and
-                                           self.tokenizer.decode([full_ids[filtered_indices[-1]]]).strip() == ''):
-                                        filtered_indices.pop()
+                            filtered_indices = self.trim_boundary_whitespace(full_ids,
+                                                                             filtered_indices)
 
                             final_indices = filtered_indices
                         else:
@@ -635,6 +621,33 @@ class ConversationEncoder:
                 i += 1
 
         return full_ids, spans
+
+    def trim_boundary_whitespace(self, full_ids: List[int], indices: List[int]) -> List[int]:
+        """The chatml span builder's boundary rule: when the tokens at
+        ``indices`` decode to a text with leading or trailing whitespace, pop
+        whitespace-only tokens from both ends.  Returns the kept indices (a
+        new list).  Factored out of :meth:`_build_turn_spans_qwen` unchanged
+        (the response-token-ids plan § 5.2, 2026-11-02), so that step 2's ids
+        path trims the stored ids' range by the same rule and a clean
+        response gives the same slot-0 positions on both paths."""
+        indices = list(indices)
+        if indices:
+            # Get the text to check for leading/trailing cleanup
+            extracted_token_ids = [full_ids[idx] for idx in indices]
+            extracted_text = self.tokenizer.decode(extracted_token_ids)
+
+            # If text starts/ends with excessive whitespace, find better boundaries
+            if extracted_text.strip() != extracted_text:
+                # Remove leading whitespace-only tokens
+                while (indices and
+                       self.tokenizer.decode([full_ids[indices[0]]]).strip() == ''):
+                    indices.pop(0)
+
+                # Remove trailing whitespace-only tokens
+                while (indices and
+                       self.tokenizer.decode([full_ids[indices[-1]]]).strip() == ''):
+                    indices.pop()
+        return indices
 
     def _build_turn_spans_fallback(
         self,
