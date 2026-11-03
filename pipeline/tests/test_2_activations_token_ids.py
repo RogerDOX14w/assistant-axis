@@ -141,14 +141,17 @@ def test_the_header_is_found_from_the_anchor_past_a_long_plan(pm):
 
 def _stored(mod, tok, content, *, plan=None, stop=True, extra=(), lead=""):
     """What step 1 would store for ``content``: the ids of ``plan`` and
-    ``</think>`` (a stripped record), ``lead`` (whitespace the strip took),
-    the content's ids, ``extra`` ids past the range (a partial character at
-    the cap) and the stop token; the range is the content's ids."""
-    ids, start = [], 0
+    ``</think>`` (a stripped record) and of ``lead`` (the ``"\\n\\n"`` the strip
+    takes after it), the content's ids, ``extra`` ids past the range (a
+    partial character at the cap) and the stop token; the range is the
+    content's ids, starting after the lead, as step 1 points since
+    2026-11-03 (until then the range started at the lead)."""
+    ids = []
     if plan is not None:
         ids += _ids(tok, plan) + [tok.convert_tokens_to_ids("</think>")]
-        start = len(ids)
-    ids += _ids(tok, lead + content)
+    ids += _ids(tok, lead) if lead else []
+    start = len(ids)
+    ids += _ids(tok, content)
     end = len(ids)
     ids += list(extra)
     if stop:
@@ -176,12 +179,18 @@ def test_the_end_of_turn_is_read_off_the_template(pm):
         llama.convert_tokens_to_ids("<|eot_id|>")]
 
 
-EQUIVALENT = ["Arr matey. Law rules!", " Yes", "Yes \n", "", "The sea is wide."]
+# Flagged change of test data (Roger, 2026-11-03): " Yes" and "Yes \n" were
+# here, and gave equal activations only because the ids path trimmed
+# boundary whitespace as the text path does; it no longer trims, so contents
+# with whitespace at their ends are the boundary-whitespace case below
+# (test_a_trailing_newline_is_averaged_as_stored_on_the_ids_path).
+EQUIVALENT = ["Arr matey. Law rules!", "Yes", "Law rules.", "", "The sea is wide."]
 
 
 def test_ids_equal_to_the_re_encoding_give_the_text_paths_activations(mod, pm):
     # § 5.8 item 1 at the extraction level: stored ids that are the content's
-    # re-encoding (plus the stop token) give bit-identical activations.
+    # re-encoding (plus the stop token) give bit-identical activations, for a
+    # content with no whitespace at its ends.
     convs = [_conv(c, system=None if i % 2 else "You are a pirate")
              for i, c in enumerate(EQUIVALENT)]
     records = [_stored(mod, pm.tokenizer, c) for c in EQUIVALENT]
@@ -217,7 +226,9 @@ def test_a_llama_like_model_takes_the_ids_path_too(mod):
 
 
 def test_the_plan_is_prefilled_and_slot_0_is_the_content_only(mod, pm):
-    # § 5.8 item 3: a stripped record, "plan </think> \n\n content".
+    # § 5.8 item 3: a stripped record, "plan </think> \n\n content".  Slot 0 is
+    # the content only because step 1's range starts after the "\n\n" (since
+    # 2026-11-03; the ids path trims nothing).
     tok = pm.tokenizer
     conv = _conv("Arr matey.")
     rec = _stored(mod, tok, "Arr matey.", plan="Law rules. Yes no.", lead="\n\n")
@@ -227,10 +238,10 @@ def test_the_plan_is_prefilled_and_slot_0_is_the_content_only(mod, pm):
     p, k, e = len(prompt), rec.content_range[0], rec.content_range[1]
     seen = pm.model.calls[-1]["input_ids"][0].tolist()
     assert seen[:p] == prompt
-    assert seen[p:p + k] == rec.ids[:k]                       # the plan, after the header
+    assert seen[p:p + k] == rec.ids[:k]                       # plan, </think>, \n\n: after header
+    assert tok.decode(rec.ids[k - 2:k]) == "</think>\n\n"
     assert seen[p + k:] == rec.ids[k:-1] + tok.convert_tokens_to_ids(["<|im_end|>", "\n"])
-    nonblank = [i for i in range(p + k, p + e) if tok.decode([seen[i]]).strip()]
-    content = list(range(nonblank[0], nonblank[-1] + 1))      # first to last non-whitespace
+    content = list(range(p + k, p + e))                       # the stored range, as stored
     assert tok.decode([seen[i] for i in content]) == "Arr matey."
     assert act[0, 0, 0].item() == _bf16(sum(content) / len(content))
     assert [act[j, 0, 0].item() for j in range(1, 8)] == list(range(p - 7, p))
@@ -311,14 +322,27 @@ def test_the_ids_path_needs_the_conversation_to_end_in_its_assistant_turn(mod, p
             mod.extract_activations_batch(pm, [conv], [0], token_records=[rec], entity="pirate")
 
 
-def test_the_boundary_trim_is_the_text_paths_rule(pm):
-    enc = ConversationEncoder(pm.tokenizer, pm.model_name, span_builder="chatml")
+def test_a_trailing_newline_is_averaged_as_stored_on_the_ids_path(mod, pm):
+    # Roger, 2026-11-03: the ids path trims nothing; the text path's chatml
+    # builder still drops whitespace-only tokens at the ends (its own rule,
+    # kept so that the text arm is today's step 2).  This replaces
+    # test_the_boundary_trim_is_the_text_paths_rule.
+    from assistant_axis.generation import prompt_token_ids
     tok = pm.tokenizer
+    conv = _conv("Arr matey.\n")
+    rec = _stored(mod, tok, "Arr matey.\n")                   # Arr, " ", matey, ".", \n
+    p = len(prompt_token_ids(tok, conv[:-1], THINKING_OFF))
+    [ids_act], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2], token_records=[rec])
+    ids_seen = pm.model.calls[-1]["input_ids"]
+    [text_act], _, _ = mod.extract_activations_batch(pm, [conv], [0, 1, 2])
+    assert torch.equal(ids_seen, pm.model.calls[-1]["input_ids"])   # the same ids
+    assert ids_act[0, 0, 0].item() == _bf16(sum(range(p, p + 5)) / 5)    # the newline included
+    assert text_act[0, 0, 0].item() == _bf16(sum(range(p, p + 4)) / 4)   # the text path drops it
+    assert torch.equal(_bits(ids_act[1:]), _bits(text_act[1:]))          # the same header slots
+    # The text path's rule itself, unchanged.
+    enc = ConversationEncoder(tok, pm.model_name, span_builder="chatml")
     full = _ids(tok, "\n\n Arr matey. \n")          # \n\n, " ", Arr, " ", matey, ".", " ", \n
     assert enc.trim_boundary_whitespace(full, list(range(len(full)))) == [2, 3, 4, 5]
-    clean = _ids(tok, "Arr matey.")
-    assert enc.trim_boundary_whitespace(clean, [0, 1, 2]) == [0, 1, 2]
-    assert enc.trim_boundary_whitespace(full, [0, 1]) == []
     assert enc.trim_boundary_whitespace(full, []) == []
 
 
@@ -516,10 +540,11 @@ def test_content_span_turn_averages_the_plan_and_the_content(mod, pm, tmp_path):
     seen = pm.model.calls[-1]["input_ids"][0].tolist()
     p = len(prompt_token_ids(tok, conv[:-1], THINKING_OFF))
     e = rec.content_range[1]
-    nonblank = [i for i in range(p, p + e) if tok.decode([seen[i]]).strip()]
-    span = list(range(nonblank[0], nonblank[-1] + 1))         # the trim still applies
-    assert span[0] == p + 2                                   # "\n" and " " before "Law" popped
-    assert tok.decode([seen[i] for i in span]) == "Law rules. Yes no.</think>\n\nArr matey."
+    # Flagged expectation change (Roger, 2026-11-03): nothing is trimmed, so
+    # the plan's leading "\n" and " " are averaged too (the trim popped them,
+    # and the span started at p + 2).
+    span = list(range(p, p + e))
+    assert tok.decode([seen[i] for i in span]) == "\n Law rules. Yes no.</think>\n\nArr matey."
     assert turn[0, 0, 0].item() == _bf16(sum(span) / len(span))
     assert torch.equal(_bits(turn[1:]), _bits(rng[1:]))        # the header slots are the same
     assert mm == []
@@ -602,14 +627,18 @@ def test_verify_ids_reports_each_kind(mod, pm, tmp_path, caplog):
                                      layers=[0, 1, 2], max_length=2048, entity="pirate")
     assert [r["conversation"] for r in res] == [0, 1, 2, 3, 4]        # the null range is not
     assert [r["identical"] for r in res] == [True, False, False, False, False]
-    assert res[0]["slots_identical"] is True
+    assert res[0]["slots_identical"] is True and res[0]["spans"] == "identical"
     assert [r.get("kinds") for r in res[1:]] == [["plan"], ["special token"],
                                                  ["partial character"], ["re-split"]]
     assert res[2]["positions"] == 1 and res[2]["regions"] == 1          # the special token
     assert res[4]["positions"] == 2 and res[4]["regions"] == 1          # \n \n for \n\n
     assert "conversation 0: identical ids" in caplog.text
-    assert "5 ids-path conversation(s): 1 with identical ids (1 with bit-identical slots), " \
-           "4 differing (partial character 1, plan 1, re-split 1, special token 1)" in caplog.text
+    # Flagged expectation change (Roger, 2026-11-03): the summary also counts
+    # the span comparison's outcomes.
+    assert ("5 ids-path conversation(s): 1 with identical ids (1 with identical spans and "
+            "bit-identical slots, 0 with spans differing by boundary whitespace (the text "
+            "path's trim), 0 failed), 4 differing (partial character 1, plan 1, re-split 1, "
+            "special token 1)") in caplog.text
     # N limits the conversations checked; a run with nothing on the ids path says so.
     assert len(mod.verify_token_paths(pm, [r["conversation"] for r in recs], records, 2,
                                       layers=[0], max_length=2048)) == 2
@@ -638,6 +667,74 @@ def test_identical_ids_with_different_slots_stop_the_run(mod, pm, tmp_path, monk
             _run(mod, pm, tmp_path, recs, verify_ids=5)
     assert "identical ids (" in caplog.text and "but the slots differ" in caplog.text
     assert not (tmp_path / "pirate.pt").exists()
+
+
+def test_identical_ids_are_compared_by_their_spans_first(mod, pm, tmp_path, caplog):
+    # Roger, 2026-11-03: identical spans are run through the model; spans that
+    # differ only by whitespace-only tokens at the ends (the text path's trim)
+    # are reported, with no model pass, and the run goes on.
+    tok = pm.tokenizer
+    contents = ["Arr matey.", "Yes \n", " Yes", " "]
+    recs = [_record(i, c, stored=_stored(mod, tok, c)) for i, c in enumerate(contents)]
+    records, _ = mod.select_token_paths(recs, "auto", entity="pirate")
+    n_calls = len(pm.model.calls)
+    with caplog.at_level("INFO"):
+        res = mod.verify_token_paths(pm, [r["conversation"] for r in recs], records, 20,
+                                     layers=[0, 1, 2], max_length=2048, entity="pirate")
+    assert [r["identical"] for r in res] == [True] * 4
+    assert [r["spans"] for r in res] == ["identical"] + [mod.SPANS_BOUNDARY_WHITESPACE] * 3
+    assert [r["slots_identical"] for r in res] == [True, None, None, None]
+    assert len(pm.model.calls) == n_calls + 2                 # two passes, conversation 0's only
+    assert not any(mod.token_path_check_failed(r) for r in res)
+    assert ("conversation 1: identical ids (") in caplog.text
+    assert "the spans differ by boundary whitespace (the text path's trim)" in caplog.text
+    assert ("4 ids-path conversation(s): 4 with identical ids (1 with identical spans and "
+            "bit-identical slots, 3 with spans differing by boundary whitespace (the text "
+            "path's trim), 0 failed), 0 differing") in caplog.text
+    acts, _ = _run(mod, pm, tmp_path, recs, verify_ids=20)     # and the extraction goes on
+    assert len(acts) == 4
+
+
+def test_another_span_difference_with_identical_ids_stops_the_run(mod, pm, tmp_path,
+                                                                  monkeypatch, caplog):
+    # A text-path span one non-whitespace token short (the "."): not the trim,
+    # so a bug, whatever the slots; no model pass is run for it.
+    from assistant_axis.internals.conversation import ConversationEncoder as Encoder
+    orig = Encoder.build_turn_spans
+
+    def short(self, conversation, **kw):
+        ids, spans = orig(self, conversation, **kw)
+        return ids, [dict(s, end=s["end"] - 1) if s["role"] == "assistant" else s
+                     for s in spans]
+
+    recs = [_record(0, "Arr matey.", stored=_stored(mod, pm.tokenizer, "Arr matey."))]
+    monkeypatch.setattr(Encoder, "build_turn_spans", short)
+    n_calls = len(pm.model.calls)
+    with caplog.at_level("ERROR"):
+        with pytest.raises(mod.TokenPathVerificationError, match="different spans or slots"):
+            _run(mod, pm, tmp_path, recs, verify_ids=5)
+    assert "but the assistant spans differ" in caplog.text
+    assert len(pm.model.calls) == n_calls and not (tmp_path / "pirate.pt").exists()
+
+
+def test_the_span_comparison(mod, pm):
+    tok = pm.tokenizer
+    full = _ids(tok, "x \nArr matey. \n")           # x, " ", \n, Arr, " ", matey, ".", " ", \n
+
+    def rel(text, ids):
+        return mod.compare_assistant_spans(
+            tok, full, [{"role": "assistant", "start": s, "end": e} for s, e in text],
+            [{"role": "assistant", "start": s, "end": e} for s, e in ids])
+
+    assert rel([(3, 7)], [(3, 7)]) == "identical"
+    assert rel([], []) == "identical"
+    assert rel([(3, 7)], [(1, 9)]) == mod.SPANS_BOUNDARY_WHITESPACE      # both ends
+    assert rel([(3, 7)], [(3, 9)]) == mod.SPANS_BOUNDARY_WHITESPACE      # the trailing end
+    assert rel([], [(7, 9)]) == mod.SPANS_BOUNDARY_WHITESPACE            # all of it
+    assert rel([(3, 6)], [(3, 9)]) == "different"                        # "." is not whitespace
+    assert rel([(3, 7)], [(0, 7)]) == "different"                        # "x" is not
+    assert rel([(1, 9)], [(3, 7)]) == "different"                        # the text path's wider
+    assert rel([(3, 7)], []) == "different"
 
 
 def test_a_worker_stops_on_a_failed_ids_check(mod, monkeypatch, tmp_path):

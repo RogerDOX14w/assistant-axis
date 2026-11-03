@@ -124,6 +124,27 @@ def looks_like_leaked_thinking(text: str) -> bool:
     return bool(_THIRD_PERSON_USER.search((text or "")[:THINKING_SCAN_CHARS]))
 
 
+# The separator Qwen3 writes after </think>, in the template's think block and
+# when its planning leaks with thinking off: one token in its vocabulary.
+PLAN_SEPARATOR = "\n\n"
+
+
+def strip_leaked_plan(text: str) -> str:
+    """The ``strip_leaked_think`` clean-up of one text that has a leaked
+    plan: everything up to and including the last ``</think>``, then
+    exactly one ``"\\n\\n"`` if that is what immediately follows, and
+    nothing else (Roger, 2026-11-03).  ``"</think>\\n\\n\\n"`` keeps its third
+    newline; whitespace the model wrote at either end of its reply is its own
+    and stays.  Until 2026-11-03 the cut was followed by ``.strip()``, which
+    took that whitespace too, and step 1's content range started one token
+    early, at the ``"\\n\\n"``; :func:`token_ranges` now cuts where this
+    does."""
+    rest = text[text.rfind("</think>") + len("</think>"):]
+    if rest.startswith(PLAN_SEPARATOR):
+        rest = rest[len(PLAN_SEPARATOR):]
+    return rest
+
+
 # ---------------------------------------------------------------------------
 # The token ranges behind the stored text (the response-token-ids plan,
 # reports/pipeline/response_token_ids/plan.md § 3 and § 4.2, 2026-11-02)
@@ -162,20 +183,27 @@ def token_ranges(tokenizer, token_ids: List[int], text: str, *, leaked: bool, st
     ``leaked`` whether the strip rule's detection fired on vLLM's text,
     ``stripped`` whether the strip was applied, ``think_end_id`` the id of
     ``</think>`` (None when the tokenizer has none) and ``special_ids`` the
-    tokenizer's special ids.  The plan's § 4.2, step by step:
+    tokenizer's special ids.  The plan's § 4.2, step by step, with the cut
+    of 2026-11-03 (Roger: the pointer follows the surgical strip exactly):
 
-    1. When ``leaked``, the thinking range is ``(0, k)``, ``k`` the index
-       after the last ``think_end_id``; with no such id (``</think>`` spelled
-       in pieces) it is None, and when ``stripped`` so is the content range
-       (its start is unknown).  The content starts at ``k`` when
-       ``stripped``, else at 0.
+    1. When ``leaked``: ``k`` is the index after the last ``think_end_id``,
+       and the cut is ``k + 1`` when the id at ``k`` decodes to exactly
+       ``"\\n\\n"`` (one token; Qwen3 has it), else ``k``: where
+       :func:`strip_leaked_plan` cuts the text.  The thinking range is
+       ``(0, cut)`` whether or not the strip was applied, so that the two
+       ranges partition the generated ids (the stop token and a character
+       cut at the cap aside).  With no ``think_end_id`` (``</think>``
+       spelled in pieces) the thinking range is None, and when ``stripped``
+       so is the content range (its start is unknown).  The content starts
+       at the cut when ``stripped``, else at 0.
     2. Trailing special ids (the stop token) are left out.
     3. Trailing ids that decode to a partial character (the cap landed inside
        one: the decoding ends in U+FFFD) are left out, at most
        :data:`MAX_PARTIAL_CHARACTER_IDS`.
-    4. The check: the range decodes to ``text`` (to ``text`` after
-       ``strip()`` when ``stripped``, since the strip took the whitespace
-       with the plan); the content range is None when it does not.
+    4. The check: the range decodes to exactly ``text``; the content range
+       is None when it does not.  (A ``"\\n\\n\\n"`` token right after
+       ``</think>``, of which the strip takes two characters, fails it: the
+       record then takes step 2's text path.)
     """
     if stripped and not leaked:
         raise ValueError("a response cannot be stripped without the strip rule's detection")
@@ -186,7 +214,10 @@ def token_ranges(tokenizer, token_ids: List[int], text: str, *, leaked: bool, st
         hits = ([i for i, t in enumerate(ids) if t == think_end_id]
                 if think_end_id is not None else [])
         if hits:
-            thinking = (0, hits[-1] + 1)
+            k = hits[-1] + 1
+            cut = (k + 1 if k < len(ids) and _decode_plain(tokenizer, [ids[k]]) == PLAN_SEPARATOR
+                   else k)
+            thinking = (0, cut)
         elif stripped:
             return None, None
         if stripped:
@@ -201,8 +232,7 @@ def token_ranges(tokenizer, token_ids: List[int], text: str, *, leaked: bool, st
         end -= 1
         steps += 1
     decoded = _decode_plain(tokenizer, ids[start:end])
-    ok = (decoded.strip() == text) if stripped else (decoded == text)
-    return thinking, ((start, end) if ok else None)
+    return thinking, ((start, end) if decoded == text else None)
 
 
 def _range_field(r: Optional[Tuple[int, int]]) -> Optional[List[int]]:
@@ -775,17 +805,18 @@ class VLLMGenerator:
         # Workaround: vLLM sometimes generates thinking content with Qwen
         # models despite enable_thinking=False. It strips the opening <think>
         # tag but leaves </think> and the preceding thinking text in the
-        # output. Strip everything up to the last </think>.  The text before
-        # the strip is kept as raw_text (2026-11-02), for readers that have
-        # no tokenizer.  The detection is the family rule's and runs under
-        # --response_cleanup keep too (the response-token-ids plan § 4.3):
-        # then the text is left as vLLM gave it and only the plan's token
-        # range records where the plan is.
+        # output.  Cut the plan surgically (strip_leaked_plan): everything up
+        # to and including the last </think>, and the one "\n\n" after it.
+        # The text before the strip is kept as raw_text (2026-11-02), for
+        # readers that have no tokenizer.  The detection is the family rule's
+        # and runs under --response_cleanup keep too (the response-token-ids
+        # plan § 4.3): then the text is left as vLLM gave it and only the
+        # plan's token range records where the plan is.
         detect = self.family.response_cleanup == "strip_leaked_think"
         strip = (response_cleanup_for(self.family, override=self.response_cleanup_override)
                  == "strip_leaked_think")
         if detect:
-            cleaned = kept = 0
+            cleaned = kept = ragged = 0
             for d in details:
                 resp = d["text"]
                 if '</think>' in resp and '<think>' not in resp:
@@ -794,13 +825,18 @@ class VLLMGenerator:
                         kept += 1
                         continue
                     d["raw_text"] = resp
-                    d["text"] = resp[resp.rfind('</think>') + len('</think>'):].strip()
+                    d["text"] = strip_leaked_plan(resp)
                     d["thinking_stripped"] = True
                     cleaned += 1
+                    ragged += int(d["text"] != d["text"].strip())
             if cleaned:
+                # How many stripped texts still begin or end with whitespace,
+                # the model's own, which the strip keeps (until 2026-11-03 a
+                # .strip() removed it unseen): the smoke run's count.
                 logger.warning(
                     f"Stripped orphaned thinking content from {cleaned}/{len(details)} "
-                    f"responses (vLLM/Qwen thinking leak)")
+                    f"responses (vLLM/Qwen thinking leak); {ragged} of them still begin or "
+                    f"end with whitespace, which is kept")
             if kept:
                 logger.warning(
                     f"Kept orphaned thinking content in {kept}/{len(details)} responses "
@@ -881,11 +917,13 @@ class VLLMGenerator:
         # sampled, verbatim; content_token_range, [start, end) into them of
         # the tokens behind the stored content (null when the decoding check
         # failed: step 2 then re-encodes the text); thinking_token_range,
-        # [0, k) of the leaked plan's tokens up to its last </think> (null
-        # when none was detected or it is not one id); and, when the strip
-        # changed the text, raw_text, the text before it.  The stored content
-        # is what it was before: step 3 and the response judging read it and
-        # have no tokenizer.
+        # [0, cut) of the leaked plan's tokens, its last </think> and the
+        # "\n\n" after it (null when none was detected or </think> is not one
+        # id; the two ranges partition the ids); and, when the strip changed
+        # the text, raw_text, the text before it.  Step 3 and the response
+        # judging read the stored content and have no tokenizer; since
+        # 2026-11-03 a stripped one keeps the model's own whitespace at its
+        # ends (strip_leaked_plan).
         results = []
         for conv, meta, d in zip(all_conversations, all_metadata, details):
             result = {

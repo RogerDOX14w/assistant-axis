@@ -116,7 +116,9 @@ def test_llama_like_prompts_carry_exactly_one_bos(fake_vllm):
 def test_the_leaked_think_strip_applies_to_the_qwen3_row_only(fake_vllm):
     fake_vllm["reply"] = "planning </think> Arr matey."
     [d] = _loaded("Qwen/Qwen3-32B", FAMILIES["qwen3"]).generate_batch_detailed(CONVS[:1])
-    assert d["text"] == "Arr matey." and d["thinking_stripped"] is True
+    # Flagged expectation change (Roger, 2026-11-03, the surgical strip): the
+    # space after </think> is the model's and stays (it was "Arr matey.").
+    assert d["text"] == " Arr matey." and d["thinking_stripped"] is True
     fake_vllm["tokenizer"] = fakes.make_llama3_like_tokenizer()
     [d] = _loaded("meta-llama/x", FAMILIES["llama"]).generate_batch_detailed(CONVS[:1])
     assert d["text"] == "planning </think> Arr matey." and d["thinking_stripped"] is False

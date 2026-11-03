@@ -18,7 +18,13 @@ special, as in Qwen3), :data:`STOP` and :data:`SPECIAL` are special tokens
 (dropped by ``skip_special_tokens``), and ``BYTE + b`` is the raw byte ``b``,
 so that a character can be split across ids (the cap landing inside it).  The
 existing tests' replies get the ids of their text plus the stop token
-(harness only; no assertion changed)."""
+(harness only; no assertion changed).
+
+Since the surgical strip (Roger, 2026-11-03) ``"\\n\\n"`` is one id too,
+:data:`NL2`, as in Qwen3's vocabulary, because step 1's cut is "the token
+after ``</think>`` decodes to exactly ``\\n\\n``"; :func:`ids_of` writes every
+``"\\n\\n"`` that way, left to right.  :data:`NL3` (``"\\n\\n\\n"`` as one
+token) is only ever given explicitly."""
 from __future__ import annotations
 
 import json
@@ -33,17 +39,28 @@ from assistant_axis.model_families import FAMILIES
 THINK_END = 0x110000      # "</think>": one id, an added token that is not special
 STOP = 0x110001           # "<|im_end|>", special: the stop token
 SPECIAL = 0x110002        # "<|box_start|>", special: one the model might sample mid-response
+NL2 = 0x110003            # "\n\n": one id, as in Qwen3's vocabulary
+NL3 = 0x110004            # "\n\n\n": one id (given explicitly only)
 BYTE = 0x120000           # BYTE + b: the raw byte b
-_NAMES = {THINK_END: "</think>", STOP: "<|im_end|>", SPECIAL: "<|box_start|>"}
+_NAMES = {THINK_END: "</think>", STOP: "<|im_end|>", SPECIAL: "<|box_start|>",
+          NL2: "\n\n", NL3: "\n\n\n"}
 
 
 def ids_of(text: str):
-    """The fake's ids for ``text``: one per character, ``</think>`` as one id."""
+    """The fake's ids for ``text``: one per character, ``</think>`` and each
+    ``"\\n\\n"`` (left to right) as one id."""
     out = []
     for i, part in enumerate(text.split("</think>")):
         if i:
             out.append(THINK_END)
-        out.extend(ord(c) for c in part)
+        j = 0
+        while j < len(part):
+            if part.startswith("\n\n", j):
+                out.append(NL2)
+                j += 2
+            else:
+                out.append(ord(part[j]))
+                j += 1
     return out
 
 
@@ -125,7 +142,10 @@ def test_records_carry_the_four_new_fields(monkeypatch):
     assert [r["question_id"] for r in res] == [0, 3, 6]           # the file's ids
     assert by_q["q0"]["finish_reason"] == "stop" and by_q["q6"]["finish_reason"] == "length"
     assert by_q["q3"]["thinking_stripped"] is True
-    assert by_q["q3"]["conversation"][-1]["content"] == "Tides come from the moon."
+    # Flagged expectation change (Roger, 2026-11-03, the surgical strip): the
+    # one "\n" after this reply's </think> is not the "\n\n" the strip cuts,
+    # so it stays; the old .strip() removed it ("Tides come from the moon.").
+    assert by_q["q3"]["conversation"][-1]["content"] == "\nTides come from the moon."
     assert by_q["q3"]["thinking_suspected"] is False              # the strip removed it
     assert by_q["q6"]["thinking_suspected"] is True and by_q["q6"]["thinking_stripped"] is False
     assert by_q["q0"]["thinking_suspected"] is False
@@ -253,20 +273,68 @@ def test_a_clean_response_points_at_everything_but_the_stop_token(monkeypatch, c
     assert "1 of 1 responses: the stored ids decode to the stored text" in caplog.text
 
 
-def test_a_stripped_response_points_past_the_plan(monkeypatch):
+def test_a_stripped_response_points_past_the_plan(monkeypatch, caplog):
+    # Flagged expectation change (Roger, 2026-11-03, the surgical strip): the
+    # strip cuts the plan, its last </think> and the "\n\n" after it, and
+    # keeps the model's own whitespace at the ends (the old .strip() made the
+    # content "Tides come from the moon."); the thinking range ends after the
+    # "\n\n" and the content range starts there, so the two partition the
+    # ids, and the check is plain equality.
     raw = "Plan: be brief. </think> Not yet. </think>\n\n Tides come from the moon. \n"
-    rec = _one(monkeypatch, (raw, "stop"))
+    with caplog.at_level(logging.WARNING):
+        rec = _one(monkeypatch, (raw, "stop"))
     ids = rec["response_token_ids"]
     k = len(ids) - ids[::-1].index(THINK_END)                # the index after the last </think>
+    assert ids[k] == NL2
     assert rec["thinking_stripped"] is True and rec["raw_text"] == raw
-    assert rec["thinking_token_range"] == [0, k]
-    assert ids[k - 1] == THINK_END
+    assert rec["thinking_token_range"] == [0, k + 1]
     start, end = rec["content_token_range"]
-    assert start == k and end == len(ids) - 1
+    assert start == k + 1 and end == len(ids) - 1             # nothing between the two ranges
     content = rec["conversation"][-1]["content"]
-    assert content == "Tides come from the moon."
-    assert _decoded(ids, [start, end]) != content             # the whitespace is still there
-    assert _decoded(ids, [start, end]).strip() == content     # ... and the strip took it
+    assert content == " Tides come from the moon. \n"
+    assert _decoded(ids, [start, end]) == content
+    assert ("Stripped orphaned thinking content from 1/1 responses (vLLM/Qwen thinking leak); "
+            "1 of them still begin or end with whitespace, which is kept") in caplog.text
+
+
+def test_the_strip_takes_one_double_newline_and_nothing_else():
+    # The rule on its own (Roger, 2026-11-03).
+    assert g.strip_leaked_plan("plan</think>\n\nAnswer.") == "Answer."
+    assert g.strip_leaked_plan("plan</think>\n\n\nAnswer.") == "\nAnswer."   # the third stays
+    assert g.strip_leaked_plan("plan</think>\nAnswer.") == "\nAnswer."       # one newline stays
+    assert g.strip_leaked_plan("plan</think> Answer. \n") == " Answer. \n"
+    assert g.strip_leaked_plan("a</think>b</think>\n\nAnswer.") == "Answer."  # the last </think>
+    assert g.strip_leaked_plan("plan</think>") == ""
+    assert g.strip_leaked_plan("plan</think>\n\n") == ""
+
+
+def test_a_third_newline_after_the_plan_is_kept_and_pointed_at(monkeypatch, caplog):
+    # "</think>\n\n\n" written as the "\n\n" token and a "\n": the strip takes
+    # the first two, the range starts at the third.
+    raw = "Plan.</think>\n\n\nTides."
+    with caplog.at_level(logging.WARNING):
+        rec = _one(monkeypatch, (raw, "stop"))
+    ids = rec["response_token_ids"]
+    assert ids[6:8] == [NL2, ord("\n")]
+    assert rec["conversation"][-1]["content"] == "\nTides."
+    assert rec["thinking_token_range"] == [0, 7]
+    assert rec["content_token_range"] == [7, len(ids) - 1]
+    assert _decoded(ids, rec["content_token_range"]) == "\nTides."
+    assert "1 of them still begin or end with whitespace" in caplog.text
+
+
+def test_three_newlines_as_one_token_after_the_plan_get_a_null_range(monkeypatch, caplog):
+    # Accepted by Roger (2026-11-03): the text rule takes two characters of a
+    # three-character token, so no token boundary is behind the stored text;
+    # the range is null and counted, and step 2 takes the text path.
+    raw = "Plan.</think>\n\n\nTides."
+    ids = ids_of("Plan.") + [THINK_END, NL3] + ids_of("Tides.") + [STOP]
+    with caplog.at_level(logging.WARNING):
+        rec = _one(monkeypatch, (raw, "stop", ids))
+    assert rec["thinking_stripped"] is True and rec["conversation"][-1]["content"] == "\nTides."
+    assert rec["thinking_token_range"] == [0, 6]               # NL3 is not "\n\n": the cut is k
+    assert rec["content_token_range"] is None
+    assert "1 of 1 responses: the stored ids do not decode to the stored text" in caplog.text
 
 
 def test_a_plan_whose_end_tag_is_not_one_id_gets_null_ranges(monkeypatch, caplog):
@@ -377,11 +445,22 @@ def test_token_ranges_clean_and_empty():
 
 
 def test_token_ranges_stripped():
+    # Flagged expectation change (Roger, 2026-11-03): the cut is after the
+    # "\n\n" token that follows </think> (it was at </think>, and the check
+    # compared after .strip()); the stored text keeps the model's trailing
+    # newline, and the check is plain equality.
     plan = ids_of("Plan.") + [THINK_END]
     ids = plan + ids_of("\n\nArr.\n") + [STOP]
-    assert _ranges(ids, "Arr.", leaked=True, stripped=True) == ((0, 6), (6, len(ids) - 1))
+    assert ids[6] == NL2
+    assert _ranges(ids, "Arr.\n", leaked=True, stripped=True) == ((0, 7), (7, len(ids) - 1))
+    assert _ranges(ids, "Arr.", leaked=True, stripped=True) == ((0, 7), None)  # no .strip()
+    # No "\n\n" after </think>: the cut is at </think>.
+    other = plan + ids_of(" Arr.") + [STOP]
+    assert _ranges(other, " Arr.", leaked=True, stripped=True) == ((0, 6), (6, len(other) - 1))
     # Only a plan: the thinking range is everything, the content range empty.
     assert _ranges(plan + [STOP], "", leaked=True, stripped=True) == ((0, 6), (6, 6))
+    assert _ranges(plan + [NL2, STOP], "", leaked=True, stripped=True) == ((0, 7), (7, 7))
+    assert _ranges(plan + [NL2], "", leaked=True, stripped=True) == ((0, 7), (7, 7))
     # </think> in pieces: both null when stripped.
     pieces = ids_of("Plan.") + [ord(c) for c in "</think>"] + ids_of("Arr.") + [STOP]
     assert _ranges(pieces, "Arr.", leaked=True, stripped=True) == (None, None)
@@ -390,10 +469,14 @@ def test_token_ranges_stripped():
 
 
 def test_token_ranges_leaked_but_kept():
-    # --response_cleanup keep: the text is vLLM's, plan and all.
+    # --response_cleanup keep: the text is vLLM's, plan and all.  Flagged
+    # expectation change (Roger, 2026-11-03): the thinking range ends where
+    # the strip would cut, after the "\n\n" (it ended at </think>, (0, 6)).
     ids = ids_of("Plan.") + [THINK_END] + ids_of("\n\nArr.") + [STOP]
     raw = "Plan.</think>\n\nArr."
-    assert _ranges(ids, raw, leaked=True) == ((0, 6), (0, len(ids) - 1))
+    assert _ranges(ids, raw, leaked=True) == ((0, 7), (0, len(ids) - 1))
+    assert (_ranges(ids, raw, leaked=True)[0]
+            == _ranges(ids, "Arr.", leaked=True, stripped=True)[0])   # the same in both modes
     # </think> in pieces: no thinking range, the content range still from 0.
     pieces = [ord(c) for c in raw] + [STOP]
     assert _ranges(pieces, raw, leaked=True) == (None, (0, len(pieces) - 1))

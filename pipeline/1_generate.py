@@ -760,7 +760,8 @@ def main():
     parser.add_argument("--response_cleanup", choices=list(RESPONSE_CLEANUP_OVERRIDES),
                         default="family",
                         help="family (default): the family row's clean-up of each generated "
-                             "text (Qwen3: strip a leaked plan up to its last </think>); keep: "
+                             "text (Qwen3: cut a leaked plan up to and including its last "
+                             "</think> and one \\n\\n right after it, nothing else); keep: "
                              "leave vLLM's text as it came, so the stored content, which step 3 "
                              "judges, holds the plan.  Either way the ids and the plan's token "
                              "range are stored.  The side-car records the clean-up applied "

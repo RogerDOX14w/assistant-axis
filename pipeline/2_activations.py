@@ -183,9 +183,12 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Before extracting each worker's first entity, build both paths' "
                              "ids for its first N ids-path conversations: report whether they "
                              "are identical, else how they differ (plan, re-split, special "
-                             "token, partial character), and when identical run both through "
-                             "the model; identical ids with different slots exits 1 without "
-                             "extracting (default 0, off; the smoke run passes 20)")
+                             "token, partial character).  Identical ids: compare the two "
+                             "assistant spans; identical spans are run through the model and "
+                             "must give bit-identical slots; spans differing by boundary "
+                             "whitespace (the text path's trim) are reported; any other span or "
+                             "slot difference exits 1 without extracting (default 0, off; the "
+                             "smoke run passes 20)")
     parser.add_argument("--prefix_token_layers", type=_layers_arg, default=None,
                         help="With --prefix_token_means: the layers its file keeps, a subset of "
                              "--layers in the same form (default: every extracted layer; at all "
@@ -492,15 +495,18 @@ def build_ids_path_sequence(
     :func:`derive_turn_end_ids`).
 
     One span, the assistant's: the stored content range shifted past the
-    prompt, then the chatml boundary rule
-    (:meth:`ConversationEncoder.trim_boundary_whitespace`, the text path's),
-    with the text path's keys (``turn``, ``role``, ``start``, ``end``,
-    ``n_tokens``, ``text``) and ``header_anchor``, the prompt's end, where the
-    header search starts (:meth:`SpanMapper.map_spans`).  No span when the
-    range is empty after the trim (as an empty response on the text path).
-    With ``content_span="turn"`` (``--content_span turn``, § 5.5) the span
-    starts at the prompt's end instead, so that slot 0 is the mean over the
-    whole generated turn, a leaked plan included (the trim still applies).
+    prompt, as stored, for every family, with the text path's keys
+    (``turn``, ``role``, ``start``, ``end``, ``n_tokens``, ``text``) and
+    ``header_anchor``, the prompt's end, where the header search starts
+    (:meth:`SpanMapper.map_spans`).  No span when the range is empty.  Nothing
+    is trimmed (Roger, 2026-11-03): whitespace-only tokens the model
+    generated at the ends are averaged, and step 1's range already starts
+    after a stripped plan's ``"\\n\\n"``.  The text path's chatml builder still
+    trims them (:meth:`ConversationEncoder.trim_boundary_whitespace`), and
+    ``--verify_ids`` reports that difference.  With ``content_span="turn"``
+    (``--content_span turn``, § 5.5) the span starts at the prompt's end
+    instead and ends where the range ends, so that slot 0 is the mean over
+    the whole generated turn, a leaked plan included.
 
     Raises :class:`ContractError` when the conversation does not end in its
     one assistant turn, :class:`TokenSourceError` when the range does not fit
@@ -526,15 +532,15 @@ def build_ids_path_sequence(
     p = len(prompt_ids)
     full_ids = prompt_ids + response_ids + [int(i) for i in turn_end_ids]
     span_start = p if content_span == "turn" else p + start
-    indices = encoder.trim_boundary_whitespace(full_ids, list(range(span_start, p + end)))
+    span_end = p + end
     spans = []
-    if indices:
+    if span_end > span_start:
         spans.append({
             "turn": sum(1 for r in roles[:-1] if r != "system"),   # the text path's numbering
             "role": "assistant",
-            "start": min(indices),
-            "end": max(indices) + 1,    # exclusive
-            "n_tokens": len(indices),
+            "start": span_start,
+            "end": span_end,    # exclusive
+            "n_tokens": span_end - span_start,
             "text": conversation[-1].get("content", ""),
             "header_anchor": p,
         })
@@ -759,6 +765,49 @@ def describe_token_difference(tokenizer, text_ids: List[int], ids_ids: List[int]
             "kinds": kinds or ["boundary whitespace"]}
 
 
+# The span relation --verify_ids reports for identical ids whose spans differ
+# only by whitespace-only tokens at their ends: the text path's chatml
+# builder trims them, the ids path does not (Roger, 2026-11-03).
+SPANS_BOUNDARY_WHITESPACE = "boundary whitespace (the text path's trim)"
+
+
+def _assistant_bounds(spans: List[Dict]) -> List[tuple]:
+    return [(s["start"], s["end"]) for s in spans if s["role"] == "assistant"]
+
+
+def compare_assistant_spans(tokenizer, full_ids: List[int], text_spans: List[Dict],
+                            ids_spans: List[Dict]) -> str:
+    """How the two paths' assistant spans relate, for one conversation whose
+    two id sequences (``full_ids``) are identical (``--verify_ids``, § 5.6):
+    ``"identical"`` (the same start and end, or no span on either path),
+    :data:`SPANS_BOUNDARY_WHITESPACE` (the text path's span is the ids
+    path's less whitespace-only tokens at one or both ends, possibly all of
+    them), or ``"different"``."""
+    text, ids = _assistant_bounds(text_spans), _assistant_bounds(ids_spans)
+    if text == ids:
+        return "identical"
+    if len(ids) != 1 or len(text) > 1:
+        return "different"
+    start, end = ids[0]
+    t_start, t_end = text[0] if text else (start, start)     # no text span: all trimmed
+
+    def blank(positions) -> bool:
+        return all(not tokenizer.decode([full_ids[i]]).strip() for i in positions)
+
+    if (start <= t_start <= t_end <= end and blank(range(start, t_start))
+            and blank(range(t_end, end))):
+        return SPANS_BOUNDARY_WHITESPACE
+    return "different"
+
+
+def token_path_check_failed(result: Dict) -> bool:
+    """Whether one conversation's ``--verify_ids`` result is a bug in the ids
+    path: identical ids with spans that differ otherwise than by boundary
+    whitespace, or with identical spans and slots that differ."""
+    return bool(result["identical"] and (result.get("spans") == "different"
+                                         or result.get("slots_identical") is False))
+
+
 def verify_token_paths(
     pm: ProbingModel,
     conversations: List[List[Dict[str, str]]],
@@ -775,13 +824,23 @@ def verify_token_paths(
 ) -> List[Dict]:
     """``--verify_ids N`` (the response-token-ids plan § 5.6, 2026-11-02): for
     the first ``n`` conversations on the ids path, build both paths' ids and
-    compare them.  When they are identical, run each path through the model
-    (one conversation per forward pass, so that both passes have the same
-    shape) and compare every slot bit for bit; when they differ, say how
-    (:func:`describe_token_difference`).  Each conversation is logged and
-    returned as a dict (``conversation``, ``identical``, and
-    ``slots_identical`` or the difference); identical ids with differing
-    slots is logged as an ERROR, and the caller stops on it."""
+    compare them.
+
+    * Identical ids: the two assistant spans are compared first
+      (:func:`compare_assistant_spans`, since 2026-11-03).  Identical spans:
+      each path is run through the model (one conversation per forward pass,
+      so that both passes have the same shape) and every slot compared bit
+      for bit; differing slots are a bug.  The text path's span equal to the
+      ids path's less whitespace-only tokens at its ends: reported as
+      :data:`SPANS_BOUNDARY_WHITESPACE` (the text path trims them, the ids
+      path does not), no model pass.  Any other span difference is a bug.
+    * Differing ids: say how (:func:`describe_token_difference`).
+
+    Each conversation is logged and returned as a dict (``conversation``,
+    ``identical``; for identical ids ``spans`` and ``slots_identical``, None
+    when no pass was run; else the difference).  A bug
+    (:func:`token_path_check_failed`) is logged as an ERROR, and the caller
+    stops on it."""
     log = log or logger
     family = pm.family
     kwargs = dict(family.template_kwargs)
@@ -796,12 +855,26 @@ def verify_token_paths(
     results = []
     for i in picks:
         conv, rec = conversations[i], token_records[i]
-        text_ids, _ = encoder.build_turn_spans(conv, **kwargs)
-        ids_ids, _ = build_ids_path_sequence(
+        text_ids, text_spans = encoder.build_turn_spans(conv, **kwargs)
+        ids_ids, ids_spans = build_ids_path_sequence(
             encoder, conv, rec, template_kwargs=kwargs, turn_end_ids=turn_end_ids,
             special_ids=special_ids, entity=entity, index=i, content_span=content_span)
         res: Dict = {"conversation": i, "identical": text_ids == ids_ids}
         if res["identical"]:
+            res["spans"] = compare_assistant_spans(pm.tokenizer, ids_ids, text_spans, ids_spans)
+            res["slots_identical"] = None
+        if res["identical"] and res["spans"] != "identical":
+            spans = (f"text path {_assistant_bounds(text_spans)}, "
+                     f"ids path {_assistant_bounds(ids_spans)}")
+            if res["spans"] == SPANS_BOUNDARY_WHITESPACE:
+                log.info(f"{entity}: --verify_ids: conversation {i}: identical ids "
+                         f"({len(text_ids)}); the spans differ by {res['spans']} ({spans}); "
+                         f"no model pass")
+            else:
+                log.error(f"{entity}: --verify_ids: conversation {i}: identical ids "
+                          f"({len(text_ids)}) but the assistant spans differ ({spans}): a bug "
+                          f"in the ids path")
+        elif res["identical"]:
             common = dict(layout=layout, extract_headers=extract_headers, entity=entity)
             [a], _, _ = extract_activations_batch(pm, [conv], layers, 1, max_length, **common)
             [b], _, _ = extract_activations_batch(pm, [conv], layers, 1, max_length, **common,
@@ -814,7 +887,7 @@ def verify_token_paths(
             res["slots_identical"] = bool(same)
             if same:
                 log.info(f"{entity}: --verify_ids: conversation {i}: identical ids "
-                         f"({len(text_ids)}); the slots are bit-identical")
+                         f"({len(text_ids)}) and spans; the slots are bit-identical")
             else:
                 log.error(f"{entity}: --verify_ids: conversation {i}: identical ids "
                           f"({len(text_ids)}) but the slots differ: a bug in the ids path")
@@ -829,13 +902,16 @@ def verify_token_paths(
                      f"{', '.join(res['kinds'])}")
         results.append(res)
     n_same = sum(r["identical"] for r in results)
-    n_bad = sum(r["identical"] and not r["slots_identical"] for r in results)
+    n_bits = sum(r["identical"] and r.get("slots_identical") is True for r in results)
+    n_ws = sum(r["identical"] and r.get("spans") == SPANS_BOUNDARY_WHITESPACE for r in results)
+    n_bad = sum(token_path_check_failed(r) for r in results)
     kinds: Dict[str, int] = {}
     for r in results:
         for k in r.get("kinds", []):
             kinds[k] = kinds.get(k, 0) + 1
     log.info(f"{entity}: --verify_ids: {len(results)} ids-path conversation(s): {n_same} with "
-             f"identical ids ({n_same - n_bad} with bit-identical slots), "
+             f"identical ids ({n_bits} with identical spans and bit-identical slots, {n_ws} with "
+             f"spans differing by {SPANS_BOUNDARY_WHITESPACE}, {n_bad} failed), "
              f"{len(results) - n_same} differing"
              + (f" ({', '.join(f'{k} {v}' for k, v in sorted(kinds.items()))})" if kinds else ""))
     return results
@@ -1225,12 +1301,12 @@ def process_role(
                                      layers=layers, max_length=max_length, layout=layout,
                                      extract_headers=extract_headers, content_span=content_span,
                                      entity=role)
-        bad = [r for r in checked if r["identical"] and not r["slots_identical"]]
+        bad = [r for r in checked if token_path_check_failed(r)]
         if bad:
             raise TokenPathVerificationError(
                 f"{role}: {len(bad)} of {len(checked)} conversations prefill the same ids on both "
-                f"paths but give different slots (logged above): a bug in the ids path; nothing "
-                f"extracted")
+                f"paths but give different spans or slots (logged above): a bug in the ids path; "
+                f"nothing extracted")
 
     if prefix_file is None:
         activations_list, mismatches, header_metadata = extract_activations_batch(

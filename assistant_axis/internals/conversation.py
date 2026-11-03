@@ -626,10 +626,21 @@ class ConversationEncoder:
         """The chatml span builder's boundary rule: when the tokens at
         ``indices`` decode to a text with leading or trailing whitespace, pop
         whitespace-only tokens from both ends.  Returns the kept indices (a
-        new list).  Factored out of :meth:`_build_turn_spans_qwen` unchanged
-        (the response-token-ids plan § 5.2, 2026-11-02), so that step 2's ids
-        path trims the stored ids' range by the same rule and a clean
-        response gives the same slot-0 positions on both paths."""
+        new list).
+
+        Why it exists: :meth:`_build_turn_spans_qwen` takes every token
+        between ``<|im_start|>assistant`` and ``<|im_end|>`` and drops the
+        think block, which leaves two header tokens in the span, the ``"\\n"``
+        after ``assistant`` and the ``"\\n\\n"`` after ``</think>``; this trim is
+        what removes them.  It also drops whitespace-only tokens the model
+        generated at the ends of its reply (13 of 20,000 October responses end
+        in a newline token; none begins with whitespace); that trailing half
+        has no recorded reason.  The text path's own rule only: step 2's ids
+        path averages the stored range as stored (Roger, 2026-11-03), and
+        ``--verify_ids`` reports where the two differ by it.  Factored out of
+        :meth:`_build_turn_spans_qwen` unchanged (the response-token-ids plan
+        § 5.2, 2026-11-02); making the header skip explicit is a later
+        refactor."""
         indices = list(indices)
         if indices:
             # Get the text to check for leading/trailing cleanup
