@@ -642,7 +642,23 @@ def check_generation_config(responses_dir: Path, pre: Preflight, *, ignore: bool
         log.warning(msg + " (--ignore_generation_config given)")
     else:
         log.info(f"{path}: model type, template kwargs, header ids and the sample prompt match")
+    # Logged, never refused (the response-token-ids plan § 5.7, 2026-11-02):
+    # the stored ranges carry what the clean-up did, and the activation
+    # metadata records it (recorded_response_cleanup).
+    log.info(f"{path}: step 1's response clean-up was {last.get('response_cleanup')!r}")
     return diffs
+
+
+def recorded_response_cleanup(responses_dir: Path) -> Optional[str]:
+    """The response clean-up step 1 recorded for this responses directory
+    (the last run of its side-car: ``"strip_leaked_think"``, ``"none"`` or,
+    since 2026-11-02, ``"keep"``), or None when there is no side-car.  Step 2
+    writes it into every activation file's metadata (§ 5.7)."""
+    from assistant_axis.generation import read_generation_config
+    cfg = read_generation_config(Path(responses_dir))
+    if not cfg or not cfg.get("runs"):
+        return None
+    return cfg["runs"][-1].get("response_cleanup")
 
 
 def log_layout(layout: Optional[ChatLayout], log=None) -> None:
@@ -1086,6 +1102,7 @@ def process_role(
     token_source: str = "auto",
     content_span: str = "range",
     verify_ids: int = 0,
+    response_cleanup: Optional[str] = None,
 ) -> tuple[bool, int]:
     """Process a single role file and save activations.
 
@@ -1103,7 +1120,9 @@ def process_role(
     turn (refused with ``token_source="text"``); written in the metadata.
     ``verify_ids`` > 0 (``--verify_ids``, § 5.6) runs
     :func:`verify_token_paths` on the first that many ids-path conversations
-    before extracting anything.
+    before extracting anything.  ``response_cleanup`` is the clean-up step 1
+    recorded (:func:`recorded_response_cleanup`; None without a side-car),
+    written in the metadata (§ 5.7).
 
     ``prefix_tokens`` (``--prefix_token_means``, the cap pilot, 2026-10-28)
     also writes ``<output_dir>/prefix_means/<role>.pt`` from the same forward
@@ -1312,10 +1331,13 @@ def process_role(
         })
         # Since 2026-11-02 (the response-token-ids plan § 5.1): how many
         # records took each path; a file may mix (records whose stored range
-        # is null take the text path under auto); and (§ 5.5) what slot 0
-        # averaged on the ids path.
+        # is null take the text path under auto); (§ 5.5) what slot 0
+        # averaged on the ids path; and (§ 5.7) the clean-up step 1 recorded
+        # in its side-car (None when there is none).  Step 4 copies them into
+        # each vector; step 5 refuses nothing on them.
         file_metadata["token_source"] = dict(source_counts)
         file_metadata["content_span"] = content_span
+        file_metadata["response_cleanup"] = response_cleanup
         if write_activations:
             activations_dict["metadata"] = file_metadata
             torch_save_with_retry(
@@ -1443,6 +1465,7 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
                     token_source=getattr(args, "token_source", "auto"),
                     content_span=getattr(args, "content_span", "range"),
                     verify_ids=getattr(args, "verify_ids", 0) if i == 0 else 0,
+                    response_cleanup=getattr(args, "response_cleanup_recorded", None),
                 )
                 total_mismatches += n_mm
                 if saved:
@@ -1652,6 +1675,8 @@ def main():
     except GenerationConfigError as e:
         logger.error(str(e))
         sys.exit(1)
+    # Step 1's clean-up, for every activation file's metadata (§ 5.7).
+    args.response_cleanup_recorded = recorded_response_cleanup(responses_dir)
     args.hf_load_kwargs = dict(pre.family.hf_load_kwargs)
     args.expected_header_ids = (list(pre.layout.header_ids)
                                 if pre.layout is not None and not args.no_headers else None)
@@ -1702,6 +1727,7 @@ def main():
                     token_source=args.token_source,
                     content_span=args.content_span,
                     verify_ids=args.verify_ids if i == 0 else 0,
+                    response_cleanup=args.response_cleanup_recorded,
                 )
             except NoActivationsError as e:
                 # Logged and carried on, like the multi-worker mode; any

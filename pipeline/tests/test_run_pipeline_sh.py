@@ -642,6 +642,49 @@ def test_an_unknown_response_cleanup_is_refused_before_any_step(tmp_path):
     assert proc.returncode == 1 and "Invalid --response-cleanup" in proc.stderr and calls == []
 
 
+def test_the_step_2_token_flags_reach_every_step_2_call(tmp_path):
+    """The response-token-ids plan § 5.7 (2026-11-02): --token-source, --content-span and
+    --verify-ids go to every step-2 call, step 0's default included."""
+    proc, calls = _run_full(tmp_path, None, "--token-source", "ids", "--content-span", "turn",
+                            "--verify-ids", "20", types="roles r_combinations")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    acts = [c for c in calls if "2_activations.py" in c]
+    assert len(acts) == 3
+    assert all("--token_source ids --content_span turn --verify_ids 20 " in c for c in acts)
+    assert not any("--token_source" in c for c in calls if "2_activations.py" not in c)
+    assert "Step 2 flags: --token_source ids --content_span turn --verify_ids 20" in proc.stdout
+
+
+def test_the_step_2_token_flags_are_not_passed_when_not_given(tmp_path):
+    proc, calls = _run_full(tmp_path, None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert not any(f in c for c in calls for f in ("--token_source", "--content_span",
+                                                   "--verify_ids"))
+    assert "Step 2 flags:" not in proc.stdout
+
+
+def test_the_step_2_token_flags_in_christina_mode(tmp_path):
+    proc, calls = _run_full(tmp_path, None, "--mode", "christina", "--token-source", "text",
+                            "--roles_dir", "../data/traits/instructions",
+                            workdir=_corpus(tmp_path), types=None)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    acts = [c for c in calls if "2_activations.py" in c]
+    assert len(acts) == 2 and all("--token_source text " in c for c in acts)
+
+
+@pytest.mark.parametrize("args,message", [
+    (("--token-source", "both"), "Invalid --token-source"),
+    (("--content-span", "all"), "Invalid --content-span"),
+    (("--verify-ids", "x"), "Invalid --verify-ids"),
+    (("--verify-ids", "-1"), "Invalid --verify-ids"),
+    (("--content-span", "turn", "--token-source", "text"),
+     "Invalid --content-span turn with --token-source text"),
+])
+def test_bad_step_2_token_flags_are_refused_before_any_step(tmp_path, args, message):
+    proc, calls = _run_full(tmp_path, None, *args)
+    assert proc.returncode == 1 and message in proc.stderr and calls == []
+
+
 def test_the_drivers_cap_default_for_christina_mode_is_step_1s():
     import re
     m = re.search(r'add_argument\("--max_tokens", type=int, default=(\d+)',

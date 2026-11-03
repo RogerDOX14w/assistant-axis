@@ -680,6 +680,109 @@ def test_the_verify_ids_flag(mod):
     assert p.parse_args(base + ["--verify_ids", "20"]).verify_ids == 20
 
 
+# ---------------------------------------------------------------------------
+# § 5.7: the metadata and the side-car's clean-up
+# ---------------------------------------------------------------------------
+
+def _sidecar(mod, responses, *, response_cleanup):
+    from assistant_axis.generation import prompt_token_ids, write_generation_config
+    from assistant_axis.model_families import FAMILIES
+    tok = make_fake_probing_model(N_LAYERS).tokenizer
+    pre = mod.Preflight(family=FAMILIES["qwen3"], n_layers=N_LAYERS, tokenizer=tok,
+                        layout=mod.derive_chat_layout(tok, FAMILIES["qwen3"]))
+    sample = _conv("")[:-1]
+    responses.mkdir(parents=True, exist_ok=True)
+    write_generation_config(responses, {
+        "created_at": "2026-11-02T00:00:00+00:00", "model_type": "qwen3",
+        "template_kwargs": dict(THINKING_OFF), "header_ids": list(pre.layout.header_ids),
+        "sample_conversation": sample, "response_cleanup": response_cleanup,
+        "sample_prompt_ids": prompt_token_ids(tok, sample, THINKING_OFF)})
+    return pre
+
+
+def test_the_recorded_clean_up_is_logged_and_read(mod, tmp_path, caplog, monkeypatch):
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    pre = _sidecar(mod, tmp_path / "responses", response_cleanup="keep")
+    with caplog.at_level("INFO"):
+        assert mod.check_generation_config(tmp_path / "responses", pre) == []
+    assert "step 1's response clean-up was 'keep'" in caplog.text
+    assert mod.recorded_response_cleanup(tmp_path / "responses") == "keep"
+    assert mod.recorded_response_cleanup(tmp_path / "none") is None
+
+
+def test_the_metadata_records_the_path_the_span_and_the_clean_up(mod, pm, tmp_path):
+    recs = [_record(0, "Arr matey.", stored=_stored(mod, pm.tokenizer, "Arr matey."))]
+    _, meta = _run(mod, pm, tmp_path, recs, response_cleanup="keep", content_span="turn")
+    assert meta["token_source"] == {"ids": 1, "text": 0, "range_null": 0}
+    assert meta["content_span"] == "turn" and meta["response_cleanup"] == "keep"
+
+
+def test_main_passes_the_flags_and_the_recorded_clean_up(mod, pm, tmp_path, monkeypatch):
+    import logging
+    import sys
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    responses = tmp_path / "responses"
+    pre = _sidecar(mod, responses, response_cleanup="strip_leaked_think")
+    _write_jsonl(responses / "alpha.jsonl", [_record(0, "Yes")])
+    seen = {}
+
+    def fake_process_role(pm_, role_file, *a, **k):
+        seen.update(k)
+        return True, 0
+
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")         # single-worker mode
+    monkeypatch.setattr(mod, "preflight_model", lambda name, **kw: pre)
+    monkeypatch.setattr(mod, "load_worker_model", lambda args, log=None: (pm, [0, 1, 2], None))
+    monkeypatch.setattr(mod, "process_role", fake_process_role)
+    monkeypatch.setattr(sys, "argv", ["2_activations.py", "--model", "Qwen/Qwen3-32B",
+                                      "--responses_dir", str(responses),
+                                      "--output_dir", str(tmp_path / "out"),
+                                      "--token_source", "ids", "--content_span", "turn",
+                                      "--verify_ids", "7"])
+    root = logging.getLogger()
+    before = list(root.handlers)
+    try:
+        mod.main()
+    finally:
+        for h in root.handlers[:]:                          # main() adds a file handler
+            if h not in before:
+                root.removeHandler(h)
+                h.close()
+    assert (seen["token_source"], seen["content_span"], seen["verify_ids"]) == ("ids", "turn", 7)
+    assert seen["response_cleanup"] == "strip_leaked_think"
+
+
+def test_step_4_copies_the_new_keys_into_the_vector_and_step_5_refuses_nothing_new(mod, pm,
+                                                                                 tmp_path,
+                                                                                 monkeypatch):
+    import json
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    act_dir, scores, vec = tmp_path / "activations", tmp_path / "scores", tmp_path / "vectors"
+    for d in (act_dir, scores, vec):
+        d.mkdir()
+    recs = [_record(i, c, stored=_stored(mod, pm.tokenizer, c))
+            for i, c in enumerate(["Arr matey.", "Yes", "Law rules."])]
+    f = _write_jsonl(tmp_path / "responses" / "pirate.jsonl", recs)
+    mod.process_role(pm, f, act_dir, [0, 1, 2], 2, 2048, response_cleanup="keep")
+    (scores / "pirate.json").write_text(json.dumps({"pos_p0_q0": 3, "pos_p1_q1": 3,
+                                                    "pos_p0_q2": 3}))
+    spec = importlib.util.spec_from_file_location("_p4_for_token_ids", REPO_ROOT / "pipeline"
+                                                  / "4_vectors.py")
+    step4 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(step4)
+    assert step4.main(["--activations_dir", str(act_dir), "--scores_dir", str(scores),
+                       "--output_dir", str(vec), "--min_count", "2"]) == 0
+    meta = torch.load(vec / "pirate.pt", weights_only=False)["metadata"]
+    assert meta["token_source"] == {"ids": 3, "text": 0, "range_null": 0}
+    assert meta["content_span"] == "range" and meta["response_cleanup"] == "keep"
+    spec5 = importlib.util.spec_from_file_location("_p5_for_token_ids", REPO_ROOT / "pipeline"
+                                                   / "5_axis.py")
+    step5 = importlib.util.module_from_spec(spec5)
+    spec5.loader.exec_module(step5)
+    assert step5.METADATA_MUST_AGREE == ("header_ids", "model_name", "model_type",
+                                         "template_kwargs")
+
+
 def test_an_anchor_at_the_spans_start_is_the_search_without_one(pm):
     # The text path's spans have no anchor; an anchor equal to the start
     # searches exactly as before.

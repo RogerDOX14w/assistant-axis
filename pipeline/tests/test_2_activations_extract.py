@@ -298,13 +298,15 @@ def test_metadata_records_a_layer_subset_and_the_no_header_layout(mod, pm, tmp_p
     # Flagged expectation change (plan § 9 test 5): "thinking" out,
     # model_type and template_kwargs in.  Flagged again (the response-token-ids
     # plan § 5.1, 2026-11-02): token_source in, the count of records per path
-    # (these records have no stored ids, so all take the text path); and
-    # (§ 5.5) content_span, what slot 0 averages on the ids path.
+    # (these records have no stored ids, so all take the text path);
+    # (§ 5.5) content_span, what slot 0 averages on the ids path; and (§ 5.7)
+    # response_cleanup, step 1's as its side-car recorded it (None here: no
+    # side-car was read).
     assert meta == {"extract_headers": False, "layers": [2], "max_length": 512,
                     "batch_size": 4, "model_type": "qwen3",
                     "template_kwargs": {"enable_thinking": False},
                     "token_source": {"ids": 0, "text": 1, "range_null": 0},
-                    "content_span": "range"}
+                    "content_span": "range", "response_cleanup": None}
     (act,) = data.values()
     assert act.shape == (1, 4) and act[0, 1].item() == 3.0   # output of layers[2]
     assert slot_labels(meta) == ["body-mean"]

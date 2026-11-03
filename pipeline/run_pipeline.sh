@@ -49,6 +49,11 @@
 #                                                     # with --from-step 3
 #   ./run_pipeline.sh --response-cleanup keep         # step 1 keeps a leaked plan in the
 #                                                     # stored (judged) text; default family
+#   ./run_pipeline.sh --token-source text             # step 2 re-encodes the stored text
+#                                                     # (default auto: the stored ids)
+#   ./run_pipeline.sh --content-span turn --verify-ids 20
+#                                                     # slot 0 over the whole generated turn;
+#                                                     # both paths compared on 20 first
 #
 # Response cap, step 2's batch size and step 4's threads (2026-10-29):
 # step 1 generates at --max_tokens 1024 in roger mode, the October
@@ -252,6 +257,14 @@ ROGER_MAX_TOKENS_DEFAULT=1024
 # given (step 1's default, family).  The response-token-ids plan § 4.3,
 # 2026-11-02; family is the default for now.
 STEP1_ARGS=()
+# Step 2's --token_source (auto, ids, text), --content_span (range, turn) and
+# --verify_ids N, set with --token-source, --content-span and --verify-ids
+# and passed to every step-2 call, step 0's included; not passed when not
+# given (step 2's defaults: auto, range, 0).  The response-token-ids plan
+# § 5.7, 2026-11-02.
+STEP2_ARGS=()
+STEP2_TOKEN_SOURCE=""
+STEP2_CONTENT_SPAN=""
 # 1_generate.py's default --max_tokens (a test pins the two together).
 GENERATE_MAX_TOKENS_DEFAULT=512
 # Step 2's batch size (2_activations.py --batch_size), set with
@@ -353,6 +366,26 @@ while [[ $# -gt 0 ]]; do
                 *) echo "Invalid --response-cleanup: $2 (must be family or keep)" >&2; exit 1 ;;
             esac
             shift 2 ;;
+        --token-source)
+            # step 2's --token_source: auto (its default), ids or text
+            case "$2" in
+                auto|ids|text) STEP2_TOKEN_SOURCE="$2"; STEP2_ARGS+=(--token_source "$2") ;;
+                *) echo "Invalid --token-source: $2 (must be auto, ids or text)" >&2; exit 1 ;;
+            esac
+            shift 2 ;;
+        --content-span)
+            # step 2's --content_span: range (its default) or turn
+            case "$2" in
+                range|turn) STEP2_CONTENT_SPAN="$2"; STEP2_ARGS+=(--content_span "$2") ;;
+                *) echo "Invalid --content-span: $2 (must be range or turn)" >&2; exit 1 ;;
+            esac
+            shift 2 ;;
+        --verify-ids)
+            # step 2's --verify_ids N (0 off, its default; the smoke run 20)
+            if ! [[ "$2" =~ ^[0-9]+$ ]]; then
+                echo "Invalid --verify-ids: $2 (a number of conversations; 0 for off)" >&2; exit 1
+            fi
+            STEP2_ARGS+=(--verify_ids "$2"); shift 2 ;;
         --step2-batch-size)
             STEP2_BATCH_SIZE="$2"; shift 2 ;;
         --step4-threads)
@@ -421,6 +454,11 @@ if [ -z "$MAX_TOKENS" ]; then
 fi
 if [ -z "$STEP2_BATCH_SIZE" ]; then
     if [ "$MAX_TOKENS" -gt 512 ]; then STEP2_BATCH_SIZE=4; else STEP2_BATCH_SIZE=8; fi
+fi
+# Step 2 refuses this pair itself, but only after step 1 has run: refuse it here.
+if [ "$STEP2_CONTENT_SPAN" = "turn" ] && [ "$STEP2_TOKEN_SOURCE" = "text" ]; then
+    echo "Invalid --content-span turn with --token-source text (turn is an ids-path variant)" >&2
+    exit 1
 fi
 # How step 3 reaches the judge: Flex in roger mode (Roger, 2026-10-30), the
 # Batch API in christina mode, unless a --judge-flex / --judge-batch /
@@ -513,6 +551,9 @@ if [ "$FROM_STEP" -le 2 ]; then
     echo "Cap:    $MAX_TOKENS response tokens (step 1); step 2 batch size $STEP2_BATCH_SIZE"
     if [ "${#STEP1_ARGS[@]}" -gt 0 ]; then
         echo "Clean-up: ${STEP1_ARGS[1]} (step 1's --response_cleanup)"
+    fi
+    if [ "${#STEP2_ARGS[@]}" -gt 0 ]; then
+        echo "Step 2 flags: ${STEP2_ARGS[*]}"
     fi
 fi
 # step 4 for the types, or step 0's for the default vector
@@ -855,6 +896,7 @@ run_step0_default() {
             --model "$MODEL" \
             --responses_dir "$DEFAULT_RESP" \
             --output_dir "$DEFAULT_ACT" \
+            "${STEP2_ARGS[@]}" \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
             --batch_size "$STEP2_BATCH_SIZE"
     else
@@ -937,6 +979,7 @@ if [ "$MODE" = "christina" ]; then
             --model "$MODEL" \
             --responses_dir "$OUTPUT_DIR/responses" \
             --output_dir "$OUTPUT_DIR/activations" \
+            "${STEP2_ARGS[@]}" \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
             --batch_size "$STEP2_BATCH_SIZE"
     }
@@ -1138,6 +1181,7 @@ else
                 --model "$MODEL" \
                 --responses_dir "$TYPE_DIR/responses" \
                 --output_dir "$TYPE_DIR/activations" \
+                "${STEP2_ARGS[@]}" \
                 --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                 --batch_size "$STEP2_BATCH_SIZE" $prefix_flag
         done
