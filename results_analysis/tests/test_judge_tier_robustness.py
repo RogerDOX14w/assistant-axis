@@ -508,6 +508,8 @@ def test_grid_analysis_records_its_inputs(tmp_path, monkeypatch):
 
 def test_instruction_12way_arms_are_every_judge_set_at_1x_and_2x_luna_to_4x_and_the_mixes():
     mod = _script("judge_instruction_12way")
+    # the figure before 2026-11-04: no Jev, the axes' own order (--without_jev --directions own)
+    mod.WITH_JEV, mod.BALANCED = False, False
     arms = mod.arms()
     assert len(arms) == 7 * 2 + 2 + 4 and len({lab for lab, _ in arms.values()}) == 20
     assert arms["gpt-5.6-luna+claude-haiku-5-5@i1_p0n20x2"] == ("Luna + Haiku 2x", {"gpt-5.6-luna": 2, "claude-haiku-5-5": 2})
@@ -524,17 +526,30 @@ def test_instruction_12way_arms_are_every_judge_set_at_1x_and_2x_luna_to_4x_and_
     assert sorted(c for s in series for c in s) == sorted(k for k, (_, spec) in arms.items() if len(set(spec.values())) == 1)
     # every arm fits the passes judged
     assert all(k <= mod.PASSES[m] for _, spec in arms.values() for m, k in spec.items())
+    # the defaults since 2026-11-04 (Roger: Jev beside the trio, balanced directions): the six Jev arms, three more
+    # series, and a 2x choice of passes one each way (Luna 2x of 4: 4 choices, not 6)
+    mod.WITH_JEV, mod.BALANCED = True, True
+    arms = mod.arms()
+    assert len(arms) == 7 * 2 + 2 + 4 + 6 and len({lab for lab, _ in arms.values()}) == 26
+    assert arms["jev-1.14.0@i1_p0n20x2"] == ("Jev 2x", {"jev-1.14.0": 2})
+    assert len(mod.series()) == 10
+    assert len(mod.replicates({"gpt-5.6-luna": 2, "claude-haiku-5-5": 2, "gemini-3.1-flash-lite": 1})) == 4 * 1 * 2
+    assert all(k <= mod.passes_of(mod.INSTRUCTIONS)[m] for _, spec in arms.values() for m, k in spec.items())
 
 
 def test_instruction_12way_a_pass_is_all_five_instructions_and_choices_are_per_judge():
     mod = _script("judge_instruction_12way")
     assert list(mod.pass_rounds(0)) == [0, 1, 2, 3, 4] and list(mod.pass_rounds(3)) == [15, 16, 17, 18, 19]
     passes = {"a": 4, "b": 2}
+    mod.BALANCED = False            # the axes' own order: every choice of passes
     assert len(mod.replicates({"a": 1}, passes)) == 4 and len(mod.replicates({"a": 2}, passes)) == 6
     assert len(mod.replicates({"a": 4}, passes)) == 1
     mix = mod.replicates({"a": 2, "b": 1}, passes)
     assert len(mix) == 6 * 2 and all(len(rep["a"]) == 10 and len(rep["b"]) == 5 for rep in mix)
     assert {rep["b"] for rep in mix} == {(0, 1, 2, 3, 4), (5, 6, 7, 8, 9)}
+    mod.BALANCED = True             # balanced (the default since 2026-11-04): an even count takes one pass each way
+    assert len(mod.replicates({"a": 1}, passes)) == 4 and len(mod.replicates({"a": 2}, passes)) == 4
+    assert len(mod.replicates({"a": 4}, passes)) == 1 and len(mod.replicates({"a": 2, "b": 1}, passes)) == 4 * 2
     # Luna's two judgements average to 2, Haiku says 6: per judge, then Luna 4 to Haiku 3 (Roger, 2026-11-03), not
     # (1 + 3 + 6) / 3; an entity Haiku left out is Luna's alone; two judges without Luna weigh alike
     assert mod.combine({"gpt-5.6-luna": [{"e": 1, "f": 5}, {"e": 3}], "claude-haiku-5-5": [{"e": 6}]}) == pytest.approx(
@@ -599,6 +614,7 @@ def test_instruction_12way_descriptions_mode_reads_the_jl_cells_two_passes_each(
     d = mod.MODES["descriptions"]
     assert d.cell("gpt-5.6-luna", 0) == "gpt-5.6-luna@none@b10n20s1jl" and d.cell("claude-haiku-5-5", 1) == "claude-haiku-5-5@b10n20s2jl"
     assert d.rounds_per_pass == 1 and d.passes == {"gpt-5.6-luna": 4, "claude-haiku-5-5": 2, "gemini-3.1-flash-lite": 2}
+    mod.WITH_JEV, mod.BALANCED = False, False       # the figure before 2026-11-04
     arms = mod.arms(d)
     assert len(arms) == 7 * 2 + 2 + 4 and all(k <= d.passes[m] for _, spec in arms.values() for m, k in spec.items())
     assert "gpt-5.6-luna@b10n20jlx4" in arms and "claude-haiku-5-5@b10n20jlx3" not in arms
@@ -606,3 +622,6 @@ def test_instruction_12way_descriptions_mode_reads_the_jl_cells_two_passes_each(
     assert mod.replicates({"a": 1}, {"a": 2}, 1) == [{"a": (0,)}, {"a": (1,)}]
     assert sorted(len(s) for s in mod.series(d)) == [2] * 6 + [4]
     assert mod.INSTRUCTIONS.cell("gpt-5.6-luna", 7) == "gpt-5.6-luna@i1_p0n20r7"
+    mod.WITH_JEV, mod.BALANCED = True, True         # the defaults since 2026-11-04: with Jev, balanced
+    assert len(mod.arms(d)) == 26 and sorted(len(s) for s in mod.series(d)) == [2] * 9 + [4]
+    assert len(mod.replicates({"gpt-5.6-luna": 2, "claude-haiku-5-5": 1}, d.passes, d.rounds_per_pass)) == 4 * 2
