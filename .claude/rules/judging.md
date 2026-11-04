@@ -21,11 +21,18 @@ paths:
 **The decision:** the batched percentile rubric `b10`, N=20 entities per call, two
 passes, one each way, no reasoning, for GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite,
 and **since 2026-11-04 Jev (TypeSafe AI) beside them, two passes, one each way, blended
-Luna 4 : Haiku 3 : Gemini 3 : Jev 24** (Roger: "the new standard is (Luna + Haiku + Gemini +
-Jev) x2, with the reversal in the x2"; Jev's weight fitted on ρ averaged over the 12
-projection variants, `judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE`): ρ 0.766 at $0.084
-an axis on the 61 axes (balanced cells, real price, May corpus), against the three judges'
-0.751 at $0.076.  Jev judges by its own method,
+Luna 4 : Haiku 3 : Gemini 3 : Jev 12** (Roger: "the new standard is (Luna + Haiku + Gemini +
+Jev) x2, with the reversal in the x2"; `judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE`): ρ
+0.766 at $0.084 an axis on the 61 axes (balanced cells, real price, May corpus), against the
+three judges' 0.751 at $0.076.  **Jev's weight is chosen for resilience, not fitted to the
+mean** (Roger, on the mean-ρ fit's 24: "That's not an ensemble, that's an addendum"; the
+ensemble is there because each judge has its own bad axes): 12 has the smallest worst-axis
+shortfall from the better of Jev alone and the trio (0.026, against 0.043 at 24) for a mean ρ
+within noise of 24's, Jev's bad axes being one class (style axes, precise vs vague −0.105)
+with a fat lower tail; dropping each entity's outlying score does worse
+([`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md) § "Jev's
+weight: 12, for resilience", [`scripts/jev_weight_resilience.py`](./scripts/jev_weight_resilience.py)).
+Re-judge the weight by the worst axes too when the October corpus is judged.  Jev judges by its own method,
 [`scripts/judge_jev_entities.py`](./scripts/judge_jev_entities.py): a yes/no Noul question
 per entity ("is it nearer the second pole than most of the other entries?"), 160 entities a
 request, $0.042 per million input tokens and output free; the account is
@@ -55,9 +62,10 @@ each way: GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite by `i1_p0` at N=20, 
 its own method (`scripts/judge_jev_entities.py`, 160 a request, its column B A B A d).
 [`scripts/judge_instruction_grid.py`](./scripts/judge_instruction_grid.py) `--design rounds`
 runs it by default and derives the blend `<judges>@i1_p0n20dx2`, Luna 4 : Haiku 3 : Gemini 3
-: Jev 24, Jev's weight fitted on the balanced cells as for descriptions (the peak at 20, 24
-indistinguishable, +0.0044 [+0.0014, +0.0074] over 3): ρ 0.789 at $0.398 an axis on the 61
-axes, against 0.778 at $0.178 for the trio at 1x; Luna + Haiku + Jev at 2x 0.788 at $0.239;
+: Jev 12, as for descriptions and for the same reason (the mean-ρ fit peaks at 20; 12 is
+−0.0003 [−0.0014, +0.0008] from it, with the worst-axis shortfall 0.036 against 0.048 at 24):
+ρ 0.789 at $0.398 an axis on the 61 axes, against 0.778 at $0.178 for the trio at 1x; Luna +
+Haiku + Jev at 2x 0.789 at $0.239;
 Jev alone 0.781 at $0.021, on the frontier in 12 of 12 variants.  Jev is requested by its
 versioned ID, `jev-1.14.0`, pinned: TypeSafe accepts a versioned ID although `GET /v1/models`
 lists only the aliases `jev-latest` and `jev-preview`, and an alias moves when a release
