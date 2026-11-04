@@ -14,6 +14,15 @@ Flash-Lite (INSTRUCTION_JUDGES), and, once every cell is in, the blend
 (judge_tier_average.py; the scores in scores_instructions.json, correlations.json beside them).  Account:
 results_analysis/README.md, "Instruction judging: the settled method".
 
+**Directions (Roger, 2026-11-04), the default of the rounds design since that day:** each round is judged by
+each judge in the direction of Roger's table (judge_tier_cost_eval.INSTRUCTION_DIRECTIONS, --directions
+instructions): each instruction both ways across the judges (2:1), each judge 3:2, by weight 27:23 or 23:27,
+per axis a coin for which way is which and a permutation of the instruction positions, a second pass the
+first reversed; swapped calls' scores mapped back.  The pole-order test found a judge does better with the
+morally good pole at the high number, and a fixed order would carry that asymmetry into every result.  The
+cells are <judge>@i1_<arm>n<N>d<round> and the blend <judges>@i1_<arm>n<N>dx<passes>; --directions own gives
+the old r<round> and x<passes> cells, all in the axis's own order.
+
 Usage: uv run python scripts/judge_instruction_grid.py --design rounds --axes_file AXES.tsv --instructions_dir DATA --dry_run
        uv run python scripts/judge_instruction_grid.py --design sets --arms p0,p1,q0,q1,t0,t1 --ns 20 --passes 2 \\
            --axes_file scripts/tier_eval_axes_dev30.tsv --instructions_dir /tmp/claude-501/corpus_2026-05-24/data --dry_run"""
@@ -33,15 +42,21 @@ INSTRUCTION_JUDGES = ("gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite
 ROUNDS_PER_PASS = 5
 
 
-def blend_label(arm: str, n: int, rounds) -> str:
-    """The blend cell of a rounds design, ``@i1_<arm>n<N>x<passes>``; None unless the rounds are whole passes
-    from round 0 (rounds 5-9 alone are a second pass, not a cell called x1)."""
+def round_label(arm: str, n: int, r: int, directions: str = "own") -> str:
+    """A round's cell label: ``d<round>`` with balanced directions, ``r<round>`` in the axis's own order, so that
+    a cell of one kind is never taken for the other."""
+    return f"@i1_{arm}n{n}{'d' if directions == 'balanced' else 'r'}{r}"
+
+
+def blend_label(arm: str, n: int, rounds, directions: str = "own") -> str:
+    """The blend cell of a rounds design, ``@i1_<arm>n<N>x<passes>`` (``dx`` with balanced directions); None
+    unless the rounds are whole passes from round 0 (rounds 5-9 alone are a second pass, not a cell called x1)."""
     if len(rounds) % ROUNDS_PER_PASS or sorted(rounds) != list(range(len(rounds))):
         return None
-    return f"@i1_{arm}n{n}x{len(rounds) // ROUNDS_PER_PASS}"
+    return f"@i1_{arm}n{n}{'d' if directions == 'balanced' else ''}x{len(rounds) // ROUNDS_PER_PASS}"
 
 
-def cells(design: str, arms, ns, passes: int, rounds):
+def cells(design: str, arms, ns, passes: int, rounds, directions: str = "own"):
     """``(rubric, label, N, seed, round or None)`` for every cell of one judge."""
     for arm in arms:
         for n in ns:
@@ -50,7 +65,7 @@ def cells(design: str, arms, ns, passes: int, rounds):
                     yield f"is_{arm}", f"@is_{arm}n{n}s{seed}", n, seed, None
             else:
                 for r in rounds:
-                    yield f"i1_{arm}", f"@i1_{arm}n{n}r{r}", n, r + 1, r
+                    yield f"i1_{arm}", round_label(arm, n, r, directions), n, r + 1, r
 
 
 def command(model: str, cell, args) -> list:
@@ -60,6 +75,8 @@ def command(model: str, cell, args) -> list:
             "--axes_file", args.axes_file, "--experiments_dir", args.experiments_dir, "--instructions_dir", args.instructions_dir]
     if round_ is not None:
         argv += ["--instruction_round", str(round_)]
+        if getattr(args, "directions", "own") == "balanced":
+            argv += ["--directions", "instructions"]
     if args.budget_usd_per_cell is not None:
         argv += ["--budget_usd", str(args.budget_usd_per_cell)]
     argv += ["--max_in_flight", str(args.max_in_flight), "--transport", args.transport]
@@ -80,6 +97,9 @@ def main(argv=None) -> int:
     ap.add_argument("--no_blend", action="store_true",
                     help="--design rounds: do not derive the blend cell <judges>@i1_<arm>n<N>x<passes> (Luna 4 : others "
                          "3, judge_tier_average.py) after the cells finish")
+    ap.add_argument("--directions", choices=("balanced", "own"), default=None,
+                    help="--design rounds: balanced (the default since 2026-11-04, Roger's table) or own (every round in "
+                         "the axis's own order); --design sets: own only")
     ap.add_argument("--axes_file", required=True)
     ap.add_argument("--experiments_dir", default="roger/axis_judge_experiments")
     ap.add_argument("--instructions_dir", required=True, help="the corpus to judge (the May pin for the May axes)")
@@ -94,11 +114,20 @@ def main(argv=None) -> int:
     ap.add_argument("--logs", default=None, help="a directory for each cell's log (default: inherit stdout and stderr)")
     ap.add_argument("--dry_run", action="store_true", help="each cell's dry run: nothing sent, nothing written")
     args = ap.parse_args(argv)
+    if args.directions is None:
+        args.directions = "balanced" if args.design == "rounds" else "own"
+    if args.directions == "balanced":
+        if args.design != "rounds":
+            ap.error("--directions balanced goes with --design rounds (a set shows all five instructions in one item)")
+        unknown = [m for m in args.judges.split(",") if m not in ev.INSTRUCTION_DIRECTION_JUDGES]
+        if unknown:
+            ap.error(f"--directions balanced: Roger's table has no column for {', '.join(unknown)} "
+                     f"({', '.join(ev.INSTRUCTION_DIRECTION_JUDGES)}); use --directions own")
     arms, ns = args.arms.split(","), [int(x) for x in args.ns.split(",")]
     rounds = [int(x) for x in args.rounds.split(",")]
     # Anthropic's first, one judge at a time: a batch upload is lost when Flex cells hold the connection
     judges = sorted(args.judges.split(","), key=lambda m: provider_for_model(m) != "anthropic")
-    jobs = [(m, c) for m in judges for c in cells(args.design, arms, ns, args.passes, rounds)]
+    jobs = [(m, c) for m in judges for c in cells(args.design, arms, ns, args.passes, rounds, args.directions)]
     print(f"{len(jobs)} cells: {args.design}, arms {arms}, batch sizes {ns}, judges {args.judges}, axes {args.axes_file}")
     logs = Path(args.logs) if args.logs else None
     if logs:
@@ -127,12 +156,12 @@ def main(argv=None) -> int:
     given = args.judges.split(",")
     for arm in arms:
         for n in ns:
-            label = blend_label(arm, n, rounds)
+            label = blend_label(arm, n, rounds, args.directions)
             if label is None:
                 print(f"no blend for rounds {rounds}: not whole passes from round 0", file=sys.stderr)
                 continue
             out = "+".join(given) + label
-            sources = [f"{m}@i1_{arm}n{n}r{r}" for m in given for r in rounds]
+            sources = [f"{m}{round_label(arm, n, r, args.directions)}" for m in given for r in rounds]
             E = Path(args.experiments_dir)
             r = avg.average_cells(out, sources, ev.jobs_from_axes_file(Path(args.axes_file), E), E, Path(args.instructions_dir))
             refused += [f"{out}: {line}" for line in r.refused]

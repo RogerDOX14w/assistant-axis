@@ -184,6 +184,10 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     # "gemini-" batch factor below, read 2026-11-03).  2.5 Flash-Lite answers HTTP 404 to new users
     # (2026-11-02).
     ("gemini-3.1-flash-lite", 0.25, 1.50),
+    # TypeSafe AI's Jev (typesafe.ai and the docs' parallel-questions cookbook, read 2026-11-04): $0.042 per
+    # million input tokens, output "currently free of charge"; a request's state is billed once whatever the
+    # number of questions.  No batch or flex tier.
+    ("jev-", 0.042, 0.0),
     ("gemini-3.5-flash-lite", 0.30, 2.50),
     ("gemini-2.5-flash-lite", 0.10, 0.40),
     ("gemini-3-flash", 0.50, 3.00),
@@ -267,6 +271,11 @@ _CACHE_RATE_FACTORS: tuple[tuple[str, float, float], ...] = (
     ("sonnet", 1.25, 0.10),
     ("opus", 1.25, 0.10),
     ("fable", 1.25, 0.10),
+    # Gemini's implicit cache (2026-11-04): no write premium, reads at a tenth (3.1 Flash-Lite $0.025 of $0.25,
+    # batch $0.0125 of $0.125; aistudio.google.com/docs/pricing, read that day); a live probe of Flash-Lite
+    # read 6,125 of 10,145 prompt tokens of a repeated prefix.  Explicit caches, which also bill storage by the
+    # hour, are not used here.
+    ("gemini", 1.0, 0.10),
 )
 
 
@@ -410,6 +419,19 @@ def anthropic_usage(resp: Any) -> TokenUsage:
         completion_tokens=int(_field(usage, "output_tokens", "completion_tokens") or 0),
         cache_write_tokens=write,
         cache_read_tokens=read,
+    )
+
+
+def gemini_usage(data: Any) -> TokenUsage:
+    """The token counts of a Gemini generateContent response (a dict, live or a Batch API result):
+    ``promptTokenCount`` counts the cached tokens in, ``cachedContentTokenCount`` is the part read from the
+    implicit cache, and the output includes the thought tokens, which Google bills as output.  Zeros when
+    usage is missing; never raises."""
+    u = (data.get("usageMetadata") if isinstance(data, dict) else None) or {}
+    return TokenUsage(
+        prompt_tokens=int(u.get("promptTokenCount") or 0),
+        completion_tokens=int(u.get("candidatesTokenCount") or 0) + int(u.get("thoughtsTokenCount") or 0),
+        cache_read_tokens=int(u.get("cachedContentTokenCount") or 0),
     )
 
 

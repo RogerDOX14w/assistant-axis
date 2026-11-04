@@ -530,6 +530,40 @@ designed against this, and the readout says which design was used:
    that tells the arms apart.**  The pilot's prompts carry the trait, its
    description and the texts, nothing more.
 
+### Axis direction in judge prompts: balance it (Roger, 2026-11-04)
+
+An axis-judging prompt names one pole first and puts it at the low number,
+and that order matters.  GPT-5.6 Luna's repeats in the same order agreed 0.94,
+against 0.89 in opposite orders (descriptions, 61 axes; responses 0.99 and
+0.96).  On axes with a morally good pole, Luna does better with that pole at
+the high number, by +0.013 to +0.040 ρ under every projection variant, with
+no such effect on neutral axes.  **Roger's rule: never judge every call in one
+fixed pole order; balance the directions.**  For some of his research a silent
+valence asymmetry would invalidate results, so the small gain from putting the
+good pole high is given up on purpose.
+
+- Descriptions: each judge's two passes, one each way
+  ([`judge_descriptions.py`](./results_analysis/judge_descriptions.py), the
+  default).
+- Instructions: Roger's table per judge and instruction,
+  `judge_tier_cost_eval.INSTRUCTION_DIRECTIONS`
+  ([`judge_instruction_grid.py`](./scripts/judge_instruction_grid.py), the
+  default for rounds).
+- Responses: a coin per call
+  ([`judge_tier_cost_eval.py`](./results_analysis/judge_tier_cost_eval.py)
+  `--directions responses`).
+
+`--directions` swaps a call's poles in its prompt, maps its scores back
+(`lo + hi - v`), and records the direction on every answer record and its
+counts in the cell.  It refuses a finished cell made under other directions,
+and the reparse tool follows the records.  Balanced cells have their own
+labels (`d<seed>`, `d<round>`, `dx<passes>`).  A new judging mode or driver
+balances its directions the same way, and a subagent writing one is told this
+rule.  **Every judge score made before 2026-11-04 is in the pair list's
+order**, which puts the good pole high on the 18 moral axes (about +0.03 ρ on
+descriptions).  Evidence: § 4c of
+[`response_judging_plan.md`](./reports/judge_pareto/response_judging_plan.md).
+
 ### Judge parse-rate alerting (mandatory)
 
 Every script that calls an LLM judge and parses structured output

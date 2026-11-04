@@ -358,7 +358,9 @@ def _is_bad_request(exc: BaseException) -> bool:
 #: * Anthropic answers a prompt it will not judge with a refusal (HTTP 200,
 #:   ``stop_reason: "refusal"``), not a 400, and has no code here; the phrases
 #:   would still catch such a message if one ever came as a 400.
-CONTENT_FLAG_CODES: Tuple[str, ...] = ("invalid_prompt", "content_policy_violation", "content_filter")
+#: ``bio_policy`` (2026-11-04): GPT-5.6 Luna refused one batch of response-judging prompts as "flagged for
+#: possible biological risk"; until then any 400 stopped the run, so a 220,000-response arm stopped at one prompt.
+CONTENT_FLAG_CODES: Tuple[str, ...] = ("invalid_prompt", "content_policy_violation", "content_filter", "bio_policy")
 CONTENT_FLAG_PHRASES: Tuple[str, ...] = ("flagged as potentially violating", "violating our usage policy",
                                          "content management policy")
 
@@ -879,7 +881,45 @@ def usage_key(model: str, service_tier: Optional[str] = None) -> str:
     return f"{model}:{service_tier}" if service_tier else model
 
 
-def chat_request_body(prompt: str, model: str, max_tokens: int, *,
+def prompt_parts(prompt: Any) -> Tuple[str, Optional[str]]:
+    """A prompt as ``(prefix, suffix)``: a two-part prompt (a tuple or list of two strings) whose prefix the
+    provider is asked to cache, or ``(text, None)`` for a plain string.  Response judging sends the question
+    and the answers as the prefix and the axis last, so that the k axes' calls on one batch read the prefix
+    from the cache (Roger, 2026-11-04; OpenAI reads at 0.1x the input rate, Anthropic the same)."""
+    if isinstance(prompt, (tuple, list)) and len(prompt) == 2:
+        return str(prompt[0]), str(prompt[1])
+    return str(prompt), None
+
+
+def prompt_text(prompt: Any) -> str:
+    """The whole prompt text, the two parts joined."""
+    a, b = prompt_parts(prompt)
+    return a if b is None else a + b
+
+
+def chat_content(prompt: Any, model: Optional[str] = None) -> Any:
+    """A chat message's content: the string, or two text parts with an explicit cache breakpoint on the
+    first (``prompt_cache_breakpoint``, GPT-5.6 and later; checked live on 2026-11-04: the second call of a
+    2,172-token prefix read it all back as cached).  The request's explicit cache mode
+    (:func:`prompt_cache_fields`) then caches exactly that prefix.  A model that refuses
+    ``prompt_cache_options`` (gpt-4.1-mini, which caches on its own) gets the parts joined."""
+    a, b = prompt_parts(prompt)
+    if b is None:
+        return a
+    if model is not None and not accepts_cache_options(model):
+        return a + b
+    return [{"type": "text", "text": a, "prompt_cache_breakpoint": {"mode": "explicit"}}, {"type": "text", "text": b}]
+
+
+def anthropic_content(prompt: Any) -> Any:
+    """A Messages API content: the string, or two text blocks with ``cache_control`` on the first."""
+    a, b = prompt_parts(prompt)
+    if b is None:
+        return a
+    return [{"type": "text", "text": a, "cache_control": {"type": "ephemeral"}}, {"type": "text", "text": b}]
+
+
+def chat_request_body(prompt: Any, model: str, max_tokens: int, *,
                       temperature: Optional[float] = DEFAULT_TEMPERATURE,
                       service_tier: Optional[str] = None,
                       prompt_cache: str = DEFAULT_PROMPT_CACHE,
@@ -900,7 +940,7 @@ def chat_request_body(prompt: str, model: str, max_tokens: int, *,
     :data:`DEFAULT_PROMPT_CACHE`)."""
     body: Dict[str, Any] = {
         "model": model,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [{"role": "user", "content": chat_content(prompt, model)}],
         "max_completion_tokens": max_tokens,
     }
     t = request_temperature(model, temperature)
@@ -1315,7 +1355,7 @@ def anthropic_request_params(prompt: str, model: str, max_tokens: int, *,
     params: Dict[str, Any] = {
         "model": model,
         "max_tokens": max_tokens,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [{"role": "user", "content": anthropic_content(prompt)}],
     }
     t = request_temperature(model, temperature)
     if t is not None:
@@ -1454,7 +1494,7 @@ def gemini_request_body(prompt: str, model: str, max_tokens: int, *,
     :data:`JUDGE_REQUEST_SETTINGS`, go in ``generationConfig``."""
     config: Dict[str, Any] = {"maxOutputTokens": max_tokens}
     config.update(judge_request_settings(model) if settings is None else json.loads(json.dumps(settings)))
-    return {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": config}
+    return {"contents": [{"parts": [{"text": prompt_text(prompt)}]}], "generationConfig": config}
 
 
 def gemini_quota_ids(body: str) -> List[str]:
@@ -1504,7 +1544,7 @@ async def call_gemini_judge(
     raises :class:`JudgeRequestError`, and a 402 (prepaid credit used up) or a 429
     naming a daily quota :class:`BillingError`, since no retry within a run gets past
     it."""
-    from .judge_pricing import TokenUsage
+    from .judge_pricing import gemini_usage
     stats = stats if stats is not None else CallStats()
     body = gemini_request_body(prompt, model, max_tokens, settings=settings)
     last: Optional[str] = None
@@ -1521,7 +1561,8 @@ async def call_gemini_judge(
         if resp is not None:
             if resp.status_code == 200:
                 try:
-                    text, finish, n_in, n_out = gemini_reply(resp.json())
+                    data = resp.json()
+                    text, finish, n_in, n_out = gemini_reply(data)
                 except ValueError as e:     # a truncated or non-JSON body: no answer yet
                     text, finish, n_in, n_out = None, None, 0, 0
                     last = f"HTTP 200 with an unreadable body: {e}"
@@ -1531,7 +1572,7 @@ async def call_gemini_judge(
                     await asyncio.sleep(sleep)
                     continue
                 if usage is not None:
-                    usage.charge_usage(model, TokenUsage(n_in, n_out))
+                    usage.charge_usage(model, gemini_usage(data))     # the cache reads too
                 if finish == "MAX_TOKENS":
                     return Truncated(text)
                 if text is None:

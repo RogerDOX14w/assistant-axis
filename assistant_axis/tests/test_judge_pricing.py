@@ -26,8 +26,10 @@ from assistant_axis.judge_pricing import (
     SONNET_RATE_IN,
     SONNET_RATE_OUT,
     UsageTotals,
+    cache_rate_factors,
     cost_for_usage,
     extract_usage_anthropic,
+    gemini_usage,
     extract_usage_openai,
     price_for_model,
     surgical_rejudge_cost_split,
@@ -753,3 +755,13 @@ class TestCacheTokens:
         tracker.charge(1218, 4, 1215, 0)
         assert tracker.totals.cache_write_tokens == 1215
         assert tracker.totals.cost_usd == pytest.approx((3 * 0.20 + 1215 * 0.25 + 4 * 1.20) / 1e6)
+
+
+def test_gemini_usage_reads_the_cache_and_thought_tokens():
+    """2026-11-04: Gemini's implicit cache, no write premium and reads at a tenth (batch rates included)."""
+    u = gemini_usage({"usageMetadata": {"promptTokenCount": 10_145, "candidatesTokenCount": 110,
+                                        "thoughtsTokenCount": 5, "cachedContentTokenCount": 6_125}})
+    assert (u.prompt_tokens, u.completion_tokens, u.cache_write_tokens, u.cache_read_tokens) == (10_145, 115, 0, 6_125)
+    assert gemini_usage({}) == gemini_usage(None) == type(u)()
+    assert cache_rate_factors("gemini-3.1-flash-lite:batch") == (1.0, 0.10)
+    assert cost_for_usage("gemini-3.1-flash-lite:batch", 1_000_000, 0, 0, 1_000_000) == pytest.approx(0.0125)

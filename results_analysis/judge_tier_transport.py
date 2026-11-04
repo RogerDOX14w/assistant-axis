@@ -51,7 +51,8 @@ def prompt_of_request(request: Dict[str, Any]) -> str:
     """The prompt of a request built by :func:`request_for`."""
     if "contents" in request:
         return request["contents"][0]["parts"][0]["text"]
-    return request["messages"][0]["content"]
+    content = request["messages"][0]["content"]
+    return content if isinstance(content, str) else "".join(part.get("text", "") for part in content)
 
 
 def openai_reply(response: Any) -> Tuple[Optional[str], Optional[str], int, int]:

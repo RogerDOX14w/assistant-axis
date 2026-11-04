@@ -210,6 +210,10 @@ def test_outcomes_of_the_detailed_call():
     flagged = HTTPError(400, "flagged", code="invalid_prompt")
     assert run(J.call_openai_judge(FakeOpenAI(flagged), "P", "gpt-5.6-luna", 9, RATE, stats=stats)) is None
     assert stats.content_flagged == 1
+    # OpenAI's biological-risk flag (2026-11-04) is a flag on the prompt, not a broken call
+    bio = HTTPError(400, "This content was flagged for possible biological risk.", code="bio_policy")
+    assert run(J.call_openai_judge(FakeOpenAI(bio), "P", "gpt-5.6-luna", 9, RATE, stats=stats)) is None
+    assert stats.content_flagged == 2
     cut = run(J.call_openai_judge(FakeOpenAI(reply=chat_reply("SCORE", "length")), "P", "gpt-5.6-luna", 9, RATE))
     assert isinstance(cut, J.Truncated) and cut.text == "SCORE"
     assert run(J.call_anthropic_judge(FakeAnthropic(CONNECTION), "P", "claude-haiku-5-5", 9, RATE)) is J.FAILED
@@ -241,6 +245,19 @@ def test_gemini_request_and_charge():
                     "generationConfig": {"maxOutputTokens": 99, "temperature": 0, "thinkingConfig": {"thinkingLevel": "minimal"}}}
     entry = usage.per_model["gemini-3.1-flash-lite"]
     assert (entry.prompt_tokens, entry.completion_tokens) == (11, 7)     # thought tokens bill as output
+
+
+def test_gemini_charges_its_implicit_cache_reads():
+    """2026-11-04: a reply's cachedContentTokenCount (a repeated prefix read from Gemini's implicit cache) is
+    charged as cache reads, priced at a tenth of the input rate."""
+    reply = http(200, {"candidates": [{"content": {"parts": [{"text": "1. 40"}]}, "finishReason": "STOP"}],
+                       "usageMetadata": {"promptTokenCount": 10_000, "candidatesTokenCount": 100,
+                                         "cachedContentTokenCount": 6_000}})
+    client, usage = FakeGemini(reply), MultiModelUsage()
+    assert run(J.call_gemini_judge(client, "P", "gemini-3.1-flash-lite", 99, RATE, usage)) == "1. 40"
+    entry = usage.per_model["gemini-3.1-flash-lite"]
+    assert (entry.prompt_tokens, entry.cache_read_tokens, entry.completion_tokens) == (10_000, 6_000, 100)
+    assert entry.cost_usd == pytest.approx((4_000 * 0.25 + 6_000 * 0.025 + 100 * 1.50) / 1e6)
 
 
 def test_gemini_retries_then_fails_without_an_answer(monkeypatch):

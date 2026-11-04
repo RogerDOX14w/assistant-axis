@@ -55,9 +55,10 @@ contemporary and batched rubrics; ``v3`` and ``v3fix`` are ``build_static_prompt
 from __future__ import annotations
 
 import re
+import dataclasses
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple
+from typing import List, Any, Callable, Dict, Optional, Sequence, Tuple
 
 from assistant_axis.entity_id import judge_label, parse_entity_id
 from assistant_axis.judge_score_words import marker_value
@@ -87,11 +88,16 @@ class RubricSpec:
     parse_batch: Optional[Callable[[Optional[str], int], Dict[int, Optional[float]]]] = None
     #: What an entity's text is: its description, all its positive instructions, or one of them per round.
     text_source: str = "descriptions"
+    #: Several axes judged in one call (the rk_* response rubrics): ``build_batch`` takes a
+    #: :class:`MultiAxisSpec` and ``parse_batch`` gives each item a list of scores, one per axis.
+    multi_axis: bool = False
 
     @property
     def mode(self) -> str:
         """The judging mode, as in a cell's ``scores_<mode>.json``."""
-        return "descriptions" if self.text_source == "descriptions" else "instructions"
+        if self.text_source in ("descriptions", "responses"):
+            return self.text_source
+        return "instructions"
 
 
 # ---------------------------------------------------------------------------
@@ -352,7 +358,170 @@ def _instruction_rubric(sets: bool, wrapper: str, guard: bool) -> RubricSpec:
                       text_source="instruction_sets" if sets else "instruction_rounds")
 
 
-_BATCH_ITEM_RE = re.compile(r"^\s*\**(\d+)[.):\]]", flags=re.MULTILINE)
+# Response judging (2026-11-03, Roger's design, reports/judge_pareto/response_judging_plan.md): a call is one
+# question and N answers to it, each from the model as a different entity; the judge places each answer's
+# persona by percentile among all the roles and traits, the batch of personas its calibration.  The answers
+# are anonymous, as in May's response rubric: the judge sees the text, never the entity's name.  Arms:
+# ``h`` the question once in the header (the design), ``q`` beside each answer (the May form); a trailing
+# ``n`` asks for the score alone, without the sentence of reasoning.
+_RESPONSE_PCT = (
+    "We are placing several hundred roles and traits along one semantic axis by how a language model answers "
+    "questions when asked to take each of them on, and comparing your placements with an independent measurement "
+    "of the same roles and traits, so what matters is where each one ranks among all of them, and small "
+    "differences are worth getting right.\n\n"
+    "The axis runs from {neg} to {pos}:\n"
+    "- {neg}: {neg_pole}\n"
+    "- {pos}: {pos_pole}\n\n"
+    "Below are {n} answers{same}, each written by the model as a different role or trait.  Judge each answer "
+    "only by what it shows of the persona behind it: how they behave, what they value and what they are "
+    "associated with (not by the question, and not by how well the answer is written).  Then estimate that "
+    "persona's percentile among all the roles and traits on this axis: 0 means further toward {neg} than any "
+    "other, 100 means further toward {pos} than any other, 50 means exactly in the middle of them all.  Most "
+    "roles and traits relate to an axis only partly or indirectly, but a percentile is a rank among all of them, "
+    "so even a partial relation places one well away from 50: use the whole range from 0 to 100, and put every "
+    "one on one side or the other of 50 unless it is genuinely balanced.{question}\n\n"
+    "{items}\n\n"
+    "Answer with exactly {n} lines, one per answer, in the order given: its number, {reason}SCORE: <integer "
+    "from 0 to 100>."
+)
+RESPONSE_QUESTION_PLACES = {"h": "the question once, in the header", "q": "the question beside each answer"}
+
+
+@dataclass(frozen=True)
+class MultiAxisSpec:
+    """Several axes judged in one call (the rk_* rubrics, 2026-11-04: the response text, 95% of the bill,
+    paid once for k axes): each member an :class:`AxisSpec` with its pair type."""
+    members: Tuple[Tuple[AxisSpec, str], ...]
+
+
+AXIS_LETTERS = "ABCDEFGHIJKLMNOP"
+
+# k axes per call (Roger, 2026-11-04: "k axes per call is potentially quite efficient, if it works: let's try
+# it"): the score-alone response rubric with the axes listed by letter and k scores per answer.
+_RESPONSE_MULTI_PCT = (
+    "We are placing several hundred roles and traits along {k} semantic axes by how a language model answers "
+    "questions when asked to take each of them on, and comparing your placements with an independent measurement "
+    "of the same roles and traits, so what matters is where each one ranks among all of them, and small "
+    "differences are worth getting right.\n\n"
+    "The axes:\n\n{axes}\n\n"
+    "Below are {n} answers to the same question, each written by the model as a different role or trait.  Judge "
+    "each answer only by what it shows of the persona behind it: how they behave, what they value and what they "
+    "are associated with (not by the question, and not by how well the answer is written).  Then, for each axis in "
+    "turn, estimate that persona's percentile among all the roles and traits on that axis: 0 means further toward "
+    "the end marked (0) than any other, 100 means further toward the end marked (100) than any other, 50 means "
+    "exactly in the middle of them all.  Most roles and traits relate to an axis only partly or indirectly, but a "
+    "percentile is a rank among all of them, so even a partial relation places one well away from 50: use the "
+    "whole range from 0 to 100, and put every one on one side or the other of 50 unless it is genuinely balanced.  "
+    "The axes are independent: judge each on its own.\n\n"
+    "The question was: {question}\n\n"
+    "{items}\n\n"
+    "Answer with exactly {n} lines, one per answer, in the order given: its number, then SCORES: {k} integers from 0 "
+    "to 100 separated by commas, one per axis in the order {letters}."
+)
+
+
+def multi_axes_text(spec: MultiAxisSpec, show) -> str:
+    """The axes of a multi-axis call, by letter, each end with its number and its pole description: told
+    only "the first end" and "the second end", GPT-5.6 Luna reversed one axis of six (blunt vs tactful,
+    2026-11-04)."""
+    return "\n\n".join(
+        f"{AXIS_LETTERS[i]}. From {show(a.neg_examples[0], pt)} (0) to {show(a.pos_examples[0], pt)} (100):\n"
+        f"- {show(a.neg_examples[0], pt)} (0): {a.neg_pole}\n- {show(a.pos_examples[0], pt)} (100): {a.pos_pole}"
+        for i, (a, pt) in enumerate(spec.members))
+
+
+def _response_multi_rubric() -> RubricSpec:
+    name = "rk_hn"
+
+    def build_batch(spec: MultiAxisSpec, pair_type: str, group: Sequence[Tuple[str, Any, Any]], show=None) -> str:
+        show = show or name_shower()
+        if not isinstance(spec, MultiAxisSpec):
+            raise ValueError(f"{name}: a multi-axis rubric needs a MultiAxisSpec (--axes_per_call)")
+        questions = {text[0] for _, _, text in group}
+        if len(questions) != 1:
+            raise ValueError(f"{name}: a call's answers must share their question; got {len(questions)}")
+        k = len(spec.members)
+        items = "\n\n".join(f"{j}. {text[1]}" for j, (_, _, text) in enumerate(group, 1))
+        return _RESPONSE_MULTI_PCT.format(k=k, axes=multi_axes_text(spec, show), n=len(group),
+                                          question=next(iter(questions)), items=items,
+                                          letters=", ".join(AXIS_LETTERS[:k]))
+
+    def build(spec, pair_type, etype, n, text, show=None):
+        return build_batch(spec, pair_type, [(etype, n, text)], show)
+
+    parse_batch = multi_batch_parser(0, 100)
+    return RubricSpec(name, name, build, lambda text: parse_batch(text, 1)[1], 0, 100,
+                      "responses on k axes per call, percentile 0..100 each, the question once, the scores alone",
+                      build_batch=build_batch, parse_batch=parse_batch, text_source="responses", multi_axis=True)
+
+
+#: A multi-axis reply line: the item's number, then its scores, with or without a mark after the number and
+#: with or without ``SCORES:`` (GPT-5.6 Luna, 2026-11-04: ``1, SCORES: 68,18,88,55,38,68``, ``1 SCORES: 65,15,...``
+#: and, a few lines into a reply, ``7,78,32,82,35,18,86``).
+_MULTI_LINE_RE = re.compile(r"^\s*\**(\d+)\**\s*[.):\],]?\**\s*(?:SCORES?\s*:)?\**\s*([0-9][0-9,\s/;]*?)\s*$",
+                            flags=re.IGNORECASE)
+
+
+def multi_batch_parser(lo: int, hi: int):
+    """``{index: [score, ...] or None}`` for each index 1..n: the integers on the item's line, in order;
+    None when the item is missing, repeated, or any value is out of range.  The caller checks the count."""
+    def parse(text: Optional[str], n: int) -> Dict[int, Optional[List[int]]]:
+        out: Dict[int, Optional[List[int]]] = {k: None for k in range(1, n + 1)}
+        if not text:
+            return out
+        seen: Dict[int, int] = {}
+        for line in text.splitlines():
+            m = _MULTI_LINE_RE.match(line)
+            if not m:
+                continue
+            k = int(m.group(1))
+            if not 1 <= k <= n:
+                continue
+            vals = [int(x) for x in re.findall(r"\d+", m.group(2))]
+            seen[k] = seen.get(k, 0) + 1
+            out[k] = vals if vals and all(lo <= v <= hi for v in vals) else None
+        for k, c in seen.items():
+            if c != 1:
+                out[k] = None
+        return out
+    return parse
+
+
+def _response_rubric(place: str, reason: bool) -> RubricSpec:
+    """One response-judging arm.  An entity's text is ``(question, answer)``; the group of a call shares
+    the question (judge_tier_cost_eval.axis_groups groups the items by it)."""
+    name = f"r1_{place}{'' if reason else 'n'}"
+
+    def build_batch(spec: AxisSpec, pair_type: str, group: Sequence[Tuple[str, Any, Any]], show=None) -> str:
+        show = show or name_shower()
+        neg, pos = spec.neg_examples[0], spec.pos_examples[0]
+        questions = {text[0] for _, _, text in group}
+        if place == "h":
+            if len(questions) != 1:
+                raise ValueError(f"{name}: a call's answers must share their question; got {len(questions)}")
+            same, question = " to the same question", f"\n\nThe question was: {next(iter(questions))}"
+            items = "\n\n".join(f"{k}. {text[1]}" for k, (_, _, text) in enumerate(group, 1))
+        else:
+            same, question = "", ""
+            items = "\n\n".join(f"{k}. Question: {text[0]}\n   Answer: {text[1]}" for k, (_, _, text) in enumerate(group, 1))
+        return _RESPONSE_PCT.format(n=len(group), same=same, question=question, neg=show(neg, pair_type),
+                                    pos=show(pos, pair_type), neg_pole=spec.neg_pole, pos_pole=spec.pos_pole,
+                                    items=items, reason="one short sentence of reasoning, then " if reason else "")
+
+    def build(spec: AxisSpec, pair_type: str, etype: str, n: str, text: Any, show=None) -> str:
+        return build_batch(spec, pair_type, [(etype, n, text)], show)
+
+    parse_batch = batch_parser(0, 100)
+    return RubricSpec(name, name, build, lambda text: parse_batch(text, 1)[1], 0, 100,
+                      f"responses, percentile 0..100, {RESPONSE_QUESTION_PLACES[place]}, "
+                      f"{'a sentence of reasoning' if reason else 'the score alone'}",
+                      build_batch=build_batch, parse_batch=parse_batch, text_source="responses")
+
+
+#: An item line starts with its number and ".", ")", ":", "]" or, since 2026-11-03, ",": asked for "its number,
+#: SCORE: <integer>" (the score-alone response rubric), GPT-5.6 Luna wrote "1, SCORE: 54", and every reply of
+#: 106,878 went unread and was re-asked until the budget stopped the run ($20).
+_BATCH_ITEM_RE = re.compile(r"^\s*\**(\d+)[.):\],]", flags=re.MULTILINE)
 _BATCH_SCORE_RE = re.compile(r"SCORE\s*:\s*\**([+-]?\d+)\b", flags=re.IGNORECASE)
 #: A whole reply of ``Score 45.`` or ``Score ~78.`` (Haiku 5.5, about one reply in 2,000, 2026-11-02): read
 #: only in an item with no colon marker at all, so that a reply with proper markers parses as ever.
@@ -442,6 +611,290 @@ for _sets in (True, False):
         for _guard in (False, True):
             _arm = _instruction_rubric(_sets, _wrapper, _guard)
             RUBRICS[_arm.name] = _arm
+for _place in RESPONSE_QUESTION_PLACES:
+    for _reason in (True, False):
+        _arm = _response_rubric(_place, _reason)
+        RUBRICS[_arm.name] = _arm
+RUBRICS["rk_hn"] = _response_multi_rubric()
+
+
+# The cached-prefix arm (Roger, 2026-11-04: "reorder the prompt so the axis we're judging for comes last,
+# cache everything before that ... then reuse the cached prefix to ask to judge different axes"): the
+# question and the answers first, the axis and the task after, the prompt sent as two parts with the
+# provider's cache breakpoint between (judge.chat_content).  The prefix names no axis, so every axis's
+# call on one batch shares it.
+_RESPONSE_PREFIX = (
+    "Below are {n} answers to the same question, each written by the model as a different role or trait, for "
+    "a judgement that follows them.\n\n"
+    "The question was: {question}\n\n"
+    "{items}"
+)
+_RESPONSE_SUFFIX = (
+    "\n\nWe are placing several hundred roles and traits along one semantic axis by how a language model answers "
+    "questions when asked to take each of them on, and comparing your placements with an independent measurement "
+    "of the same roles and traits, so what matters is where each one ranks among all of them, and small "
+    "differences are worth getting right.\n\n"
+    "The axis runs from {neg} to {pos}:\n"
+    "- {neg}: {neg_pole}\n"
+    "- {pos}: {pos_pole}\n\n"
+    "Judge each of the {n} answers above only by what it shows of the persona behind it: how they behave, what "
+    "they value and what they are associated with (not by the question, and not by how well the answer is "
+    "written).  Then estimate that persona's percentile among all the roles and traits on this axis: 0 means "
+    "further toward {neg} than any other, 100 means further toward {pos} than any other, 50 means exactly in the "
+    "middle of them all.  Most roles and traits relate to an axis only partly or indirectly, but a percentile is "
+    "a rank among all of them, so even a partial relation places one well away from 50: use the whole range from "
+    "0 to 100, and put every one on one side or the other of 50 unless it is genuinely balanced.\n\n"
+    "Answer with exactly {n} lines, one per answer, in the order given: its number, SCORE: <integer from 0 to 100>."
+)
+
+
+def _response_prefix_rubric() -> RubricSpec:
+    name = "r1_pn"
+
+    def build_batch(spec: Any, pair_type: str, group: Sequence[Tuple[str, Any, Any]], show=None):
+        show = show or name_shower()
+        if isinstance(spec, MultiAxisSpec):
+            if len(spec.members) != 1:
+                raise ValueError(f"{name}: one axis per call (--axis_index), not {len(spec.members)}")
+            spec, pair_type = spec.members[0]
+        questions = {text[0] for _, _, text in group}
+        if len(questions) != 1:
+            raise ValueError(f"{name}: a call's answers must share their question; got {len(questions)}")
+        neg, pos = spec.neg_examples[0], spec.pos_examples[0]
+        items = "\n\n".join(f"{k}. {text[1]}" for k, (_, _, text) in enumerate(group, 1))
+        prefix = _RESPONSE_PREFIX.format(n=len(group), question=next(iter(questions)), items=items)
+        suffix = _RESPONSE_SUFFIX.format(n=len(group), neg=show(neg, pair_type), pos=show(pos, pair_type),
+                                         neg_pole=spec.neg_pole, pos_pole=spec.pos_pole)
+        return (prefix, suffix)
+
+    def build(spec, pair_type, etype, n, text, show=None):
+        return build_batch(spec, pair_type, [(etype, n, text)], show)
+
+    parse_batch = batch_parser(0, 100)
+    return RubricSpec(name, name, build, lambda text: parse_batch(text, 1)[1], 0, 100,
+                      "responses, percentile 0..100, the question and answers as a cached prefix, the axis after, "
+                      "the score alone", build_batch=build_batch, parse_batch=parse_batch, text_source="responses")
+
+
+RUBRICS["r1_pn"] = _response_prefix_rubric()
+
+
+# The cached prefix with k axes after it (Roger, 2026-11-04: "in theory the two should even stack"): the
+# prefix byte for byte r1_pn's, so that one batch's calls of either rubric read one cache; the suffix the
+# k-axes task of rk_hn after the answers.
+_RESPONSE_MULTI_SUFFIX = (
+    "\n\nWe are placing several hundred roles and traits along {k} semantic axes by how a language model answers "
+    "questions when asked to take each of them on, and comparing your placements with an independent measurement "
+    "of the same roles and traits, so what matters is where each one ranks among all of them, and small "
+    "differences are worth getting right.\n\n"
+    "The axes:\n\n{axes}\n\n"
+    "Judge each of the {n} answers above only by what it shows of the persona behind it: how they behave, what "
+    "they value and what they are associated with (not by the question, and not by how well the answer is "
+    "written).  Then, for each axis in turn, estimate that persona's percentile among all the roles and traits "
+    "on that axis: 0 means further toward the end marked (0) than any other, 100 means further toward the end "
+    "marked (100) than any other, 50 means exactly in the middle of them all.  Most roles and traits relate to an "
+    "axis only partly or indirectly, but a percentile is a rank among all of them, so even a partial relation "
+    "places one well away from 50: use the whole range from 0 to 100, and put every one on one side or the other "
+    "of 50 unless it is genuinely balanced.  The axes are independent: judge each on its own.\n\n"
+    "Answer with exactly {n} lines, one per answer, in the order given: its number, then SCORES: {k} integers from 0 "
+    "to 100 separated by commas, one per axis in the order {letters}."
+)
+
+
+def _response_multi_prefix_rubric() -> RubricSpec:
+    name = "rk_pn"
+
+    def build_batch(spec: MultiAxisSpec, pair_type: str, group: Sequence[Tuple[str, Any, Any]], show=None):
+        show = show or name_shower()
+        if not isinstance(spec, MultiAxisSpec):
+            raise ValueError(f"{name}: a multi-axis rubric needs a MultiAxisSpec (--axes_per_call)")
+        questions = {text[0] for _, _, text in group}
+        if len(questions) != 1:
+            raise ValueError(f"{name}: a call's answers must share their question; got {len(questions)}")
+        k = len(spec.members)
+        items = "\n\n".join(f"{j}. {text[1]}" for j, (_, _, text) in enumerate(group, 1))
+        prefix = _RESPONSE_PREFIX.format(n=len(group), question=next(iter(questions)), items=items)
+        suffix = _RESPONSE_MULTI_SUFFIX.format(k=k, axes=multi_axes_text(spec, show), n=len(group),
+                                               letters=", ".join(AXIS_LETTERS[:k]))
+        return (prefix, suffix)
+
+    def build(spec, pair_type, etype, n, text, show=None):
+        return build_batch(spec, pair_type, [(etype, n, text)], show)
+
+    parse_batch = multi_batch_parser(0, 100)
+    return RubricSpec(name, name, build, lambda text: parse_batch(text, 1)[1], 0, 100,
+                      "responses on k axes per call, percentile 0..100 each, the question and answers as a cached "
+                      "prefix, the axes after, the scores alone",
+                      build_batch=build_batch, parse_batch=parse_batch, text_source="responses", multi_axis=True)
+
+
+RUBRICS["rk_pn"] = _response_multi_prefix_rubric()
+
+
+# Two more output formats for k axes after the cached prefix (Roger, 2026-11-04, after the twelve-axis test
+# found the second score of an answer drifting toward the first): rk_pl labels each score with its axis's
+# letter ("1. SCORES: A=18, B=42", a few tokens between the scores); rk_pa answers axis by axis, every answer's
+# score on one axis before the next axis ("A: 1=18, 2=32, ..."), the one-axis task once per axis.
+_RESPONSE_MULTI_TASK = (
+    "\n\nWe are placing several hundred roles and traits along {k} semantic axes by how a language model answers "
+    "questions when asked to take each of them on, and comparing your placements with an independent measurement "
+    "of the same roles and traits, so what matters is where each one ranks among all of them, and small "
+    "differences are worth getting right.\n\n"
+    "The axes:\n\n{axes}\n\n"
+    "Judge each of the {n} answers above only by what it shows of the persona behind it: how they behave, what "
+    "they value and what they are associated with (not by the question, and not by how well the answer is "
+    "written).  {how}, estimate that persona's percentile among all the roles and traits "
+    "on that axis: 0 means further toward the end marked (0) than any other, 100 means further toward the end "
+    "marked (100) than any other, 50 means exactly in the middle of them all.  Most roles and traits relate to an "
+    "axis only partly or indirectly, but a percentile is a rank among all of them, so even a partial relation "
+    "places one well away from 50: use the whole range from 0 to 100, and put every one on one side or the other "
+    "of 50 unless it is genuinely balanced.  The axes are independent: judge each on its own.\n\n"
+)
+_MULTI_FORMATS = {
+    "pl": ("Then, for each axis in turn",
+           "Answer with exactly {n} lines, one per answer, in the order given: its number, then SCORES: and one score "
+           "per axis, each written as the axis's letter, an equals sign and an integer from 0 to 100, in the order "
+           "{letters} ({example})."),
+    "pa": ("Take the axes one at a time, in the order {letters}: for each axis, go through all {n} answers and,"
+           " for each answer",
+           "Answer with exactly {k} lines, one per axis, in the order {letters}: the axis's letter and a colon, then "
+           "every answer's score on that axis as its number, an equals sign and an integer from 0 to 100, in the "
+           "order of the answers ({example})."),
+}
+
+
+def _letter_list(k: int) -> str:
+    return ", ".join(AXIS_LETTERS[:k])
+
+
+def labeled_batch_parser(lo: int, hi: int):
+    """rk_pl: ``{index: [score per letter, A first] or None}``: an item's line holds ``<letter>=<int>`` once per
+    letter; a letter missing, repeated, or out of range gives None in its place (the caller checks the count)."""
+    item_re = re.compile(r"^\s*\**(\d+)\**\s*[.):\],]?\s*(.*)$")
+    pair_re = re.compile(r"\b([A-P])\s*[=:]\s*(\d+)")
+
+    def parse(text: Optional[str], n: int) -> Dict[int, Optional[List[Optional[int]]]]:
+        out: Dict[int, Optional[List[Optional[int]]]] = {k: None for k in range(1, n + 1)}
+        if not text:
+            return out
+        seen: Dict[int, int] = {}
+        for line in text.splitlines():
+            m = item_re.match(line)
+            if not m or not 1 <= int(m.group(1)) <= n:
+                continue
+            idx = int(m.group(1))
+            pairs = pair_re.findall(m.group(2))
+            if not pairs:
+                continue
+            seen[idx] = seen.get(idx, 0) + 1
+            by_letter: Dict[int, List[int]] = {}
+            for letter, v in pairs:
+                by_letter.setdefault(AXIS_LETTERS.index(letter), []).append(int(v))
+            width = max(by_letter) + 1
+            out[idx] = [by_letter[i][0] if len(by_letter.get(i, [])) == 1 and lo <= by_letter[i][0] <= hi else None
+                        for i in range(width)]
+        for idx, c in seen.items():
+            if c != 1:
+                out[idx] = None
+        return out
+    return parse
+
+
+def axis_major_batch_parser(lo: int, hi: int):
+    """rk_pa: one line per axis, ``<letter>: 1=<int>, 2=<int>, ...``; ``{index: [score per letter, A first]}``,
+    None in a place whose letter line is missing, repeated, or lacks that item once (the caller checks)."""
+    line_re = re.compile(r"^\s*\**([A-P])\**\s*[:.)]\s*(.*)$")
+    pair_re = re.compile(r"(\d+)\s*=\s*(\d+)")
+
+    def parse(text: Optional[str], n: int) -> Dict[int, Optional[List[Optional[int]]]]:
+        out: Dict[int, Optional[List[Optional[int]]]] = {k: None for k in range(1, n + 1)}
+        if not text:
+            return out
+        rows: Dict[int, Optional[Dict[int, List[int]]]] = {}
+        for line in text.splitlines():
+            m = line_re.match(line)
+            if not m:
+                continue
+            letter = AXIS_LETTERS.index(m.group(1))
+            vals: Dict[int, List[int]] = {}
+            for i, v in pair_re.findall(m.group(2)):
+                vals.setdefault(int(i), []).append(int(v))
+            rows[letter] = None if letter in rows else vals
+        if not rows:
+            return out
+        width = max(rows) + 1
+        for idx in range(1, n + 1):
+            out[idx] = [(rows[a][idx][0] if rows.get(a) and len(rows[a].get(idx, [])) == 1
+                         and lo <= rows[a][idx][0] <= hi else None) for a in range(width)]
+        return out
+    return parse
+
+
+def _response_multi_format_rubric(fmt: str) -> RubricSpec:
+    name = f"rk_{fmt}"
+    how, answer = _MULTI_FORMATS[fmt]
+
+    def build_batch(spec: MultiAxisSpec, pair_type: str, group: Sequence[Tuple[str, str, Any]], show=None):
+        show = show or name_shower()
+        if not isinstance(spec, MultiAxisSpec):
+            raise ValueError(f"{name}: a multi-axis rubric needs a MultiAxisSpec (--axes_per_call)")
+        questions = {text[0] for _, _, text in group}
+        if len(questions) != 1:
+            raise ValueError(f"{name}: a call's answers must share their question; got {len(questions)}")
+        k, n = len(spec.members), len(group)
+        letters = _letter_list(k)
+        if fmt == "pl":
+            example = "1. SCORES: " + ", ".join(f"{AXIS_LETTERS[i]}=<0-100>" for i in range(k))
+        else:
+            example = "A: 1=<0-100>, 2=<0-100>, ..., " + f"{n}=<0-100>"
+        items = "\n\n".join(f"{j}. {text[1]}" for j, (_, _, text) in enumerate(group, 1))
+        prefix = _RESPONSE_PREFIX.format(n=n, question=next(iter(questions)), items=items)
+        suffix = (_RESPONSE_MULTI_TASK.format(k=k, axes=multi_axes_text(spec, show), n=n,
+                                              how=how.format(letters=letters, n=n))
+                  + answer.format(n=n, k=k, letters=letters, example=example))
+        return (prefix, suffix)
+
+    def build(spec, pair_type, etype, n, text, show=None):
+        return build_batch(spec, pair_type, [(etype, n, text)], show)
+
+    parse_batch = labeled_batch_parser(0, 100) if fmt == "pl" else axis_major_batch_parser(0, 100)
+    summary = {"pl": "each score labelled with its axis's letter", "pa": "axis by axis, every answer's score on one axis "
+               "before the next"}[fmt]
+    return RubricSpec(name, name, build, lambda text: parse_batch(text, 1)[1], 0, 100,
+                      f"responses on k axes per call after the cached prefix, percentile 0..100 each, {summary}",
+                      build_batch=build_batch, parse_batch=parse_batch, text_source="responses", multi_axis=True)
+
+
+for _fmt in _MULTI_FORMATS:
+    RUBRICS[f"rk_{_fmt}"] = _response_multi_format_rubric(_fmt)
+
+
+def with_poles_swapped(rubric: RubricSpec) -> RubricSpec:
+    """``rubric`` for a run with every axis's poles swapped (--swap_poles, Roger, 2026-11-04: does the order, and
+    so which pole is the high number, make a difference?): the prompts are built from the swapped axis
+    (:func:`swap_axis`), and every parsed score is mapped back to the axis's own direction, ``lo + hi - v``, so
+    the cell reads like any other."""
+    lo, hi = rubric.lo, rubric.hi
+
+    def back(v: Any) -> Any:
+        if v is None:
+            return None
+        if isinstance(v, (list, tuple)):
+            return [None if x is None else lo + hi - x for x in v]
+        return lo + hi - v
+
+    parse_batch = rubric.parse_batch
+    return dataclasses.replace(
+        rubric, parse=lambda text: back(rubric.parse(text)),
+        parse_batch=(lambda text, n: {k: back(v) for k, v in parse_batch(text, n).items()}) if parse_batch else None,
+        summary=rubric.summary + "; the poles swapped and the scores mapped back")
+
+
+def swap_axis(spec: AxisSpec) -> AxisSpec:
+    """The axis with its ends exchanged in everything a prompt shows (the pole descriptions and examples); what
+    defines the entity set (the poles left out, their kind) unchanged."""
+    return dataclasses.replace(spec, neg_pole=spec.pos_pole, pos_pole=spec.neg_pole,
+                               neg_examples=list(spec.pos_examples), pos_examples=list(spec.neg_examples))
 
 
 def get(name: str) -> RubricSpec:

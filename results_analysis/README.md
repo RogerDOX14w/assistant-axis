@@ -2735,6 +2735,33 @@ by judge *family*, so on resume the producer compares the cache's recorded
 rejudges legacy caches that recorded no model).  See AGENT_NOTES "Judge-model
 drift on resume".
 
+### Axis direction: balanced in every judging mode (Roger, 2026-11-04)
+
+Every axis-judging prompt names one pole first and puts it at the low number, and that order
+matters.  GPT-5.6 Luna's repeats in the same order agree more than repeats in opposite orders: 0.94
+against 0.89 on descriptions, 61 axes, and 0.99 against 0.96 on responses, 12 axes.  On 35 axes with a
+morally good pole, Luna also does better with that pole at the high number, by +0.013 to +0.040 ρ under
+every projection variant; on neutral axes there is no such effect.  A fixed order would therefore carry a
+valence asymmetry into every result, so since 2026-11-04 the drivers balance the direction instead:
+
+- **Descriptions:** [`judge_descriptions.py`](./judge_descriptions.py) judges each axis once each way in a
+  judge's two passes.  A coin per axis decides which pass is swapped.
+- **Instructions:** [`judge_instruction_grid.py`](../scripts/judge_instruction_grid.py) `--design rounds`
+  follows Roger's table, `judge_tier_cost_eval.INSTRUCTION_DIRECTIONS`.  Each instruction is judged 2:1 across
+  the three judges, each judge 3:2, and by weight 27:23 or 23:27.  Per axis a coin says which way is which, and
+  the instruction positions are permuted.
+- **Responses:** [`judge_tier_cost_eval.py`](./judge_tier_cost_eval.py) `--directions responses` flips a coin
+  per call.
+
+A swapped call shows the axis with its poles exchanged, and its scores are mapped back (`lo + hi - v`).
+Every answer record says which way its call went, and each cell records its counts.  A finished cell made
+under other directions is refused, and the reparse tool follows the records.  Balanced cells have their own
+labels: `d<seed>`, `d<round>` and `dx<passes>`, where the axis's own order keeps `s`, `r` and `x`.
+`--swap_poles` swaps every call, for testing the order itself.  **Judge scores made before 2026-11-04 are in
+the pair list's order**, which puts the good pole high on the 18 moral axes.  On descriptions those axes gained
+about +0.03 ρ from it.  Evidence and tables: § 4c of
+[`response_judging_plan.md`](../reports/judge_pareto/response_judging_plan.md).
+
 ### Description judging: the settled method (Roger, 2026-11-02)
 
 [`judge_descriptions.py`](./judge_descriptions.py) judges axes from the entities'
