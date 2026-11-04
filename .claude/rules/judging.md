@@ -54,9 +54,14 @@ table and the second pass the first reversed, so every judge sees every instruct
 each way: GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite by `i1_p0` at N=20, and Jev by
 its own method (`scripts/judge_jev_entities.py`, 160 a request, its column B A B A d).
 [`scripts/judge_instruction_grid.py`](./scripts/judge_instruction_grid.py) `--design rounds`
-runs it by default and derives the blend `<judges>@i1_p0n20dx2`.  Jev's instruction weight
-is fitted on the balanced cells like its description weight (until it is set in
-`TIER_JUDGE_WEIGHTS_BY_MODE`, Jev takes the default 3); the account is
+runs it by default and derives the blend `<judges>@i1_p0n20dx2`, Luna 4 : Haiku 3 : Gemini 3
+: Jev 24, Jev's weight fitted on the balanced cells as for descriptions (the peak at 20, 24
+indistinguishable, +0.0044 [+0.0014, +0.0074] over 3): ρ 0.789 at $0.398 an axis on the 61
+axes, against 0.778 at $0.178 for the trio at 1x; Luna + Haiku + Jev at 2x 0.788 at $0.239;
+Jev alone 0.781 at $0.021, on the frontier in 12 of 12 variants.  Jev is requested as
+`jev-latest`, the only name TypeSafe serves (`GET /v1/models`), and a run writes no cell if
+it answers as another version than `jev-1.14.0` (`judge_jev_entities.py --expect_model`).
+The account is
 [`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md).  Before
 2026-11-04 (Roger, 2026-11-03): every judge judges each of
 an entity's five instructions once, one instruction per entity per call (`i1_p0`, the plain

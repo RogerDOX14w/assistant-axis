@@ -4,6 +4,32 @@
 
 Made 2026-11-03.  The method in both: every judge in an arm judges every text of an entity (five instructions, or the one description), and **Nx is N passes over those texts**, each pass in its own batch orders, to average out sampling noise.  A point's ρ and cost are averaged over every choice of its judges' passes, so no arm rests on one draw.  An entity's score is each judge's mean over all its judgements, the judges weighted Luna 4 : 3 for any other (`judge_score_combine.TIER_JUDGE_WEIGHTS`); a mix of unequal passes takes weights fitted to the most ρ at the default projection, with split-half and leave-one-axis-out checks recorded in the JSON.  Cost is the real price (each judge's Flex or batch rate) on the May corpus, about 577 entities an axis.  A point is on a variant's frontier only when it is on the frontier's convex hull.
 
+## Since 2026-11-04: Jev, and the poles balanced
+
+Both figures now carry Jev (TypeSafe AI's model, six arms: Jev 1x and 2x, and Luna + Haiku + Gemini + Jev and Luna + Haiku + Jev at 1x and 2x) and read the balanced cells, after Roger's rule that no judging runs in one fixed pole order.  A judge's 2x is its two passes one each way.  A 1x alternates the direction over an entity's five instructions (Roger's table, `judge_tier_cost_eval.INSTRUCTION_DIRECTIONS`) or, for a description, takes a coin's direction per axis.  The blends weigh Luna 4 : Haiku 3 : Gemini 3 : Jev 24 in both modes, Jev's weight fitted on these cells ([`jev_judging.md`](../../../reports/judge_pareto/jev_judging.md)).  **The decisions (Roger, 2026-11-04): Luna + Haiku + Gemini + Jev, two passes each, one each way, for descriptions and for instructions.**  `scripts/judge_instruction_12way.py --without_jev --directions own` redraws the figures of 2026-11-03, whose account follows this section.
+
+| instructions (61 axes, s6_l25_raw) | ρ | $/axis | frontier of 12 |
+|---|---:|---:|---:|
+| Luna 1x | 0.768 | 0.050 | 0 |
+| Luna + Haiku + Gemini 1x (the default to 2026-11-04) | 0.778 | 0.178 | 0 |
+| Luna + Haiku + Gemini 2x | 0.780 | 0.356 | 0 |
+| Jev 1x | 0.781 | 0.021 | 12 |
+| Jev 2x | 0.783 | 0.043 | 10 |
+| Luna + Haiku + Jev 1x | 0.787 | 0.119 | 9 |
+| Luna + Haiku + Jev 2x | 0.788 | 0.239 | 10 |
+| **Luna + Haiku + Gemini + Jev 2x** | **0.789** | **0.398** | **5** |
+
+| descriptions (61 axes, s6_l25_raw) | ρ | $/axis | frontier of 12 |
+|---|---:|---:|---:|
+| Luna 1x | 0.709 | 0.011 | 0 |
+| Jev 1x | 0.745 | 0.004 | 12 |
+| Luna + Haiku + Gemini 2x (the default to 2026-11-04) | 0.751 | 0.076 | 0 |
+| Jev 2x | 0.758 | 0.008 | 12 |
+| Luna + Haiku + Jev 2x | 0.766 | 0.050 | 12 |
+| **Luna + Haiku + Gemini + Jev 2x** | **0.766** | **0.084** | **5** |
+
+In both modes Gemini adds about +0.0003 beside Jev.  Data: the trio's balanced cells `<judge>@i1_p0n20d<r>` (rounds 0–9, $21.69) and `<judge>@b10n20d<seed>` (seeds 1–2), Jev's `jev-1.14.0@ji_noul_relative_n160d<r>` and `jev-1.14.0@jd_noul_relative_n160d<seed>`; Luna's third and fourth instruction passes are its own-order rounds 10–19.
+
 ## The decisions (Roger, 2026-11-03)
 
 - **Instructions: Luna + Haiku + Gemini, one pass each** (0.777 at $0.178 an axis; on the frontier in 7 of 12 variants; better than Luna alone in all 12 and than Luna + Haiku in 9).  Rule: one pass of every model, since the ensemble across models helps and its gains vary by axis, while repeat passes of one model are not consistently worth their cost.  Luna's second, third and fourth passes add +0.005, +0.002 and +0.001; nothing dearer than the trio is distinguishable from it.  Production: [`scripts/judge_instruction_grid.py`](../../../scripts/judge_instruction_grid.py) `--design rounds`, which derives the blend cell `<judges>@i1_p0n20x1`.

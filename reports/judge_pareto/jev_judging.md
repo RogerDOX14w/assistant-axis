@@ -106,12 +106,39 @@ So Jev carries 71% of the description blend.  Alone, the judges at 2x balanced s
 
 ## The instruction blend
 
-To be fitted on the trio's balanced instruction cells (`<judge>@i1_p0n20d0..d9`, judged 2026-11-04) with Jev's (`@ji_noul_relative_n160d0..d9`), in the same way.  Until then, Jev on instructions takes the default weight of 3.
+The cells are all four judges, two passes each, on the 61 axes: rounds 0-9, the trio's `<judge>@i1_p0n20d0..d9` (judged 2026-11-04, $21.69) and Jev's `@ji_noul_relative_n160d0..d9`.  Each judge sees each instruction once each way.  Each judge's ten rounds are averaged, then blended 4:3:3:X, with X fitted on ρ averaged over the 12 variants, as for descriptions.
+
+| X | 0 (the trio) | 3 | 8 | 12 | 16 | **20** | 24 | 32 | 48 | 128 | Jev alone |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| ρ, mean of 12 | 0.7202 | 0.7257 | 0.7290 | 0.7299 | 0.7301 | **0.7302** | 0.7301 | 0.7299 | 0.7293 | 0.7276 | 0.7259 |
+
+- **Plateau:** X = 20 is the peak, and 12 to 40 lie within 0.001 of it.  24 is 0.0000 below it ([−0.0003, +0.0002]).
+- **Bootstrap:** resampling the axes, the best X falls between 12 and 40 in 95% of cases (24 most often, 30%; 16 and 20 24% each).
+- **Out of sample:** fitting the development half picks 16, the held-out half 24, and leaving any one axis out picks 16 to 24.  Over 500 random half splits, the out-of-sample gain over the trio alone is +0.0100 at X = 16 or 24 and +0.0055 at X = 3.
+- **Against X = 3:** 24 is +0.0044 [+0.0014, +0.0074].
+- **Free weights:** the best free fit on all 61 is 5 : 1.5 : 0 : 12 (0.7309 against 0.7302); fitted on either half it scores −0.0001 and +0.0010 on the other, so nothing to choose.
+
+**Chosen: 24, as for descriptions** (`judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE`).  Nothing separates it from the peak, and one weight for both modes is simpler.  Alone, the judges at 2x balanced score Jev 0.7259, Luna 0.7152, Haiku 0.7045 and Gemini 0.7041.
+
+The arms at the default variant (s6_l25_raw), from [`judge_instruction_12way.png`](../../roger/axis_judge_experiments/instruction_judging_12way/judge_instruction_12way.png), balanced: a 2x takes each judge's passes one each way, a 1x alternates directions over an entity's instructions (Roger's table):
+
+| judges (61 axes, balanced) | ρ | $ per axis | on the frontier, of 12 variants |
+|---|---:|---:|---:|
+| Luna, 1 pass | 0.768 | 0.050 | 0 |
+| Luna + Haiku + Gemini, 1 pass each (the default to 2026-11-04) | 0.778 | 0.178 | 0 |
+| Luna + Haiku + Gemini, 2 passes each | 0.780 | 0.356 | 0 |
+| Jev, 1 pass | 0.781 | 0.021 | 12 |
+| Jev, 2 passes | 0.783 | 0.043 | 10 |
+| Luna + Haiku + Jev, 1 pass each | 0.787 | 0.119 | 9 |
+| Luna + Haiku + Jev, 2 passes each | 0.788 | 0.239 | 10 |
+| **Luna + Haiku + Gemini + Jev, 2 passes each (the default)** | **0.789** | **0.398** | **5** |
+
+As on descriptions, Gemini adds little beside Jev: the default is +0.0003 over Luna + Haiku + Jev at 2x, for $0.16 more an axis.  On the October corpus (1,270 entities an axis, instructions 40 tokens against 24) the default costs roughly $0.95 an axis, about $190 for 200 axes (the trio's $0.42 an axis at 1x, doubled, plus Jev scaled from the May corpus; an estimate, not a dry run).
 
 ## Where Jev is strong and weak (one pass each, own order, 61 axes)
 
 Jev's lead over Luna in descriptions predicts its lead in instructions (Spearman +0.68 across the axes), so these are properties of the axes.
-- **Ahead in both:** [introverted](../../data/traits/instructions/introverted.json) vs [extroverted](../../data/traits/instructions/extroverted.json) (+0.14 on descriptions), [casual](../../data/traits/instructions/casual.json) vs [formal](../../data/traits/instructions/formal.json), materialistic vs spiritual, forgiving, passionate, dependable, obedient, ecocentric.
+- **Ahead in both:** [introverted](../../data/traits/instructions/introverted.json) vs [extroverted](../../data/traits/instructions/extroverted.json) (+0.14 on descriptions), [casual](../../data/traits/instructions/casual.json) vs [formal](../../data/traits/instructions/formal.json), [materialistic](../../data/traits/instructions/materialistic.json) vs [spiritual](../../data/traits/instructions/spiritual.json), [forgiving](../../data/traits/instructions/forgiving.json), [passionate](../../data/traits/instructions/passionate.json), [dependable](../../data/traits/instructions/dependable.json), [obedient](../../data/traits/instructions/obedient.json), [ecocentric](../../data/traits/instructions/ecocentric.json).
 - **Behind in both:** [precise](../../data/traits/instructions/precise.json) vs [vague](../../data/traits/instructions/vague.json) and [concise](../../data/traits/instructions/concise.json) vs [verbose](../../data/traits/instructions/verbose.json).  Both are about how someone expresses themselves.
 - **No pattern** by kind (roles, traits) or by moral axis.
 

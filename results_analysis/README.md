@@ -2860,10 +2860,27 @@ reversed, so every judge sees every instruction once each way: Luna, Haiku and G
 its column B A B A d; cells `jev-1.14.0@ji_noul_relative_n160d<round>`).
 [`scripts/judge_instruction_grid.py`](../scripts/judge_instruction_grid.py) `--design rounds`
 runs it by default (`--rounds` defaults to 0-9) and derives
-`gpt-5.6-luna+claude-haiku-5-5+gemini-3.1-flash-lite+jev-1.14.0@i1_p0n20dx2`.  Jev's weight
-for instructions is fitted on these balanced cells (until then the default 3); account and
-figures: [`jev_judging.md`](../reports/judge_pareto/jev_judging.md).  The method of
-2026-11-03 follows.
+`gpt-5.6-luna+claude-haiku-5-5+gemini-3.1-flash-lite+jev-1.14.0@i1_p0n20dx2`, **blended Luna 4 :
+Haiku 3 : Gemini 3 : Jev 24**, the weight fitted on these balanced cells as for descriptions
+(the peak of 4:3:3:X at 20, 24 indistinguishable from it, 12-40 within 0.001, +0.0044
+[+0.0014, +0.0074] over 3; `judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE`).  Jev is requested
+as `jev-latest`, the only name TypeSafe serves, and a run stops before writing cells if it
+answers as another version than `jev-1.14.0` (`--expect_model`), since the cell names and the
+weight are for that version.
+
+| judges (61 axes, balanced; slot 6, layer 25, raw; real price, May corpus) | ρ | $ per axis | on the frontier, of 12 variants |
+|---|---:|---:|---:|
+| Luna + Haiku + Gemini, 1 pass each (the default to 2026-11-04) | 0.778 | 0.178 | 0 |
+| Jev, 1 pass | 0.781 | 0.021 | 12 |
+| Jev, 2 passes | 0.783 | 0.043 | 10 |
+| Luna + Haiku + Jev, 2 passes each | 0.788 | 0.239 | 10 |
+| **Luna + Haiku + Gemini + Jev, 2 passes each (the default)** | **0.789** | **0.398** | **5** |
+
+On the October corpus the default costs roughly $0.95 an axis, about $190 for 200 axes (an
+estimate scaled from the May corpus).  Account and figures:
+[`jev_judging.md`](../reports/judge_pareto/jev_judging.md),
+[`judge_instruction_12way.png`](../roger/axis_judge_experiments/instruction_judging_12way/judge_instruction_12way.png).
+The method of 2026-11-03 follows.
 
 [`scripts/judge_instruction_grid.py`](../scripts/judge_instruction_grid.py) `--design rounds`
 judged axes from the entities' instructions: **every judge judges each of an entity's five

@@ -1094,9 +1094,14 @@ table and the second pass the first reversed, so every judge sees every instruct
 each way: GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite by `i1_p0` at N=20, and Jev by
 its own method (`scripts/judge_jev_entities.py`, 160 a request, its column B A B A d).
 [`scripts/judge_instruction_grid.py`](./scripts/judge_instruction_grid.py) `--design rounds`
-runs it by default and derives the blend `<judges>@i1_p0n20dx2`.  Jev's instruction weight
-is fitted on the balanced cells like its description weight (until it is set in
-`TIER_JUDGE_WEIGHTS_BY_MODE`, Jev takes the default 3); the account is
+runs it by default and derives the blend `<judges>@i1_p0n20dx2`, Luna 4 : Haiku 3 : Gemini 3
+: Jev 24, Jev's weight fitted on the balanced cells as for descriptions (the peak at 20, 24
+indistinguishable, +0.0044 [+0.0014, +0.0074] over 3): ρ 0.789 at $0.398 an axis on the 61
+axes, against 0.778 at $0.178 for the trio at 1x; Luna + Haiku + Jev at 2x 0.788 at $0.239;
+Jev alone 0.781 at $0.021, on the frontier in 12 of 12 variants.  Jev is requested as
+`jev-latest`, the only name TypeSafe serves (`GET /v1/models`), and a run writes no cell if
+it answers as another version than `jev-1.14.0` (`judge_jev_entities.py --expect_model`).
+The account is
 [`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md).  Before
 2026-11-04 (Roger, 2026-11-03): every judge judges each of
 an entity's five instructions once, one instruction per entity per call (`i1_p0`, the plain
@@ -3071,7 +3076,7 @@ edit.
 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.525` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; then `0.41` 2026-05-11→05-12 on the raw-projection v2 sweep; `0.625` 2026-05-12→05-22 on the canonical-whitening soft_shear=3 v2 sweep at 12 axes; **retuned to `0.525` on 2026-05-22 22-axis cohort** — discrete grid peak w=0.525 on the expanded set; see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
 | `TIER_JUDGE_WEIGHTS` | Luna `4`, others `3` (`TIER_JUDGE_DEFAULT_WEIGHT`) | between the batched tier judges (GPT-5.6 Luna, Haiku 5.5, Gemini 3.1 Flash-Lite) in description and instruction judging, each judge's own mean over its passes or rounds first: 4:3 in a pair with Luna, 4:3:3 in the trio, 1:1 without Luna (Roger, 2026-11-03: Luna alone beats Haiku and Gemini alone; equal before).  Set, not tuned: fitted weights lean to Luna but gain nothing out of sample.  `tier_judge_weights`, `combine_tier_judges`; used by `judge_tier_average.py` (blend cells record `averaged.judge_weights`; one made under other weights is made again) and `scripts/judge_instruction_12way.py` |
-| `TIER_JUDGE_WEIGHTS_BY_MODE` | descriptions: Jev (`jev-1.14.0`) `24` | per judging mode, the weights that differ from `TIER_JUDGE_WEIGHTS` (2026-11-04): Jev on descriptions at 24 beside Luna 4, Haiku 3, Gemini 3, **fitted** (Roger asked for "an optimal blend ... of the form 4:3:3:X ... average across all 12"): the peak of 4:3:3:X on ρ averaged over the 12 variants, balanced cells, 61 axes; 16-40 within 0.0005; picked by both halves and by leaving any one axis out; +0.0083 [+0.0051, +0.0113] over 3.  Unlike the trio's, this fit holds out of sample.  `tier_judge_weights(judges, mode)`; `judge_tier_average.py` takes the mode from the cells.  Evidence: [`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md) |
+| `TIER_JUDGE_WEIGHTS_BY_MODE` | descriptions and instructions: Jev (`jev-1.14.0`) `24` | per judging mode, the weights that differ from `TIER_JUDGE_WEIGHTS` (2026-11-04): Jev on descriptions at 24 beside Luna 4, Haiku 3, Gemini 3, **fitted** (Roger asked for "an optimal blend ... of the form 4:3:3:X ... average across all 12"): the peak of 4:3:3:X on ρ averaged over the 12 variants, balanced cells, 61 axes; 16-40 within 0.0005; picked by both halves and by leaving any one axis out; +0.0083 [+0.0051, +0.0113] over 3.  On instructions, fitted the same way: the peak at 20, 24 0.0000 below it, 12-40 within 0.001, +0.0044 [+0.0014, +0.0074] over 3, so 24 in both modes.  Unlike the trio's, this fit holds out of sample.  `tier_judge_weights(judges, mode)`; `judge_tier_average.py` takes the mode from the cells.  Evidence: [`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md) |
 
 > **RESOLVED 2026-05-14 — di-extension reconfirm done; all constants hold**
 >

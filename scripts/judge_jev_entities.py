@@ -347,7 +347,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--direction_pass", type=int, default=0, help="with --directions descriptions: 0 or 1")
     p.add_argument("--entities_per_call", type=int, default=20)
     p.add_argument("--shuffle_seed", type=int, default=1)
-    p.add_argument("--model", default=DEFAULT_MODEL)
+    p.add_argument("--model", default=DEFAULT_MODEL,
+                   help="the name requested: the API offers only jev-latest and jev-preview, no pinned versions")
+    p.add_argument("--expect_model", default=None,
+                   help="the version the answers must come from (e.g. jev-1.14.0, which the drivers' cell names and "
+                        "Jev's fitted weights are for): an answer from another version stops the run before any cell "
+                        "is written")
     p.add_argument("--cell_label", required=True, help="suffix of the cells, starting with @")
     p.add_argument("--max_in_flight", type=int, default=24)
     p.add_argument("--budget_usd", type=float, default=None, help="stop issuing requests past this spend")
@@ -502,6 +507,12 @@ def write_cells(jobs, requests, answers, args, levels: int, log_path: Path) -> i
     for job, key, names, _, _ in requests:
         by_axis.setdefault(job.axis_dir, []).append((names, answers[key]))
     resolved = sorted({r.get("model") for r in answers.values() if r.get("model")})
+    if args.expect_model and resolved != [args.expect_model]:
+        logger.error(f"Jev answered as {', '.join(resolved) or 'no named version'}, not {args.expect_model}: the "
+                     f"cells' names and Jev's fitted weights are for {args.expect_model}, so no cell is written.  Check "
+                     f"the new version, then change JEV_MODEL in the drivers (judge_descriptions.py, "
+                     f"judge_instruction_grid.py), which refits nothing by itself")
+        return 5
     model = resolved[0] if len(resolved) == 1 else args.model
     mode = args.mode
     n_ok = n_all = 0

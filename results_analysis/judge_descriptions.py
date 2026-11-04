@@ -78,6 +78,9 @@ DESCRIPTION_PASSES = 2
 #: value Jev's probability of yes), its passes balanced the same way as the others', its weight in
 #: judge_score_combine.TIER_JUDGE_WEIGHTS.  Its key is TYPESAFE_API_KEY.
 JEV_MODEL = "jev-1.14.0"
+#: The name requested: TypeSafe's API serves only jev-latest and jev-preview (GET /v1/models, 2026-11-04), so the
+#: drivers ask for jev-latest and require answers from JEV_MODEL (judge_jev_entities.py --expect_model).
+JEV_REQUEST_MODEL = "jev-latest"
 JEV_TOOL = Path(__file__).resolve().parents[1] / "scripts" / "judge_jev_entities.py"
 JEV_ENTITIES_PER_CALL = 160
 JEV_METHOD = ("--question", "noul", "--wording", "relative")
@@ -158,7 +161,7 @@ def pass_argv(args: argparse.Namespace, model: str, seed: int) -> List[str]:
 def jev_pass_argv(args: argparse.Namespace, model: str, seed: int) -> List[str]:
     """judge_jev_entities.py's arguments for one Jev pass: the same axes, seed and direction pass as the other
     judges' pass of that seed (so its batches are its own, 160 a request, and its directions the same coin's)."""
-    argv = ["--mode", "descriptions", "--model", model, *JEV_METHOD, "--entities_per_call", str(JEV_ENTITIES_PER_CALL),
+    argv = ["--mode", "descriptions", "--model", JEV_REQUEST_MODEL, "--expect_model", model, *JEV_METHOD, "--entities_per_call", str(JEV_ENTITIES_PER_CALL),
             "--shuffle_seed", str(seed), "--cell_label", jev_pass_label(seed, args.directions),
             "--experiments_dir", args.experiments_dir, "--instructions_dir", args.instructions_dir]
     if args.directions == "balanced":

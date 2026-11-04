@@ -504,6 +504,8 @@ def test_tier_judge_weights_take_a_modes_own_weights():
     four = ["gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite", "jev-1.14.0"]
     w = tier_judge_weights(four, "descriptions")
     assert w["jev-1.14.0"] / w["gpt-5.6-luna"] == pytest.approx(24 / 4) and w["claude-haiku-5-5"] / w["gpt-5.6-luna"] == pytest.approx(3 / 4)
+    wi = tier_judge_weights(four, "instructions")        # fitted the same way on the balanced instruction cells
+    assert wi["jev-1.14.0"] / wi["gpt-5.6-luna"] == pytest.approx(24 / 4) and wi["gemini-3.1-flash-lite"] == pytest.approx(3 / 34)
     plain = tier_judge_weights(four)
     assert plain["jev-1.14.0"] / plain["gpt-5.6-luna"] == pytest.approx(3 / 4)
     assert tier_judge_weights(["gpt-5.6-luna", "jev-1.14.0@x"], "responses")["jev-1.14.0@x"] == pytest.approx(3 / 7)

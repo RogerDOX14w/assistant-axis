@@ -2955,6 +2955,19 @@ def test_jev_entities_judges_a_batch_per_request_and_writes_description_cells(wo
         run(["--shuffle_seed", "2"])
 
 
+def test_jev_entities_refuses_answers_from_another_version(world, monkeypatch):
+    """2026-11-04: TypeSafe serves only jev-latest, so the drivers ask for it and require the version their cell
+    names and Jev's fitted weights are for; answers from another version write no cell (exit 5), and a rerun
+    expecting the version that answered writes them from the log without asking again."""
+    mod, fake, run = _jev_entities(world, monkeypatch, "--mode", "descriptions", "--question", "noul",
+                                   "--entities_per_call", "3", "--cell_label", "@jd_v")
+    assert run(["--expect_model", "jev-1.13.0"]) == 5                # the fake answers as jev-1.14.0
+    assert not list(world.exp.glob("*_tier_eval/jev-*@jd_v"))
+    n = len(fake.calls)
+    assert run(["--expect_model", "jev-1.14.0"]) == 0 and len(fake.calls) == n
+    assert (world.exp / f"{AXES[0][0]}_tier_eval" / "jev-1.14.0@jd_v" / "scores_descriptions.json").exists()
+
+
 def test_jev_entities_instruction_round_puts_that_rounds_instruction_in_the_state(world, monkeypatch):
     for name in ("calm", "bold", "shy", "kind", "alpha", "beta"):
         p = world.data / "traits" / "instructions" / f"{name}.json"

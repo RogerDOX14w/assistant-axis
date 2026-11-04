@@ -318,8 +318,14 @@ TIER_JUDGE_DEFAULT_WEIGHT: float = 3.0
 #: on rho averaged over the 12 projection variants: the peak of 4:3:3:X, the plateau 16-40 within 0.0005 of it,
 #: the bootstrap's best X in [16, 40] (95%), 24 chosen fitting either half and leaving any one axis out, and
 #: +0.0083 [+0.0051, +0.0113] over X = 3; a free fit of all four weights gains nothing on held-out halves.
+#: instructions: 24 too (Roger: "(Luna + Haiku + Gemini + Jev) x2, and just do both directions in the x2"),
+#: fitted the same way on the balanced instruction cells (rounds 0-9): the peak at 20, 0.0000 above 24
+#: ([-0.0002, +0.0003]), the plateau 12-40 within 0.001, the bootstrap's best X in [12, 40] (95%, 24 the
+#: commonest), 16 to 24 chosen fitting either half or leaving any one axis out, and +0.0044 [+0.0014, +0.0074]
+#: over X = 3; one weight for both modes, since nothing tells the two apart.
 #: Evidence: reports/judge_pareto/jev_judging.md.
-TIER_JUDGE_WEIGHTS_BY_MODE: Dict[str, Dict[str, float]] = {"descriptions": {"jev-1.14.0": 24.0}}
+TIER_JUDGE_WEIGHTS_BY_MODE: Dict[str, Dict[str, float]] = {"descriptions": {"jev-1.14.0": 24.0},
+                                                           "instructions": {"jev-1.14.0": 24.0}}
 
 
 def tier_judge_weights(judges, mode: Optional[str] = None) -> Dict[str, float]:
