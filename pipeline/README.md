@@ -86,6 +86,33 @@ for t in roles traits combinations; do
 done
 ```
 
+
+### The pod watchdog: arm it before any extended run (Roger, 2026-11-04)
+
+[`pod/watchdog.sh`](./pod/watchdog.sh) stops the pod when the run it was armed for has gone idle, so that a pod is not
+left running when the laptop sleeps or the agent's session ends (on 2026-11-03 the response-token-ids sample pod ran
+idle for hours because its shutdown was the last link of a watcher chain in the agent's session).  It never guesses
+idleness from CPU or GPU utilisation, which is what April's `auto_stop_on_idle.sh` tried and could not read: it is
+armed with an explicit cue before each extended run, in the run script's first lines or by hand:
+
+```bash
+bash pipeline/pod/watchdog.sh arm --idle-min 60 --watch /workspace/out --pid-file /root/run.pid   # every 5 min
+bash pipeline/pod/watchdog.sh hold 4        # working on the pod by hand, or pulling: no stop for 4 h
+bash pipeline/pod/watchdog.sh status        # the configuration, the hold, the last decision, the log tail
+bash pipeline/pod/watchdog.sh check         # one decision, printed (status 0 busy, 1 idle)
+bash pipeline/pod/watchdog.sh disarm
+```
+
+Busy means any of: a file under a `--watch` directory modified within the last `--idle-min` minutes (the run's own
+output directory is the cue), a `--pid` or a `--pid-file`'s process alive, a hold in force, an SSH session open or a
+process on a GPU (`--ignore-ssh`, `--ignore-gpu` turn those two off).  After `--idle-min` minutes with no cue busy the
+loop logs `STOPPING` and runs `runpodctl stop pod $RUNPOD_POD_ID` (RunPod installs `runpodctl` and the key it needs on
+every pod; `--dry-run` only logs).  State and log in `$WATCHDOG_DIR`, default `/workspace/.watchdog` on the volume, so
+the log survives the stop.  A stop erases the container disk: arm on a directory the run writes to until its outputs
+are copied off, and hold while pulling.  The run script still stops the pod itself when its outputs are safe; the
+watchdog is the backstop.  Test: [`tests/test_pod_watchdog.py`](./tests/test_pod_watchdog.py) (a fake stop command,
+the machine cues off).
+
 ### Model mirror in tmpfs
 
 Unless `--no-tmpfs`, the driver mirrors the model's Hugging Face cache (`<HF_HOME>/hub/models--<owner>--<name>/`) into `--tmpfs-dir` (`/dev/shm/hf-cache`) and points `HF_HOME` there, so that the workers load weights from RAM and not from the network volume (cold mmap reads there can hang for hours).  Since 2026-10-12 (P8.6) the copy is made by [`assistant_axis/tmpfs.py`](../assistant_axis/tmpfs.py), run as a script, which the steering driver ([`steering/run_sweep.py`](../steering/run_sweep.py)) imports too, so there is one implementation; before, the shell had its own `cp -r` with no marker.  Both drivers take `--tmpfs-method`:

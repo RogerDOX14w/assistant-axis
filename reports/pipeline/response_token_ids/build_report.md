@@ -228,3 +228,163 @@ Two independent reads of `git diff 094abc57..ae5fc276` (fourteen commits: the tw
 **The smoke run (plan § 8, with the review's additions; 2026-11-03, 05:44–06:13 UTC, about $0.90).**  On a 1× A100 SXM pod deployed on the tcomb volume (`roger-aa-smoke-ids`; EUR-IS-1 had no 2× pod free, and the deploy form's volume reset to tcomb), checkout `b221528a`, outputs pulled to [`runpod_workspace/qwen/qwen-3-32b Roger smoke-ids/`](../../../runpod_workspace/qwen/qwen-3-32b%20Roger%20smoke-ids/) (the responses with their side-car, and the logs; the activation files stayed on the pod's container disk).  Step 1, gamer, 500 responses at the October cap of 1,024 (8 minutes): 75 stripped (October's run had 78), 3 of them keeping edge whitespace under the surgical rule, 89 capped, and **500 of 500 stored ids decode to the stored text** (no null range: vLLM's `.text` equals a plain decode on every response, the cut character at the cap included); **the stop token is in `token_ids`** when the model stops (411 responses end in `<|im_end|>`, the 89 capped ones in an ordinary token); the side-car records `response_cleanup_version: 2`, `response_cleanup_override: family`, a clean `git_sha`.  Step 2 on it with `--token_source ids --verify_ids 20 --verify_spans 20 --batch_size 4` (3 minutes after the load): 500 on the ids path; 20 of 20 spans decode to the content; of the 20 verified conversations, 15 have identical ids on both paths and **identical spans and bit-identical slots**, 5 differ (4 by a prefilled plan, 1 by a re-split of 2 positions in a 755-token sequence); no header mismatch.  Regression of the text path on real data: the October `t_accountant__amoral` and `default` responses (no ids) re-extracted with the new code at batch size 4 are **bit-identical to their October activation files, 500 of 500 each**, no NaN slots, the metadata differing only by the three new keys.  Plan § 8's three questions are answered, all as the code assumed.
 
 **Verified clean:** the parallel lists of `process_role` (one `responses` list, one order, no filtering, lengths checked, batch slices by the same indices); the bounds check of the range against the special-stripped ids; the same `all_special_ids` on both sides; the prompt built by the same `prompt_token_ids` on `conversation[:-1]` that step 1 sent; `header_anchor = len(prompt_ids)` as the header's end (the layout derivation already requires the generation prompt to be a prefix of the rendered turn); the `map_spans` anchor leaving the text path untouched; the three factorings byte-identical (golden gate); `verify_token_paths` and `compare_assistant_spans`; both worker modes passing the same arguments; the driver's arrays reaching every call; `response_cleanup_override` outside `SETTINGS_KEYS`.
+
+---
+
+# The sample (plan § 9), run 2026-11-03/04
+
+**Run.**  Pod `roger-aa-sample-ids` (1× A100 SXM 80 GB, EUR-IS-1, the roles volume), checkout `b221528a`, launched
+17:14 UTC on 2026-11-03 by [`run_sample.sh`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/logs/run_sample.sh>)
+(every script and log of the run is in that `logs/` directory).  The 20 entities of the plan's table (its 21 counted the
+role [specialist](../../../data/roles/instructions/specialist.json) twice): nine heavy leakers, four cap-heavy, six controls
+drawn with seed 20261103, and `default`.  Step 1 once under the family strip (`--max_tokens 1024 --reduce_questions 3`,
+93 min): 10,000 responses, all with stored ids and a content range, 477 stripped, 37 suspected, 1,783 capped
+([`step1_summary.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/step1_summary.json>)).  Step 2 three
+times on the same responses (`text`, `ids`, `ids --content_span turn`, 54 min each) and the padding floor (the text path at
+batch size 1 on [gamer](../../../data/roles/instructions/gamer.json) and
+[thorough](../../../data/traits/instructions/thorough.json)); step 3 once per type by Flex ($1.56, rubric 20, which is
+version 13's role and trait rubrics, the October prompt hashes); steps 4 and 5 per variant; the comparisons on the pod.
+Outputs (no activations) in [`runpod_workspace/qwen/qwen-3-32b Roger sample-ids/`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/>):
+`responses/`, `scores/`, `vec_text|ids|turn|text_bs1/` (20, 20, 20, 2 vectors), `axis_*.pt`, `compare/`, and the local
+measurements in [`analysis/`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/>).  Cost about $23:
+the pod ran 11.3 h instead of the planned 5.5 (below).
+
+**What went wrong, for the record.**  (1) The comparison script spent 3.7 h a pair because torch spawned one thread per
+CPU on a 255-CPU pod for small per-response ops; with `OMP_NUM_THREADS=8` an entity takes 2 min cold and 4 s from the page
+cache (the remaining pairs ran in 88 and 16 s).  Set the thread count on any CPU-side torch script run on a pod.
+(2) The agent's session ended at about 22:00 UTC with the shutdown as the last link of its watcher chain, so the pod ran
+on until Roger asked at 04:05; from 2026-11-04 a run stops its own pod (`runpodctl stop pod $RUNPOD_POD_ID`, which the
+finishing chain did at 04:26) and a watchdog armed before each extended run is to be built.  (3) SSH from the sandbox
+to the pod's exposed port died at 04:04 (the proxy answered 502; sshd was fine) while a fresh pull pod's port worked;
+the console's web terminal was the way in.
+
+## Measurement 1: tokens ([`compare/token_diff.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/compare/token_diff.json>))
+
+The stored ids against the text path's re-encoding, per response.  A stripped response differs by construction
+(the ids path carries the leaked plan in the prefill, the text path never sees it; the `plan` kind), so the
+re-tokenization rate is read from the `re-split` kind.
+
+| class | responses | identical | re-split | token positions differing | rate |
+|---|---|---|---|---|---|
+| clean | 8,145 | 8,090 | 55 | 134 of 3,922,900 | 1 in 29,000 |
+| capped | 1,378 | 1,355 (11 of them trimmed at the boundary) | 23 | 48 of 1,411,072 | 1 in 29,000 |
+| stripped | 72 | 0 (plan) | 3 | | |
+| stripped and capped | 405 | 0 (plan) | 11 (1 partial character) | | |
+
+The October lower bound of 1 in 80,000 (§ 1 of the plan) becomes 1 in 29,000 on a fresh sample: 78 clean or capped
+responses in 10,000 re-split somewhere.  No special token inside a range, no range null.
+
+## Measurement 2: responses ([`analysis/compare_summary.txt`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/compare_summary.txt>))
+
+Per response, slot 0 (the mean over the content tokens) and the seven header slots, pooled over the 64 layers:
+cosine between the two variants' activations, relative difference `|a − b| / |a|` and relative norm change
+`||a| − |b|| / |a|`.  "Bit-identical" is the fraction of cells with identical bf16 bits.
+
+| comparison | class | cells | bit-identical | cosine p01 | cosine median | rel. diff median | rel. diff p99 | rel. diff max | rel. norm median | rel. norm p99 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| text vs ids (the path) | clean, slot 0 | 521,280 | 0.979 | 0.999997 | 1.000000 | 0 | 2.4e-3 | 6.8e-2 | 0 | 1.2e-4 |
+| | capped, slot 0 | 88,192 | 0.975 | 0.999998 | 1.000000 | 0 | 1.5e-3 | 1.0e-2 | 0 | 7.6e-5 |
+| | stripped, slot 0 | 4,608 | 0 | 0.981 | 0.995 | 0.100 | 0.21 | 0.34 | 1.2e-2 | 8.0e-2 |
+| | stripped and capped, slot 0 | 25,856 | 0 | 0.963 | 0.9946 | 0.106 | 0.31 | 0.89 | 1.2e-2 | 0.175 |
+| | all, header slots | 4,479,552 | 0.982 | 0.99995 | 1.000000 | 0 | 1.0e-2 | 7.4e-2 | 0 | 7.7e-4 |
+| ids vs turn (the span) | stripped, slot 0 | 4,608 | 0 | 0.919 | 0.988 | 0.160 | 0.42 | 0.52 | 1.7e-2 | 0.10 |
+| | stripped and capped, slot 0 | 25,856 | 0 | 0.883 | 0.985 | 0.175 | 0.48 | 0.69 | 1.8e-2 | 0.13 |
+| | clean or capped, any slot | | 1.000 | | | 0 | 0 | 0 | 0 | 0 |
+| text vs text at batch size 1 (the padding floor) | all, slot 0 | 64,000 | 0 | 0.99999 | 0.999999 | 1.5e-3 | 6.5e-3 | 3.9e-2 | 7.6e-5 | 5.1e-3 |
+| | all, header slots | 448,000 | 0 | 0.9995 | 0.99994 | 1.1e-2 | 3.3e-2 | 0.70 | 9.3e-4 | 6.3e-3 |
+
+In angles: cosine 0.995 is 0.10 rad, 0.981 is 0.19 rad, 0.963 is 0.27 rad, 0.918 (the stripped-and-capped minimum)
+0.41 rad, and the clean p01 of 0.999997 is 2.5 mrad.  So the path moves a stripped response's slot-0 activation by a
+tenth of its length at the median and by a fifth to a quarter at the worst percentile, with a norm change of 1% at the
+median and 8% to 17% at the worst percentile; a clean response is bit-identical 98% of the time and otherwise moves by
+less than the padding floor.  Taking the whole turn as the span (the plan inside slot 0) moves a stripped response by
+0.16 to 0.18 at the median, half as much again.  The header slots are bit-identical wherever the batch's padded length
+is unchanged; where it changes (a stripped response's batch, or batch size 1) they carry the padding floor, about 1%
+per response per cell at the median and 2% to 3% at p99, ten times slot 0's 0.15%, with one outlying cell, slot 1
+(`<|im_start|>`) at layer 61 (p99 0.27, max 0.70); slot 6 at layer 25, the production cell, has p99 1.3e-2.
+
+## Measurement 3: vectors ([`analysis/vector_compare.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/vector_compare.json>))
+
+The step-4 vector of each entity under one variant against another, and against the entity's October vector (the
+floor: a fresh T = 0.7 sample, a fresh judging, today's path).  Cosines at slot 0, layers 25 and 49; group medians
+and the group's lowest.
+
+| comparison | group | n | L25 median | L25 lowest | L49 median | L49 lowest | header slots, lowest |
+|---|---|---|---|---|---|---|---|
+| text vs ids (the path) | heavy leakers | 9 | 0.99996 | 0.99980 ([gamer](../../../data/roles/instructions/gamer.json)) | 0.99995 | 0.99976 | 1.0 |
+| | cap-heavy, controls, default | 11 | 1.00000 | 1.00000 | 1.00000 | 1.00000 | 1.0 |
+| ids vs turn (the span) | heavy leakers | 9 | 0.99993 | 0.99971 (gamer) | 0.99989 | 0.99951 | 1.0 |
+| | the others | 11 | 1.00000 | 1.00000 | 1.00000 | 1.00000 | 1.0 |
+| text vs text at batch size 1 (padding) | gamer, thorough | 2 | 1.00000 | 1.00000 | 1.00000 | 1.00000 | 0.99995 |
+| text vs October (the floor) | heavy leakers | 9 | 0.99987 | 0.99902 (r_competitor__aural_vark) | 0.99992 | 0.99949 | 0.99744 |
+| | cap-heavy | 4 | 0.99996 | 0.99996 | 0.99997 | 0.99996 | 0.99994 |
+| | controls | 6 | 0.99973 | 0.99961 ([witness](../../../data/roles/instructions/witness.json)) | 0.99984 | 0.99974 | 0.99944 |
+| | default | 1 | 0.99997 | | 0.99998 | | 1.0 |
+
+The sample's own assistant axes (step 5, 19 entities against `default`): text vs ids 0.99981 at L25 and 0.99977 at
+L49, ids vs turn 0.99970 and 0.99944.  Read as 1 − cosine: the path moves a heavy leaker's vector by 4e-5 at the median
+and 2e-4 at worst, every other entity by under 1e-5; the floor is 1.3e-4 (leakers) to 2.7e-4 (controls) at the median
+and 1e-3 at worst.  The controls' floor is the largest because their responses are the shortest (witness's 500 average
+266 tokens, thorough's 923, from the token counts in `compare/token_diff.json`).
+
+## Measurement 4: axes and ρ
+
+**(a) Projections** ([`analysis/axis_projection_shift.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/axis_projection_shift.json>)):
+each sampled entity's projection on the 61 judged axes (October pole vectors; the two renamed poles resolved), the
+shift between variants in units of the standard deviation of all 1,271 October entities' projections on that axis.
+Group medians of the per-entity median |shift| over the 61 axes, then of the per-entity maximum, at slot 0 layer 25.
+
+| comparison | heavy leakers: median, max-median, largest | controls | cap-heavy | header slots, largest |
+|---|---|---|---|---|
+| text vs ids (the path) | 0.008 σ, 0.022 σ, 0.053 σ | 0, 0, 0.001 σ | 0 | 0.001 σ |
+| ids vs turn (the span) | 0.021 σ, 0.119 σ, 0.228 σ | 0, 0, 0.003 σ | 0 | 0 |
+| text vs batch size 1 (padding) | 0.0001 σ, 0.001 σ, 0.001 σ | | 0.0004 σ, 0.001 σ | 0.011 σ |
+| text vs October (the floor) | 0.035 σ, 0.069 σ, 0.325 σ | 0.016 σ, 0.093 σ, 0.217 σ | 0.009 σ, 0.045 σ, 0.069 σ | 0.254 σ |
+
+**(b) ρ** ([`analysis/rho_substitution.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/rho_substitution.json>)):
+[`judge_tier_robustness.py`](../../../results_analysis/judge_tier_robustness.py) (raw regime, the two production judge
+cells, 61 axes) on symlink clones of the October tree with the sample's vectors substituted for the nine sampled
+entities the judge caches cover (three of them poles: thorough, verbose, angel).  Largest |Δρ| over the 61 axes:
+
+| comparison | s0_l25 | s0_l49 | s6_l25 | s6_l49 |
+|---|---|---|---|---|
+| ids vs text (the path) | 0.0002 | 0.0001 | 0.0000 | 0.0000 |
+| turn vs text (the span) | 0.0004 | 0.0003 | 0.0000 | 0.0000 |
+| text vs the untouched tree (the floor) | 0.0025 | 0.0023 | 0.0009 | 0.0005 |
+
+(the two-judge cell; the single-judge cell is the same to the last digit; the largest is always `angel_vs_demon`,
+whose pole was resampled).
+
+## Reading, against the plan's decision rule
+
+The path difference is confined to the responses that had a leak stripped (5% of the sample's, concentrated in the
+heavy leakers): there it is a tenth of the activation's length per response, with a 1% norm change.  Averaged into a
+vector it is 4e-5 of cosine at the median and 2e-4 at worst, against a resampling floor of 1.3e-4 to 2.7e-4 at the
+median and 1e-3 at worst; on the judged axes 0.008 σ against 0.035 σ; on ρ 0.0002 against 0.0025.  The controls do
+not move at all (1.00000 to five places, 0 σ), so re-tokenization itself does not matter; the plan effect is real and
+confined to the leakers, and an order of magnitude below the sampling noise at every level the pipeline uses.  **No
+re-extraction of the October data on this account.**  The span choice (the plan inside slot 0, `--content_span turn`)
+is the larger of the two: 0.16 per stripped response, 7e-5 to 3e-4 on a leaker's vector, 0.021 σ at the median and
+0.12 σ at the per-entity maximum on the axes, comparable to the floor's median and above its per-entity maximum of
+0.07 σ; it still moves no control and ρ by 0.0004 at most.  That is the input to the AGENT_NOTES TODO on keeping leaked
+thinking, not a re-extraction question.
+
+**Other noise sources, for scale.**  The padding floor (batch size 4 against 1, the same text) is 0.15% per response at
+slot 0 and about 1% at the header slots, and under 1e-5 of cosine on a vector.  The floor used above bundles the fresh
+T = 0.7 sample with a fresh judging and a fresh kept set; the judge's own repeatability on fixed responses was not
+measured here (no earlier measurement of it exists in the reports either), and cannot be from this sample, whose
+activations went with the container disk.  It can be measured for about $2 and an hour on the October data, whose
+activations are on the volumes: rejudge 20 entities' responses by Flex and rerun step 4 on a CPU pod.
+
+## Lessons for the next pod run
+
+- `OMP_NUM_THREADS` (or `torch.set_num_threads`) on every CPU-side torch script; a pod exposes every host CPU.
+- The run script stops its own pod when its outputs are safe, and arms
+  [`pipeline/pod/watchdog.sh`](../../../pipeline/pod/watchdog.sh) first (built the same day, with
+  [`test_pod_watchdog.py`](../../../pipeline/tests/test_pod_watchdog.py)): an explicit cue, a hold for hands-on work,
+  `runpodctl stop pod` after the idle window; the backstop for a sleeping laptop (Roger, 2026-11-04).
+- Launch over `ssh -n` (a detached job inherits ssh's stdin and holds the session open); when the exposed port dies,
+  the console's web terminal (Connect → Enable web terminal) reaches a pod whose sshd is fine; the SSH gateway
+  `ssh.runpod.io` needs a PTY and carries no rsync.
+- The outputs of a container-disk run are copied to the volume before the pod stops (the finishing chain did), and a
+  fresh CPU pod on the volume ($0.16/h) pulls them; a deploy from the Storage page injects `PUBLIC_KEY` itself.

@@ -278,6 +278,17 @@ older context, or differs from the documented current default.
   `assistant_axis.judge_pricing.price_for_model` prices at the batch
   rate, so that a usage record says how the tokens were bought.
 
+### Pods stop themselves (Roger, 2026-11-04)
+
+**An unattended pod run stops its own pod**, as the last step of its run script once its outputs are safe
+(`runpodctl stop pod $RUNPOD_POD_ID`; RunPod installs the tool and the key it needs on every pod), and **arms the
+watchdog before it starts**: [`pipeline/pod/watchdog.sh`](./pipeline/pod/watchdog.sh) `arm --idle-min 60 --watch
+<output dir> --pid-file <pid file>`, with an explicit, scriptable cue and a `hold` for hands-on work (details in
+[`pipeline/README.md`](./pipeline/README.md) § "The pod watchdog").  The agent's own watchers are never the
+mechanism: on 2026-11-03 the response-token-ids sample pod ran idle for about five hours (about $9) because its
+shutdown was the last link of a watcher chain in a Claude Code session that ended first, and Roger's laptop sleeps
+or goes offline at times.  A session that follows a pod run checks `tools/runpod_api.py pods` first.
+
 ---
 
 ## File Access Boundary (HARD RULE)
