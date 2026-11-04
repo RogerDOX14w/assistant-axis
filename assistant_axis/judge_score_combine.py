@@ -312,12 +312,22 @@ PRIMARY_AXIS_SAMPLE_WEIGHT: float = 5.0
 # part of a cell name before "@".  See the module docstring, item 5.
 TIER_JUDGE_WEIGHTS: Dict[str, float] = {"gpt-5.6-luna": 4.0}
 TIER_JUDGE_DEFAULT_WEIGHT: float = 3.0
+#: Per judging mode, the weights that differ from TIER_JUDGE_WEIGHTS (2026-11-04).  Jev (TypeSafe AI) on
+#: descriptions: 24 beside Luna 4, Haiku 3, Gemini 3 (Roger: "an optimal blend ... of the form 4:3:3:X ...
+#: average across all 12"), fitted on the balanced cells of the 61 axes (each judge two passes, one each way)
+#: on rho averaged over the 12 projection variants: the peak of 4:3:3:X, the plateau 16-40 within 0.0005 of it,
+#: the bootstrap's best X in [16, 40] (95%), 24 chosen fitting either half and leaving any one axis out, and
+#: +0.0083 [+0.0051, +0.0113] over X = 3; a free fit of all four weights gains nothing on held-out halves.
+#: Evidence: reports/judge_pareto/jev_judging.md.
+TIER_JUDGE_WEIGHTS_BY_MODE: Dict[str, Dict[str, float]] = {"descriptions": {"jev-1.14.0": 24.0}}
 
 
-def tier_judge_weights(judges) -> Dict[str, float]:
+def tier_judge_weights(judges, mode: Optional[str] = None) -> Dict[str, float]:
     """``{judge: weight}`` over ``judges`` (models, or cell names whose model
-    is the part before "@"), summing to 1, from :data:`TIER_JUDGE_WEIGHTS`."""
-    raw = {j: TIER_JUDGE_WEIGHTS.get(j.split("@", 1)[0], TIER_JUDGE_DEFAULT_WEIGHT) for j in judges}
+    is the part before "@"), summing to 1, from :data:`TIER_JUDGE_WEIGHTS` and,
+    for ``mode`` ("descriptions", "instructions"), :data:`TIER_JUDGE_WEIGHTS_BY_MODE`."""
+    table = {**TIER_JUDGE_WEIGHTS, **TIER_JUDGE_WEIGHTS_BY_MODE.get(mode or "", {})}
+    raw = {j: table.get(j.split("@", 1)[0], TIER_JUDGE_DEFAULT_WEIGHT) for j in judges}
     total = sum(raw.values())
     return {j: w / total for j, w in raw.items()}
 
@@ -325,6 +335,7 @@ def tier_judge_weights(judges) -> Dict[str, float]:
 def combine_tier_judges(
     per_judge: Dict[str, Dict[str, float]],
     weights: Optional[Dict[str, float]] = None,
+    mode: Optional[str] = None,
 ) -> Dict[str, float]:
     """One score per entity from several judges' scores (each judge's own
     mean over its passes or rounds): the weighted mean, with
@@ -332,7 +343,7 @@ def combine_tier_judges(
     over the judges that scored the entity (the one-side-missing fallback
     of :func:`blend_two_with_fallback`).  An entity no judge scored is
     left out."""
-    w = weights if weights is not None else tier_judge_weights(per_judge)
+    w = weights if weights is not None else tier_judge_weights(per_judge, mode)
     out: Dict[str, float] = {}
     for n in set().union(*per_judge.values()) if per_judge else ():
         num = den = 0.0

@@ -27,9 +27,29 @@ def test_jev_arms_and_cells():
         mod.WITH_JEV = False
         assert not any(mod.JEV in v[1] for v in mod.arms(mode).values()) and mod.JEV not in mod.passes_of(mode)
     mod.WITH_JEV = True
-    assert mod.cell_of(mod.MODES["instructions"], mod.JEV, 7) == "jev-1.14.0@ji_noul_relative_n160_r7"
-    assert mod.cell_of(mod.MODES["descriptions"], mod.JEV, 1) == "jev-1.14.0@jd_noul_relative_n160s2"
-    assert mod.cell_of(mod.MODES["instructions"], "gpt-5.6-luna", 3) == "gpt-5.6-luna@i1_p0n20r3"
+    I, Dm = mod.MODES["instructions"], mod.MODES["descriptions"]
+    mod.BALANCED = False            # --directions own: the cells in the axes' own order
+    assert mod.cell_of(I, mod.JEV, 7) == "jev-1.14.0@ji_noul_relative_n160_r7"
+    assert mod.cell_of(Dm, mod.JEV, 1) == "jev-1.14.0@jd_noul_relative_n160s2"
+    assert mod.cell_of(I, "gpt-5.6-luna", 3) == "gpt-5.6-luna@i1_p0n20r3"
+    mod.BALANCED = True             # the default: the balanced cells
+    assert mod.cell_of(I, mod.JEV, 7) == "jev-1.14.0@ji_noul_relative_n160d7"
+    assert mod.cell_of(Dm, mod.JEV, 1) == "jev-1.14.0@jd_noul_relative_n160d2"
+    assert mod.cell_of(I, "claude-haiku-5-5", 3) == "claude-haiku-5-5@i1_p0n20d3"
+    assert mod.cell_of(Dm, "gpt-5.6-luna", 3) == "gpt-5.6-luna@b10n20d4"
+    assert mod.cell_of(I, "gpt-5.6-luna", 12) == "gpt-5.6-luna@i1_p0n20r12"       # Luna's passes 3-4: own order
+
+
+def test_balanced_choices_take_as_many_passes_each_way():
+    mod = _mod()
+    mod.BALANCED = True
+    two = mod.replicates({"gpt-5.6-luna": 2}, {"gpt-5.6-luna": 4}, 1)
+    assert sorted(r["gpt-5.6-luna"] for r in two) == [(0, 1), (0, 3), (1, 2), (2, 3)]     # one of each parity
+    assert len(mod.replicates({"gpt-5.6-luna": 1}, {"gpt-5.6-luna": 4}, 1)) == 4
+    assert len(mod.replicates({"gpt-5.6-luna": 3}, {"gpt-5.6-luna": 4}, 1)) == 4
+    mod.BALANCED = False
+    assert len(mod.replicates({"gpt-5.6-luna": 2}, {"gpt-5.6-luna": 4}, 1)) == 6
+    mod.BALANCED = True
 
 
 def test_jev_colour():

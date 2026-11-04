@@ -495,3 +495,17 @@ class TestTierJudgeWeights:
                                    "claude-haiku-5-5": {"a": 8.0, "c": 5.0, "d": None}})
         assert out == pytest.approx({"a": (4 * 1 + 3 * 8) / 7, "b": 2.0, "c": 5.0})
         assert combine_tier_judges({}) == {}
+
+
+def test_tier_judge_weights_take_a_modes_own_weights():
+    """2026-11-04: Jev's weight is fitted per judging mode (TIER_JUDGE_WEIGHTS_BY_MODE); with no mode, or a mode
+    without its own entry, a judge takes TIER_JUDGE_WEIGHTS or the default 3."""
+    from assistant_axis.judge_score_combine import combine_tier_judges, tier_judge_weights
+    four = ["gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite", "jev-1.14.0"]
+    w = tier_judge_weights(four, "descriptions")
+    assert w["jev-1.14.0"] / w["gpt-5.6-luna"] == pytest.approx(24 / 4) and w["claude-haiku-5-5"] / w["gpt-5.6-luna"] == pytest.approx(3 / 4)
+    plain = tier_judge_weights(four)
+    assert plain["jev-1.14.0"] / plain["gpt-5.6-luna"] == pytest.approx(3 / 4)
+    assert tier_judge_weights(["gpt-5.6-luna", "jev-1.14.0@x"], "responses")["jev-1.14.0@x"] == pytest.approx(3 / 7)
+    per = {"gpt-5.6-luna": {"a": 0.0}, "jev-1.14.0": {"a": 28.0}}
+    assert combine_tier_judges(per, mode="descriptions")["a"] == pytest.approx(28.0 * 24 / 28)

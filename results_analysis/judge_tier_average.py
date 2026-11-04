@@ -54,7 +54,6 @@ def average_cells(out: str, sources: Sequence[str], jobs: Sequence["ev.AxisJob"]
     result = AverageResult()
     judge_of = {s: s.split("@", 1)[0] for s in sources}
     judges = list(dict.fromkeys(judge_of.values()))
-    weights = tier_judge_weights(judges) if len(judges) > 1 else None
     for job in jobs:
         axis = job.axis_dir
         ds = [E / f"{axis}_tier_eval" / c for c in sources]
@@ -66,6 +65,8 @@ def average_cells(out: str, sources: Sequence[str], jobs: Sequence["ev.AxisJob"]
             raise ValueError(f"{axis}: the sources mix judging modes: {[p.name for p in paths]}")
         scores_name = paths[0].name
         mode = scores_name[len("scores_"):-len(".json")]
+        # the judges' weights for this mode (judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE: Jev's differ by mode)
+        weights = tier_judge_weights(judges, mode) if len(judges) > 1 else None
         stamp = max(os.path.getmtime(p) for p in paths)
         if (do / "usage.json").exists():
             done = json.loads((do / scores_name).read_text())["_provenance"].get("averaged", {})

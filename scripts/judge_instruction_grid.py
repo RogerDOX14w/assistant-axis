@@ -7,12 +7,15 @@ tool's resume rule, so a rerun only judges what is missing.
 shuffle (seed round + 1); round r shows instruction r mod 5, so rounds 0-4 are one pass over an entity's
 five instructions and rounds 5-9 a second.
 
-**The settled method for instruction judging (Roger, 2026-11-03)** is this script's defaults: the plain
-wrapper (p0), 20 entities a call, one pass (rounds 0-4) of each of GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1
-Flash-Lite (INSTRUCTION_JUDGES), and, once every cell is in, the blend
-<judges>@i1_p0n20x1, each judge's mean over its five rounds weighted Luna 4 : Haiku 3 : Gemini 3
-(judge_tier_average.py; the scores in scores_instructions.json, correlations.json beside them).  Account:
-results_analysis/README.md, "Instruction judging: the settled method".
+**The settled method for instruction judging (Roger, 2026-11-04: "(Luna + Haiku + Gemini + Jev) x2, and just do
+both directions in the x2")** is this script's defaults: two passes (rounds 0-9) of each of GPT-5.6 Luna, Haiku 5.5
+and Gemini 3.1 Flash-Lite, the plain wrapper (p0) and 20 entities a call, and of Jev (TypeSafe AI) by its own
+method (scripts/judge_jev_entities.py: a Noul question per entity, "is it nearer the second end than most of the
+other entries?", 160 entities a request; its cells jev-1.14.0@ji_noul_relative_n160d<round>), and, once every
+cell is in, the blend <judges>@i1_p0n20dx2, each judge's mean over its ten rounds weighted by
+judge_score_combine.TIER_JUDGE_WEIGHTS (judge_tier_average.py; the scores in scores_instructions.json,
+correlations.json beside them).  Before 2026-11-04 the method was one pass of the three (Roger, 2026-11-03).
+Account: results_analysis/README.md, "Instruction judging: the settled method".
 
 **Directions (Roger, 2026-11-04), the default of the rounds design since that day:** each round is judged by
 each judge in the direction of Roger's table (judge_tier_cost_eval.INSTRUCTION_DIRECTIONS, --directions
@@ -21,7 +24,9 @@ per axis a coin for which way is which and a permutation of the instruction posi
 first reversed; swapped calls' scores mapped back.  The pole-order test found a judge does better with the
 morally good pole at the high number, and a fixed order would carry that asymmetry into every result.  The
 cells are <judge>@i1_<arm>n<N>d<round> and the blend <judges>@i1_<arm>n<N>dx<passes>; --directions own gives
-the old r<round> and x<passes> cells, all in the axis's own order.
+the old r<round> and x<passes> cells, all in the axis's own order.  Jev's directions are its own column of the
+table (judge_jev_entities.JEV_INSTRUCTION_COLUMN, B A B A d): with the three columns, each of the first four
+instruction positions is judged 2:2, and with two passes every judge sees every instruction once each way.
 
 Usage: uv run python scripts/judge_instruction_grid.py --design rounds --axes_file AXES.tsv --instructions_dir DATA --dry_run
        uv run python scripts/judge_instruction_grid.py --design sets --arms p0,p1,q0,q1,t0,t1 --ns 20 --passes 2 \\
@@ -36,10 +41,40 @@ from results_analysis import judge_tier_average as avg, judge_tier_cost_eval as 
 from results_analysis.judge_descriptions import max_tokens_for
 
 TOOL = REPO / "results_analysis" / "judge_tier_cost_eval.py"
-#: The settled instruction judges (Roger, 2026-11-03: one pass of every model, "ensembles across three
-#: models ... extra passes of individual models don't appear to be consistently cost effective")
-INSTRUCTION_JUDGES = ("gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite")
+JEV_TOOL = REPO / "scripts" / "judge_jev_entities.py"
+JEV_MODEL = "jev-1.14.0"
+JEV_ENTITIES_PER_CALL = 160
+JEV_METHOD = ("--question", "noul", "--wording", "relative")
+#: The settled instruction judges (Roger, 2026-11-03: the three; 2026-11-04: with Jev, two passes each)
+INSTRUCTION_JUDGES = ("gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite", JEV_MODEL)
 ROUNDS_PER_PASS = 5
+DEFAULT_ROUNDS = "0,1,2,3,4,5,6,7,8,9"
+
+
+def is_jev(model: str) -> bool:
+    return model.startswith("jev")
+
+
+def jev_round_label(r: int, directions: str = "own") -> str:
+    """A Jev round's cell label (judge_jev_entities.py's arm name; the 61-axis cells of 2026-11-04 carry it)."""
+    return f"@ji_noul_relative_n{JEV_ENTITIES_PER_CALL}{'d' if directions == 'balanced' else '_r'}{r}"
+
+
+def jev_command(model: str, r: int, args) -> list:
+    """judge_jev_entities.py's command for Jev's round ``r``: instruction r mod 5, seed r + 1, its own batches of
+    160, its column of Roger's direction table."""
+    argv = [sys.executable, str(JEV_TOOL), "--mode", "instructions", "--instruction_round", str(r), "--model", model,
+            *JEV_METHOD, "--entities_per_call", str(JEV_ENTITIES_PER_CALL), "--shuffle_seed", str(r + 1),
+            "--cell_label", jev_round_label(r, args.directions), "--axes_file", args.axes_file,
+            "--experiments_dir", args.experiments_dir, "--instructions_dir", args.instructions_dir,
+            "--max_in_flight", str(min(args.max_in_flight, 16))]
+    if args.directions == "balanced":
+        argv += ["--directions", "instructions"]
+    if args.budget_usd_per_cell is not None:
+        argv += ["--budget_usd", str(args.budget_usd_per_cell)]
+    if args.dry_run:
+        argv += ["--dry_run"]
+    return argv
 
 
 def round_label(arm: str, n: int, r: int, directions: str = "own") -> str:
@@ -91,9 +126,10 @@ def main(argv=None) -> int:
     ap.add_argument("--arms", default="p0", help="comma-separated wrapper and sentence codes: p0,p1,q0,q1,t0,t1")
     ap.add_argument("--ns", default="20", help="comma-separated batch sizes")
     ap.add_argument("--passes", type=int, default=2, help="--design sets: shuffles per batch size")
-    ap.add_argument("--rounds", default="0,1,2,3,4", help="--design rounds: rounds to judge")
+    ap.add_argument("--rounds", default=DEFAULT_ROUNDS, help=f"--design rounds: rounds to judge (default {DEFAULT_ROUNDS}, "
+                                                              f"two passes)")
     ap.add_argument("--judges", default=",".join(INSTRUCTION_JUDGES),
-                    help=f"comma-separated (default the settled three, {','.join(INSTRUCTION_JUDGES)})")
+                    help=f"comma-separated (default the settled four, {','.join(INSTRUCTION_JUDGES)})")
     ap.add_argument("--no_blend", action="store_true",
                     help="--design rounds: do not derive the blend cell <judges>@i1_<arm>n<N>x<passes> (Luna 4 : others "
                          "3, judge_tier_average.py) after the cells finish")
@@ -119,15 +155,19 @@ def main(argv=None) -> int:
     if args.directions == "balanced":
         if args.design != "rounds":
             ap.error("--directions balanced goes with --design rounds (a set shows all five instructions in one item)")
-        unknown = [m for m in args.judges.split(",") if m not in ev.INSTRUCTION_DIRECTION_JUDGES]
+        unknown = [m for m in args.judges.split(",") if m not in ev.INSTRUCTION_DIRECTION_JUDGES and not is_jev(m)]
         if unknown:
             ap.error(f"--directions balanced: Roger's table has no column for {', '.join(unknown)} "
                      f"({', '.join(ev.INSTRUCTION_DIRECTION_JUDGES)}); use --directions own")
+    if args.design == "sets" and any(is_jev(m) for m in args.judges.split(",")):
+        ap.error("--design sets: Jev judges rounds only (pass --judges without it)")
     arms, ns = args.arms.split(","), [int(x) for x in args.ns.split(",")]
     rounds = [int(x) for x in args.rounds.split(",")]
     # Anthropic's first, one judge at a time: a batch upload is lost when Flex cells hold the connection
-    judges = sorted(args.judges.split(","), key=lambda m: provider_for_model(m) != "anthropic")
-    jobs = [(m, c) for m in judges for c in cells(args.design, arms, ns, args.passes, rounds, args.directions)]
+    judges = sorted(args.judges.split(","), key=lambda m: (True, True) if is_jev(m) else (False, provider_for_model(m) != "anthropic"))
+    jobs = [(m, c) for m in judges if not is_jev(m) for c in cells(args.design, arms, ns, args.passes, rounds, args.directions)]
+    jobs += [(m, ("jev", jev_round_label(r, args.directions), JEV_ENTITIES_PER_CALL, r + 1, r))
+             for m in judges if is_jev(m) for r in rounds]
     print(f"{len(jobs)} cells: {args.design}, arms {arms}, batch sizes {ns}, judges {args.judges}, axes {args.axes_file}")
     logs = Path(args.logs) if args.logs else None
     if logs:
@@ -135,7 +175,7 @@ def main(argv=None) -> int:
 
     def run(job) -> int:
         model, cell = job
-        cmd = command(model, cell, args)
+        cmd = jev_command(model, cell[4], args) if is_jev(model) else command(model, cell, args)
         if not logs:
             return subprocess.run(cmd, cwd=REPO).returncode
         with open(logs / f"{model}{cell[1]}.log", "a") as f:
@@ -161,7 +201,8 @@ def main(argv=None) -> int:
                 print(f"no blend for rounds {rounds}: not whole passes from round 0", file=sys.stderr)
                 continue
             out = "+".join(given) + label
-            sources = [f"{m}{round_label(arm, n, r, args.directions)}" for m in given for r in rounds]
+            sources = [f"{m}{jev_round_label(r, args.directions) if is_jev(m) else round_label(arm, n, r, args.directions)}"
+                       for m in given for r in rounds]
             E = Path(args.experiments_dir)
             r = avg.average_cells(out, sources, ev.jobs_from_axes_file(Path(args.axes_file), E), E, Path(args.instructions_dir))
             refused += [f"{out}: {line}" for line in r.refused]

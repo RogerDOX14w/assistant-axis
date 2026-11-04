@@ -27,6 +27,15 @@ each other judge.  Its cells are scripts/judge_jev_entities.py's best arm, a Nou
 entity is nearer the axis's second end than most of the other entities, 160 entities a request (JEV_CELLS), in
 the axes' own order like every other cell here; ``--without_jev`` draws the figure without them.
 
+Directions (Roger's rule of 2026-11-04, ``--directions balanced``, the default since that day): every cell is a
+balanced one, each judge's passes alternating each axis's direction, so a 2x is one pass each way and a 1x half
+the axes each way (descriptions) or the instructions alternating (instructions, Roger's table); an arm's choices of
+passes take only those with as many passes each way (Luna 2x of 4: 4 choices, not 6).  Descriptions:
+<judge>@b10n20d<seed> (judge_descriptions.py), Jev's @jd_noul_relative_n160d<seed>; instructions:
+<judge>@i1_p0n20d<round> (judge_instruction_grid.py), Jev's @ji_noul_relative_n160d<round>.  Luna's instruction
+passes 3 and 4 are its own-order rounds 10-19 (Roger, 2026-11-04: "Don't bother getting this exactly correct for
+3x and 4x").  ``--directions own`` draws the figure of the cells in the axes' own order, as before.
+
 ``--mode descriptions`` draws the same arms for description judging (Roger, 2026-11-03: "confirm that this
 also works well for description judging"): a pass is one cell of judge_descriptions.py's method
 (``<judge>@b10n20s<seed>jl``, the entity's description once, N=20 a call, the judge display form of the
@@ -66,6 +75,12 @@ NAMES = {**{m: n for n, m in JUDGES}, JEV: "Jev"}
 JEV_CELLS = {"instructions": lambda r: f"{JEV}@ji_noul_relative_n160_r{r}",
              "descriptions": lambda r: f"{JEV}@jd_noul_relative_n160s{r + 1}"}
 JEV_PASSES = 2
+#: The balanced cells (--directions balanced): Jev's, and the other judges' by mode.
+JEV_CELLS_BALANCED = {"instructions": lambda r: f"{JEV}@ji_noul_relative_n160d{r}",
+                      "descriptions": lambda r: f"{JEV}@jd_noul_relative_n160d{r + 1}"}
+BALANCED = True
+#: The mode being drawn, for the judges' weights (judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE); set in main.
+MODE_NAME = None
 #: The Jev arms: the judges of each, drawn at 1x and 2x.
 JEV_SETS = ((("Jev", JEV),), (*JUDGES, ("Jev", JEV)), (JUDGES[0], JUDGES[1], ("Jev", JEV)))
 WITH_JEV = True
@@ -132,8 +147,15 @@ def pass_rounds(p: int, rounds_per_pass: int = ROUNDS_PER_PASS) -> range:
 
 
 def cell_of(mode: "Mode", m: str, r: int) -> str:
-    """The cell directory of judge ``m``'s round (or pass) ``r`` in ``mode``."""
-    return JEV_CELLS[mode.name](r) if m == JEV else mode.cell(m, r)
+    """The cell directory of judge ``m``'s round (or pass) ``r`` in ``mode``: the balanced cells unless
+    --directions own (Luna's instruction rounds past 9 are its own-order ones either way)."""
+    if not BALANCED:
+        return JEV_CELLS[mode.name](r) if m == JEV else mode.cell(m, r)
+    if m == JEV:
+        return JEV_CELLS_BALANCED[mode.name](r)
+    if mode.name == "instructions":
+        return f"{m}@{CELL_ARM}d{r}" if r < 2 * ROUNDS_PER_PASS else mode.cell(m, r)
+    return f"{m}@{DESC_CELL_ARM}d{r + 1}"
 
 
 def passes_of(mode: "Mode") -> Dict[str, int]:
@@ -176,8 +198,12 @@ def replicates(spec: Dict[str, int], passes: Dict[str, int] = PASSES,
     """Every choice of passes for an arm, as each judge's rounds: each judge's k of its ``passes``,
     chosen apart from the other judges' (every pass holds every instruction, so there is nothing to
     pair).  Luna 2x of 4 passes: 6 choices; Luna 2x + Haiku 1x of 2: 12."""
-    per = [[tuple(r for p in c for r in pass_rounds(p, rounds_per_pass)) for c in itertools.combinations(range(passes[m]), k)]
-           for m, k in spec.items()]
+    def balanced(c) -> bool:
+        """With balanced directions, an even number of passes takes as many each way (pass p's direction flips
+        with p's parity); an odd number cannot be balanced and takes any."""
+        return not BALANCED or len(c) % 2 or sum(p % 2 for p in c) * 2 == len(c)
+    per = [[tuple(r for p in c for r in pass_rounds(p, rounds_per_pass)) for c in itertools.combinations(range(passes[m]), k)
+            if balanced(c)] for m, k in spec.items()]
     return [dict(zip(spec, choice)) for choice in itertools.product(*per)]
 
 
@@ -195,7 +221,7 @@ def combine(per_judge: Dict[str, Sequence[Dict[str, float]]],
     """An entity's score: each judge's mean over its rounds, then the judges weighted by ``weights``, or
     by judge_score_combine.tier_judge_weights (Luna 4, another judge 3; Roger, 2026-11-03).  A judge without
     the entity is left out of that entity's mean."""
-    return combine_tier_judges(judge_means(per_judge), weights)
+    return combine_tier_judges(judge_means(per_judge), weights, MODE_NAME)
 
 
 def weight_grid(n: int, step: float = WEIGHT_STEP) -> np.ndarray:
@@ -232,7 +258,7 @@ def fit_weights(G: np.ndarray, grid: np.ndarray, dev: np.ndarray, models: Sequen
     """The weights with the best mean rho over all axes, and how they fare out of sample against the
     default weights (tier_judge_weights): fitted on the development axes and scored on the held-out
     ones and the reverse, and each axis scored with weights fitted on the others."""
-    default = np.array([tier_judge_weights(models)[m] for m in models])
+    default = np.array([tier_judge_weights(models, MODE_NAME)[m] for m in models])
     G_def = G[int(np.argmin(np.abs(grid - default).sum(1)))]   # the default, to the nearest grid point
     best = int(np.argmax(G.mean(1)))
     fit_dev, fit_held = int(np.argmax(G[:, dev].mean(1))), int(np.argmax(G[:, ~dev].mean(1)))
@@ -292,13 +318,18 @@ def main(argv=None) -> int:
     ap.add_argument("--dev_axes_file", default="scripts/tier_eval_axes_dev30.tsv",
                     help="the development half, for the split-half check of the mixes' fitted weights")
     ap.add_argument("--without_jev", action="store_true", help="leave the Jev arms out (the figure before 2026-11-04)")
+    ap.add_argument("--directions", choices=("balanced", "own"), default="balanced",
+                    help="balanced (default since 2026-11-04): the cells with each judge's passes alternating each axis's "
+                         "direction, a 2x one pass each way; own: the cells in the axes' own order")
     ap.add_argument("--cache-policy", dest="cache_policy", choices=CACHE_POLICIES, default="warn",
                     help="what to do when a score file's recorded inputs have changed: strict | warn (default) | rebuild | off")
     args = ap.parse_args(argv)
-    global WITH_JEV
+    global WITH_JEV, BALANCED, MODE_NAME
     WITH_JEV = not args.without_jev
+    BALANCED = args.directions == "balanced"
     t0 = time.time()
     mode = MODES[args.mode]
+    MODE_NAME = mode.name
     stem = args.stem or mode.stem
     data_dir, E, out = Path(args.data_dir).resolve(), Path(args.experiments_dir), Path(args.output_dir)
     variants = rob.build_variants(rob.DEFAULT_SLOTS, rob.DEFAULT_LAYERS, list(rob.REGIMES),
@@ -413,8 +444,12 @@ def main(argv=None) -> int:
                 + (f" ({extra})" if extra else "")
                 + ("; Jev alone, beside the trio and in Gemini's place" if WITH_JEV else "")
                 + f", under {len(variants)} projection variants: {args.axes_label} (default {default})")
-    sub = (f"Nx = every judge judges {mode.text} N times (N passes, each in its own batch orders, N=20 a call); "
-           f"judges weighted Luna 4 : 3 each other; arrows run from 1x up\n"
+    jw = tier_judge_weights([m for _, m in JUDGES] + ([JEV] if WITH_JEV else []), MODE_NAME)
+    lw = jw[JUDGES[0][1]]
+    weights_text = " : ".join(f"{NAMES[m]} {w / lw * 4:g}" for m, w in jw.items())
+    sub = (f"Nx = every judge judges {mode.text} N times (N passes, each in its own batch orders, N=20 a call"
+           + ("; each judge's passes alternate each axis's direction, a 2x one pass each way" if BALANCED else
+              "; every pass in the axes' own order") + f"); judges weighted {weights_text}; arrows run from 1x up\n"
            f"each point averaged over every choice of its passes (passes judged: " + ", ".join(
                f"{NAMES[m]} {n}" for m, n in passes.items()) + f"); mixes: judge weights (in parentheses) fitted to "
            f"the most rho at {default}\n"

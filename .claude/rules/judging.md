@@ -19,12 +19,20 @@ paths:
 ### Description judging: the settled method (Roger, 2026-11-02)
 
 **The decision:** the batched percentile rubric `b10`, N=20 entities per call, two
-passes in independent random orders, no reasoning, and **since 2026-11-03 the three
-judges, GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite, blended Luna 4 : Haiku 3 :
-Gemini 3** (Roger: "Luna + Haiku + Gemini at 2× each"; `judge_score_combine.TIER_JUDGE_WEIGHTS`,
-§ "Combining judge scores"): ρ 0.752 at $0.076 an axis on the 61 axes (real price, May
-corpus), on the frontier in 9 of 12 projection variants, +0.0045 [+0.0016, +0.0075] over
-the two-judge default of 2026-11-02 (Luna + Haiku, 0.747 at $0.042).  The rule is the
+passes, one each way, no reasoning, for GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite,
+and **since 2026-11-04 Jev (TypeSafe AI) beside them, two passes, one each way, blended
+Luna 4 : Haiku 3 : Gemini 3 : Jev 24** (Roger: "the new standard is (Luna + Haiku + Gemini +
+Jev) x2, with the reversal in the x2"; Jev's weight fitted on ρ averaged over the 12
+projection variants, `judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE`): ρ 0.766 at $0.084
+an axis on the 61 axes (balanced cells, real price, May corpus), against the three judges'
+0.751 at $0.076.  Jev judges by its own method,
+[`scripts/judge_jev_entities.py`](./scripts/judge_jev_entities.py): a yes/no Noul question
+per entity ("is it nearer the second pole than most of the other entries?"), 160 entities a
+request, $0.042 per million input tokens and output free; the account is
+[`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md).  From
+2026-11-03 to 2026-11-04 the method was the three judges, 4:3:3, ρ 0.752 at $0.076 in own
+order, +0.0045 [+0.0016, +0.0075] over the two-judge default of 2026-11-02 (Luna + Haiku,
+0.747 at $0.042).  The rule is the
 instruction one below: every model, and the passes the text needs (one description per
 entity, so two passes; a second pass adds 0.020 here against 0.005 on instructions, and
 Luna's fourth pass only matches Luna 2 + Haiku 1 at a third more).  GPT-6 Luna alone is the
@@ -39,7 +47,18 @@ judging: the settled method",
 and the figure
 [`judge_description_12way.png`](./roger/axis_judge_experiments/instruction_judging_12way/judge_description_12way.png).
 
-**Instruction judging: the settled method (Roger, 2026-11-03).**  Every judge judges each of
+**Instruction judging: the settled method (Roger, 2026-11-04: "(Luna + Haiku + Gemini + Jev)
+x2, and just do both directions in the x2").**  Four judges, two passes each over an
+entity's five instructions (rounds 0-9), each judge in its column of Roger's direction
+table and the second pass the first reversed, so every judge sees every instruction once
+each way: GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite by `i1_p0` at N=20, and Jev by
+its own method (`scripts/judge_jev_entities.py`, 160 a request, its column B A B A d).
+[`scripts/judge_instruction_grid.py`](./scripts/judge_instruction_grid.py) `--design rounds`
+runs it by default and derives the blend `<judges>@i1_p0n20dx2`.  Jev's instruction weight
+is fitted on the balanced cells like its description weight (until it is set in
+`TIER_JUDGE_WEIGHTS_BY_MODE`, Jev takes the default 3); the account is
+[`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md).  Before
+2026-11-04 (Roger, 2026-11-03): every judge judges each of
 an entity's five instructions once, one instruction per entity per call (`i1_p0`, the plain
 wrapper), N=20, in five rounds (round r the entity's instruction r, seed r+1), and the three
 judges, GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite, are blended Luna 4 : Haiku 3 :

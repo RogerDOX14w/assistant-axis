@@ -2766,11 +2766,35 @@ about +0.03 ρ from it.  Evidence and tables: § 4c of
 
 [`judge_descriptions.py`](./judge_descriptions.py) judges axes from the entities'
 descriptions as the judge-tier evaluation settled it: the batched percentile rubric
-`b10`, 20 entities per call, two passes in independent random orders, no reasoning,
-each judge's passes averaged, and **since 2026-11-03 the three judges, GPT-5.6 Luna,
-Haiku 5.5 and Gemini 3.1 Flash-Lite, blended Luna 4 : Haiku 3 : Gemini 3** (Roger: "Luna +
-Haiku + Gemini at 2× each"; `judge_score_combine.TIER_JUDGE_WEIGHTS`).  The defaults are
-the constants at the top of that script, one place to change them.
+`b10`, 20 entities per call, two passes, one each way, no reasoning, each judge's passes
+averaged, for GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite, and **since 2026-11-04
+Jev (TypeSafe AI) beside them by its own method, two passes one each way, the four blended
+Luna 4 : Haiku 3 : Gemini 3 : Jev 24** (Roger: "the new standard is (Luna + Haiku + Gemini
++ Jev) x2, with the reversal in the x2"; `judge_score_combine.TIER_JUDGE_WEIGHTS_BY_MODE`).
+The defaults are the constants at the top of that script, one place to change them.
+
+**Since 2026-11-04, balanced cells** (61 axes, slot 6, layer 25, raw; real price, May corpus;
+[`judge_description_12way.png`](../roger/axis_judge_experiments/instruction_judging_12way/judge_description_12way.png)):
+
+| judges (61 axes, balanced) | ρ | $ per axis | on the frontier, of 12 variants |
+|---|---:|---:|---:|
+| Luna, 1 pass | 0.709 | 0.011 | 0 |
+| Jev, 1 pass | 0.745 | 0.004 | 12 |
+| Luna + Haiku + Gemini, 2 passes each (the default to 2026-11-04) | 0.751 | 0.076 | 0 |
+| Jev, 2 passes | 0.758 | 0.008 | 12 |
+| Luna + Haiku + Jev, 2 passes each | 0.766 | 0.050 | 12 |
+| **Luna + Haiku + Gemini + Jev, 2 passes each (the default)** | **0.766** | **0.084** | **5** |
+
+Jev's weight, 24 beside Luna's 4, is the peak of 4:3:3:X on ρ averaged over the 12
+variants: X from 16 to 40 lies within 0.0005 of it, the bootstrap's best X is in [16, 40]
+(95%), fitting either half or leaving any one axis out picks 24, and it is +0.0083
+[+0.0051, +0.0113] over X = 3.  A free fit of all four weights gains nothing on held-out
+halves.  Jev's method, its tests and the evidence:
+[`jev_judging.md`](../reports/judge_pareto/jev_judging.md).  Jev's cells are
+`<axis>_tier_eval/jev-1.14.0@jd_noul_relative_n160d<seed>/`, its average
+`jev-1.14.0@jd_noul_relative_n160dx2/`; its key is `TYPESAFE_API_KEY`.
+
+The own-order account of 2026-11-03 follows.
 
 The choice on the 61 axes under the 12 projection variants, 20 arms (every set of judges at
 1x and 2x, Luna alone to 4x, and mixes), each averaged over every choice of its passes
@@ -2828,8 +2852,21 @@ byte-for-byte as they were.
 
 ### Instruction judging: the settled method (Roger, 2026-11-03)
 
+**Since 2026-11-04 (Roger: "(Luna + Haiku + Gemini + Jev) x2, and just do both directions in
+the x2")** the method is four judges, two passes each over the five instructions (rounds
+0-9), each judge in its column of Roger's direction table with the second pass the first
+reversed, so every judge sees every instruction once each way: Luna, Haiku and Gemini by
+`i1_p0` at N=20, and Jev by its own method (`scripts/judge_jev_entities.py`, 160 a request,
+its column B A B A d; cells `jev-1.14.0@ji_noul_relative_n160d<round>`).
 [`scripts/judge_instruction_grid.py`](../scripts/judge_instruction_grid.py) `--design rounds`
-judges axes from the entities' instructions: **every judge judges each of an entity's five
+runs it by default (`--rounds` defaults to 0-9) and derives
+`gpt-5.6-luna+claude-haiku-5-5+gemini-3.1-flash-lite+jev-1.14.0@i1_p0n20dx2`.  Jev's weight
+for instructions is fitted on these balanced cells (until then the default 3); account and
+figures: [`jev_judging.md`](../reports/judge_pareto/jev_judging.md).  The method of
+2026-11-03 follows.
+
+[`scripts/judge_instruction_grid.py`](../scripts/judge_instruction_grid.py) `--design rounds`
+judged axes from the entities' instructions: **every judge judges each of an entity's five
 instructions once, one instruction per entity per call (the `i1_p0` rubric, the plain
 wrapper), 20 entities a call, in five rounds (round r the entity's instruction r, batched by
 seed r+1), and the three judges, GPT-5.6 Luna, Haiku 5.5 and Gemini 3.1 Flash-Lite, are
