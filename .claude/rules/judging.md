@@ -58,9 +58,11 @@ runs it by default and derives the blend `<judges>@i1_p0n20dx2`, Luna 4 : Haiku 
 : Jev 24, Jev's weight fitted on the balanced cells as for descriptions (the peak at 20, 24
 indistinguishable, +0.0044 [+0.0014, +0.0074] over 3): ρ 0.789 at $0.398 an axis on the 61
 axes, against 0.778 at $0.178 for the trio at 1x; Luna + Haiku + Jev at 2x 0.788 at $0.239;
-Jev alone 0.781 at $0.021, on the frontier in 12 of 12 variants.  Jev is requested as
-`jev-latest`, the only name TypeSafe serves (`GET /v1/models`), and a run writes no cell if
-it answers as another version than `jev-1.14.0` (`judge_jev_entities.py --expect_model`).
+Jev alone 0.781 at $0.021, on the frontier in 12 of 12 variants.  Jev is requested by its
+versioned ID, `jev-1.14.0`, pinned: TypeSafe accepts a versioned ID although `GET /v1/models`
+lists only the aliases `jev-latest` and `jev-preview`, and an alias moves when a release
+ships.  A run writes no cell if any answer comes from another version
+(`judge_jev_entities.py --expect_model`, by default the version requested).
 The account is
 [`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md).  Before
 2026-11-04 (Roger, 2026-11-03): every judge judges each of
