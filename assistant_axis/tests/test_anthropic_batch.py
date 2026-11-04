@@ -167,6 +167,22 @@ def test_resume_adopts_a_batch_created_but_not_recorded(tmp_path):
     assert len(got) == 3 and len(client.messages.batches.created) == 1   # not submitted twice
 
 
+def test_resume_leaves_a_lost_batch_alone_when_told_to(tmp_path):
+    """Another run's batch of the same size looks just like a lost submission (2026-11-02: sibling judging
+    cells of exactly 870 requests each, seven uploads lost among them)."""
+    client = _client(end_after=1)
+    runner = _runner(client, tmp_path)
+    chunk = runner.write_chunks(_requests(3))[0]
+    asyncio.run(client.messages.batches.create(          # a sibling's batch, the only one of this size
+        requests=[{"custom_id": f"r{i:06d}", "params": p} for i, (_, p) in enumerate(_requests(3))]))
+    runner._record(chunk)["submitting_ts"] = time.time()
+    runner._save_state()
+    again = _runner(client, tmp_path)
+    again.adopt_lost_batches = False
+    assert asyncio.run(again.resume()) == set()
+    assert again.state["chunks"] == [] and not chunk.exists()
+
+
 def test_resume_sends_again_when_no_single_batch_matches(tmp_path):
     client = _client()
     runner = _runner(client, tmp_path)
