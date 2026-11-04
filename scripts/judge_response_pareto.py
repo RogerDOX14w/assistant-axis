@@ -19,10 +19,13 @@ in judge prompts"):
   @r1_pnn20_s27p0g12_a<i>c): only designs where Gemini judges a share come near the budget.
 
 Arms: each judge alone; Luna + Haiku both judging every response (2x) and round-robin (each response by one of
-them, by (q + rank) % 18); the trio round-robin ((q + rank) % 27: Gemini 0, Luna 9, Haiku 18, inside the ninth).
-Judges blended Luna 4 : Haiku 3 : Gemini 3 (judge_score_combine.combine_tier_judges).  Further subsampling: of
-each judge's share, the fraction m/5 by instruction ((p + q + rank + r) % 5 < m, every question kept; it beat
-dropping whole questions on the two axes judged in full), averaged over the five rotations r.  Coverage above
+them, the golden halves of the ninth: judge_tier_cost_eval.golden_part over the absolute question number and the
+instruction, the design that tool cuts by since 2026-11-04); the trio round-robin by question ((q + rank) % 27:
+Gemini 0, Luna 9, Haiku 18, inside the ninth; Gemini judged only its share, so its arm cannot be cut otherwise from
+these cells).  Judges blended Luna 4 : Haiku 3 : Gemini 3 (judge_score_combine.combine_tier_judges).  Further
+subsampling: of each judge's share, the fraction m/3 cut the golden way (a response's golden point, rescaled within
+a golden share, in the first m thirds of the circle after a rotation r/3; no fifths, Roger, 2026-11-04), averaged
+over the three rotations r.  Coverage above
 the ninth (1/3, all) is extrapolated, hollow points: each arm's per-entity reliability at the ninth from a
 split half by question (more coverage adds questions; halves by instruction share their questions and
 predicted a fifth of the measured gain), Spearman-Brown to the larger coverage, rho scaled by the square root of the
@@ -70,7 +73,8 @@ LUNA, HAIKU, GEMINI = "gpt-5.6-luna", "claude-haiku-5-5", "gemini-3.1-flash-lite
 OCTOBER_RESPONSES = 1273 * 425      # kept responses an axis, the October extraction
 N_AXES = 200
 NINTH = 1 / 9
-FRACTIONS = (1, 2, 3, 4, 5)         # m/5 of each judge's share of the ninth
+FRACTION_K = 3                      # each judge's share of the ninth cut in thirds (Roger: no fifths)
+FRACTIONS = (1, 2, 3)               # m/3 of it
 EXTRAPOLATE = {"1/3": 3, "all": 9}  # coverage multiples of the ninth
 KEY_RE = re.compile(r"^(.*)\|p(\d+)q(\d+)$")
 #: Production prices, USD per 1M tokens: (input, output, cached read, once per prefix per cached token).
@@ -114,6 +118,8 @@ class Data:
         ids = sorted({key.rsplit("|", 1)[0] for _, key, _ in self.group.entities})
         bare = [i.split("|")[0] for i in ids]
         self.rank = {b: r for r, (b, i) in enumerate(zip(bare, ids)) if bare.count(b) == 1}
+        # the absolute question number of each question position (the golden design's Q)
+        self.qabs = {ev.response_question(key): ev.absolute_question(text[0]) for _, key, text in self.group.entities}
         self.kinds = rob.vector_kinds(data_dir)
 
     def cell(self, axis: str, model: str, label: str) -> Optional[Dict[Tuple[str, int, int], float]]:
@@ -191,16 +197,24 @@ def full_run_cost(parts: Sequence[Tuple[float, Tuple[float, float]]]) -> float:
     return sum(frac * OCTOBER_RESPONSES * (N_AXES * per_axis + once) for frac, (per_axis, once) in parts)
 
 
-def subsample(items: Dict[Tuple[str, int, int], float], rank: Dict[str, int], m: int, r: int,
-              share: Optional[Tuple[int, int]] = None) -> Dict[Tuple[str, int, int], float]:
-    """The items of a share ((q + rank) % mod == part) and of the fraction m/5 by instruction, rotation r."""
+def subsample(items: Dict[Tuple[str, int, int], float], rank: Dict[str, int], qabs: Dict[int, int], m: int, r: int,
+              share: Optional[Tuple[str, int, int]] = None) -> Dict[Tuple[str, int, int], float]:
+    """The items of a share and of the fraction m/FRACTION_K cut the golden way, rotation r.  A share is ("g", mod,
+    part), golden (judge_tier_cost_eval.golden_part), or ("q", mod, part), by question, (q + rank) % mod == part;
+    within a golden share the fraction reads the point's place inside the share's interval."""
+    one = 1 << 64
     out = {}
     for (n, p, q), v in items.items():
         if n not in rank:
             continue
-        if share and (q + rank[n]) % share[0] != share[1]:
+        point = ev.golden_point(qabs[q], p)
+        if share and share[0] == "q" and (q + rank[n]) % share[1] != share[2]:
             continue
-        if m < 5 and (p + q + rank[n] + r) % 5 >= m:
+        if share and share[0] == "g":
+            if (point * share[1]) >> 64 != share[2]:
+                continue
+            point = (point * share[1]) % one
+        if m < FRACTION_K and (((point + r * one // FRACTION_K) % one) * FRACTION_K) >> 64 >= m:
             continue
         out[(n, p, q)] = v
     return out
@@ -277,10 +291,10 @@ def main(argv=None) -> int:
         add(f"{LUNA}+{HAIKU}@2x", "Luna + Haiku, both", "Luna + Haiku, both judge every response",
             [("luna", judges["luna"], None), ("haiku", judges["haiku"], None)], [(1.0, unit[LUNA]), (1.0, unit[HAIKU])])
         add(f"{LUNA}+{HAIKU}@rr", "Luna + Haiku, round-robin", "Luna + Haiku, each response by one",
-            [("luna", judges["luna"], (18, 0)), ("haiku", judges["haiku"], (18, 9))], [(0.5, unit[LUNA]), (0.5, unit[HAIKU])])
+            [("luna", judges["luna"], ("g", 2, 0)), ("haiku", judges["haiku"], ("g", 2, 1))], [(0.5, unit[LUNA]), (0.5, unit[HAIKU])])
     if have["haiku"] and have["gemini"]:
         add(f"{LUNA}+{HAIKU}+{GEMINI}@rr", "trio, round-robin", "Luna + Haiku + Gemini, each response by one",
-            [("luna", judges["luna"], (27, 9)), ("haiku", judges["haiku"], (27, 18)), ("gemini", judges["gemini"], (27, 0))],
+            [("luna", judges["luna"], ("q", 27, 9)), ("haiku", judges["haiku"], ("q", 27, 18)), ("gemini", judges["gemini"], ("q", 27, 0))],
             [(1 / 3, unit[LUNA]), (1 / 3, unit[HAIKU]), (1 / 3, unit[GEMINI])])
     model_of = {"luna": LUNA, "haiku": HAIKU, "gemini": GEMINI}
 
@@ -307,14 +321,14 @@ def main(argv=None) -> int:
             rhos = {vk: [] for vk in vkeys}
             for ax in axes:
                 per_rot = []
-                for r in (range(5) if m < 5 else (0,)):
-                    parts = {model_of[j]: means(subsample(items[ax.axis_dir], data.rank, m, r, share))
+                for r in (range(FRACTION_K) if m < FRACTION_K else (0,)):
+                    parts = {model_of[j]: means(subsample(items[ax.axis_dir], data.rank, data.qabs, m, r, share))
                              for j, items, share in arm["members"]}
                     per_rot.append(rho_of(blend(parts), ax))
                 for vk in vkeys:
                     rhos[vk].append(float(np.mean([x[vk] for x in per_rot])))
-            cov = NINTH * m / 5
-            points[f"{arm['key']}|{m}/5"] = dict(arm=arm["key"], label=arm["label"], family=arm["family"], coverage=cov,
+            cov = NINTH * m / FRACTION_K
+            points[f"{arm['key']}|ninth x {m}/{FRACTION_K}"] = dict(arm=arm["key"], label=arm["label"], family=arm["family"], coverage=cov, m=m,
                                                  measured=True, cost=full_run_cost([(f * cov, u) for f, u in arm["cost_parts"]]),
                                                  rho={vk: float(np.mean(rhos[vk])) for vk in vkeys}, per_axis=rhos)
         # extrapolation above the ninth: split-half reliability by instruction parity, Spearman-Brown
@@ -325,9 +339,10 @@ def main(argv=None) -> int:
                 parts = {}
                 for j, items, share in arm["members"]:
                     # by question (more coverage adds questions), alternating along the judge's own questions,
-                    # which lie a share's modulus apart (9 in the ninth, 18 or 27 in a round-robin share)
-                    step = share[0] if share else 9
-                    sel = {k: v for k, v in subsample(items[ax.axis_dir], data.rank, 5, 0, share).items()
+                    # which lie a share's modulus apart (9 in the ninth and in a golden share of it, 27 in the
+                    # trio's share by question)
+                    step = share[1] if share and share[0] == "q" else 9
+                    sel = {k: v for k, v in subsample(items[ax.axis_dir], data.rank, data.qabs, FRACTION_K, 0, share).items()
                            if (k[2] // step) % 2 == h}
                     parts[model_of[j]] = means(sel)
                 halves.append(blend(parts))
@@ -335,7 +350,7 @@ def main(argv=None) -> int:
             r = pearsonr([halves[0][n] for n in common], [halves[1][n] for n in common])[0]
             rel.append(2 * r / (1 + r))
         R = float(np.mean(rel))
-        base = points[f"{arm['key']}|5/5"]
+        base = points[f"{arm['key']}|ninth x {FRACTION_K}/{FRACTION_K}"]
         for name, M in EXTRAPOLATE.items():
             RM = M * R / (1 + (M - 1) * R)
             cov = NINTH * M
@@ -351,7 +366,7 @@ def main(argv=None) -> int:
     title = "Response judging with a cached prefix: subsampling against stacking, under 12 projection variants"
     plot(points, variants, out / "judge_response_pareto.png", title, len(axes), check, inputs)
     result = {"config": {"axes_file": args.axes_file, "variants": vkeys, "prices": PRICES, "october_responses": OCTOBER_RESPONSES,
-                         "n_axes": N_AXES, "fractions": "m/5 of each judge's share of the ninth, by instruction",
+                         "n_axes": N_AXES, "fractions": "m/3 of each judge's share of the ninth, golden (judge_tier_cost_eval.golden_point), 3 rotations",
                          "extrapolation": "Spearman-Brown from a split half by question"},
               "unit_costs": {m: {"per_response_axis": a, "per_response_once": o, "tokens_per_call": prof[m]}
                              for m, (a, o) in unit.items()},
@@ -444,7 +459,7 @@ def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: i
                 ax.plot([points[k]["cost"] for k in ms], [q[k] for k in ms], "-", color=col, lw=0.8, alpha=0.6)
                 if ex:
                     ax.plot([points[k]["cost"] for k in ms[-1:] + ex], [q[k] for k in ms[-1:] + ex], ":", color=col, lw=0.8, alpha=0.6)
-                ax.scatter([points[k]["cost"] for k in ms], [q[k] for k in ms], s=[18 + 7 * int(k.split("|")[1][0]) for k in ms],
+                ax.scatter([points[k]["cost"] for k in ms], [q[k] for k in ms], s=[18 + 22 * points[k]["m"] / FRACTION_K for k in ms],
                            marker=mk, color=col, edgecolors="black" if False else col, zorder=3)
                 ax.scatter([points[k]["cost"] for k in ex], [q[k] for k in ex], s=40, marker=mk, facecolors="none",
                            edgecolors=col, linewidths=1.2, zorder=3)
@@ -474,7 +489,7 @@ def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: i
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=8.5, frameon=False, bbox_to_anchor=(0.5, 0.0))
     sub = (f"{n_axes} axes (scripts/tier_eval_axes_responses12.tsv); GPT-5.6 Luna, Haiku 5.5, Gemini 3.1 Flash-Lite, every call's direction "
            f"a coin, judges 4:3:3; stacking: each batch's axes regrouped at random, the best format at each k\n"
-           f"a ninth of the kept responses measured: points from 1/45 (smallest) to 1/9, subsampled by instruction; 1/3 and all extrapolated "
+           f"a ninth of the kept responses measured: points from 1/27 (smallest) to 1/9, subsampled the golden way (absolute question and instruction); 1/3 and all extrapolated "
            f"(hollow: Spearman-Brown by question, gains scaled by {check['calibration']:.2f}, the measured-to-predicted ratio on Luna's third and full cells)\n"
            f"cost of a full run, 200 October axes (1,273 entities x 425 kept responses) at the point's coverage, every prefix cached: Luna by Flex, "
            f"Haiku by Message Batches, Gemini by its Batch API with explicit caches")
