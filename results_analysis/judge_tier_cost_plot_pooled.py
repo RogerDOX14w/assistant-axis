@@ -63,14 +63,15 @@ import numpy as np
 
 from assistant_axis.judge_pricing import (
     GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT, SONNET_RATE_IN, SONNET_RATE_OUT,
-    price_for_model,
+    cache_rate_factors, price_for_model,
 )
 from assistant_axis.plot_metadata import png_metadata
 from assistant_axis.provenance import (
     CACHE_POLICIES, InputSpec, current_file_input, current_files_input, load_and_register,
 )
 
-PROVIDER_COLOR = {"openai": "#7FB069", "anthropic": "#D9636B", "google": "#5B8DEF", "blend": "#8E6BBF"}
+PROVIDER_COLOR = {"openai": "#7FB069", "anthropic": "#D9636B", "google": "#5B8DEF", "typesafe": "#E39B2D",
+                  "blend": "#8E6BBF"}
 
 EST_IN_PER_ENTITY = 320 + 150
 EST_OUT_PER_ENTITY = 80
@@ -81,6 +82,8 @@ def provider_of(model: str) -> str:
         return "blend"
     if model.startswith("gemini"):
         return "google"
+    if model.startswith("jev"):     # TypeSafe AI's Jev (2026-11-04)
+        return "typesafe"
     return "openai" if model.startswith(("gpt-", "o1-", "o3-", "o4-")) else "anthropic"
 
 
@@ -168,7 +171,13 @@ def load_measured_cost(usage_path: Path, price_basis: str = DEFAULT_PRICE_BASIS)
             print(f"WARNING: {usage_path}: no {price_basis} price for {model!r}; using the recorded cost",
                   file=sys.stderr)
             return d.get("total_cost_usd")
-        total += (entry.get("prompt_tokens", 0) * rate_in
+        # cache-written and cache-read tokens (part of prompt_tokens) at their factors of the input rate, as
+        # billed (judge_pricing.cache_rate_factors; before 2026-11-04 they were repriced as plain input, which
+        # put a cached-prefix arm at five times its bill)
+        written, read = int(entry.get("cache_write_tokens", 0)), int(entry.get("cache_read_tokens", 0))
+        write_factor, read_factor = cache_rate_factors(model)
+        plain = entry.get("prompt_tokens", 0) - written - read
+        total += ((plain + written * write_factor + read * read_factor) * rate_in
                   + entry.get("completion_tokens", 0) * rate_out) / 1e6
     return total
 

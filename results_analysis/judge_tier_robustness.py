@@ -967,7 +967,7 @@ def render_figure(out_png: Path, models_by_rho: Sequence[str], variants: Sequenc
     if not all(measured[m] for m in models_by_rho):
         handles.insert(3, plt.Line2D([0], [0], marker="o", color="w", markerfacecolor="none", markeredgecolor="#888888",
                                      markersize=8, label="hollow = estimated cost"))
-    for provider, name in (("google", "Google"), ("blend", "Blend of judges")):
+    for provider, name in (("google", "Google"), ("typesafe", "TypeSafe (Jev)"), ("blend", "Blend of judges")):
         if any(provider_of(m) == provider for m in models_by_rho):
             handles.insert(2, plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=PROVIDER_COLOR[provider],
                                          markeredgecolor=PROVIDER_COLOR[provider], markersize=8, label=name))

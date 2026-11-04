@@ -256,3 +256,18 @@ def test_the_frontier_keeps_only_points_on_its_convex_hull() -> None:
     # a point exactly on the chord of its neighbours stays
     line = [(0.01, q(0.70)), (0.02, q(0.72)), (0.03, q(0.74))]
     assert ptp.pareto_frontier(line) == [0, 1, 2]
+
+
+def test_measured_cost_prices_cache_tokens_as_billed(tmp_path: Path) -> None:
+    """A cached-prefix cell (2026-11-04): reads at a tenth of the input rate, writes at 1.25 times."""
+    from results_analysis.judge_tier_cost_plot_pooled import load_measured_cost
+    u = tmp_path / "usage.json"
+    u.write_text(json.dumps({"total_cost_usd": 0.2758, "per_model": {"gpt-5.6-luna:flex": {
+        "model": "gpt-5.6-luna:flex", "prompt_tokens": 11_645_195, "cache_read_tokens": 11_174_972,
+        "completion_tokens": 195_087}}}))
+    plain = 11_645_195 - 11_174_972
+    want = ((plain + 11_174_972 * 0.1) * 0.10 + 195_087 * 0.60) / 1e6
+    assert load_measured_cost(u, "batch") == pytest.approx(want) and abs(want - 0.2758) < 0.001
+    u.write_text(json.dumps({"per_model": {"gpt-5.6-luna:flex": {"model": "gpt-5.6-luna:flex", "prompt_tokens": 1_000_000,
+                                                                 "cache_write_tokens": 1_000_000, "completion_tokens": 0}}}))
+    assert load_measured_cost(u, "batch") == pytest.approx(1.25 * 0.10)

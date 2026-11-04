@@ -21,6 +21,12 @@ apart (Luna 2x: 6 choices of its 4 passes).  The rho of one choice is judge_tier
 An earlier version (2026-11-03) read Nx as N of the five instructions judged once; its figure is kept in
 <output_dir>/coverage_reading/.
 
+Jev (TypeSafe AI, 2026-11-04, Roger: "show Jev, Jev 2x, adding Jev to the trio, and replacing Gemini with Jev"):
+the arms Jev 1x and 2x, the trio + Jev and Luna + Haiku + Jev (Gemini replaced) at 1x and 2x, Jev weighted 3 as
+each other judge.  Its cells are scripts/judge_jev_entities.py's best arm, a Noul question asking whether each
+entity is nearer the axis's second end than most of the other entities, 160 entities a request (JEV_CELLS), in
+the axes' own order like every other cell here; ``--without_jev`` draws the figure without them.
+
 ``--mode descriptions`` draws the same arms for description judging (Roger, 2026-11-03: "confirm that this
 also works well for description judging"): a pass is one cell of judge_descriptions.py's method
 (``<judge>@b10n20s<seed>jl``, the entity's description once, N=20 a call, the judge display form of the
@@ -53,7 +59,16 @@ from results_analysis.judge_tier_cost_eval import cell_scores_path, cell_usage_p
 from results_analysis.judge_tier_cost_plot_pooled import DEFAULT_PRICE_BASIS, PRICE_BASES, load_measured_cost
 
 JUDGES = (("Luna", "gpt-5.6-luna"), ("Haiku", "claude-haiku-5-5"), ("Gemini", "gemini-3.1-flash-lite"))
-NAMES = {m: n for n, m in JUDGES}
+JEV = "jev-1.14.0"
+NAMES = {**{m: n for n, m in JUDGES}, JEV: "Jev"}
+#: Jev's cells by mode, (round or pass) -> cell directory name: relative Noul, 160 entities a request, own order
+#: (scripts/judge_jev_entities.py); two passes in each mode (instruction rounds 0-9, description seeds 1 and 2).
+JEV_CELLS = {"instructions": lambda r: f"{JEV}@ji_noul_relative_n160_r{r}",
+             "descriptions": lambda r: f"{JEV}@jd_noul_relative_n160s{r + 1}"}
+JEV_PASSES = 2
+#: The Jev arms: the judges of each, drawn at 1x and 2x.
+JEV_SETS = ((("Jev", JEV),), (*JUDGES, ("Jev", JEV)), (JUDGES[0], JUDGES[1], ("Jev", JEV)))
+WITH_JEV = True
 CELL_ARM = "i1_p0n20"          # one instruction per entity per call, plain wrapper, N=20
 ROUNDS_PER_PASS = 5            # an entity's five instructions, one per round
 #: Passes judged (Roger, 2026-11-03: "take Luna to 4x, Haiku and Gemini to 2x")
@@ -70,7 +85,7 @@ MIXES = ({"gpt-5.6-luna": 2, "claude-haiku-5-5": 1},
          {"gpt-5.6-luna": 2, "claude-haiku-5-5": 2, "gemini-3.1-flash-lite": 1})
 WEIGHT_STEP = 0.05
 STEM = "judge_instruction_12way"
-X_TICKS = (0.03, 0.05, 0.07, 0.1, 0.15, 0.2, 0.3, 0.5, 0.7)
+X_TICKS = (0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.2, 0.3, 0.5, 0.7)     # 0.02 for Jev 1x (2026-11-04)
 #: Description judging: the cells of judge_descriptions.py's method under the judge display form (the
 #: ``jl`` siblings, scripts/judge_tier_reask.py --mode names, or judged under that form); Luna's cell name
 #: carries its reasoning-off token.
@@ -101,7 +116,8 @@ MODES = {
                          EXTRA_PASSES, MIXES, CELL_ARM, STEM, X_TICKS, "each of an entity's five instructions"),
     "descriptions": Mode("descriptions", lambda m, r: f"{m}{DESC_CELL_TOKEN.get(m, '')}@{DESC_CELL_ARM}s{r + 1}jl", 1,
                          DESC_PASSES, SET_PASSES, DESC_EXTRA_PASSES, MIXES, f"{DESC_CELL_ARM}jl", "judge_description_12way",
-                         (0.01, 0.015, 0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.2, 0.3), "an entity's description"),
+                         (0.003, 0.005, 0.01, 0.015, 0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.2, 0.3),
+                         "an entity's description"),
 }
 INSTRUCTIONS = MODES["instructions"]
 
@@ -115,9 +131,20 @@ def pass_rounds(p: int, rounds_per_pass: int = ROUNDS_PER_PASS) -> range:
     return range(rounds_per_pass * p, rounds_per_pass * (p + 1))
 
 
+def cell_of(mode: "Mode", m: str, r: int) -> str:
+    """The cell directory of judge ``m``'s round (or pass) ``r`` in ``mode``."""
+    return JEV_CELLS[mode.name](r) if m == JEV else mode.cell(m, r)
+
+
+def passes_of(mode: "Mode") -> Dict[str, int]:
+    """Each judge's passes in ``mode``, Jev's included when it is drawn."""
+    return {**mode.passes, **({JEV: JEV_PASSES} if WITH_JEV else {})}
+
+
 def arms(mode: Mode = INSTRUCTIONS) -> Dict[str, Tuple[str, Dict[str, int]]]:
     """``{arm key: (label, {model: passes})}``: singles, pairs, the trio, each at every k of the mode's
-    set_passes; a judge alone at its extra_passes; then the mixes."""
+    set_passes; a judge alone at its extra_passes; then the mixes; then, unless --without_jev, the Jev sets
+    (JEV_SETS) at 1x and 2x."""
     out = {}
     for size in (1, 2, 3):
         for combo in itertools.combinations(JUDGES, size):
@@ -127,6 +154,11 @@ def arms(mode: Mode = INSTRUCTIONS) -> Dict[str, Tuple[str, Dict[str, int]]]:
                 out[key] = (" + ".join(n for n, _ in combo) + f" {k}x", {m: k for _, m in combo})
     for spec in mode.mixes:
         out[mix_key(spec, mode)] = (" + ".join(f"{NAMES[m]} {k}x" for m, k in spec.items()), dict(spec))
+    if WITH_JEV:
+        for combo in JEV_SETS:
+            for k in (1, 2):
+                key = "+".join(m for _, m in combo) + f"@{mode.arm_token}x{k}"
+                out[key] = (" + ".join(n for n, _ in combo) + f" {k}x", {m: k for _, m in combo})
     return out
 
 
@@ -259,9 +291,12 @@ def main(argv=None) -> int:
     ap.add_argument("--axes_label", default="61 axes")
     ap.add_argument("--dev_axes_file", default="scripts/tier_eval_axes_dev30.tsv",
                     help="the development half, for the split-half check of the mixes' fitted weights")
+    ap.add_argument("--without_jev", action="store_true", help="leave the Jev arms out (the figure before 2026-11-04)")
     ap.add_argument("--cache-policy", dest="cache_policy", choices=CACHE_POLICIES, default="warn",
                     help="what to do when a score file's recorded inputs have changed: strict | warn (default) | rebuild | off")
     args = ap.parse_args(argv)
+    global WITH_JEV
+    WITH_JEV = not args.without_jev
     t0 = time.time()
     mode = MODES[args.mode]
     stem = args.stem or mode.stem
@@ -282,11 +317,12 @@ def main(argv=None) -> int:
     specs = {k: spec for k, (_, spec) in arms(mode).items()}
     models = sorted({m for spec in specs.values() for m in spec})
     scores, costs, score_paths, usage_paths, missing = {}, {}, [], [], []
-    rounds_of = {m: range(mode.rounds_per_pass * mode.passes[m]) for m in models}
+    passes = passes_of(mode)
+    rounds_of = {m: range(mode.rounds_per_pass * passes[m]) for m in models}
     for ax in axes:
         for m in models:
             for r in rounds_of[m]:
-                d = E / f"{ax.axis_dir}{rob.TIER_EVAL_SUFFIX}" / mode.cell(m, r)
+                d = E / f"{ax.axis_dir}{rob.TIER_EVAL_SUFFIX}" / cell_of(mode, m, r)
                 up = cell_usage_path(d) if cell_scores_path(d).exists() else d / "usage.json"
                 if not up.exists():
                     missing.append(str(d))
@@ -302,7 +338,7 @@ def main(argv=None) -> int:
     inputs.append(current_files_input(dep_key=f"{mode.name[:-1]}_scores", paths=score_paths))
     inputs.append(current_files_input(dep_key=f"{mode.name[:-1]}_usage", paths=usage_paths,
                                       extras={"price_basis": args.price_basis}))
-    print(f"[cells] {len(scores)} round cells (" + ", ".join(f"{NAMES[m]} {mode.passes[m]} passes" for m in models)
+    print(f"[cells] {len(scores)} round cells (" + ", ".join(f"{NAMES[m]} {passes[m]} passes" for m in models)
           + f"; {len(axes)} axes), {time.time() - t0:.1f}s", file=sys.stderr)
 
     # Projections under the 12 variants
@@ -325,7 +361,7 @@ def main(argv=None) -> int:
     for key, spec in specs.items():
         if len(set(spec.values())) > 1:
             grid = weight_grid(len(spec))
-            G = fit_rho(spec, axes, scores, {a: p[default] for a, p in projections.items()}, grid, mode.passes,
+            G = fit_rho(spec, axes, scores, {a: p[default] for a, p in projections.items()}, grid, passes,
                         mode.rounds_per_pass)
             fits[key] = fit_weights(G, grid, dev, list(spec))
             weights[key] = fits[key]["weights"]
@@ -336,7 +372,7 @@ def main(argv=None) -> int:
                   file=sys.stderr)
     print(f"[fit] {time.time() - t0:.1f}s", file=sys.stderr)
 
-    rho, cost, per_choice = arm_table(specs, axes, scores, costs, projections, vkeys, mode.passes, weights,
+    rho, cost, per_choice = arm_table(specs, axes, scores, costs, projections, vkeys, passes, weights,
                                       mode.rounds_per_pass)
     print(f"[rho] {time.time() - t0:.1f}s", file=sys.stderr)
     keys = list(specs)
@@ -355,7 +391,7 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     extra = ", ".join(f"{NAMES[m]} alone to {max(k)}x" for m, k in mode.extra_passes.items())
     result = {"config": {"variants": vkeys, "default_variant": default, "price_basis": args.price_basis,
-                         "mode": mode.name, "passes": mode.passes, "rounds_per_pass": mode.rounds_per_pass,
+                         "mode": mode.name, "passes": passes, "rounds_per_pass": mode.rounds_per_pass,
                          "cell_arm": mode.arm_token, "axes_file": args.axes_file, "data_dir": str(data_dir),
                          "nx": f"{mode.text} judged N times, in N passes (pass p = rounds {mode.rounds_per_pass}p..)",
                          "passes_rule": "every choice of each judge's k passes, made for each judge apart",
@@ -365,7 +401,7 @@ def main(argv=None) -> int:
                          "weight_step": WEIGHT_STEP, "dev_axes_file": args.dev_axes_file},
               "axes": [ax.axis_dir for ax in axes],
               "arms": {k: {"label": labels[k], "judges": specs[k],
-                           "n_choices": len(replicates(specs[k], mode.passes, mode.rounds_per_pass)),
+                           "n_choices": len(replicates(specs[k], passes, mode.rounds_per_pass)),
                            "mean_cost": cost[k], "mean_rho": {vk: per_variant[vk][k]["mean_rho"] for vk in vkeys},
                            "on_frontier_of_12": counts[k], "per_choice_mean_rho": per_choice[k],
                            **({"fitted_weights": fits[k]} if k in fits else {})} for k in order},
@@ -374,14 +410,17 @@ def main(argv=None) -> int:
         result, title=f"{mode.name.capitalize()[:-1]} judging by passes, {len(vkeys)} projection variants",
         inputs=inputs), indent=1))
     headline = (f"{mode.name.capitalize()[:-1]} judging, every set of judges at 1x and 2x"
-                + (f" ({extra})" if extra else "") + f", under {len(variants)} projection variants: {args.axes_label} "
-                f"(default {default})")
+                + (f" ({extra})" if extra else "")
+                + ("; Jev alone, beside the trio and in Gemini's place" if WITH_JEV else "")
+                + f", under {len(variants)} projection variants: {args.axes_label} (default {default})")
     sub = (f"Nx = every judge judges {mode.text} N times (N passes, each in its own batch orders, N=20 a call); "
            f"judges weighted Luna 4 : 3 each other; arrows run from 1x up\n"
            f"each point averaged over every choice of its passes (passes judged: " + ", ".join(
-               f"{NAMES[m]} {n}" for m, n in mode.passes.items()) + f"); mixes: judge weights (in parentheses) fitted to "
+               f"{NAMES[m]} {n}" for m, n in passes.items()) + f"); mixes: judge weights (in parentheses) fitted to "
            f"the most rho at {default}\n"
-           f"cost at {rob.PRICE_BASIS_LABEL[args.price_basis]}; soft_K: K={rob.DEFAULT_SOFT_K}; "
+           f"cost at {rob.PRICE_BASIS_LABEL[args.price_basis]}"
+           + ("; Jev (relative Noul, 160 a call) at its one price, $0.042 per 1M input, output free" if WITH_JEV else "")
+           + f"; soft_K: K={rob.DEFAULT_SOFT_K}; "
            f"soft_shear: L={rob.DEFAULT_SOFT_SHEAR_L}")
     rob.render_figure(out / f"{stem}.png", order, variants, per_variant, frontiers, {k: True for k in keys}, default,
                       len(axes), sub, inputs,
