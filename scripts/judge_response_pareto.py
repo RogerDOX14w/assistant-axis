@@ -39,9 +39,20 @@ naming an explicit cache per prefix ($0.125/$0.75, cached reads $0.0125; each ca
 input rate, $0.25, and stored an hour at $1 per 1M an hour; the implicit cache reads nothing in batch).  Each
 judge's tokens a call are its own, measured on these runs; a stacked arm's cost is its measured cost.
 
-Output: <output_dir>/judge_response_pareto.png and .json.  No API calls.
+With --stack_group g61 (Roger, 2026-11-05: "Can you do the Pareto plot at 61, mostly?"): the 61 axes of
+scripts/tier_eval_axes.tsv, Luna only, the only judge and format judged on all 61: one axis a call (the twelve's
+balanced cells as above, a coin run @r1_pnn20_s9p0g61_a<i>c on the other 49) against plain stacking at k = 2, 4
+and 6 (@rk_pnn20_s9p0g61_k<k>, each batch's 61 axes regrouped at random), every axis stacked or the worst 10% or
+25% of the axes judged one axis a call instead.  The worst are chosen by cross-fitting: the ninth's questions fall
+in 9 folds by the golden point of the absolute question number; for each fold, the axes whose stacking penalty
+(stacked minus one axis a call, rho averaged over the 12 variants) is worst on the other 8 folds are judged one
+axis a call on that fold, and the folds are pooled.  Such an arm costs its share of axes at each price.
+
+Output: <output_dir>/judge_response_pareto_{luna,answers,jev,models}.png and judge_response_pareto.json; with
+--stack_group g61, judge_response_pareto_61_luna.png and judge_response_pareto_61.json.  No API calls.
 
 Usage: uv run python scripts/judge_response_pareto.py --output_dir roger/axis_judge_experiments/response_pareto
+       uv run python scripts/judge_response_pareto.py --stack_group g61 --output_dir roger/axis_judge_experiments/response_pareto
 """
 from __future__ import annotations
 
@@ -115,6 +126,17 @@ FIGURES = {
                "(Gemini judged only its 1/27)"),
 }
 FMT_NAME = {"rk_pn": "plain", "rk_pl": "labelled", "rk_pa": "axis by axis"}
+AXES_12, AXES_61 = "scripts/tier_eval_axes_responses12.tsv", "scripts/tier_eval_axes.tsv"
+#: The 61-axis mode: plain stacking's k, the shares of the axes left out of it, and the cross-fitting folds.
+STACK61_K = (2, 4, 6)
+LEAVE_OUT = (0.10, 0.25)            # Roger, 2026-11-04: "try 10%, 25%, and a plausible seeming threshold"
+CROSSFIT_FOLDS = 9
+INV_PHI = 0.6180339887498949
+FIGURE_61 = ("61 axes, Luna only: one axis a call against plain stacking, every axis or all but the worst",
+             "judge_response_pareto_61_luna.png",
+             "GPT-5.6 Luna alone, every call's direction a coin, 20 answers a call; plain stacking \"1, SCORES: 18, 42\", each "
+             "batch's 61 axes regrouped at random; the worst 10% or 25% of the axes judged one axis a call instead, chosen on "
+             "the other 8 of 9 question folds (cross-fitted)")
 
 
 def bare_scores(raw: Dict[str, Any]) -> Dict[Tuple[str, int, int], float]:
@@ -263,11 +285,17 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--experiments_dir", default=str(rob.DEFAULT_EXPERIMENTS_DIR))
     ap.add_argument("--data_dir", default=str(rob.DEFAULT_DATA_DIR))
-    ap.add_argument("--axes_file", default="scripts/tier_eval_axes_responses12.tsv")
+    ap.add_argument("--stack_group", choices=("g12", "g61"), default="g12",
+                    help="g12: the twelve axes, every judge and format (four figures); g61: the 61 axes, Luna only")
+    ap.add_argument("--axes_file", default=None, help=f"default {AXES_12}, or {AXES_61} with --stack_group g61")
     ap.add_argument("--instructions_dir", default="/tmp/claude-501/corpus_2026-05-24/data")
     ap.add_argument("--cache_dir", default=str(rob.DEFAULT_EXPERIMENTS_DIR / "_tier_eval_scratch" / "robustness_cache"))
     ap.add_argument("--output_dir", required=True)
     args = ap.parse_args(argv)
+    if args.axes_file is None:
+        args.axes_file = AXES_61 if args.stack_group == "g61" else AXES_12
+    if args.stack_group == "g61":
+        return main61(args)
     E, data_dir = Path(args.experiments_dir), Path(args.data_dir).resolve()
     data = Data(E, Path(args.axes_file), data_dir, Path(args.instructions_dir))
     axes = data.axes
@@ -359,23 +387,55 @@ def main(argv=None) -> int:
                 [(1 / 3, unit[LUNA]), (1 / 3, unit[HAIKU]), (1 / 3, unit[jb])], ["models"])
     model_of = {"luna": LUNA, "luna40": LUNA, "haiku": HAIKU, "gemini": GEMINI, **{lab: JEV for lab, _ in JEV_ARMS}}
 
-    # projections under the 12 variants
+    variants, vkeys, rho_of = projector(data, Path(args.cache_dir), data_dir)
+    check = validate_extrapolation(data, E)
+    calib = check["calibration"]
+    points = arm_points(arms, data, model_of, rho_of, vkeys, calib)
+
+    out = Path(args.output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    inputs = data.inputs + [current_files_input(dep_key="cells", paths=sorted(set(data.read)))]
+    title = "Response judging with a cached prefix: subsampling against stacking, under 12 projection variants"
+    for fig_key, (fig_title, fname, lead) in FIGURES.items():
+        sub_points = {k: v for k, v in points.items() if fig_key in v["figures"]}
+        ref = {f"{LUNA}@k1"} if fig_key == "jev" else set()
+        plot(sub_points, variants, out / fname, f"Response judging, {fig_title}", len(axes), check, inputs, ref_arms=ref, lead=lead,
+             axes_file=args.axes_file)
+        print(f"wrote {out / fname}", file=sys.stderr)
+    result = {"config": {"axes_file": args.axes_file, "variants": vkeys, "prices": PRICES, "october_responses": OCTOBER_RESPONSES,
+                         "n_axes": N_AXES, "fractions": "m/3 of each judge's share of the ninth, golden (judge_tier_cost_eval.golden_point), 3 rotations",
+                         "extrapolation": "Spearman-Brown from a split half by question"},
+              "unit_costs": {m: {"per_response_axis": a, "per_response_once": o, "tokens_per_call": prof.get(m)}
+                             for m, (a, o) in unit.items()},
+              "extrapolation_check": check, "points": points}
+    (out / "judge_response_pareto.json").write_text(json.dumps(json_metadata(result, title=title, inputs=inputs), indent=1))
+    print(f"wrote {out / 'judge_response_pareto.json'}", file=sys.stderr)
+    return 0
+
+
+def projector(data: Data, cache_dir: Path, data_dir: Path):
+    """The 12 projection variants, and rho_of(entity scores, axis) -> {variant: Spearman rho} on data's axes."""
     variants = rob.build_variants(rob.DEFAULT_SLOTS, rob.DEFAULT_LAYERS, list(rob.REGIMES),
                                   K=rob.DEFAULT_SOFT_K, L=rob.DEFAULT_SOFT_SHEAR_L)
     vkeys = [v.key for v in variants]
     meta = {"version": rob.CACHE_VERSION, "fingerprint": rob.data_fingerprint(data_dir), "ca_kind": "combined"}
-    slices = rob.load_slices(Path(args.cache_dir), rob.DEFAULT_SLOTS, rob.DEFAULT_LAYERS, meta, True)
+    slices = rob.load_slices(cache_dir, rob.DEFAULT_SLOTS, rob.DEFAULT_LAYERS, meta, True)
     if slices is None:
         raise SystemExit("the slice cache is stale or missing: run scripts/judge_instruction_12way.py once to rebuild it")
-    names = {ax.axis_dir: set(rob.lift_scores({n: 0.0 for n in data.rank}, data.kinds)) for ax in axes}
-    proj = rob.project_variants(slices, axes, variants, names, data_dir)
+    names = {ax.axis_dir: set(rob.lift_scores({n: 0.0 for n in data.rank}, data.kinds)) for ax in data.axes}
+    proj = rob.project_variants(slices, data.axes, variants, names, data_dir)
 
     def rho_of(scores: Dict[str, float], ax) -> Dict[str, float]:
         lifted = rob.lift_scores(scores, data.kinds)
         return {vk: rob.cell_rho(lifted, proj[ax.axis_dir][vk], (ax.pos, ax.neg))[0] for vk in vkeys}
+    return variants, vkeys, rho_of
 
-    check = validate_extrapolation(data, E)
-    calib = check["calibration"]
+
+def arm_points(arms: List[dict], data: Data, model_of: Dict[str, str], rho_of, vkeys: List[str],
+               calib: float) -> Dict[str, dict]:
+    """Each arm's points: the fractions m/3 of the ninth measured (each the mean of three rotations), and the
+    coverages above the ninth extrapolated by Spearman-Brown, the gains scaled by calib."""
+    axes = data.axes
     points: Dict[str, dict] = {}
     for arm in arms:
         for m in FRACTIONS:
@@ -422,24 +482,97 @@ def main(argv=None) -> int:
                 cost=full_run_cost([(f * cov, u) for f, u in arm["cost_parts"]]),
                 # the Spearman-Brown gain, scaled by the measured-to-predicted ratio of the check
                 rho={vk: base["rho"][vk] * (1 + calib * (math.sqrt(RM / R) - 1)) for vk in vkeys})
+    return points
+
+
+def main61(args) -> int:
+    """The 61 axes, Luna only: one axis a call against plain stacking at k = 2, 4, 6, every axis stacked or all but
+    the worst 10% or 25%, those chosen by cross-fitting over question folds (module docstring)."""
+    from results_analysis.judge_tier_cost_plot_pooled import load_measured_cost
+    E, data_dir, inst = Path(args.experiments_dir), Path(args.data_dir).resolve(), Path(args.instructions_dir)
+    data = Data(E, Path(args.axes_file), data_dir, inst)
+    d12 = Data(E, Path(AXES_12), data_dir, inst)          # the twelve's balanced cells and Luna's cost a call
+    axes, A = data.axes, len(data.axes)
+    i12 = {a.axis_dir: i for i, a in enumerate(d12.axes)}
+    k1 = {a.axis_dir: (d12.luna_balanced(i12[a.axis_dir], a.axis_dir) if a.axis_dir in i12
+                       else data.cell(a.axis_dir, LUNA, f"@r1_pnn20_s9p0g61_a{i}c")) for i, a in enumerate(axes)}
+    stacked = {k: {a.axis_dir: data.cell(a.axis_dir, LUNA, f"@rk_pnn20_s9p0g61_k{k}") for a in axes} for k in STACK61_K}
+    missing = [f"{ax} ({what})" for what, cells in [("one axis a call", k1)] + [(f"k={k}", c) for k, c in stacked.items()]
+               for ax, v in cells.items() if not v]
+    if missing:
+        raise SystemExit(f"{len(missing)} cells missing, e.g. {missing[:4]}")
+
+    unit_luna = judge_costs(per_call_profile(d12, LUNA, lambda i: f"@r1_pnn20_s9p0g12_a{i}"), LUNA)
+    stack_unit = {}
+    for k in STACK61_K:                 # a stacked run's measured cost, per response and axis
+        per = []
+        for a in axes:
+            cd = E / f"{a.axis_dir}{rob.TIER_EVAL_SUFFIX}" / f"{LUNA}@rk_pnn20_s9p0g61_k{k}"
+            per.append(load_measured_cost(cd / "usage.json", "batch") / json.load(open(cd / "scores_responses.json"))["_provenance"]["n_items"])
+            data.read.append(cd / "usage.json")
+        stack_unit[k] = (float(np.mean(per)), unit_luna[1])
+    for name, u in [("one axis a call", unit_luna)] + [(f"plain k={k}", u) for k, u in stack_unit.items()]:
+        print(f"[cost] {name}: ${u[0] * 1e6:.2f} per 1M response-axes; full run, every response: "
+              f"${full_run_cost([(1.0, u)]):,.0f}", file=sys.stderr)
+
+    variants, vkeys, rho_of = projector(data, Path(args.cache_dir), data_dir)
+    fold = lambda key: int(((data.qabs[key[2]] * INV_PHI) % 1.0) * CROSSFIT_FOLDS)
+    part = lambda items, keep: {key: v for key, v in items.items() if fold(key) in keep}
+    rho_mean = lambda items, ax: float(np.mean(list(rho_of(means(items), ax).values())))
+    folds = set(range(CROSSFIT_FOLDS))
+    # each fold's selection: the stacking penalty of every axis on the other folds
+    base = {j: np.array([rho_mean(part(k1[a.axis_dir], folds - {j}), a) for a in axes]) for j in folds}
+    penalty = {(k, j): np.array([rho_mean(part(stacked[k][a.axis_dir], folds - {j}), a) for a in axes]) - base[j]
+               for k in STACK61_K for j in folds}
+
+    arms, left_out = [], {}
+    arms.append(dict(key=f"{LUNA}@k1", label="Luna", family="Luna, one axis a call", members=[("luna", k1, None)],
+                     cost_parts=[(1.0, unit_luna)], figures=["luna61"]))
+    for k in STACK61_K:
+        arms.append(dict(key=f"{LUNA}@rk_pnk{k}", label=f"Luna k={k} plain", family="Luna stacked, plain",
+                         members=[("luna", stacked[k], None)], cost_parts=[(1.0, stack_unit[k])], figures=["luna61"]))
+        for share in LEAVE_OUT:
+            n, pct = round(share * A), round(100 * share)
+            out_of = {j: set(np.argsort(penalty[(k, j)])[:n].tolist()) for j in folds}
+            merged = {}
+            for i, a in enumerate(axes):
+                items: Dict[Tuple[str, int, int], float] = {}
+                for j in folds:
+                    items.update(part(k1[a.axis_dir] if i in out_of[j] else stacked[k][a.axis_dir], {j}))
+                merged[a.axis_dir] = items
+            key = f"{LUNA}@rk_pnx{pct}k{k}"
+            left_out[key] = {a.axis_dir: c for i, a in enumerate(axes) if (c := sum(i in out_of[j] for j in folds))}
+            arms.append(dict(key=key, label=f"Luna k={k} plain, worst {pct}% one axis a call",
+                             family=f"Luna stacked, plain, worst {pct}% one axis a call", members=[("luna", merged, None)],
+                             cost_parts=[(n / A, unit_luna), (1 - n / A, stack_unit[k])], figures=["luna61"]))
+
+    check = validate_extrapolation(data, E)
+    points = arm_points(arms, data, {"luna": LUNA}, rho_of, vkeys, check["calibration"])
+    ref = points[f"{LUNA}@k1|ninth x {FRACTION_K}/{FRACTION_K}"]["rho"]
+    for arm in arms:
+        p = points[f"{arm['key']}|ninth x {FRACTION_K}/{FRACTION_K}"]
+        d = np.array([p["rho"][vk] - ref[vk] for vk in vkeys])
+        print(f"[ninth] {arm['label']:45s} cost {p['cost']:6.0f}  rho {np.mean(list(p['rho'].values())):.4f}  "
+              f"minus one axis a call, same coverage: slot 0 {d[:6].mean():+.4f}, slot 6 {d[6:].mean():+.4f}", file=sys.stderr)
 
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
-    inputs = data.inputs + [current_files_input(dep_key="cells", paths=sorted(set(data.read)))]
-    title = "Response judging with a cached prefix: subsampling against stacking, under 12 projection variants"
-    for fig_key, (fig_title, fname, lead) in FIGURES.items():
-        sub_points = {k: v for k, v in points.items() if fig_key in v["figures"]}
-        ref = {f"{LUNA}@k1"} if fig_key == "jev" else set()
-        plot(sub_points, variants, out / fname, f"Response judging, {fig_title}", len(axes), check, inputs, ref_arms=ref, lead=lead)
-        print(f"wrote {out / fname}", file=sys.stderr)
+    data.read += d12.read
+    inputs = data.inputs + d12.inputs + [current_files_input(dep_key="cells", paths=sorted(set(data.read)))]
+    fig_title, fname, lead = FIGURE_61
+    plot(points, variants, out / fname, f"Response judging, {fig_title}", A, check, inputs, lead=lead, axes_file=args.axes_file)
+    print(f"wrote {out / fname}", file=sys.stderr)
+    title = "Response judging on 61 axes, Luna only: stacking with the worst axes left out, under 12 projection variants"
     result = {"config": {"axes_file": args.axes_file, "variants": vkeys, "prices": PRICES, "october_responses": OCTOBER_RESPONSES,
-                         "n_axes": N_AXES, "fractions": "m/3 of each judge's share of the ninth, golden (judge_tier_cost_eval.golden_point), 3 rotations",
+                         "n_axes": N_AXES, "stack_k": list(STACK61_K), "leave_out": list(LEAVE_OUT),
+                         "crossfit": f"{CROSSFIT_FOLDS} folds by frac(Q / phi) of the absolute question; each fold's left-out axes "
+                                     "the worst by stacking penalty (rho mean of 12 variants) on the other folds",
+                         "fractions": "m/3 of the ninth, golden (judge_tier_cost_eval.golden_point), 3 rotations",
                          "extrapolation": "Spearman-Brown from a split half by question"},
-              "unit_costs": {m: {"per_response_axis": a, "per_response_once": o, "tokens_per_call": prof.get(m)}
-                             for m, (a, o) in unit.items()},
-              "extrapolation_check": check, "points": points}
-    (out / "judge_response_pareto.json").write_text(json.dumps(json_metadata(result, title=title, inputs=inputs), indent=1))
-    print(f"wrote {out / 'judge_response_pareto.json'}", file=sys.stderr)
+              "unit_costs": {"one axis a call": unit_luna, **{f"plain k={k}": u for k, u in stack_unit.items()}},
+              "left_out_folds": left_out, "extrapolation_check": check, "points": points}
+    (out / "judge_response_pareto_61.json").write_text(json.dumps(json_metadata(result, title=title, inputs=inputs), indent=1))
+    print(f"wrote {out / 'judge_response_pareto_61.json'}", file=sys.stderr)
     return 0
 
 
@@ -491,6 +624,8 @@ FAMILY_STYLE = {
     "Luna stacked, plain": ("#1B9E77", "s"),
     "Luna stacked, labelled": ("#D95F02", "s"),
     "Luna stacked, axis by axis": ("#7570B3", "s"),
+    "Luna stacked, plain, worst 10% one axis a call": ("#1F78B4", "s"),
+    "Luna stacked, plain, worst 25% one axis a call": ("#A6761D", "s"),
     "Jev, 20 answers x 12 axes a request": ("#E7298A", "o"),
     "Jev, 40 answers x 6 axes a request": ("#66A61E", "o"),
     "Jev, 40 answers x 1 axis a request": ("#E6AB02", "o"),
@@ -507,7 +642,7 @@ K_MARKER = {"k2": "s", "k4": "^", "k6": "v"}
 
 
 def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: int, check: dict, inputs,
-         ref_arms=frozenset(), lead: str = "") -> None:
+         ref_arms=frozenset(), lead: str = "", axes_file: str = AXES_12) -> None:
     vkeys = [v.key for v in variants]
     sl = list(dict.fromkeys((v.slot, v.layer) for v in variants))
     regimes = list(dict.fromkeys(v.regime for v in variants))
@@ -568,7 +703,7 @@ def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: i
                 plt.Line2D([0], [0], marker="o", color="#222222", markerfacecolor="none", markersize=10, lw=0,
                            label="on the frontier (its convex hull)")]
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=8.5, frameon=False, bbox_to_anchor=(0.5, 0.0))
-    sub = (f"{n_axes} axes (scripts/tier_eval_axes_responses12.tsv); {lead}\n"
+    sub = (f"{n_axes} axes ({axes_file}); {lead}\n"
            f"a ninth of the kept responses measured: points from 1/27 (smallest) to 1/9, subsampled the golden way (absolute question and instruction); 1/3 and all extrapolated "
            f"(hollow: Spearman-Brown by question, gains scaled by {check['calibration']:.2f}, the measured-to-predicted ratio on Luna's third and full cells)\n"
            f"cost of a full run, 200 October axes (1,273 entities x 425 kept responses) at the point's coverage, every prefix cached: Luna by Flex, "
