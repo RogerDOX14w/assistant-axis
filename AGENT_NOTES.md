@@ -31,6 +31,8 @@ rules:
       - "results_analysis/axis_judge_correlation.py"
       - "results_analysis/infer_axis_description.py"
       - "results_analysis/standardize_axis_spec.py"
+      - "scripts/judge_*jev*.py"
+      - "scripts/jev_*.py"
       - "data/roles/instructions/**"
       - "data/traits/instructions/**"
   judge-refusal-gaps:
@@ -1072,7 +1074,10 @@ within noise of 24's, Jev's bad axes being one class (style axes, precise vs vag
 with a fat lower tail; dropping each entity's outlying score does worse
 ([`reports/judge_pareto/jev_judging.md`](./reports/judge_pareto/jev_judging.md) § "Jev's
 weight: 12, for resilience", [`scripts/jev_weight_resilience.py`](./scripts/jev_weight_resilience.py)).
-Re-judge the weight by the worst axes too when the October corpus is judged.  Jev judges by its own method,
+Re-judge the weight by the worst axes too when the October corpus is judged.  **Before asking Jev
+anything, read [`reports/judge_pareto/working_with_jev.md`](./reports/judge_pareto/working_with_jev.md)**:
+what one small test showed about prompting it, reading its answers, its quality and its quirks,
+written as clues rather than rules, with a list of what is untested.  Jev judges by its own method,
 [`scripts/judge_jev_entities.py`](./scripts/judge_jev_entities.py): a yes/no Noul question
 per entity ("is it nearer the second pole than most of the other entries?"), 160 entities a
 request, $0.042 per million input tokens and output free; the account is
