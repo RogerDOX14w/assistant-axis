@@ -55,6 +55,7 @@ The value is 100 × P(yes).
 - **Batching helps.** With the Noul question, 20 a request beats one a request by +0.013, at a third of the cost.
 - **The relative wording grows with batch size:** 0.698 at 10, 0.711 at 20, 0.717 at 40, 0.721 at 80, 0.724 at 160, and 0.7245 at 290, where it levels off.
 - **That choice was made on dev30 among about 20 arms, and it did not replicate.** On holdout31 the relative arm at 160 equals the base Noul arm at 20 alone: −0.001 on descriptions and −0.002 on instructions.  Its ensemble edge is only +0.001.  Figures pooled over all 61 axes therefore flatter it.
+  - The two wordings side by side on every cell that exists, all 61 axes balanced and in own order, and the plain wording's own batch curve (2026-11-05, after the response session found the plain Noul ahead on responses): [`scripts/jev_plain_vs_relative.py`](../../scripts/jev_plain_vs_relative.py), its [JSON](../../roger/axis_judge_experiments/jev_wording/jev_plain_vs_relative.json), and [`working_with_jev.md`](./working_with_jev.md) § 2.  Over the 61, balanced, the plain Noul at 20 trails the relative at 160 by 0.0125 on descriptions (two passes) and 0.010 on instructions, the whole gap on dev30; at the same batch size on dev30 the two are level, and the plain one was never run at 160.
 - **Instructions, one pass, own order:** relative 160 gives 0.753 on dev30 and 0.796 on holdout31, against Luna's 0.743 and 0.790.
 
 ## Held out and balanced
