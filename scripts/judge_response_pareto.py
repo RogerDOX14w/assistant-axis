@@ -83,9 +83,37 @@ PRICES = {
     HAIKU: dict(inp=0.05, out=0.25, read=0.005, once=0.05 * 1.25 - 0.005),      # Message Batches
     GEMINI: dict(inp=0.125, out=0.75, read=0.0125, once=0.25 + 1.0 * 1.0),     # Batch API, explicit cache: create + 1 h
 }
-#: The best stacking at each k on the twelve axes (2026-11-04: plain -0.007 at k=2, axis by axis -0.018 at k=4 and
-#: -0.020 at k=6, against one axis a call); the other formats are in the json, not the figure.
-STACKED = [("rk_pn", 2), ("rk_pa", 4), ("rk_pa", 6)]
+#: Every stacked arm judged on the twelve axes: three output formats at k = 2, 4 and 6 (plain k=6 added on 2026-11-04,
+#: Roger: "One stacking direction seems to be missing?").  All are in the Luna figure.
+STACKED = [(f, k) for f in ("rk_pn", "rk_pl", "rk_pa") for k in (2, 4, 6)]
+JEV = "jev-1.14.0"
+#: Jev's relative yes/no design (judge_responses_jev.py --design relative), the arms judged on the twelve axes:
+#: (cell label, figure label).  Its cost is measured per response and axis, with no cache.
+JEV_ARMS = [("@jrel_a20m12_s9p0", "Jev, 20 answers x 12 axes a request"), ("@jrel_a40m6_s9p0", "Jev, 40 answers x 6 axes a request"),
+            ("@jrel_a40m1_s9p0", "Jev, 40 answers x 1 axis a request")]
+#: The figures (Roger, 2026-11-04: "our Pareto plot is answering too many questions at once"; the 40-answer arm got its
+#: own on 2026-11-05, "Move that to a separate plot"): one arm can be
+#: in several; a reference arm is drawn grey and stays off that figure's frontier.
+FIGURES = {
+    "luna": ("Luna only: one axis a call against every stacking format and k",
+             "judge_response_pareto_luna.png",
+             "GPT-5.6 Luna alone, every call's direction a coin, 20 answers a call; stacking: each batch's axes "
+             "regrouped at random, formats plain \"1, SCORES: 18, 42\", labelled \"1. SCORES: A=18, B=42\", axis by axis \"A: 1=18, 2=32\""),
+    "answers": ("Luna only: 20 answers a call against 40",
+                "judge_response_pareto_answers.png",
+                "GPT-5.6 Luna alone, one axis a call, every call's direction a coin; each call judges one question's answers in "
+                "batches of 20 (the default) or 40"),
+    "jev": ("Jev only: its relative yes/no design, answers and axes a request (Luna one axis a call for reference)",
+            "judge_response_pareto_jev.png",
+            "Jev 1.14 (TypeSafe AI): a batch of answers to one question and some axes a request, \"is the persona behind answer k "
+            "nearer the X end of axis A than most of the other answers'?\", a coin per request and axis; GPT-5.6 Luna one axis a "
+            "call in grey"),
+    "models": ("Judges and mixes: each judge alone, every response judged by each, or each response by one",
+               "judge_response_pareto_models.png",
+               "GPT-5.6 Luna, Haiku 5.5, Gemini 3.1 Flash-Lite one axis a call, Jev 1.14 at 20 answers x 12 axes a request; every "
+               "call's direction a coin; mixes weighted Luna 4 : Haiku 3 : Gemini 3 : Jev 3; shares golden, the trio's by question "
+               "(Gemini judged only its 1/27)"),
+}
 FMT_NAME = {"rk_pn": "plain", "rk_pl": "labelled", "rk_pa": "axis by axis"}
 
 
@@ -250,6 +278,9 @@ def main(argv=None) -> int:
         judges["luna"][ax.axis_dir] = data.luna_balanced(i, ax.axis_dir)
         judges["haiku"][ax.axis_dir] = data.cell(ax.axis_dir, HAIKU, f"@r1_pnn20_s9p0g12_a{i}c")
         judges["gemini"][ax.axis_dir] = data.cell(ax.axis_dir, GEMINI, f"@r1_pnn20_s27p0g12_a{i}c")
+    judges["luna40"] = {ax.axis_dir: data.cell(ax.axis_dir, LUNA, f"@r1_pnn40_s9p0g12_a{i}c") for i, ax in enumerate(axes)}
+    for lab, _ in JEV_ARMS:
+        judges[lab] = {ax.axis_dir: data.cell(ax.axis_dir, JEV, lab) for ax in axes}
     stacked = {(fmt, k): {ax.axis_dir: data.cell(ax.axis_dir, LUNA, f"@{fmt}n20_s9p0g12_k{k}") for ax in axes}
                for fmt, k in STACKED}
     have = {j: all(v is not None for v in judges[j].values()) for j in judges}
@@ -262,8 +293,17 @@ def main(argv=None) -> int:
     if have["gemini"]:
         prof[GEMINI] = per_call_profile(data, GEMINI, lambda i: f"@r1_pnn20_s27p0g12_a{i}c")
     unit = {m: judge_costs(p, m) for m, p in prof.items()}
+    if have["luna40"]:
+        prof["luna40"] = per_call_profile(data, LUNA, lambda i: f"@r1_pnn40_s9p0g12_a{i}c")
+        unit["luna40"] = judge_costs(prof["luna40"], LUNA)
+    for lab, _ in JEV_ARMS:         # no cache: the run's cost over its responses and axes
+        if have[lab]:
+            u = json.load(open(E / "_tier_eval_jev" / lab.lstrip("@") / "usage.json"))
+            n = json.load(open(E / f"{axes[0].axis_dir}{rob.TIER_EVAL_SUFFIX}" / f"{JEV}{lab}" / "scores_responses.json"))["_provenance"]["n_items"]
+            unit[lab] = (u["total_cost_usd"] / (n * len(axes)), 0.0)
+            data.read.append(E / "_tier_eval_jev" / lab.lstrip("@") / "usage.json")
     for m, (a, o) in unit.items():
-        print(f"[cost] {m}: {json.dumps({k: round(v, 1) for k, v in prof[m].items()})}; ${a * 1e6:.2f} per 1M "
+        print(f"[cost] {m}: {json.dumps({k: round(v, 1) for k, v in prof.get(m, {}).items()})}; ${a * 1e6:.2f} per 1M "
               f"response-axes, ${o * 1e6:.1f} per 1M responses once; full run, every response: "
               f"${full_run_cost([(1.0, unit[m])]):,.0f}", file=sys.stderr)
     stack_unit = {}
@@ -277,26 +317,47 @@ def main(argv=None) -> int:
                                               "usage.json", "batch") / n for ax, n in zip(axes, items)])
             stack_unit[(fmt, k)] = (per, unit[LUNA][1])
 
-    # the arms: (key, label, family, [(judge, items by axis, share)], cost parts per unit coverage)
+    # the arms: (key, label, family, [(judge, items by axis, share)], cost parts per unit coverage, figures)
     arms = []
-    def add(key, label, family, members, cost_parts):
-        arms.append(dict(key=key, label=label, family=family, members=members, cost_parts=cost_parts))
-    add(f"{LUNA}@k1", "Luna", "Luna, one axis a call", [("luna", judges["luna"], None)], [(1.0, unit[LUNA])])
+    def add(key, label, family, members, cost_parts, figures):
+        arms.append(dict(key=key, label=label, family=family, members=members, cost_parts=cost_parts, figures=figures))
+    jb = JEV_ARMS[0][0]                 # Jev in the mixes: its cheapest arm, 20 answers x 12 axes
+    add(f"{LUNA}@k1", "Luna", "Luna, one axis a call", [("luna", judges["luna"], None)], [(1.0, unit[LUNA])],
+        ["luna", "answers", "jev", "models"])
+    if have["luna40"]:
+        add(f"{LUNA}@n40", "Luna, 40 answers", "Luna, one axis a call, 40 answers a call", [("luna40", judges["luna40"], None)],
+            [(1.0, unit["luna40"])], ["answers"])
     for (fmt, k), cells in stacked.items():
         if (fmt, k) in stack_unit:
             add(f"{LUNA}@{fmt}k{k}", f"Luna k={k} {FMT_NAME[fmt]}", f"Luna stacked, {FMT_NAME[fmt]}",
-                [("luna", cells, None)], [(1.0, stack_unit[(fmt, k)])])
+                [("luna", cells, None)], [(1.0, stack_unit[(fmt, k)])], ["luna"])
+    for lab, name in JEV_ARMS:
+        if have[lab]:
+            add(f"{JEV}{lab}", name, name, [(lab, judges[lab], None)], [(1.0, unit[lab])], ["jev"] + (["models"] if lab == jb else []))
     if have["haiku"]:
-        add(f"{HAIKU}@k1", "Haiku", "Haiku, one axis a call", [("haiku", judges["haiku"], None)], [(1.0, unit[HAIKU])])
+        add(f"{HAIKU}@k1", "Haiku", "Haiku, one axis a call", [("haiku", judges["haiku"], None)], [(1.0, unit[HAIKU])], ["models"])
         add(f"{LUNA}+{HAIKU}@2x", "Luna + Haiku, both", "Luna + Haiku, both judge every response",
-            [("luna", judges["luna"], None), ("haiku", judges["haiku"], None)], [(1.0, unit[LUNA]), (1.0, unit[HAIKU])])
+            [("luna", judges["luna"], None), ("haiku", judges["haiku"], None)], [(1.0, unit[LUNA]), (1.0, unit[HAIKU])], ["models"])
         add(f"{LUNA}+{HAIKU}@rr", "Luna + Haiku, round-robin", "Luna + Haiku, each response by one",
-            [("luna", judges["luna"], ("g", 2, 0)), ("haiku", judges["haiku"], ("g", 2, 1))], [(0.5, unit[LUNA]), (0.5, unit[HAIKU])])
+            [("luna", judges["luna"], ("g", 2, 0)), ("haiku", judges["haiku"], ("g", 2, 1))], [(0.5, unit[LUNA]), (0.5, unit[HAIKU])],
+            ["models"])
     if have["haiku"] and have["gemini"]:
         add(f"{LUNA}+{HAIKU}+{GEMINI}@rr", "trio, round-robin", "Luna + Haiku + Gemini, each response by one",
             [("luna", judges["luna"], ("q", 27, 9)), ("haiku", judges["haiku"], ("q", 27, 18)), ("gemini", judges["gemini"], ("q", 27, 0))],
-            [(1 / 3, unit[LUNA]), (1 / 3, unit[HAIKU]), (1 / 3, unit[GEMINI])])
-    model_of = {"luna": LUNA, "haiku": HAIKU, "gemini": GEMINI}
+            [(1 / 3, unit[LUNA]), (1 / 3, unit[HAIKU]), (1 / 3, unit[GEMINI])], ["models"])
+    if have[jb]:
+        add(f"{LUNA}+{JEV}@2x", "Luna + Jev, both", "Luna + Jev, both judge every response",
+            [("luna", judges["luna"], None), (jb, judges[jb], None)], [(1.0, unit[LUNA]), (1.0, unit[jb])], ["models"])
+        add(f"{LUNA}+{JEV}@rr", "Luna + Jev, round-robin", "Luna + Jev, each response by one",
+            [("luna", judges["luna"], ("g", 2, 0)), (jb, judges[jb], ("g", 2, 1))], [(0.5, unit[LUNA]), (0.5, unit[jb])], ["models"])
+        if have["haiku"]:
+            add(f"{LUNA}+{HAIKU}+{JEV}@3x", "Luna + Haiku + Jev, all", "Luna + Haiku + Jev, all judge every response",
+                [("luna", judges["luna"], None), ("haiku", judges["haiku"], None), (jb, judges[jb], None)],
+                [(1.0, unit[LUNA]), (1.0, unit[HAIKU]), (1.0, unit[jb])], ["models"])
+            add(f"{LUNA}+{HAIKU}+{JEV}@rr", "Luna + Haiku + Jev, round-robin", "Luna + Haiku + Jev, each response by one",
+                [("luna", judges["luna"], ("g", 3, 0)), ("haiku", judges["haiku"], ("g", 3, 1)), (jb, judges[jb], ("g", 3, 2))],
+                [(1 / 3, unit[LUNA]), (1 / 3, unit[HAIKU]), (1 / 3, unit[jb])], ["models"])
+    model_of = {"luna": LUNA, "luna40": LUNA, "haiku": HAIKU, "gemini": GEMINI, **{lab: JEV for lab, _ in JEV_ARMS}}
 
     # projections under the 12 variants
     variants = rob.build_variants(rob.DEFAULT_SLOTS, rob.DEFAULT_LAYERS, list(rob.REGIMES),
@@ -329,6 +390,7 @@ def main(argv=None) -> int:
                     rhos[vk].append(float(np.mean([x[vk] for x in per_rot])))
             cov = NINTH * m / FRACTION_K
             points[f"{arm['key']}|ninth x {m}/{FRACTION_K}"] = dict(arm=arm["key"], label=arm["label"], family=arm["family"], coverage=cov, m=m,
+                                                 figures=arm["figures"],
                                                  measured=True, cost=full_run_cost([(f * cov, u) for f, u in arm["cost_parts"]]),
                                                  rho={vk: float(np.mean(rhos[vk])) for vk in vkeys}, per_axis=rhos)
         # extrapolation above the ninth: split-half reliability by instruction parity, Spearman-Brown
@@ -356,6 +418,7 @@ def main(argv=None) -> int:
             cov = NINTH * M
             points[f"{arm['key']}|{name}"] = dict(
                 arm=arm["key"], label=arm["label"], family=arm["family"], coverage=cov, measured=False, reliability=R,
+                figures=arm["figures"],
                 cost=full_run_cost([(f * cov, u) for f, u in arm["cost_parts"]]),
                 # the Spearman-Brown gain, scaled by the measured-to-predicted ratio of the check
                 rho={vk: base["rho"][vk] * (1 + calib * (math.sqrt(RM / R) - 1)) for vk in vkeys})
@@ -364,15 +427,19 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     inputs = data.inputs + [current_files_input(dep_key="cells", paths=sorted(set(data.read)))]
     title = "Response judging with a cached prefix: subsampling against stacking, under 12 projection variants"
-    plot(points, variants, out / "judge_response_pareto.png", title, len(axes), check, inputs)
+    for fig_key, (fig_title, fname, lead) in FIGURES.items():
+        sub_points = {k: v for k, v in points.items() if fig_key in v["figures"]}
+        ref = {f"{LUNA}@k1"} if fig_key == "jev" else set()
+        plot(sub_points, variants, out / fname, f"Response judging, {fig_title}", len(axes), check, inputs, ref_arms=ref, lead=lead)
+        print(f"wrote {out / fname}", file=sys.stderr)
     result = {"config": {"axes_file": args.axes_file, "variants": vkeys, "prices": PRICES, "october_responses": OCTOBER_RESPONSES,
                          "n_axes": N_AXES, "fractions": "m/3 of each judge's share of the ninth, golden (judge_tier_cost_eval.golden_point), 3 rotations",
                          "extrapolation": "Spearman-Brown from a split half by question"},
-              "unit_costs": {m: {"per_response_axis": a, "per_response_once": o, "tokens_per_call": prof[m]}
+              "unit_costs": {m: {"per_response_axis": a, "per_response_once": o, "tokens_per_call": prof.get(m)}
                              for m, (a, o) in unit.items()},
               "extrapolation_check": check, "points": points}
     (out / "judge_response_pareto.json").write_text(json.dumps(json_metadata(result, title=title, inputs=inputs), indent=1))
-    print(f"wrote {out / 'judge_response_pareto.png'} and .json", file=sys.stderr)
+    print(f"wrote {out / 'judge_response_pareto.json'}", file=sys.stderr)
     return 0
 
 
@@ -419,19 +486,28 @@ def validate_extrapolation(data: Data, E: Path) -> dict:
 
 
 FAMILY_STYLE = {
-    "Luna, one axis a call": ("#3E8E2F", "o"),
-    "Luna stacked, plain": ("#9CCB6B", "s"),
-    "Luna stacked, labelled": ("#2BA39B", "s"),
-    "Luna stacked, axis by axis": ("#B5A32E", "s"),
-    "Haiku, one axis a call": ("#D9636B", "o"),
+    "Luna, one axis a call": ("#222222", "o"),
+    "Luna, one axis a call, 40 answers a call": ("#8C8C8C", "o"),
+    "Luna stacked, plain": ("#1B9E77", "s"),
+    "Luna stacked, labelled": ("#D95F02", "s"),
+    "Luna stacked, axis by axis": ("#7570B3", "s"),
+    "Jev, 20 answers x 12 axes a request": ("#E7298A", "o"),
+    "Jev, 40 answers x 6 axes a request": ("#66A61E", "o"),
+    "Jev, 40 answers x 1 axis a request": ("#E6AB02", "o"),
+    "Haiku, one axis a call": ("#E08214", "o"),
     "Luna + Haiku, both judge every response": ("#8E6BBF", "D"),
-    "Luna + Haiku, each response by one": ("#C792EA", "D"),
-    "Luna + Haiku + Gemini, each response by one": ("#3B6FD8", "D"),
+    "Luna + Haiku, each response by one": ("#8E6BBF", "P"),
+    "Luna + Haiku + Gemini, each response by one": ("#17BECF", "P"),
+    "Luna + Jev, both judge every response": ("#A6761D", "D"),
+    "Luna + Jev, each response by one": ("#A6761D", "P"),
+    "Luna + Haiku + Jev, all judge every response": ("#1F78B4", "D"),
+    "Luna + Haiku + Jev, each response by one": ("#1F78B4", "P"),
 }
 K_MARKER = {"k2": "s", "k4": "^", "k6": "v"}
 
 
-def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: int, check: dict, inputs) -> None:
+def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: int, check: dict, inputs,
+         ref_arms=frozenset(), lead: str = "") -> None:
     vkeys = [v.key for v in variants]
     sl = list(dict.fromkeys((v.slot, v.layer) for v in variants))
     regimes = list(dict.fromkeys(v.regime for v in variants))
@@ -445,12 +521,13 @@ def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: i
             vk = next(v.key for v in variants if (v.slot, v.layer, v.regime) == (s, l, regime))
             keys = list(points)
             q = {k: 1 / (1 - points[k]["rho"][vk]) for k in keys}
-            idx = pareto_frontier([(points[k]["cost"], q[k]) for k in keys])
-            front = sorted((keys[i] for i in idx), key=lambda k: points[k]["cost"])
+            fkeys = [k for k in keys if points[k]["arm"] not in ref_arms]
+            idx = pareto_frontier([(points[k]["cost"], q[k]) for k in fkeys])
+            front = sorted((fkeys[i] for i in idx), key=lambda k: points[k]["cost"])
             for arm in dict.fromkeys(p["arm"] for p in points.values()):
                 ks = sorted([k for k in keys if points[k]["arm"] == arm], key=lambda k: points[k]["cost"])
                 fam = points[ks[0]]["family"]
-                col, mk = FAMILY_STYLE[fam]
+                col, mk = ("#BBBBBB", "o") if arm in ref_arms else FAMILY_STYLE[fam]
                 kk = re.search(r"k(\d)$", arm)
                 if kk and "stacked" in fam:
                     mk = K_MARKER[f"k{kk.group(1)}"]
@@ -479,20 +556,23 @@ def plot(points: Dict[str, dict], variants, out_png: Path, title: str, n_axes: i
                 ax.set_ylabel("1 / (1 - mean rho)", fontsize=9)
             if r == len(regimes) - 1:
                 ax.set_xlabel("estimated total cost of a full run (USD, 200 October axes)", fontsize=9)
+    ref_fams = {p["family"] for p in points.values() if p["arm"] in ref_arms}
     handles = [plt.Line2D([0], [0], marker=mk, color=col, lw=0.8, label=fam, markersize=7) for fam, (col, mk) in FAMILY_STYLE.items()
-               if any(p["family"] == fam for p in points.values())]
-    handles += [plt.Line2D([0], [0], marker=m, color="#777777", lw=0, label=f"stacked {k[1]} axes a call", markersize=7)
-                for k, m in K_MARKER.items()]
+               if fam not in ref_fams and any(p["family"] == fam for p in points.values())]
+    handles += [plt.Line2D([0], [0], marker="o", color="#BBBBBB", lw=0.8, label=f"{fam} (reference, off the frontier)", markersize=7)
+                for fam in sorted(ref_fams)]
+    if any("stacked" in p["family"] for p in points.values()):
+        handles += [plt.Line2D([0], [0], marker=m, color="#777777", lw=0, label=f"stacked {k[1]} axes a call", markersize=7)
+                    for k, m in K_MARKER.items()]
     handles += [plt.Line2D([0], [0], marker="o", color="#777777", markerfacecolor="none", lw=0, label="extrapolated (1/3, all)"),
                 plt.Line2D([0], [0], marker="o", color="#222222", markerfacecolor="none", markersize=10, lw=0,
                            label="on the frontier (its convex hull)")]
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=8.5, frameon=False, bbox_to_anchor=(0.5, 0.0))
-    sub = (f"{n_axes} axes (scripts/tier_eval_axes_responses12.tsv); GPT-5.6 Luna, Haiku 5.5, Gemini 3.1 Flash-Lite, every call's direction "
-           f"a coin, judges 4:3:3; stacking: each batch's axes regrouped at random, the best format at each k\n"
+    sub = (f"{n_axes} axes (scripts/tier_eval_axes_responses12.tsv); {lead}\n"
            f"a ninth of the kept responses measured: points from 1/27 (smallest) to 1/9, subsampled the golden way (absolute question and instruction); 1/3 and all extrapolated "
            f"(hollow: Spearman-Brown by question, gains scaled by {check['calibration']:.2f}, the measured-to-predicted ratio on Luna's third and full cells)\n"
            f"cost of a full run, 200 October axes (1,273 entities x 425 kept responses) at the point's coverage, every prefix cached: Luna by Flex, "
-           f"Haiku by Message Batches, Gemini by its Batch API with explicit caches")
+           f"Haiku by Message Batches, Gemini by its Batch API with explicit caches, Jev at its measured cost (no cache)")
     fig.suptitle(title, fontsize=13, fontweight="bold", y=0.995)
     fig.text(0.5, 0.965, sub, ha="center", va="top", fontsize=8.5)
     fig.subplots_adjust(top=0.885, bottom=0.12, left=0.05, right=0.985, hspace=0.32, wspace=0.18)
