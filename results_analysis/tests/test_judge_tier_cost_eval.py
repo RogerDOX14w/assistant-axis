@@ -100,6 +100,14 @@ def _capped_reply(prompt: str, cap: int, needs: dict):
     return text, False, name
 
 
+_RESPONSE_MARK = "each written by the model as a different role or trait"     # how the response prompts read
+
+
+def _joined(content) -> str:
+    """A message's text: the string, or its parts joined (a two-part prompt, the cached prefix and the rest)."""
+    return content if isinstance(content, str) else "".join(part["text"] for part in content)
+
+
 class HTTPError(Exception):
     """An SDK error: both SDKs set ``status_code``; OpenAI's also ``param`` and ``code``."""
 
@@ -177,7 +185,7 @@ class FakeOpenAI:
         if b["status"] == "in_progress":
             out = []
             for line in self.lines(b["input"]):
-                text, cut, name = capped_reply(line["body"]["messages"][0]["content"],
+                text, cut, name = capped_reply(_joined(line["body"]["messages"][0]["content"]),
                                                line["body"]["max_completion_tokens"], self.needs)
                 if name in self.error_names:
                     out.append({"custom_id": line["custom_id"], "error": None,
@@ -214,7 +222,7 @@ class FakeAnthropic:
 
     async def _create(self, **kw):
         self.calls.append(kw)
-        return self._message(kw["messages"][0]["content"], kw["max_tokens"])
+        return self._message(_joined(kw["messages"][0]["content"]), kw["max_tokens"])
 
     async def _bcreate(self, requests):
         bid = f"msgbatch_{len(self._batches)}"
@@ -234,8 +242,8 @@ class FakeAnthropic:
         self.results_read.append(bid)
         out = []
         for r in self._batches[bid]["requests"]:
-            prompt = r["params"]["messages"][0]["content"]
-            name = "batch" if _BATCH_MARK in prompt else reply_for(prompt)[1]
+            prompt = _joined(r["params"]["messages"][0]["content"])
+            name = "batch" if _BATCH_MARK in prompt or _RESPONSE_MARK in prompt else reply_for(prompt)[1]
             if name in self.errored_names:
                 out.append(SimpleNamespace(custom_id=r["custom_id"], result=SimpleNamespace(type="errored", error=None)))
             else:
@@ -3508,3 +3516,180 @@ def test_stack_one_sends_every_axis_of_a_batch_in_turn_with_its_own_coin(world, 
     assert all(heads[i] == heads[i + 1] == heads[i + 2] for i in range(0, len(heads), 3))     # a batch's calls in turn
     with pytest.raises(SystemExit):
         _run(world, "gpt-5.6-luna", axes=world.axes3, extra=[*common, "--rubric", "rk_pn", "--stack", "1", "--cell_label", "@bad"])
+
+
+
+# ---------------------------------------------------------------------------
+# Grouped and stacked runs through the batch APIs (2026-11-05, Roger: "Yes, we're going to need these")
+# ---------------------------------------------------------------------------
+
+class StackAnthropic(FakeAnthropic):
+    """FakeAnthropic answering a stacked call as stack_reply does (each listed axis by its own ends)."""
+
+    def _message(self, prompt, cap):
+        return SimpleNamespace(content=[SimpleNamespace(type="text", text=stack_reply(prompt))], stop_reason="end_turn",
+                               stop_details=None, usage=SimpleNamespace(input_tokens=300, output_tokens=40))
+
+
+_STACK_COMMON = ["--axes_per_call", "3", "--entities_per_call", "3", "--response_part", "0"]
+
+
+def _stack_args(world, rubric, k, label, transport):
+    return [*_STACK_COMMON, "--responses_dir", str(world.resp), "--rubric", rubric, "--stack", str(k),
+            "--cell_label", label, "--transport", transport]
+
+
+def _member_cells(world, model, label):
+    out = {}
+    for axis_dir, *_ in AXES:
+        data = json.loads((world.exp / f"{axis_dir}_tier_eval" / f"{model}{label}" / "scores_responses.json").read_text())
+        out[axis_dir] = (data["result"], data["items"], data["_provenance"]["direction_counts"])
+    return out
+
+
+def _batch_requests(client):
+    return [r for bid in client.created for r in client._batches[bid]["requests"]]
+
+
+@pytest.mark.parametrize("rubric,k", [("r1_pn", 1), ("rk_pn", 2)])
+def test_a_stacked_run_through_message_batches_gives_the_live_run_s_cells(world, monkeypatch, rubric, k):
+    """--stack 1 with r1_pn and --stack 2 with rk_pn through Message Batches: every batch's calls go into the
+    submission one after another (one cached prefix each, its breakpoint on the prefix), and each axis's cell holds
+    the same items, means and direction counts as the same run in real time on the same fake replies."""
+    monkeypatch.setitem(DIRECTION_AWARE, "on", True)
+    model = "claude-haiku-5-5"
+    fake = (lambda: FakeAnthropic()) if k == 1 else (lambda: StackAnthropic())
+    live = fake()
+    monkeypatch.setattr(ev, "make_anthropic_client", lambda: live)
+    assert _run(world, model, axes=world.axes3, extra=_stack_args(world, rubric, k, "@live", "realtime")) == 0
+    batch = fake()
+    monkeypatch.setattr(ev, "make_anthropic_client", lambda: batch)
+    assert _run(world, model, axes=world.axes3, extra=_stack_args(world, rubric, k, "@batch", "batch")) == 0
+    assert not batch.calls and len(batch.created) == 1
+    reqs = _batch_requests(batch)
+    assert len(reqs) == len(live.calls)
+    heads = [r["params"]["messages"][0]["content"][0]["text"] for r in reqs]
+    assert all(r["params"]["messages"][0]["content"][0]["cache_control"] == {"type": "ephemeral"} for r in reqs)
+    slots = -(-3 // k)
+    assert all(len(set(heads[i:i + slots])) == 1 for i in range(0, len(heads), slots))     # a batch's calls in turn
+    assert len(set(heads)) == len(heads) // slots
+    got, want = _member_cells(world, model, "@batch"), _member_cells(world, model, "@live")
+    assert got == want
+    for ai, (axis_dir, *_r) in enumerate(AXES):
+        result, items, counts = got[axis_dir]
+        assert items and all(v == batch_score(key.rsplit("|", 1)[0], True) + (ai if k > 1 else 0) for key, v in items.items())
+        assert counts["own"] > 0 and counts["swapped"] > 0 and counts["own"] + counts["swapped"] == len(items)
+        prov = json.loads((world.exp / f"{axis_dir}_tier_eval" / f"{model}@batch" / "scores_responses.json").read_text())["_provenance"]
+        assert prov["transport"] == "batch" and prov["stack"] == k
+        usage = json.loads((world.exp / f"{axis_dir}_tier_eval" / f"{model}@batch" / "usage.json").read_text())
+        assert set(usage["per_model"]) == {f"{model}:batch"}
+    work = world.exp / "_tier_eval_batches" / f"{model}@batch"
+    groups = json.loads((work / "groups.json").read_text())
+    assert all("#s" in n for members in groups.values() for n in members)
+    amap = json.loads((work / "axis_map.json").read_text())
+    assert [m["axis_dir"] for m in amap["axes"]["0"]["members"]] == [a for a, *_ in AXES]
+    assert amap["settings"]["stack"] == k
+    n = len(batch.created)
+    assert _run(world, model, axes=world.axes3, extra=_stack_args(world, rubric, k, "@batch", "batch")) == 0
+    assert len(batch.created) == n                                       # a rerun submits nothing
+
+
+def test_a_stacked_submission_is_chunked_by_bytes_and_splits_few_prefixes(world, monkeypatch):
+    """With a byte cap of a few requests a chunk, the stacked submission goes in several batches; a batch's calls
+    stay adjacent, so each chunk boundary splits at most one prefix, and every cell is right."""
+    client = StackAnthropic()
+    monkeypatch.setattr(ev, "make_anthropic_client", lambda: client)
+    monkeypatch.setattr(AnthropicBatchRunner, "write_chunks",
+                        partialmethod(AnthropicBatchRunner.write_chunks, max_bytes=7000))
+    assert _run(world, "claude-haiku-5-5", axes=world.axes3, extra=_stack_args(world, "rk_pn", 2, "@chunked", "batch")) == 0
+    assert len(client.created) > 2
+    per_batch = [[r["params"]["messages"][0]["content"][0]["text"] for r in client._batches[b]["requests"]]
+                 for b in client.created]
+    assert all(len(json.dumps(client._batches[b]["requests"])) < 7000 * 1.2 for b in client.created)
+    order = [h for batch in per_batch for h in batch]
+    first = {h: order.index(h) for h in order}
+    assert all(order[first[h]:first[h] + order.count(h)] == [h] * order.count(h) for h in first)    # contiguous
+    split = sum(1 for h in first if sum(h in batch for batch in per_batch) > 1)
+    assert split <= len(per_batch) - 1
+    for ai, (axis_dir, *_r) in enumerate(AXES):
+        _result, items, _counts = _member_cells(world, "claude-haiku-5-5", "@chunked")[axis_dir]
+        assert items and all(v == batch_score(key.rsplit("|", 1)[0], True) + ai for key, v in items.items())
+
+
+def test_a_stacked_batch_left_in_flight_is_collected_by_a_later_run_that_does_not_list_it(world, monkeypatch, tmp_path):
+    """A run stopped after submitting (every status check fails) leaves its batch in flight; a later run whose
+    axes file lists none of the group's axes collects it: the job, members included, comes back from the axis
+    map, and the group's and the members' cells are written as the uninterrupted run writes them."""
+    model = "claude-haiku-5-5"
+    client = StackAnthropic()
+    client.fail_retrieve_from = 0
+    monkeypatch.setattr(ev, "make_anthropic_client", lambda: client)
+    args = _stack_args(world, "rk_pn", 2, "@later", "batch")
+    assert _run(world, model, axes=world.axes3, extra=args) == 1
+    assert len(client.created) == 1
+    assert not (world.exp / f"{AXES[0][0]}_tier_eval" / f"{model}@later").exists()
+    other = tmp_path / "other_axes.tsv"
+    other.write_text("zeta_vs_eta\tzeta\teta\ttraits\n")              # no projections: skipped, no jobs at all
+    client.fail_retrieve_from = None
+    assert _run(world, model, axes=other, extra=args) == 0
+    assert len(client.created) == 1                                     # collected, nothing submitted
+    for ai, (axis_dir, *_r) in enumerate(AXES):
+        _result, items, counts = _member_cells(world, model, "@later")[axis_dir]
+        assert items and all(v == batch_score(key.rsplit("|", 1)[0], True) + ai for key, v in items.items())
+        assert counts["own"] + counts["swapped"] == len(items)
+    group = next((world.exp / "_tier_eval_multi").glob(f"*/{model}@later"))
+    assert (group / "usage.json").exists() and (group / "batch_replies.jsonl.gz").exists()
+
+
+def test_a_stacked_result_saved_between_batches_keeps_its_axes_and_directions(world, monkeypatch):
+    """collected/ keeps a stacked item's {member: score} and its directions between two runs (a stop between
+    batches), and the cells the second run writes equal an uninterrupted run's."""
+    model = "claude-haiku-5-5"
+    client = StackAnthropic()
+    monkeypatch.setattr(ev, "make_anthropic_client", lambda: client)
+    monkeypatch.setattr(AnthropicBatchRunner, "write_chunks",
+                        partialmethod(AnthropicBatchRunner.write_chunks, max_requests=4))
+    client.fail_retrieve_from = 1
+    args = _stack_args(world, "rk_pn", 2, "@stop", "batch")
+    assert _run(world, model, axes=world.axes3, extra=args) == 1
+    saved = json.loads((world.exp / "_tier_eval_batches" / f"{model}@stop" / "collected" / "a0.json").read_text())
+    assert saved["scores"] and all(isinstance(v, dict) for v in saved["scores"].values())
+    assert set(saved["swapped"]) == set(saved["scores"])
+    client.fail_retrieve_from = None
+    assert _run(world, model, axes=world.axes3, extra=args) == 0
+    whole = StackAnthropic()
+    monkeypatch.setattr(ev, "make_anthropic_client", lambda: whole)
+    assert _run(world, model, axes=world.axes3, extra=_stack_args(world, "rk_pn", 2, "@whole", "batch")) == 0
+    assert _member_cells(world, model, "@stop") == _member_cells(world, model, "@whole")
+
+
+def test_grouped_runs_go_through_the_openai_batch_api_too(world, monkeypatch, caplog):
+    """--axis_index with r1_pn, and rk_hn over the whole group, through the OpenAI Batch API (auto picks it for
+    gpt-4.1-mini, which refuses Flex): the cells are those of the real-time run; the submission's cost estimate is
+    logged, with --budget_usd's note."""
+    common = ["--axes_per_call", "2", "--entities_per_call", "3", "--responses_dir", str(world.resp), "--response_part", "0"]
+    for arm in (["--rubric", "r1_pn", "--axis_index", "1"], ["--rubric", "rk_hn"]):
+        std = FakeOpenAI()
+        _openai(monkeypatch, std=std)
+        label = "@" + arm[1]
+        assert _run(world, "gpt-4.1-mini", extra=[*common, *arm, "--cell_label", label + "rt", "--transport", "realtime"]) == 0
+        n_live = len(std.calls)
+        caplog.clear()
+        with caplog.at_level("INFO"):
+            assert _run(world, "gpt-4.1-mini", extra=[*common, *arm, "--cell_label", label + "b", "--budget_usd", "5"]) == 0
+        assert len(std.calls) == n_live and len(std.batches_created) == 1 and len(std.batch_lines(0)) == n_live
+        assert "estimated $" in caplog.text and "does not stop a batch submission" in caplog.text
+        axes = [AXES[1][0]] if "--axis_index" in arm else [AXES[0][0], AXES[1][0]]
+        for axis_dir in axes:
+            read = lambda lab: json.loads((world.exp / f"{axis_dir}_tier_eval" / f"gpt-4.1-mini{lab}" / "scores_responses.json").read_text())
+            assert read(label + "b")["items"] == read(label + "rt")["items"] and read(label + "b")["items"]
+
+
+def test_a_group_s_map_entry_carries_its_members_and_a_one_axis_entry_is_unchanged(world):
+    jobs = ev.jobs_from_axes_file(world.axes3, world.exp)
+    assert "members" not in jobs[0].map_entry()
+    group = ev.group_jobs(jobs, 3, world.exp)[0]
+    back = ev.AxisJob.from_map_entry(json.loads(json.dumps(group.map_entry())))
+    assert [m.axis_dir for m in back.members] == [a for a, *_ in AXES] and back.map_entry() == group.map_entry()
+    assert ev.saved_score({"0": 51, "2": None}) == {0: 51, 2: None} and ev.saved_score([1, None]) == [1, None]
+    assert ev.saved_score(None) is None and ev.saved_score(7.0) == 7

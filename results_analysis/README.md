@@ -3046,6 +3046,28 @@ batches still in flight before submitting anything; it refuses (exit 1)
 when batches in flight were requested with another model or other settings,
 and a `flex` / `realtime` run refuses while a model's batches are in flight.
 
+**Grouped and stacked runs go through the batch APIs too** (2026-11-05; Roger: "Yes,
+we're going to need these").  `--axes_per_call` with an `rk_*` rubric, `--axis_index`
+and `--stack k` (`r1_pn --stack 1`, `rk_pn --stack k`) were refused with
+`--transport batch` until then; now every transport takes them, Anthropic, OpenAI and
+Gemini alike.  A group is one job: its custom ids are `a<index>|g<k>`, `groups.json`
+records each id's members (slot-named under `--stack`, `<key>#s<slot>`), and its
+`axis_map.json` entry lists the members, so a batch collected by a later run, even one
+whose axes file names none of the group's axes, rebuilds the job and writes the
+group's cell and each member's cell as an uninterrupted run would.  `collected/`
+keeps a stacked item's `{member: score}` and its directions between runs, and the
+settings record `stack`, `stack_seed` and `axis_index`, so a run under another
+stacking refuses to collect them.  A batch's calls (one cached prefix) go into the
+submission one after another, so a chunk boundary splits at most one prefix's calls;
+Anthropic's `cache_control` breakpoint on the prefix was read back on 98% of 16,470
+shuffled requests in four concurrent Message Batches on 2026-11-05, across batches
+too, with no warm-up.  A group the batch leaves unanswered goes to the real-time
+remainder with its own two-part prompt rebuilt, so its prefix stays cached.  Before
+each submission the log gives a coarse estimate of its cost at the batch price, with
+no cache reads and with each prefix written once and read on its other calls
+(`SubmissionEstimate`: four characters a token in, the dry run's model out), since
+`--budget_usd` does not stop a batch.
+
 **Prompt caching is off** (2026-11-02): GPT-5.6 and later write any prompt of
 1,024 tokens or more to the cache by default, at 1.25x the input rate, and a judge
 prompt is never read back.  `judge.prompt_cache_fields` turns that off for all

@@ -40,7 +40,13 @@ Transports (--transport, default auto; added 2026-11-01):
               (up to --batch_fallback_max).  Work and state under
               <experiments_dir>/_tier_eval_batches/<model>/; a rerun collects
               batches still in flight before submitting anything.  Usage under
-              <model>:batch, the real-time remainder under <model>.
+              <model>:batch, the real-time remainder under <model>.  Grouped and
+              stacked runs (--axes_per_call, --axis_index, --stack) too, since
+              2026-11-05: a group's axis-map entry lists its members, so a batch
+              collected by a later run rebuilds the job; a batch's calls go into
+              the submission one after another, so a chunk splits at most one
+              cached prefix; the submission's estimated cost is logged first,
+              since --budget_usd does not stop a batch.
   * realtime  Every request in real time through the rate limiter (the
               behaviour before 2026-11-01).
   auto picks batch for an Anthropic model, real time for a Gemini model; for an
@@ -503,17 +509,27 @@ class AxisJob:
     #: job's own cell holds the answer logs and every item's k scores, each member gets its own cell.
     members: List["AxisJob"] = field(default_factory=list, repr=False)
 
-    def map_entry(self) -> Dict[str, str]:
+    def map_entry(self) -> Dict[str, Any]:
         """How the batch axis map records this axis (absolute paths, so a rerun
-        from another directory finds the same entry)."""
-        return {"axis_dir": self.axis_dir, "pos": self.pos, "neg": self.neg, "pair_type": self.pair_type,
-                "projections_file": str(Path(self.projections_file).resolve()),
-                "output_dir": str(Path(self.output_dir).resolve())}
+        from another directory finds the same entry).  A multi-axis job records its
+        members too (2026-11-05, when grouped and stacked runs were wired for the batch
+        APIs): a batch collected by a later run that does not list the group rebuilds
+        the job from this entry, and without its members it could neither parse a
+        stacked reply nor write the members' cells.  A one-axis entry has no
+        ``members`` key, so maps written before then still match."""
+        entry: Dict[str, Any] = {"axis_dir": self.axis_dir, "pos": self.pos, "neg": self.neg,
+                                 "pair_type": self.pair_type,
+                                 "projections_file": str(Path(self.projections_file).resolve()),
+                                 "output_dir": str(Path(self.output_dir).resolve())}
+        if self.members:
+            entry["members"] = [m.map_entry() for m in self.members]
+        return entry
 
     @classmethod
-    def from_map_entry(cls, entry: Dict[str, str]) -> "AxisJob":
+    def from_map_entry(cls, entry: Dict[str, Any]) -> "AxisJob":
         return cls(entry["axis_dir"], entry["pos"], entry["neg"], entry["pair_type"],
-                   Path(entry["projections_file"]), Path(entry["output_dir"]))
+                   Path(entry["projections_file"]), Path(entry["output_dir"]),
+                   members=[cls.from_map_entry(m) for m in entry.get("members") or []])
 
 
 def read_axes_file(path: Path) -> List[Tuple[str, str, str, str]]:
@@ -1757,6 +1773,18 @@ class AxisMap:
                                      indent=2, sort_keys=True) + "\n", self.path, logger_obj=logger)
 
 
+def saved_score(v: Any) -> Any:
+    """A score as ``collected/a<idx>.json`` keeps it, back in a cell: a number, None, a multi-axis item's list of
+    scores, or a stacked item's ``{member index: score}`` (JSON makes the indices strings)."""
+    if v is None:
+        return None
+    if isinstance(v, dict):
+        return {int(m): (None if x is None else int(x)) for m, x in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [None if x is None else int(x) for x in v]
+    return int(v)
+
+
 def custom_id(idx: int, name: str) -> str:
     cid = f"a{idx}|{name}"
     if not CUSTOM_ID_RE.fullmatch(cid):
@@ -1794,6 +1822,13 @@ def batch_settings(ctx: RunContext, mrun: ModelRun) -> Dict[str, Any]:
     if ctx.entities_per_call > 1:
         out.update(entities_per_call=ctx.entities_per_call, shuffle_seed=ctx.shuffle_seed,
                    batch_design=ctx.batch_design)
+    # grouped and stacked runs (2026-11-05): a custom id names a group by its place in axis_groups, which these
+    # decide, so batches of another stacking or other members must not be collected under them; recorded only
+    # when set, so the settings of every earlier batch run read as before
+    if STACK:
+        out.update(stack=STACK, stack_seed=STACK_SEED)
+    if AXIS_INDEX is not None:
+        out["axis_index"] = list(AXIS_INDEX)
     return out
 
 
@@ -1822,6 +1857,69 @@ def item_groups(full: List[Tuple[str, str, Any]], ctx: RunContext) -> List[List[
         return groups
     random.Random(ctx.shuffle_seed * 1_000_003 + 0).shuffle(full)
     return grid_batches(full, ctx.entities_per_call, ctx.batch_design)
+
+
+#: About four characters a token (the estimate of --response_chars), for the submission estimate.
+CHARS_PER_TOKEN = 4.0
+
+
+def axes_per_call_of_run() -> int:
+    """How many axes each call of this run scores: --stack k, the --axis_index members, or one."""
+    if STACK:
+        return STACK
+    if AXIS_INDEX is not None:
+        return len(AXIS_INDEX)
+    return 1
+
+
+def est_out_per_call(n_per: int) -> int:
+    """The dry run's token model for a call's output: per entity (and per axis it scores) when batched."""
+    if n_per > 1:
+        return EST_BATCH_OUT_PER_ENTITY * n_per * axes_per_call_of_run()
+    return EST_OUT_PER_ENTITY
+
+
+@dataclass
+class SubmissionEstimate:
+    """A coarse cost of a batch submission, logged before it is sent (2026-11-05: --budget_usd does not stop a
+    batch, so the log says what one will cost): input from the prompts' own length at CHARS_PER_TOKEN, output
+    from the dry run's token model, both at the price of ``key``.  With two-part prompts it gives a second figure,
+    each prefix written to the cache once and read back on its other calls (cache_rate_factors), which is what
+    Anthropic's breakpoint did in its batches on 2026-11-05 (98% of requests read their prefix); the first figure
+    reads nothing."""
+    key: str
+    out_per_call: int
+    n: int = 0
+    tokens_in: float = 0.0
+    tokens_in_cached: float = 0.0       # in units of plain input tokens
+    _prefixes: Set[int] = field(default_factory=set, repr=False)
+
+    def add(self, prompt: Any) -> None:
+        from assistant_axis.judge import prompt_parts
+        from assistant_axis.judge_pricing import cache_rate_factors
+        a, b = prompt_parts(prompt)
+        ta, tb = len(a) / CHARS_PER_TOKEN, len(b or "") / CHARS_PER_TOKEN
+        self.n += 1
+        self.tokens_in += ta + tb
+        if b is None:
+            self.tokens_in_cached += ta
+            return
+        write, read = cache_rate_factors(self.key)
+        h = hash(a)
+        self.tokens_in_cached += tb + ta * (read if h in self._prefixes else write)
+        self._prefixes.add(h)
+
+    def costs(self) -> Tuple[float, float]:
+        rate_in, rate_out = price_for_model(self.key)
+        out = self.n * self.out_per_call * rate_out / 1e6
+        return self.tokens_in * rate_in / 1e6 + out, self.tokens_in_cached * rate_in / 1e6 + out
+
+    def describe(self) -> str:
+        plain, cached = self.costs()
+        text = f"estimated ${plain:.2f} at {self.key}'s price with no cache reads"
+        if self._prefixes:
+            text += f", ${cached:.2f} with each of the {len(self._prefixes)} prefixes written once and read on its other calls"
+        return text + f" (coarse: {CHARS_PER_TOKEN:g} characters a token in, {self.out_per_call} tokens a call out)"
 
 
 async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> None:
@@ -1881,9 +1979,11 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
         p = collected_path(idx)
         if p.exists():
             data = json.loads(p.read_text())
-            cell.scores = {k: (None if v is None else int(v)) for k, v in data.get("scores", {}).items()}
+            cell.scores = {k: saved_score(v) for k, v in data.get("scores", {}).items()}
             cell.truncated = set(data.get("truncated") or [])
             cell.usage = MultiModelUsage.from_dict(data.get("usage") or {})
+            cell.swapped = {k: ({int(m): bool(w) for m, w in v.items()} if isinstance(v, dict) else bool(v))
+                            for k, v in (data.get("swapped") or {}).items()}
         # answers a live or Flex run saved are not asked again (they are not in collected/, and a
         # result for the same entity from a batch already counts)
         resume_cell(cell, mrun, header)
@@ -1935,10 +2035,15 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
             return
         parsed = ({} if isinstance(reply, tt.Truncated) or not reply else parse_group(cell.job, members, mrun.model, reply))
         sw = group_swapped(cell.job, members, mrun.model) if DIRECTIONS != "own" else None
+        # --stack: each item's axes and their directions, as the live path's answer records keep them (the
+        # members' cells count the directions from these)
+        stacked = dict(zip(*_group_plan(cell.job, members, mrun.model))) if STACK else None
         retry = bool(reply) and not isinstance(reply, tt.Truncated) and any(parsed.get(k) is None for k in range(1, len(members) + 1))
         for k, gname in enumerate(members, 1):
             if not retry or parsed.get(k) is not None:
                 record(mrun, cell, gname, reply, score=parsed.get(k) if parsed else None, swapped=sw)
+                if stacked is not None:
+                    cell.swapped[gname] = stacked
         if retry:
             to_reask.append((cell, members, reply))
 
@@ -1995,7 +2100,7 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
             else:
                 atomic_write_text(json.dumps({"axis": amap.axes.get(idx), "settings": settings_now,
                                               "scores": cell.scores, "truncated": sorted(cell.truncated),
-                                              "usage": cell.usage.as_dict()},
+                                              "usage": cell.usage.as_dict(), "swapped": cell.swapped},
                                              indent=2, sort_keys=True) + "\n",
                                   collected_path(idx), logger_obj=logger)
         touched.clear()
@@ -2017,7 +2122,9 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
     # 2. One submission for everything still missing.
     def pending():
         """``(cid, idx, prompt)`` for every request still to submit: one per entity, or with
-        batched judging one per group with any member unscored."""
+        batched judging one per group with any member unscored.  Under --stack the calls of one
+        answer batch (one cached prefix) come one after another, as axis_groups gives them, so a
+        chunk boundary splits at most one prefix's calls between two submissions."""
         for idx in current:
             cell = cells[idx]
             if cell.written:
@@ -2044,14 +2151,21 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
         amap.save()   # before the submission, so a rerun can route what it collects
         if n_per > 1:
             atomic_write_text(json.dumps(groups, indent=0, sort_keys=True) + "\n", groups_path, logger_obj=logger)
+        estimate = SubmissionEstimate(batch_key, out_per_call=est_out_per_call(n_per))
+
+        def requests():
+            for cid, idx, prompt in pending():
+                estimate.add(prompt)
+                yield cid, tt.request_for(model, prompt, ctx.max_tokens, mrun.settings)
+
         chunks = runner.write_chunks(
-            ((cid, tt.request_for(model, prompt, ctx.max_tokens, mrun.settings))
-             for cid, idx, prompt in pending()),
+            requests(),
             # the runner's own default unless --batch_chunk_requests says otherwise
             **({"max_requests": ctx.batch_chunk_requests} if ctx.batch_chunk_requests != DEFAULT_BATCH_CHUNK_REQUESTS
                else {}))
         logger.info(f"[{model}] batch: {n_pending} requests in {len(chunks)} chunk(s) for "
-                    f"{sum(1 for i in current if not cells[i].written)} axes")
+                    f"{sum(1 for i in current if not cells[i].written)} axes; {estimate.describe()}"
+                    + ("; --budget_usd does not stop a batch submission" if ctx.budget_usd is not None else ""))
         unanswered.update(await runner.run(chunks, on_result, flush))
     elif not inflight:
         logger.info(f"[{model}] batch: nothing to submit")
@@ -2075,6 +2189,13 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
                 if cell is None or cell.written or (not is_group and name in cell.scores):
                     return
                 prompt = tt.prompt_of_request(request)
+                if is_group:
+                    # the group's own prompt, rebuilt: a two-part prompt keeps its parts (and its cache
+                    # breakpoint), which the request's flattened text would lose
+                    by_name = {e[1]: e for e in cell.job.entities}
+                    members = group_members(cid) or []
+                    if members and all(n in by_name for n in members):
+                        prompt = build_group(cell.job, [by_name[n] for n in members], model)
                 charge = _Charge(cell.usage, mrun.usage, ctx.run_usage)
                 mrun.in_flight += 1
                 try:
@@ -2751,7 +2872,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--axes_per_call", type=int, default=1,
                         help="With an rk_* rubric (required) and --axes_file: judge this many consecutive axes of the "
                              "file in each call (the response text paid once for all of them); each axis still gets "
-                             "its own cell, and the group's answer log lives under _tier_eval_multi/.  Live and Flex only.")
+                             "its own cell, and the group's answer log lives under _tier_eval_multi/.  Any transport "
+                             "(the batch APIs since 2026-11-05).")
     parser.add_argument("--directions", choices=DIRECTION_MODES, default="own",
                         help="Which way each call presents its axis (Roger, 2026-11-04: balance the directions so that "
                              "no valence asymmetry enters a result).  own (default): the axis's order.  descriptions: "
@@ -2764,7 +2886,8 @@ def build_parser() -> argparse.ArgumentParser:
                              "one axis a call, a batch's M calls one after another, so its prefix stays cached), each batch's M axes "
                              "partitioned afresh at random into groups of k (a random letter order, each axis's "
                              "direction a coin per call), so that leakage between stacked axes is noise, not a fixed "
-                             "bias; every batch sent once per group.  Live and Flex only.")
+                             "bias; every batch sent once per group.  Any transport: through a batch API a batch's "
+                             "calls go one after another into the submission, so a chunk splits few prefixes.")
     parser.add_argument("--stack_seed", type=int, default=1, help="With --stack: the seed of the partitions.")
     parser.add_argument("--direction_pass", type=int, default=0,
                         help="With --directions descriptions: which of the judge's passes this run is, from 0.")
@@ -2976,8 +3099,9 @@ async def main_async(argv: Optional[Sequence[str]] = None) -> int:
                 choice = tt.choose_transport(model, args.transport)
             except (tt.JudgeRequestError, ValueError) as e:
                 parser.error(str(e))
-        if args.axes_per_call > 1 and choice.transport == "batch":
-            parser.error(f"{model}: --axes_per_call is not wired for the Batch API yet; --transport flex or realtime")
+        # --axes_per_call (an rk_* rubric, --axis_index, --stack) through the batch APIs since 2026-11-05 (Roger:
+        # "Yes, we're going to need these"): a group is one job with its members in the axis map, so a batch
+        # collected by a later run rebuilds them.
         runs.append(ModelRun(model=model, settings=tt.judge_request_settings(model, overrides), choice=choice))
 
     if args.repair_truncated:
