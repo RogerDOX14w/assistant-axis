@@ -1480,15 +1480,29 @@ class FakeGemini:
 
     def __init__(self, fail_first=0, needs=None):
         self.calls, self.fail_first, self.needs = [], fail_first, dict(needs or {})
+        self.kwargs = []        # what each generateContent post was given besides the body (a Flex attempt's timeout)
 
-    async def post(self, path, json):
+    def _prompt(self, body):
+        """The prompt a generateContent body holds (every turn's text, joined)."""
+        return "".join(part["text"] for c in body["contents"] for part in c["parts"])
+
+    def _reply(self, body):
+        """``(text, cut)`` for a generateContent body."""
+        text, cut, _ = capped_reply(self._prompt(body), body["generationConfig"]["maxOutputTokens"], self.needs)
+        return text, cut
+
+    def _usage(self, body):
+        return {"promptTokenCount": 300, "candidatesTokenCount": 40, "thoughtsTokenCount": 7}
+
+    async def post(self, path, json, **kw):
         self.calls.append((path, json))
+        self.kwargs.append(kw)
         if self.fail_first > 0:
             self.fail_first -= 1
             return SimpleNamespace(status_code=503, text="high demand", json=lambda: {})
-        text, cut, _ = capped_reply(json["contents"][0]["parts"][0]["text"], json["generationConfig"]["maxOutputTokens"], self.needs)
+        text, cut = self._reply(json)
         data = {"candidates": [{"content": {"parts": [{"text": text}]}, "finishReason": "MAX_TOKENS" if cut else "STOP"}],
-                "usageMetadata": {"promptTokenCount": 300, "candidatesTokenCount": 40, "thoughtsTokenCount": 7}}
+                "usageMetadata": self._usage(json)}
         return SimpleNamespace(status_code=200, text="", json=lambda: data)
 
 
@@ -1496,13 +1510,12 @@ def test_gemini_is_its_own_provider_and_goes_live_or_by_batch():
     assert tt.provider_for_model("gemini-3.1-flash-lite") == "google"
     assert tt.judge_request_settings("gemini-3.1-flash-lite") == {"temperature": 0, "thinkingConfig": {"thinkingLevel": "minimal"}}
     # the Batch API since 2026-11-03 (Roger: "add batch mode for it"), auto's choice once its turnaround
-    # was measured; real time on request; Flex is not wired
+    # was measured; real time on request; Flex on request since 2026-11-05 (before then refused: not wired)
     c = tt.choose_transport("gemini-3.1-flash-lite")
     assert (c.transport, c.probe) == ("batch", False)
     assert tt.choose_transport("gemini-3.1-flash-lite", "batch").transport == "batch"
     assert tt.choose_transport("gemini-3.1-flash-lite", "realtime").transport == "realtime"
-    with pytest.raises(tt.JudgeRequestError):
-        tt.choose_transport("gemini-3.1-flash-lite", "flex")
+    assert (tt.choose_transport("gemini-3.1-flash-lite", "flex").transport, c.probe) == ("flex", False)
     assert ev.key_name("gemini-3.1-flash-lite") == "GEMINI_API_KEY"
     assert price_for_model("gemini-3.1-flash-lite") == (0.25, 1.50)
     assert price_for_model("gemini-3.1-flash-lite:batch") == pytest.approx((0.125, 0.75))
@@ -1578,9 +1591,9 @@ class FakeGeminiBatch(FakeGemini):
         super().__init__(**kw)
         self.errored, self.batches = set(errored), {}
 
-    async def post(self, path, json):
+    async def post(self, path, json, **kw):
         if not path.endswith(":batchGenerateContent"):
-            return await super().post(path, json)
+            return await super().post(path, json, **kw)
         name = f"batches/b{len(self.batches)}"
         self.batches[name] = json["batch"]["input_config"]["requests"]["requests"]
         return SimpleNamespace(status_code=200, text="", json=lambda: {"name": name})
@@ -1589,14 +1602,15 @@ class FakeGeminiBatch(FakeGemini):
         items = []
         for r in self.batches[path[1:]]:
             body = r["request"]
-            prompt = body["contents"][0]["parts"][0]["text"]
+            prompt = self._prompt(body)
             if any(f"{e} (" in prompt for e in self.errored):
                 items.append({"error": {"code": 13, "message": "internal"}, "metadata": r["metadata"]})
                 continue
-            text, cut, _ = capped_reply(prompt, body["generationConfig"]["maxOutputTokens"], self.needs)
+            text, cut = self._reply(body)
+            usage = {k: v for k, v in self._usage(body).items() if k != "thoughtsTokenCount"}
             items.append({"metadata": r["metadata"], "response": {
                 "candidates": [{"content": {"parts": [{"text": text}]}, "finishReason": "MAX_TOKENS" if cut else "STOP"}],
-                "usageMetadata": {"promptTokenCount": 300, "candidatesTokenCount": 40}}})
+                "usageMetadata": usage}})
         data = {"name": path[1:], "done": True, "metadata": {"state": "BATCH_STATE_SUCCEEDED"},
                 "response": {"inlinedResponses": {"inlinedResponses": items}}}
         return SimpleNamespace(status_code=200, text="", json=lambda: data)
@@ -3693,3 +3707,355 @@ def test_a_group_s_map_entry_carries_its_members_and_a_one_axis_entry_is_unchang
     assert [m.axis_dir for m in back.members] == [a for a, *_ in AXES] and back.map_entry() == group.map_entry()
     assert ev.saved_score({"0": 51, "2": None}) == {0: 51, 2: None} and ev.saved_score([1, None]) == [1, None]
     assert ev.saved_score(None) is None and ev.saved_score(7.0) == 7
+
+
+# ---------------------------------------------------------------------------
+# Gemini: Flex, and explicit caches for the cached-prefix rubrics (2026-11-05)
+# ---------------------------------------------------------------------------
+
+from assistant_axis import gemini_batch as gb                     # noqa: E402
+from assistant_axis import judge_pricing as jp                    # noqa: E402
+
+GEM = "gemini-3.1-flash-lite"
+CACHE_TOKENS = 1000
+
+
+class FakeGeminiCaching(FakeGeminiBatch):
+    """FakeGeminiBatch with explicit caches (POST /cachedContents, DELETE /cachedContents/<id>) and Flex.  A request
+    on a cache is answered from the cache's prefix and its own suffix, and its usage counts the cache's tokens as
+    read from it; a request on a cache that is gone gets a 404.  The first ``flex_fail`` Flex calls answer
+    ``flex_status``; ``create_fail`` creates are refused (HTTP 400, too small); ``served`` is the tier a reply
+    reports.  ``events`` records creates, batch submissions, batch reads and deletes in order."""
+
+    def __init__(self, *, flex_fail=0, flex_status=503, create_fail=0, served=None, stack=False, delete_ok=True, **kw):
+        super().__init__(**kw)
+        self.caches, self.created, self.deleted, self.events = {}, [], [], []
+        self.flex_fail, self.flex_status, self.create_fail = flex_fail, flex_status, create_fail
+        self.served, self.stack, self.delete_ok = served, stack, delete_ok
+
+    def _prompt(self, body):
+        text = super()._prompt(body)
+        return self.caches[body["cachedContent"]] + text if "cachedContent" in body else text
+
+    def _reply(self, body):
+        if self.stack:
+            return stack_reply(self._prompt(body)), False
+        return super()._reply(body)
+
+    def _usage(self, body):
+        u = {"promptTokenCount": 300 + (CACHE_TOKENS if "cachedContent" in body else 0), "candidatesTokenCount": 40}
+        if "cachedContent" in body:
+            u["cachedContentTokenCount"] = CACHE_TOKENS
+        if self.served or body.get("serviceTier"):
+            u["serviceTier"] = self.served or body["serviceTier"]
+        return u
+
+    async def post(self, path, json, **kw):
+        if path == "/cachedContents":
+            if self.create_fail > 0:
+                self.create_fail -= 1
+                return SimpleNamespace(status_code=400, text="Cached content is too small", json=lambda: {})
+            name = f"cachedContents/c{len(self.created)}"
+            self.caches[name] = json["contents"][0]["parts"][0]["text"]
+            self.created.append((name, json))
+            self.events.append(("create", name))
+            return SimpleNamespace(status_code=200, text="", json=lambda: {"name": name, "usageMetadata": {"totalTokenCount": CACHE_TOKENS}})
+        if path.endswith(":generateContent"):
+            if json.get("cachedContent") and json["cachedContent"] not in self.caches:
+                self.calls.append((path, json))
+                return SimpleNamespace(status_code=404, text="cached content not found", json=lambda: {})
+            if json.get("serviceTier") == "flex" and self.flex_fail > 0:
+                self.calls.append((path, json))
+                self.kwargs.append(kw)
+                self.flex_fail -= 1
+                return SimpleNamespace(status_code=self.flex_status, text="at capacity", json=lambda: {})
+        if path.endswith(":batchGenerateContent"):
+            self.events.append(("batch", f"batches/b{len(self.batches)}"))
+        return await super().post(path, json, **kw)
+
+    async def get(self, path, params=None):
+        self.events.append(("read", path[1:]))
+        return await super().get(path, params)
+
+    async def delete(self, path):
+        self.events.append(("delete", path[1:]))
+        if not self.delete_ok:
+            return SimpleNamespace(status_code=500, text="internal", json=lambda: {})
+        self.deleted.append(path[1:])
+        self.caches.pop(path[1:], None)
+        return SimpleNamespace(status_code=200, text="", json=lambda: {})
+
+    def generate_calls(self):
+        return [b for p, b in self.calls if p.endswith(":generateContent")]
+
+
+def _gemini(monkeypatch, client):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-used")
+    monkeypatch.setattr(ev, "make_gemini_client", lambda service_tier=None: client)
+    monkeypatch.setattr(judge_module, "GEMINI_RETRY_SLEEP_S", (0, 0, 0))
+    monkeypatch.setattr(judge_module, "GEMINI_CACHE_RETRY_SLEEP_S", (0, 0, 0))
+    return client
+
+
+def test_gemini_flex_and_cache_storage_prices():
+    assert price_for_model(f"{GEM}:flex") == pytest.approx((0.125, 0.75)) == price_for_model(f"{GEM}:batch")
+    assert jp.cache_storage_rate(GEM) == 1.00 and jp.cache_storage_rate(f"{GEM}:flex") == 0.5 == jp.cache_storage_rate(f"{GEM}:batch")
+    with pytest.raises(KeyError):
+        jp.cache_storage_rate("gemini-3.5-flash-lite")        # no rate: an explicit cache with it is refused
+    with pytest.raises(KeyError):
+        price_for_model("claude-haiku-5-5:flex")
+    # 1M prompt tokens of which 900k read from the cache, on Flex: 100k x $0.125 + 900k x $0.0125; 10M token-hours at $0.50
+    assert jp.cost_for_usage(f"{GEM}:flex", 1_000_000, 0, 0, 900_000) == pytest.approx(0.0125 + 0.01125)
+    assert jp.cost_for_usage(GEM, 0, 0, 0, 0, 10_000_000) == pytest.approx(10.0)
+    u = MultiModelUsage()
+    u.charge(f"{GEM}:batch", 1000, 0, 1000, 0, n_calls=0)                     # a creation: not a judge call
+    u.charge(f"{GEM}:batch", 0, 0, cache_storage_token_hours=2_000_000.0, n_calls=0)
+    t = u.per_model[f"{GEM}:batch"]
+    assert t.n_calls == 0 and t.cache_write_tokens == 1000 and t.cost_usd == pytest.approx(1000 * 0.125 / 1e6 + 1.0)
+    back = MultiModelUsage.from_dict(json.loads(json.dumps(u.as_dict())))
+    assert back.per_model[f"{GEM}:batch"].cache_storage_token_hours == 2_000_000.0
+    assert back.total_cost_usd == pytest.approx(u.total_cost_usd)
+    merged = MultiModelUsage()
+    merged.merge_from(u)
+    merged.merge_from(u)
+    assert merged.total_cost_usd == pytest.approx(2 * u.total_cost_usd)
+    assert "cache_storage_token_hours" not in MultiModelUsage().as_dict() and "token-h" in u.log_line()
+
+
+def test_a_gemini_flex_call_carries_its_tier_retries_429_and_503_and_falls_back_after_the_window(monkeypatch):
+    monkeypatch.setattr(judge_module, "GEMINI_RETRY_SLEEP_S", (0, 0, 0))
+    settings = tt.judge_request_settings(GEM)
+    prompt = "to score\n\n**shy**: x"
+
+    def call(client, usage, stats):
+        return asyncio.run(tt.call_gemini(client, prompt, GEM, 300, RateLimiter(1000), usage, settings=settings,
+                                          stats=stats, service_tier="flex"))
+    # within the window: a 503 and a 429 tried again on Flex, then answered there
+    client, usage, stats = FakeGeminiCaching(flex_fail=1, flex_status=503), MultiModelUsage(), tt.CallStats()
+    client.flex_fail, statuses = 2, iter((503, 429))
+    orig = client.post
+
+    async def post(path, json, **kw):
+        client.flex_status = next(statuses, 503)
+        return await orig(path, json, **kw)
+    client.post = post
+    assert call(client, usage, stats).endswith("SCORE: 3")
+    bodies = client.generate_calls()
+    assert len(bodies) == 3 and all(b["serviceTier"] == "flex" for b in bodies)
+    assert all(kw["timeout"] >= judge_module.FLEX_MIN_ATTEMPT_S for kw in client.kwargs)    # each attempt bounded
+    assert set(usage.per_model) == {f"{GEM}:flex"} and stats.flex_fallbacks == 0 and stats.errors == 0
+    # past the window: one attempt more, on the standard tier, charged as such
+    monkeypatch.setattr(judge_module, "FLEX_FALLBACK_AFTER_S", 0.0)
+    client, usage, stats = FakeGeminiCaching(flex_fail=10), MultiModelUsage(), tt.CallStats()
+    assert call(client, usage, stats).endswith("SCORE: 3")
+    bodies = client.generate_calls()
+    assert [b.get("serviceTier") for b in bodies] == ["flex", None] and stats.flex_fallbacks == 1
+    assert set(usage.per_model) == {GEM}
+    # a Flex request the reply says was served on the standard tier is charged at the standard price
+    client, usage = FakeGeminiCaching(served="standard"), MultiModelUsage()
+    monkeypatch.setattr(judge_module, "FLEX_FALLBACK_AFTER_S", 600.0)
+    call(client, usage, tt.CallStats())
+    assert set(usage.per_model) == {GEM}
+    assert judge_module.gemini_request_body("P", GEM, 9, service_tier="flex")["serviceTier"] == "flex"
+    with pytest.raises(ValueError):
+        judge_module.gemini_request_body("P", GEM, 9, service_tier="FLEX")
+
+
+def test_a_gemini_flex_run_writes_cells_charged_at_the_flex_price(world, monkeypatch):
+    client = _gemini(monkeypatch, FakeGeminiCaching())
+    assert _run(world, GEM, extra=["--rubric", "b10", "--cell_label", "@b10s1", "--entities_per_call", "3",
+                                   "--transport", "flex"]) == 0
+    assert client.generate_calls() and all(b["serviceTier"] == "flex" for b in client.generate_calls())
+    scores, usage, _ = _cell(world, "alpha_vs_beta", f"{GEM}@b10s1")
+    assert scores["result"] == {e: batch_score(e, True) for e in ENTITIES} and scores["_provenance"]["transport"] == "flex"
+    assert set(usage["per_model"]) == {f"{GEM}:flex"}
+    assert usage["total_cost_usd"] == pytest.approx(2 * (300 * 0.125 + 40 * 0.75) / 1e6, abs=1e-4)
+
+
+def _explicit_args(world, label, transport, cache="explicit", rubric="r1_pn", k=1):
+    return [*_STACK_COMMON, "--responses_dir", str(world.resp), "--rubric", rubric, "--stack", str(k),
+            "--cell_label", label, "--transport", transport, "--gemini_cache", cache]
+
+
+def _group_usage(world, label):
+    group = next((world.exp / "_tier_eval_multi").glob(f"*/{GEM}{label}"))
+    return json.loads((group / "usage.json").read_text()), group
+
+
+@pytest.mark.parametrize("transport", ["realtime", "flex"])
+def test_explicit_caches_live_and_flex_one_per_answer_batch_with_the_suffix_only(world, monkeypatch, transport):
+    """--gemini_cache explicit, r1_pn --stack 1: one cache per answer batch, created before its calls, every call
+    of the batch on it with only the suffix as a second user turn, the cache deleted after them; the cells equal
+    the implicit run's on the same replies; the group cell's usage holds the creations as cache-written tokens,
+    the reads, the storage and only judge calls in n_calls; the answer log keeps the cache lines."""
+    monkeypatch.setitem(DIRECTION_AWARE, "on", True)
+    client = _gemini(monkeypatch, FakeGeminiCaching())
+    assert _run(world, GEM, axes=world.axes3, extra=_explicit_args(world, "@exp", transport)) == 0
+    bodies = client.generate_calls()
+    names = [n for n, _ in client.created]
+    assert bodies and all(b.get("cachedContent") in names for b in bodies)
+    assert all(len(b["contents"]) == 1 and b["contents"][0]["role"] == "user" for b in bodies)
+    assert all("The question was:" not in b["contents"][0]["parts"][0]["text"] for b in bodies)
+    assert all("The question was:" in body["contents"][0]["parts"][0]["text"] and body["ttl"] for _, body in client.created)
+    assert len(bodies) == 3 * len(names)                           # each batch's three axes on its one cache
+    assert sorted(client.deleted) == sorted(names) and not client.caches
+    for name in names:                                              # created before its calls, deleted after them
+        first = next(i for i, b in enumerate(bodies) if b["cachedContent"] == name)
+        assert client.events.index(("create", name)) < client.events.index(("delete", name))
+        assert first >= 0
+    if transport == "flex":
+        assert all(b["serviceTier"] == "flex" for b in bodies)
+    key = tt.price_key(GEM, transport)
+    usage, group = _group_usage(world, "@exp")
+    per = usage["per_model"][key]
+    assert per["cache_write_tokens"] == CACHE_TOKENS * len(names) and per["cache_read_tokens"] == CACHE_TOKENS * len(bodies)
+    assert per["n_calls"] == len(bodies)
+    logged = [json.loads(x) for x in gzip.decompress((group / "answers.jsonl.gz").read_bytes()).decode().splitlines()
+              if '"kind": "cache"' in x]
+    assert sorted(r["event"] for r in logged) == ["create"] * len(names) + ["delete"] * len(names)
+    assert not (group / ev.ANSWERS_PARTIAL).exists()        # the cell waited for its last cache's storage charge
+    assert per.get("cache_storage_token_hours", 0) == pytest.approx(sum(r.get("storage_token_hours", 0) for r in logged), abs=1e-3)
+    plain = _gemini(monkeypatch, FakeGeminiCaching())
+    assert _run(world, GEM, axes=world.axes3, extra=_explicit_args(world, "@imp", transport, cache="implicit")) == 0
+    assert not plain.created and all("cachedContent" not in b for b in plain.generate_calls())
+    assert _member_cells(world, GEM, "@exp") == _member_cells(world, GEM, "@imp")
+    prov = json.loads((world.exp / f"{AXES[0][0]}_tier_eval" / f"{GEM}@exp" / "scores_responses.json").read_text())["_provenance"]
+    assert prov["gemini_cache"] == "explicit"
+
+
+def test_explicit_caches_stacked_rk_pn_and_a_failed_create_sends_that_batch_whole(world, monkeypatch, caplog):
+    client = _gemini(monkeypatch, FakeGeminiCaching(stack=True, create_fail=1))
+    assert _run(world, GEM, axes=world.axes3, extra=_explicit_args(world, "@exp2", "realtime", rubric="rk_pn", k=2)) == 0
+    bodies = client.generate_calls()
+    whole = [b for b in bodies if "cachedContent" not in b]
+    assert len(whole) == 2 and all("The question was:" in b["contents"][0]["parts"][0]["text"] for b in whole)
+    assert "explicit cache not created" in caplog.text
+    for ai, (axis_dir, *_r) in enumerate(AXES):
+        _result, items, _counts = _member_cells(world, GEM, "@exp2")[axis_dir]
+        assert items and all(v == batch_score(key.rsplit("|", 1)[0], True) + ai for key, v in items.items())
+
+
+def test_a_call_whose_cache_is_gone_is_sent_whole(monkeypatch):
+    client = FakeGeminiCaching()
+    usage = MultiModelUsage()
+    prompt = ("to score\n\n", "**shy**: x")
+    text = asyncio.run(tt.call_gemini(client, prompt, GEM, 300, RateLimiter(1000), usage, stats=tt.CallStats(),
+                                      cached_content="cachedContents/expired"))
+    assert text.endswith("SCORE: 3")
+    assert [("cachedContent" in b) for b in client.generate_calls()] == [True, False]
+
+
+def test_explicit_caches_through_the_batch_api_per_chunk(world, monkeypatch):
+    """Batch: each chunk's caches made just before it is submitted, its inline requests carrying a cache's name
+    and the suffix only, the caches deleted once the chunk is collected; creation and storage in the group cell's
+    usage at the batch price; the cells equal the implicit batch run's."""
+    monkeypatch.setitem(DIRECTION_AWARE, "on", True)
+    client = _gemini(monkeypatch, FakeGeminiCaching())
+    monkeypatch.setattr(gb.GeminiBatchRunner, "write_chunks", partialmethod(gb.GeminiBatchRunner.write_chunks, max_requests=10))
+    assert _run(world, GEM, axes=world.axes3, extra=_explicit_args(world, "@expb", "batch")) == 0
+    assert len(client.batches) > 1 and not client.generate_calls()
+    names = [n for n, _ in client.created]
+    for b, reqs in client.batches.items():
+        on = {r["request"]["cachedContent"] for r in reqs}
+        assert on <= set(names) and all("The question was:" not in r["request"]["contents"][0]["parts"][0]["text"] for r in reqs)
+        assert all(client.events.index(("create", n)) < client.events.index(("batch", b)) for n in on)
+        last_read = max(i for i, e in enumerate(client.events) if e == ("read", b))
+        assert all(client.events.index(("delete", n)) > client.events.index(("batch", b)) for n in on)
+        assert last_read >= 0
+    assert sorted(client.deleted) == sorted(names)
+    state = json.loads((world.exp / "_tier_eval_batches" / f"{GEM}@expb" / "batch_state.json").read_text())
+    assert all(c["deleted"] for c in state["caches"].values())
+    assert not list((world.exp / "_tier_eval_batches" / f"{GEM}@expb" / "chunks").glob("*.prefixes.json"))
+    usage, _group = _group_usage(world, "@expb")
+    per = usage["per_model"][f"{GEM}:batch"]
+    n_reqs = sum(len(r) for r in client.batches.values())
+    assert per["cache_write_tokens"] == CACHE_TOKENS * len(names) and per["n_calls"] == n_reqs
+    assert per["cache_read_tokens"] == CACHE_TOKENS * n_reqs
+    plain = _gemini(monkeypatch, FakeGeminiCaching())
+    assert _run(world, GEM, axes=world.axes3, extra=_explicit_args(world, "@impb", "batch", cache="implicit")) == 0
+    assert not plain.created
+    assert _member_cells(world, GEM, "@expb") == _member_cells(world, GEM, "@impb")
+
+
+def test_explicit_batch_caches_left_by_a_stopped_run_are_deleted_on_resume(world, monkeypatch):
+    """A run stopped with its batch in flight keeps its caches (the batch needs them); the next run collects the
+    batch and deletes them; a cache whose chunks are all collected but which a stopped run never deleted is
+    deleted by the next run's resume."""
+    client = _gemini(monkeypatch, FakeGeminiCaching())
+    real_get = FakeGeminiCaching.get
+
+    async def failing_get(self, path, params=None):
+        return SimpleNamespace(status_code=503, text="unavailable", json=lambda: {})
+    monkeypatch.setattr(FakeGeminiCaching, "get", failing_get)
+    args = _explicit_args(world, "@resb", "batch")
+    assert _run(world, GEM, axes=world.axes3, extra=args) == 1
+    assert client.created and not client.deleted
+    monkeypatch.setattr(FakeGeminiCaching, "get", real_get)
+    assert _run(world, GEM, axes=world.axes3, extra=args) == 0
+    assert sorted(client.deleted) == sorted(n for n, _ in client.created) and len(client.batches) == 1
+    state_path = world.exp / "_tier_eval_batches" / f"{GEM}@resb" / "batch_state.json"
+    state = json.loads(state_path.read_text())
+    digest, rec = next(iter(state["caches"].items()))
+    rec["deleted"] = False
+    client.caches[rec["name"]] = "leftover"
+    state_path.write_text(json.dumps(state))
+    n = len(client.deleted)
+    assert _run(world, GEM, axes=world.axes3, extra=args) == 0
+    assert client.deleted[n:] == [rec["name"]]
+
+
+def test_gemini_cache_flag_validation(world, monkeypatch):
+    _gemini(monkeypatch, FakeGeminiCaching())
+    for bad, models in (([*_STACK_COMMON, "--responses_dir", str(world.resp), "--rubric", "r1_pn", "--axis_index", "0",
+                          "--gemini_cache", "explicit", "--cell_label", "@bad"], (GEM,)),           # no --stack
+                        (_explicit_args(world, "@bad", "realtime", rubric="r1_hn"), (GEM,)),          # one-part prompt
+                        (_explicit_args(world, "@bad", "realtime"), ("gpt-5.6-luna",))):            # no Gemini model
+        with pytest.raises(SystemExit):
+            _run(world, *models, axes=world.axes3, extra=bad)
+    # implicit is the default: an r1_pn --stack 1 Gemini run sends whole prompts and makes no cache
+    plain = _gemini(monkeypatch, FakeGeminiCaching())
+    args = [x for x in _explicit_args(world, "@def", "realtime") if x not in ("--gemini_cache", "explicit")]
+    assert _run(world, GEM, axes=world.axes3, extra=args) == 0
+    assert not plain.created and all("cachedContent" not in b for b in plain.generate_calls())
+
+
+def test_a_resumed_explicit_run_counts_the_cache_charges_of_its_answer_log(world, monkeypatch):
+    """The cache lines of an answer log are charged into the cell on a rerun (not as calls), and a log made under
+    explicit caches is refused by an implicit run."""
+    monkeypatch.setitem(DIRECTION_AWARE, "on", True)
+    model_cell = f"{GEM}@resl"
+    client = _gemini(monkeypatch, FakeGeminiCaching())
+    args = _explicit_args(world, "@resl", "realtime")
+    assert _run(world, GEM, axes=world.axes3, extra=args) == 0
+    usage, group = _group_usage(world, "@resl")
+    log = gzip.decompress((group / "answers.jsonl.gz").read_bytes())
+    (group / "usage.json").unlink()
+    (group / ev.ANSWERS_PARTIAL).write_bytes(log)
+    n = len(client.generate_calls())
+    assert _run(world, GEM, axes=world.axes3, extra=args) == 0
+    assert len(client.generate_calls()) == n                              # every answer taken from the log
+    again, _ = _group_usage(world, "@resl")
+    assert again["per_model"] == usage["per_model"]
+    (group / "usage.json").unlink()
+    (group / ev.ANSWERS_PARTIAL).write_bytes(log)
+    implicit = [x for x in args if x not in ("--gemini_cache", "explicit")]
+    assert _run(world, GEM, axes=world.axes3, extra=implicit) == 1          # CheckpointMismatchError: other settings
+    assert model_cell
+
+
+def test_explicit_batch_with_no_cache_made_sends_whole_requests_and_splits_what_passes_the_inline_limit(world, monkeypatch, caplog):
+    """Every create refused: the chunk's requests go whole, and those that no longer fit the inline limit (here
+    one request) go into a chunk of their own (cut by the ordinary chunk limits); every cell is still right."""
+    monkeypatch.setitem(DIRECTION_AWARE, "on", True)
+    client = _gemini(monkeypatch, FakeGeminiCaching(create_fail=10_000))
+    monkeypatch.setattr(gb, "INLINE_LIMIT_BYTES", 1)
+    assert _run(world, GEM, axes=world.axes3, extra=_explicit_args(world, "@nocache", "batch")) == 0
+    reqs = [r for rs in client.batches.values() for r in rs]
+    assert len(client.batches) == 2 and len(client.batches["batches/b0"]) == 1 and len(reqs) > 2 and not client.created
+    assert all("cachedContent" not in r["request"] and "The question was:" in r["request"]["contents"][0]["parts"][0]["text"]
+               for r in reqs)
+    assert "explicit caches not created" in caplog.text and "a chunk of their own" in caplog.text
+    plain = _gemini(monkeypatch, FakeGeminiCaching())
+    monkeypatch.setattr(gb, "INLINE_LIMIT_BYTES", gb.DEFAULT_CHUNK_BYTES)
+    assert _run(world, GEM, axes=world.axes3, extra=_explicit_args(world, "@nocache_imp", "batch", cache="implicit")) == 0
+    assert _member_cells(world, GEM, "@nocache") == _member_cells(world, GEM, "@nocache_imp")

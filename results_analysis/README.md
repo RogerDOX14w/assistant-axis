@@ -3090,8 +3090,8 @@ inline, at most 15 MB a batch (Google's limit is 20 MB), usage is kept under
 name, and what a batch fails to answer is judged in real time.  Google states a
 24-hour target and expires a batch after 48 hours; here one request came back in
 1 min 47 s and each round of instruction judging (1,769 requests, 8.7 MB) in about
-3 minutes (2026-11-03), so `auto` chooses it.  Gemini's Flex tier (half
-price, a preview) is not wired.  An HTTP 402 (prepaid credit used up) raises
+3 minutes (2026-11-03), so `auto` chooses it.  Gemini's Flex tier is
+`--transport flex` since 2026-11-05 (below).  An HTTP 402 (prepaid credit used up) raises
 `BillingError` in real time and `GeminiBatchError` in batch, stopping the run.
 Default settings: temperature 0
 (Gemini takes it) and `thinkingConfig.thinkingLevel` "minimal" (no thought
@@ -3108,6 +3108,55 @@ saved answers once the quota resets.  On the paid tier, `--requests_per_second 5
 --max_in_flight 20` ran a pass over 30 axes in about two minutes.  Neither model
 reached the frontier at N=20 and two passes (update 3 of
 [`pareto_pooled_61axes_notes.md`](../roger/axis_judge_experiments/pareto_pooled_61axes_notes.md)).
+
+**Gemini Flex and explicit caches** (2026-11-05; Roger: "Yes, we're going to need
+these").  Measured live that day by the main session's probes on 3.1 Flash-Lite; the
+prices are aistudio.google.com/docs/pricing's of that day, per 1M tokens: standard input
+$0.25, cached $0.025, storage $1.00 an hour, output $1.50; Flex and Batch half of each
+($0.125, $0.0125, $0.50, $0.75).
+
+- `--transport flex` sends generateContent with the top-level `"serviceTier": "flex"`
+  (lowercase; `"FLEX"` is an HTTP 400).  Flex answers 429 or 503 at capacity and never
+  falls back by itself, with a latency target of 1 to 15 minutes, so a call is tried
+  again with growing sleeps until `judge.FLEX_FALLBACK_AFTER_S` (10 minutes, Roger's
+  OpenAI rule) after its first send, each attempt bounded by the time left, then goes to
+  the standard tier as an ordinary call.  The client's timeout is `FLEX_TIMEOUT_S`.  Usage
+  under `<model>:flex` at the Flex price; a fallback, or a reply whose
+  `usageMetadata.serviceTier` says it was served on another tier, under `<model>`.  Flex
+  counts against the per-minute input-token limit (4M a minute for Flash-Lite at tier 1),
+  which the rate limiter and `--max_in_flight` bound only by requests.  `auto` keeps
+  Gemini on the Batch API (same price, no capacity refusals).
+- `--gemini_cache explicit` (default `implicit`, every run before then), with `--stack`
+  and a cached-prefix rubric (`r1_pn`, `rk_pn`, `rk_pl`, `rk_pa`, `RubricSpec.two_part`):
+  each answer batch's prefix goes into an explicit cache (`POST /cachedContents`, the
+  prefix as one user turn, a TTL) and its calls carry `"cachedContent": <name>` and only
+  the suffix as their `contents`.  Prompt tokens read from the cache: 96% on Flex and in
+  batch alike, against the implicit cache's about 60% live, 45-57% on Flex and 17% in
+  batch.  **It changes the prompt from one user message to two consecutive user turns**,
+  so a paired quality check against implicit cells comes before it is adopted; the
+  answer log's header records `gemini_cache`, so a log of one is refused by the other.
+  - Live and Flex: one cache per answer batch, made just before its calls and deleted
+    after them (a failed delete is logged; the TTL, 900 s live and 2 h on Flex, is the
+    backstop), several batches in flight, at most `--max_in_flight` calls in all; a cell
+    is written once none of its caches is alive.  A call whose cache is gone (an HTTP
+    400, 403 or 404) is sent whole.
+  - Batch ([`gemini_batch.py`](../assistant_axis/gemini_batch.py)): a chunk's prefixes
+    sit in a side file, so the inline requests carry suffixes only and far more fit the
+    15 MB; just before a chunk is submitted its caches are made (one still alive from an
+    earlier chunk is reused) and recorded in `batch_state.json`'s `caches` with the chunks
+    and custom ids using them; a cache is deleted once every chunk using it is collected,
+    and a resumed run deletes those a stopped one left (TTL 6 h).  Requests a batch leaves
+    unanswered come back whole.
+  - A cache that cannot be made (a prefix under the model's minimum, a quota) sends its
+    batch's calls whole, logged; in batch, requests sent whole that no longer fit the
+    inline limit go in a chunk of their own.
+  - Charged to the cell whose calls used the cache (shared by request count when two
+    groups' cells use the same answers): creation as cache-written tokens at the tier's
+    input rate (**an assumption, not checked against a bill**), reads
+    (`cachedContentTokenCount`) at a tenth of the tier's input rate, and storage as
+    `cache_storage_token_hours` (creation to deletion, or to the TTL when the delete
+    failed) at `judge_pricing.cache_storage_rate`; none of these counts in `n_calls`.
+    Live and Flex keep them on `cache` lines of the answer log, so a rerun counts them.
 
 **Request settings per model** come from `JUDGE_REQUEST_SETTINGS` in
 [`assistant_axis/judge.py`](../assistant_axis/judge.py), what step 3 sends:

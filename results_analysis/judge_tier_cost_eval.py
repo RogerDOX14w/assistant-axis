@@ -31,7 +31,11 @@ Transports (--transport, default auto; added 2026-11-01):
               once through the rate limiter, on a client with a 900 s timeout
               and 8 retries; a request Flex keeps failing for 10 minutes is
               sent once to the standard tier.  Usage under <model>:flex, the
-              fallbacks under <model>.
+              fallbacks under <model>.  Gemini's Flex tier too since 2026-11-05
+              ("serviceTier": "flex" on generateContent, half price; Flex answers
+              429 or 503 at capacity and is tried again with growing sleeps, the
+              same 10 minutes, then the standard tier), on request only: auto
+              keeps Gemini on its Batch API.
   * batch     The provider's batch API (OpenAI Batch API, Anthropic Message
               Batches; half price, results within 24 hours, usually within
               one).  One submission per model for all the axes being run;
@@ -57,6 +61,22 @@ Transports (--transport, default auto; added 2026-11-01):
   the batch).  The choice is logged and recorded in each cell's
   scores_descriptions.json _provenance (transport, request_settings,
   max_tokens).
+
+Gemini's explicit cache (--gemini_cache explicit, 2026-11-05; default implicit, every
+run before then): with --stack and a cached-prefix rubric (r1_pn, rk_pn, rk_pl, rk_pa),
+each answer batch's prefix (the question and the answers) goes into an explicit cache
+and its calls send the cache's name and the suffix (the axes) only.  Measured live that
+day on 3.1 Flash-Lite: 96% of prompt tokens read from an explicit cache on Flex and in
+batch, against about 60% live, 45-57% on Flex and 17% in batch for the implicit cache.
+Live and Flex: a cache per answer batch, made just before its calls and deleted after
+them, several batches in flight.  Batch: each chunk's caches made just before it is
+submitted (its inline requests then carry suffixes only), deleted once every chunk using
+them is collected, recorded in the batch state so that a resumed run deletes what a
+stopped one left.  A cache that cannot be made sends its batch's calls whole.  Charged:
+creation as cache-written tokens at the tier's input rate (an assumption), reads at a
+tenth, storage as token-hours at the tier's storage rate (judge_pricing).  It changes the
+prompt from one user message to two consecutive user turns, so a paired quality check
+against implicit cells comes before adoption.
 
 Request settings per model (reasoning effort, thinking) come from
 assistant_axis/judge.py's JUDGE_REQUEST_SETTINGS, the requests pipeline step 3
@@ -188,7 +208,8 @@ from results_analysis.judge_tier_transport import provider_for_model  # noqa: E4
 from results_analysis import judge_tier_rubrics as jr  # noqa: E402
 from assistant_axis.judge import RateLimiter, warn_if_low_parse_rate  # noqa: E402
 from assistant_axis.judge_pricing import (  # noqa: E402
-    BATCH_SUFFIX, MultiModelUsage, TokenUsage, anthropic_usage, gemini_usage, openai_usage, price_for_model,
+    BATCH_SUFFIX, MultiModelUsage, TokenUsage, anthropic_usage, cache_storage_rate, gemini_usage, openai_usage,
+    price_for_model,
 )
 from assistant_axis.entity_id import entity_id, parse_entity_id  # noqa: E402
 from assistant_axis.atomic_io import atomic_write_bytes, atomic_write_text  # noqa: E402
@@ -262,10 +283,10 @@ CHECKPOINT_VERSION = 1
 #: Header fields an answer log must share with the run that resumes it.
 CHECKPOINT_KEYS = ("version", "judge_model", "cell_label", "rubric_version", "request_settings", "max_tokens",
                    "name_format", "swap_poles", "directions", "direction_pass", "stack", "stack_seed",
-                   "response_design")
+                   "response_design", "gemini_cache")
 #: What an answer log's header means by leaving a key out: it predates the key.
 CHECKPOINT_DEFAULTS = {"name_format": "mechanical", "swap_poles": False, "directions": "own", "direction_pass": 0,
-                       "stack": 0, "stack_seed": 1, "response_design": "question"}
+                       "stack": 0, "stack_seed": 1, "response_design": "question", "gemini_cache": "implicit"}
 
 
 def load_pole_description(instructions_dir: Path, pair_type: str, name: str) -> str:
@@ -746,6 +767,23 @@ DIRECTION_PASS = 0
 STACK = 0
 STACK_SEED = 1
 SLOT_MARK = "#s"
+#: --gemini_cache (2026-11-05): "implicit" (the default, every run before then): a Gemini request sends its whole
+#: prompt and Google's implicit cache reads what it reads (about 60% of prompt tokens live, 45-57% on Flex, 17% in
+#: the Batch API, measured that day).  "explicit": with --stack and a two-part (cached-prefix) rubric, each answer
+#: batch's prefix goes into an explicit cache (judge.gemini_create_cache) and its calls carry the cache's name and
+#: the suffix only (96% read on Flex and in the Batch API alike).  This changes the prompt from one user message to
+#: two consecutive user turns (the cached prefix, then the suffix), so a paired quality check against implicit
+#: cells comes before it is adopted.  Gemini models only; set in main_async.
+GEMINI_CACHE = "implicit"
+#: Explicit caches' TTLs by transport, a backstop: each is deleted after its calls (live and Flex: after the
+#: answer batch's calls; batch: once every chunk using it is collected).  Flex calls can take 15 minutes and
+#: retry for ten before their standard-tier fallback, a batch an hour or more.
+GEMINI_CACHE_TTL_S = {"realtime": 900.0, "flex": 7200.0, "batch": 6 * 3600.0}
+#: How many answer batches (prefixes) a live or Flex run with explicit caches keeps in flight at once is
+#: --max_in_flight over the calls a prefix has (its slots), at least this.
+GEMINI_CACHE_MIN_PREFIXES = 1
+#: The cachedContent of a batch request written before its cache exists (the runner sets the name at submission).
+PENDING_CACHE = "cachedContents/pending"
 #: Roger's instruction design (2026-11-04): for instruction positions 1-5 (rows) the direction of each judge
 #: (Luna, Haiku, Gemini): A or B, and on the fifth a coin per axis, d.  Each instruction is judged both ways
 #: across the judges (2:1), each judge 3:2, and by weight (4:3:3) 27:23 or 23:27.  Per axis (seeded by its
@@ -881,6 +919,11 @@ def _group_plan(job: "AxisJob", names: Sequence[str], model: str) -> Tuple[List[
     return stack_plan(job, [stack_real(n) for n in names], int(names[0].split(SLOT_MARK, 1)[1]), model)
 
 
+def explicit_cache_for(model: str) -> bool:
+    """Whether ``model``'s calls in this run go on explicit caches (--gemini_cache explicit, a Gemini model)."""
+    return GEMINI_CACHE == "explicit" and provider_for_model(model) == "google"
+
+
 def build_prompt(job: "AxisJob", etype: str, name: str, desc: str) -> str:
     """The judge prompt of this run's rubric for one entity of ``job``."""
     return RUBRIC.build(job.axis_spec, job.pair_type, etype, name, desc, show=NAME_SHOW)
@@ -983,6 +1026,14 @@ class _Charge:
     def charge(self, key: str, prompt_tokens: int, completion_tokens: int) -> None:
         self.charge_usage(key, TokenUsage(int(prompt_tokens), int(completion_tokens)))
 
+    def charge_cache(self, key: str, write_tokens: float = 0, storage_token_hours: float = 0.0) -> None:
+        """An explicit cache's creation (its tokens written, at the tier's input rate: an assumption) or its
+        storage (token-hours): charged to every tracker, not as a judge call (n_calls 0), and not kept in
+        ``charges``: the live path logs it on a ``cache`` line of the answer log."""
+        w = int(round(write_tokens))
+        for t in self.trackers:
+            t.charge(key, w, 0, w, 0, cache_storage_token_hours=float(storage_token_hours), n_calls=0)
+
 
 @dataclass
 class RunContext:
@@ -1072,6 +1123,8 @@ def write_cell(cell: Cell, mrun: ModelRun, max_tokens: int) -> None:
                   "n_entities": len(cell.expected), "n_scored": len(scores)}
     if DIRECTIONS != "own":
         provenance.update(direction_summary(cell))
+    if explicit_cache_for(model):
+        provenance["gemini_cache"] = "explicit"
     if cell.refused:
         provenance["refused"] = sorted(cell.refused)
     if cell.parse_retries:
@@ -1242,7 +1295,8 @@ def checkpoint_header(mrun: "ModelRun", max_tokens: int) -> Dict[str, Any]:
             "rubric_version": RUBRIC.version, "request_settings": mrun.settings, "max_tokens": max_tokens,
             "name_format": NAME_FORMAT, "swap_poles": SWAP_POLES, "directions": DIRECTIONS,
             "direction_pass": DIRECTION_PASS, "stack": STACK, "stack_seed": STACK_SEED,
-            "response_design": response_design_in_effect()}
+            "response_design": response_design_in_effect(),
+            "gemini_cache": "explicit" if explicit_cache_for(mrun.model) else "implicit"}
 
 
 def prompt_digest(prompt: str) -> str:
@@ -1277,9 +1331,10 @@ def read_answer_log(path: Path) -> Tuple[Optional[Dict[str, Any]], Dict[str, Dic
     return header, answers
 
 
-def read_reasks(path: Path) -> List[Dict[str, Any]]:
+def read_reasks(path: Path, kind: str = "reask") -> List[Dict[str, Any]]:
     """The ``reask`` lines of an answer log: each a reply that left members unread and was asked again,
-    with that reply's charges, which no answer line carries."""
+    with that reply's charges, which no answer line carries.  ``kind="cache"``: the explicit caches'
+    creation and storage charges (2026-11-05)."""
     out = []
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -1287,7 +1342,7 @@ def read_reasks(path: Path) -> List[Dict[str, Any]]:
                 rec = json.loads(line)
             except ValueError:
                 continue
-            if rec.get("kind") == "reask":
+            if rec.get("kind") == kind:
                 out.append(rec)
     return out
 
@@ -1310,7 +1365,8 @@ def resume_cell(cell: Cell, mrun: "ModelRun", header: Dict[str, Any]) -> int:
             f.write("\n")   # a torn last line must not swallow the next answer
     found, answers = read_answer_log(path)
     reasks = read_reasks(path)
-    if not answers and not reasks:
+    cache_lines = read_reasks(path, "cache")
+    if not answers and not reasks and not cache_lines:
         return 0
     if found is None:
         raise CheckpointMismatchError(f"{path}: no header line, so its settings are unknown: move it aside to "
@@ -1327,6 +1383,8 @@ def resume_cell(cell: Cell, mrun: "ModelRun", header: Dict[str, Any]) -> int:
         cell.parse_retries += 1
         for key, *counts in rec.get("charges") or []:
             cell.usage.charge(key, *counts)
+    for rec in cache_lines:
+        _Charge(cell.usage).charge_cache(rec["key"], rec.get("write_tokens") or 0, rec.get("storage_token_hours") or 0.0)
     descs = {name: (etype, desc) for etype, name, desc in cell.job.entities}
     taken = stale = 0
     for name, rec in answers.items():
@@ -1578,7 +1636,11 @@ def key_name(model: str) -> str:
     return {"anthropic": "ANTHROPIC_API_KEY", "google": "GEMINI_API_KEY"}.get(provider_for_model(model), "OPENAI_API_KEY")
 
 
-def make_gemini_client():
+def make_gemini_client(service_tier: Optional[str] = None):
+    """generateContent's client; for Flex (2026-11-05) with FLEX_TIMEOUT_S, since a Flex answer can take 15
+    minutes (each attempt is bounded by the time left before the standard-tier fallback)."""
+    if service_tier == "flex":
+        return tt.make_gemini_client(os.environ["GEMINI_API_KEY"], timeout_s=tt.FLEX_TIMEOUT_S)
     return tt.make_gemini_client(os.environ["GEMINI_API_KEY"])
 
 
@@ -1610,7 +1672,8 @@ async def run_live(ctx: RunContext, mrun: ModelRun, todo: List[AxisJob], *, tier
     if provider_for_model(model) == "anthropic":
         client, fallback = make_anthropic_client(), None
     elif provider_for_model(model) == "google":
-        client, fallback = make_gemini_client(), None
+        # Flex is a body field, so one client serves both tiers (its timeout the long one for Flex)
+        client, fallback = (make_gemini_client("flex") if tier == "flex" else make_gemini_client()), None
     else:
         client = make_openai_client(tier)
         fallback = make_openai_client(None) if tier == "flex" else None
@@ -1650,10 +1713,20 @@ async def run_live(ctx: RunContext, mrun: ModelRun, todo: List[AxisJob], *, tier
     def gate() -> bool:
         return bool(fatal) or ctx.over_budget()
 
+    explicit = explicit_cache_for(model) and n_per > 1
+    live_caches: Dict[str, str] = {}    # prefix digest -> the explicit cache holding it, while its calls run
+    holds: Dict[int, int] = {}          # a cell's caches still alive: its write waits for their storage charge
+
+    def maybe_write(i: int) -> None:
+        cell = cells[i]
+        if cell.finished and not cell.written and not holds.get(i):
+            write_cell(cell, mrun, ctx.max_tokens)
+
     def call(prompt: str, charge: _Charge) -> Any:
+        cached = live_caches.get(prompt_digest(tt.prompt_parts(prompt)[0])) if explicit else None
         return tt.call_model(model, prompt, ctx.max_tokens, rate_limiter, charge, client=client,
                              settings=mrun.settings, service_tier=tier, fallback_client=fallback,
-                             stats=mrun.stats, gate=gate)
+                             stats=mrun.stats, gate=gate, cached_content=cached)
 
     async def one(item: Tuple[int, Any, Any, Any], *, probing: bool = False) -> None:
         nonlocal unfinished
@@ -1697,8 +1770,7 @@ async def run_live(ctx: RunContext, mrun: ModelRun, todo: List[AxisJob], *, tier
                 append_answer(cell, model, header, name, text, charge.charges, prompt)
             record(mrun, cell, name, text)
         ctx.note_answer()
-        if cell.finished and not cell.written:
-            write_cell(cell, mrun, ctx.max_tokens)
+        maybe_write(i)
 
     try:
         if probe and items:
@@ -1714,12 +1786,74 @@ async def run_live(ctx: RunContext, mrun: ModelRun, todo: List[AxisJob], *, tier
                 mrun.transport_reason += "; the probe was answered on Flex"
                 logger.info(f"[{model}] probe: Flex accepted; add {model!r}: {{'flex': True}} to "
                             f"MODEL_CAPABILITIES in assistant_axis/judge.py")
-        await run_bounded(one, items, ctx.max_in_flight)
+        if explicit:
+            await run_on_explicit_caches(ctx, mrun, cells, items, one, live_caches, client, header,
+                                         "flex" if tier == "flex" else "realtime", holds, maybe_write)
+        else:
+            await run_bounded(one, items, ctx.max_in_flight)
     finally:
         ctx.live_pending -= unfinished   # requests never sent (a refused probe, a cancelled run)
     if fatal:
         raise fatal[0]
     return True
+
+
+async def run_on_explicit_caches(ctx: RunContext, mrun: ModelRun, cells: Dict[int, Cell], items: List[Any], one: Any,
+                                 live_caches: Dict[str, str], client: Any, header: Dict[str, Any],
+                                 transport: str, holds: Dict[int, int], maybe_write: Any) -> None:
+    """Live and Flex calls on explicit caches (--gemini_cache explicit, 2026-11-05): the calls grouped by their
+    answer batch (one prefix), each batch's cache created just before its calls and deleted after them
+    (try/finally; a failed delete is logged, the TTL the backstop, and its storage then charged to the TTL), several
+    batches in flight at once, at most --max_in_flight calls in all.  A cache that cannot be created leaves its
+    batch's calls whole (implicit).  The creation (as cache-written tokens at the tier's input rate, an
+    assumption) and the storage (token-hours, create to delete) go to the cell's usage and, as ``cache`` lines, to
+    its answer log, so a rerun counts them; a cell is written only once none of its caches is alive (``holds``),
+    so that its usage.json has their storage."""
+    model = mrun.model
+    key = tt.price_key(model, transport)
+    ttl = GEMINI_CACHE_TTL_S[transport]
+    units: Dict[Tuple[int, str], List[Any]] = {}
+    prefixes: Dict[Tuple[int, str], str] = {}
+    for item in items:
+        i, group = item[0], item[1]
+        prefix, suffix = tt.prompt_parts(build_group(cells[i].job, group, model))
+        if suffix is None:
+            raise ValueError(f"--gemini_cache explicit: {RUBRIC.name} built a one-part prompt")
+        k = (i, prompt_digest(prefix))
+        units.setdefault(k, []).append(item)
+        prefixes[k] = prefix
+    biggest = max((len(v) for v in units.values()), default=1)
+    lanes = max(GEMINI_CACHE_MIN_PREFIXES, ctx.max_in_flight // max(1, biggest))
+    logger.info(f"[{model}] explicit caches: {len(items)} calls on {len(units)} answer batches, up to {lanes} "
+                f"batches in flight, TTL {ttl:.0f} s")
+
+    async def unit(k: Tuple[int, str]) -> None:
+        cell = cells[k[0]]
+        holds[k[0]] = holds.get(k[0], 0) + 1
+        cache = None
+        if not ctx.over_budget():
+            cache = await tt.gemini_create_cache(client, model, prefixes[k], ttl,
+                                                 display_name=f"judge-tier {cell_name(model)} {k[1]}")
+        if cache is not None:
+            _Charge(cell.usage, mrun.usage, ctx.run_usage).charge_cache(key, cache.tokens)
+            _append_log(cell, model, header, {"kind": "cache", "event": "create", "name": cache.name, "key": key,
+                                              "write_tokens": cache.tokens, "at": _utc_now()})
+            live_caches[k[1]] = cache.name
+        try:
+            await asyncio.gather(*(one(item) for item in units[k]))
+        finally:
+            if cache is not None:
+                live_caches.pop(k[1], None)
+                ok = await tt.gemini_delete_cache(client, cache.name)
+                hours = cache.storage_token_hours(None if ok else cache.created + cache.ttl_s)
+                _Charge(cell.usage, mrun.usage, ctx.run_usage).charge_cache(key, 0, hours)
+                _append_log(cell, model, header, {"kind": "cache", "event": "delete" if ok else "left to expire",
+                                                  "name": cache.name, "key": key, "storage_token_hours": hours,
+                                                  "at": _utc_now()})
+            holds[k[0]] -= 1
+            maybe_write(k[0])
+
+    await run_bounded(unit, list(units), lanes)
 
 
 def close_live_cells(mrun: ModelRun, max_tokens: int) -> None:
@@ -1829,6 +1963,8 @@ def batch_settings(ctx: RunContext, mrun: ModelRun) -> Dict[str, Any]:
         out.update(stack=STACK, stack_seed=STACK_SEED)
     if AXIS_INDEX is not None:
         out["axis_index"] = list(AXIS_INDEX)
+    if explicit_cache_for(mrun.model):
+        out["gemini_cache"] = "explicit"
     return out
 
 
@@ -1939,8 +2075,17 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
         runner = AnthropicBatchRunner(client, work / "chunks", work / "batch_state.json",
                                       poll_seconds=ctx.batch_poll_seconds, adopt_lost_batches=False, logger=logger)
     elif provider == "google":
+        cache_kw: Dict[str, Any] = {}
+        if explicit_cache_for(model):
+            async def create(prefix: str, ttl: float) -> Optional[Tuple[str, int]]:
+                c = await tt.gemini_create_cache(client, model, prefix, ttl, display_name=f"judge-tier {cell_name(model)}")
+                return (c.name, c.tokens) if c is not None else None
+
+            cache_kw = dict(cache_create=create, cache_delete=lambda name: tt.gemini_delete_cache(client, name),
+                            cache_ttl_s=GEMINI_CACHE_TTL_S["batch"],
+                            on_cache_done=lambda cids, rec: cache_done(cids, rec))
         runner = GeminiBatchRunner(client, work / "chunks", work / "batch_state.json", model=model,
-                                   poll_seconds=ctx.batch_poll_seconds, logger=logger)
+                                   poll_seconds=ctx.batch_poll_seconds, logger=logger, **cache_kw)
     else:
         runner = OpenAIBatchRunner(client, work / "chunks", work / "batch_state.json",
                                    poll_seconds=ctx.batch_poll_seconds,
@@ -2086,6 +2231,22 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
             record(mrun, cell, name, reply)
         touched.add(idx)
 
+    def cache_done(cids: List[str], rec: Dict[str, Any]) -> None:
+        """An explicit cache a batch run created, now deleted (--gemini_cache explicit): its creation and storage
+        charged to the cells of the requests that used it, by their share of them (a prefix can serve the same
+        answers in two groups' cells)."""
+        by_idx: Dict[int, int] = {}
+        for cid in cids:
+            by_idx[split_custom_id(cid)[0]] = by_idx.get(split_custom_id(cid)[0], 0) + 1
+        total = sum(by_idx.values()) or 1
+        for idx, n in sorted(by_idx.items()):
+            cell = cell_for(idx)
+            trackers = (mrun.usage, ctx.run_usage) if cell is None or cell.written else (cell.usage, mrun.usage, ctx.run_usage)
+            _Charge(*trackers).charge_cache(batch_key, rec.get("tokens", 0) * n / total,
+                                            rec.get("storage_token_hours", 0.0) * n / total)
+            if cell is not None and not cell.written:
+                touched.add(idx)
+
     def flush() -> None:
         """Called after each batch's results, before the runner marks it
         collected: complete cells are written, the others saved under
@@ -2153,10 +2314,18 @@ async def run_batch(ctx: RunContext, mrun: ModelRun, jobs: List[AxisJob]) -> Non
             atomic_write_text(json.dumps(groups, indent=0, sort_keys=True) + "\n", groups_path, logger_obj=logger)
         estimate = SubmissionEstimate(batch_key, out_per_call=est_out_per_call(n_per))
 
+        explicit = explicit_cache_for(model)
+
         def requests():
             for cid, idx, prompt in pending():
                 estimate.add(prompt)
-                yield cid, tt.request_for(model, prompt, ctx.max_tokens, mrun.settings)
+                prefix, suffix = tt.prompt_parts(prompt)
+                if explicit and suffix is not None:
+                    # the suffix only, on a cache of the prefix the runner creates before the chunk is submitted
+                    yield cid, tt.request_for(model, prompt, ctx.max_tokens, mrun.settings,
+                                              cached_content=PENDING_CACHE), prefix
+                else:
+                    yield cid, tt.request_for(model, prompt, ctx.max_tokens, mrun.settings)
 
         chunks = runner.write_chunks(
             requests(),
@@ -2889,6 +3058,14 @@ def build_parser() -> argparse.ArgumentParser:
                              "bias; every batch sent once per group.  Any transport: through a batch API a batch's "
                              "calls go one after another into the submission, so a chunk splits few prefixes.")
     parser.add_argument("--stack_seed", type=int, default=1, help="With --stack: the seed of the partitions.")
+    parser.add_argument("--gemini_cache", choices=("implicit", "explicit"), default="implicit",
+                        help="Gemini models' prompt cache (2026-11-05).  implicit (default): the whole prompt each "
+                             "call, Google's implicit cache reading what it reads (about 60%% live, 45-57%% on Flex, "
+                             "17%% in the Batch API).  explicit: with --stack and a cached-prefix rubric (r1_pn, "
+                             "rk_pn, rk_pl, rk_pa), each answer batch's prefix in an explicit cache (96%% read on Flex "
+                             "and in batch), its calls sending the suffix only; live and Flex create a cache before a "
+                             "batch's calls and delete it after them, the Batch API per chunk before submission and "
+                             "after collection.  Changes the prompt to two user turns: run a paired check first.")
     parser.add_argument("--direction_pass", type=int, default=0,
                         help="With --directions descriptions: which of the judge's passes this run is, from 0.")
     parser.add_argument("--swap_poles", action="store_true",
@@ -3001,7 +3178,8 @@ async def main_async(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     global CELL_LABEL, RUBRIC, NAME_FORMAT, NAME_SHOW, INSTRUCTION_ROUND, RESPONSES_DIR, RESPONSE_SPLIT, RESPONSE_PART, \
-        RESPONSE_CHARS, AXIS_INDEX, SWAP_POLES, DIRECTIONS, DIRECTION_PASS, STACK, STACK_SEED, RESPONSE_DESIGN
+        RESPONSE_CHARS, AXIS_INDEX, SWAP_POLES, DIRECTIONS, DIRECTION_PASS, STACK, STACK_SEED, RESPONSE_DESIGN, \
+        GEMINI_CACHE
     CELL_LABEL = args.cell_label or ""
     SWAP_POLES = bool(args.swap_poles)
     DIRECTIONS, DIRECTION_PASS = args.directions, args.direction_pass
@@ -3035,6 +3213,17 @@ async def main_async(argv: Optional[Sequence[str]] = None) -> int:
             parser.error(f"--directions {DIRECTIONS} needs a --cell_label, so that its cells stand apart")
     if DIRECTION_PASS and DIRECTIONS != "descriptions":
         parser.error("--direction_pass goes with --directions descriptions")
+    GEMINI_CACHE = args.gemini_cache
+    if GEMINI_CACHE == "explicit":
+        rubric = jr.get(args.rubric)
+        if not any(provider_for_model(m) == "google" for m in args.judge_model):
+            parser.error("--gemini_cache explicit applies to Gemini models: none is judged")
+        if not STACK:
+            parser.error("--gemini_cache explicit needs --stack, so that an answer batch's calls go together on one "
+                         "cache")
+        if not rubric.two_part:
+            parser.error(f"--gemini_cache explicit needs a cached-prefix rubric (a two-part prompt: "
+                         f"{', '.join(sorted(n for n, r in jr.RUBRICS.items() if r.two_part))}), not {rubric.name}")
     RUBRIC = jr.with_poles_swapped(jr.get(args.rubric)) if SWAP_POLES else jr.get(args.rubric)
     if SWAP_POLES and not CELL_LABEL:
         parser.error("--swap_poles needs a --cell_label, so that its cells stand apart from the axis's own")
@@ -3136,6 +3325,8 @@ async def main_async(argv: Optional[Sequence[str]] = None) -> int:
                     *([tt.price_key(mrun.model, "batch")] if mrun.choice.probe else [])}:
             try:
                 price_for_model(key)
+                if explicit_cache_for(mrun.model):
+                    cache_storage_rate(key)     # an explicit cache bills storage: priced before it is made
             except KeyError as e:
                 parser.error(e.args[0] if e.args else f"no price for {key!r}")
 
