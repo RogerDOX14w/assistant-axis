@@ -155,7 +155,6 @@
     "m": 1,
     "figures": [
      "luna",
-     "answers",
      "jev",
      "models"
     ],
@@ -354,7 +353,6 @@
     "m": 2,
     "figures": [
      "luna",
-     "answers",
      "jev",
      "models"
     ],
@@ -553,7 +551,6 @@
     "m": 3,
     "figures": [
      "luna",
-     "answers",
      "jev",
      "models"
     ],
@@ -753,7 +750,6 @@
     "reliability": 0.9698554350878991,
     "figures": [
      "luna",
-     "answers",
      "jev",
      "models"
     ],
@@ -782,7 +778,6 @@
     "reliability": 0.9698554350878991,
     "figures": [
      "luna",
-     "answers",
      "jev",
      "models"
     ],
@@ -808,9 +803,7 @@
     "family": "Luna, one axis a call, 40 answers a call",
     "coverage": 0.037037037037037035,
     "m": 1,
-    "figures": [
-     "answers"
-    ],
+    "figures": [],
     "measured": true,
     "cost": 38.08129318344673,
     "rho": {
@@ -1004,9 +997,7 @@
     "family": "Luna, one axis a call, 40 answers a call",
     "coverage": 0.07407407407407407,
     "m": 2,
-    "figures": [
-     "answers"
-    ],
+    "figures": [],
     "measured": true,
     "cost": 76.16258636689346,
     "rho": {
@@ -1200,9 +1191,7 @@
     "family": "Luna, one axis a call, 40 answers a call",
     "coverage": 0.1111111111111111,
     "m": 3,
-    "figures": [
-     "answers"
-    ],
+    "figures": [],
     "measured": true,
     "cost": 114.2438795503402,
     "rho": {
@@ -1397,9 +1386,7 @@
     "coverage": 0.3333333333333333,
     "measured": false,
     "reliability": 0.9664055245622417,
-    "figures": [
-     "answers"
-    ],
+    "figures": [],
     "cost": 342.7316386510206,
     "rho": {
      "s0_l25_raw": 0.6558129530847655,
@@ -1423,9 +1410,7 @@
     "coverage": 1.0,
     "measured": false,
     "reliability": 0.9664055245622417,
-    "figures": [
-     "answers"
-    ],
+    "figures": [],
     "cost": 1028.1949159530618,
     "rho": {
      "s0_l25_raw": 0.6604578851140326,
@@ -14253,11 +14238,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python scripts/judge_response_pareto.py --output_dir roger/axis_judge_experiments/response_pareto",
-   "git_sha": "13a69965c+dirty",
+   "git_sha": "d2b180328+dirty",
    "author": "Roger Dearnaley",
    "title": "Response judging with a cached prefix: subsampling against stacking, under 12 projection variants"
   },
-  "produced_at": "2026-11-05T01:09:39+00:00",
+  "produced_at": "2026-11-05T02:30:29+00:00",
   "inputs": [
    {
     "dep_key": "axes_file",

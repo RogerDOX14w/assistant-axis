@@ -42,14 +42,16 @@ judge's tokens a call are its own, measured on these runs; a stacked arm's cost 
 With --stack_group g61 (Roger, 2026-11-05: "Can you do the Pareto plot at 61, mostly?"): the 61 axes of
 scripts/tier_eval_axes.tsv, Luna only, the only judge and format judged on all 61: one axis a call (the twelve's
 balanced cells as above, a coin run @r1_pnn20_s9p0g61_a<i>c on the other 49) against plain stacking at k = 2, 4
-and 6 (@rk_pnn20_s9p0g61_k<k>, each batch's 61 axes regrouped at random), every axis stacked or the worst 10% or
-25% of the axes judged one axis a call instead.  The worst are chosen by cross-fitting: the ninth's questions fall
+and 6 (@rk_pnn20_s9p0g61_k<k>, each batch's 61 axes regrouped at random), every axis stacked or the worst 10%, 15%, 20%
+or 25% of the axes judged one axis a call instead.  The worst are chosen by cross-fitting: the ninth's questions fall
 in 9 folds by the golden point of the absolute question number; for each fold, the axes whose stacking penalty
 (stacked minus one axis a call, rho averaged over the 12 variants) is worst on the other 8 folds are judged one
 axis a call on that fold, and the folds are pooled.  Such an arm costs its share of axes at each price.
 
-Output: <output_dir>/judge_response_pareto_{luna,answers,jev,models}.png and judge_response_pareto.json; with
---stack_group g61, judge_response_pareto_61_luna.png and judge_response_pareto_61.json.  No API calls.
+Output: <output_dir>/judge_response_pareto_{luna,jev,models}.png and judge_response_pareto.json; with
+--stack_group g61, judge_response_pareto_61_luna.png, judge_response_pareto_answers.png (20 answers a call against 40,
+the 40-answer cells @r1_pnn40_s9p0g12_a<i>c on the twelve and @r1_pnn40_s9p0g61_a<i>c on the other 49) and
+judge_response_pareto_61.json.  No API calls.
 
 Usage: uv run python scripts/judge_response_pareto.py --output_dir roger/axis_judge_experiments/response_pareto
        uv run python scripts/judge_response_pareto.py --stack_group g61 --output_dir roger/axis_judge_experiments/response_pareto
@@ -110,10 +112,6 @@ FIGURES = {
              "judge_response_pareto_luna.png",
              "GPT-5.6 Luna alone, every call's direction a coin, 20 answers a call; stacking: each batch's axes "
              "regrouped at random, formats plain \"1, SCORES: 18, 42\", labelled \"1. SCORES: A=18, B=42\", axis by axis \"A: 1=18, 2=32\""),
-    "answers": ("Luna only: 20 answers a call against 40",
-                "judge_response_pareto_answers.png",
-                "GPT-5.6 Luna alone, one axis a call, every call's direction a coin; each call judges one question's answers in "
-                "batches of 20 (the default) or 40"),
     "jev": ("Jev only: its relative yes/no design, answers and axes a request (Luna one axis a call for reference)",
             "judge_response_pareto_jev.png",
             "Jev 1.14 (TypeSafe AI): a batch of answers to one question and some axes a request, \"is the persona behind answer k "
@@ -129,13 +127,19 @@ FMT_NAME = {"rk_pn": "plain", "rk_pl": "labelled", "rk_pa": "axis by axis"}
 AXES_12, AXES_61 = "scripts/tier_eval_axes_responses12.tsv", "scripts/tier_eval_axes.tsv"
 #: The 61-axis mode: plain stacking's k, the shares of the axes left out of it, and the cross-fitting folds.
 STACK61_K = (2, 4, 6)
-LEAVE_OUT = (0.10, 0.25)            # Roger, 2026-11-04: "try 10%, 25%, and a plausible seeming threshold"
+LEAVE_OUT = (0.10, 0.15, 0.20, 0.25)  # Roger, 2026-11-04: "try 10%, 25%, and a plausible seeming threshold"; 15%, 20% 2026-11-05
 CROSSFIT_FOLDS = 9
 INV_PHI = 0.6180339887498949
+#: 20 answers a call against 40, on the 61 axes since 2026-11-05 (Roger: "Do it [at Flex], update it and show it to me
+#: once done, no need to change the plot name"); drawn by --stack_group g61.
+FIGURE_ANSWERS = ("61 axes, Luna only: 20 answers a call against 40",
+                  "judge_response_pareto_answers.png",
+                  "GPT-5.6 Luna alone, one axis a call, every call's direction a coin; each call judges one question's answers "
+                  "in batches of 20 (the default) or 40")
 FIGURE_61 = ("61 axes, Luna only: one axis a call against plain stacking, every axis or all but the worst",
              "judge_response_pareto_61_luna.png",
              "GPT-5.6 Luna alone, every call's direction a coin, 20 answers a call; plain stacking \"1, SCORES: 18, 42\", each "
-             "batch's 61 axes regrouped at random; the worst 10% or 25% of the axes judged one axis a call instead, chosen on "
+             "batch's 61 axes regrouped at random; the worst 10%, 15%, 20% or 25% of the axes judged one axis a call instead, chosen on "
              "the other 8 of 9 question folds (cross-fitted)")
 
 
@@ -286,7 +290,7 @@ def main(argv=None) -> int:
     ap.add_argument("--experiments_dir", default=str(rob.DEFAULT_EXPERIMENTS_DIR))
     ap.add_argument("--data_dir", default=str(rob.DEFAULT_DATA_DIR))
     ap.add_argument("--stack_group", choices=("g12", "g61"), default="g12",
-                    help="g12: the twelve axes, every judge and format (four figures); g61: the 61 axes, Luna only")
+                    help="g12: the twelve axes, every judge and format (three figures); g61: the 61 axes, Luna only (stacking, and 20 answers a call against 40)")
     ap.add_argument("--axes_file", default=None, help=f"default {AXES_12}, or {AXES_61} with --stack_group g61")
     ap.add_argument("--instructions_dir", default="/tmp/claude-501/corpus_2026-05-24/data")
     ap.add_argument("--cache_dir", default=str(rob.DEFAULT_EXPERIMENTS_DIR / "_tier_eval_scratch" / "robustness_cache"))
@@ -351,10 +355,10 @@ def main(argv=None) -> int:
         arms.append(dict(key=key, label=label, family=family, members=members, cost_parts=cost_parts, figures=figures))
     jb = JEV_ARMS[0][0]                 # Jev in the mixes: its cheapest arm, 20 answers x 12 axes
     add(f"{LUNA}@k1", "Luna", "Luna, one axis a call", [("luna", judges["luna"], None)], [(1.0, unit[LUNA])],
-        ["luna", "answers", "jev", "models"])
+        ["luna", "jev", "models"])
     if have["luna40"]:
         add(f"{LUNA}@n40", "Luna, 40 answers", "Luna, one axis a call, 40 answers a call", [("luna40", judges["luna40"], None)],
-            [(1.0, unit["luna40"])], ["answers"])
+            [(1.0, unit["luna40"])], [])        # its figure is drawn on the 61 axes (--stack_group g61)
     for (fmt, k), cells in stacked.items():
         if (fmt, k) in stack_unit:
             add(f"{LUNA}@{fmt}k{k}", f"Luna k={k} {FMT_NAME[fmt]}", f"Luna stacked, {FMT_NAME[fmt]}",
@@ -487,7 +491,7 @@ def arm_points(arms: List[dict], data: Data, model_of: Dict[str, str], rho_of, v
 
 def main61(args) -> int:
     """The 61 axes, Luna only: one axis a call against plain stacking at k = 2, 4, 6, every axis stacked or all but
-    the worst 10% or 25%, those chosen by cross-fitting over question folds (module docstring)."""
+    the worst 10%, 15%, 20% or 25%, those chosen by cross-fitting over question folds (module docstring)."""
     from results_analysis.judge_tier_cost_plot_pooled import load_measured_cost
     E, data_dir, inst = Path(args.experiments_dir), Path(args.data_dir).resolve(), Path(args.instructions_dir)
     data = Data(E, Path(args.axes_file), data_dir, inst)
@@ -497,12 +501,15 @@ def main61(args) -> int:
     k1 = {a.axis_dir: (d12.luna_balanced(i12[a.axis_dir], a.axis_dir) if a.axis_dir in i12
                        else data.cell(a.axis_dir, LUNA, f"@r1_pnn20_s9p0g61_a{i}c")) for i, a in enumerate(axes)}
     stacked = {k: {a.axis_dir: data.cell(a.axis_dir, LUNA, f"@rk_pnn20_s9p0g61_k{k}") for a in axes} for k in STACK61_K}
-    missing = [f"{ax} ({what})" for what, cells in [("one axis a call", k1)] + [(f"k={k}", c) for k, c in stacked.items()]
+    k1_40 = {a.axis_dir: (d12.cell(a.axis_dir, LUNA, f"@r1_pnn40_s9p0g12_a{i12[a.axis_dir]}c") if a.axis_dir in i12
+                          else data.cell(a.axis_dir, LUNA, f"@r1_pnn40_s9p0g61_a{i}c")) for i, a in enumerate(axes)}
+    missing = [f"{ax} ({what})" for what, cells in [("one axis a call", k1), ("40 answers", k1_40)] + [(f"k={k}", c) for k, c in stacked.items()]
                for ax, v in cells.items() if not v]
     if missing:
         raise SystemExit(f"{len(missing)} cells missing, e.g. {missing[:4]}")
 
     unit_luna = judge_costs(per_call_profile(d12, LUNA, lambda i: f"@r1_pnn20_s9p0g12_a{i}"), LUNA)
+    unit_40 = judge_costs(per_call_profile(d12, LUNA, lambda i: f"@r1_pnn40_s9p0g12_a{i}c"), LUNA)
     stack_unit = {}
     for k in STACK61_K:                 # a stacked run's measured cost, per response and axis
         per = []
@@ -511,7 +518,7 @@ def main61(args) -> int:
             per.append(load_measured_cost(cd / "usage.json", "batch") / json.load(open(cd / "scores_responses.json"))["_provenance"]["n_items"])
             data.read.append(cd / "usage.json")
         stack_unit[k] = (float(np.mean(per)), unit_luna[1])
-    for name, u in [("one axis a call", unit_luna)] + [(f"plain k={k}", u) for k, u in stack_unit.items()]:
+    for name, u in [("one axis a call", unit_luna), ("40 answers a call", unit_40)] + [(f"plain k={k}", u) for k, u in stack_unit.items()]:
         print(f"[cost] {name}: ${u[0] * 1e6:.2f} per 1M response-axes; full run, every response: "
               f"${full_run_cost([(1.0, u)]):,.0f}", file=sys.stderr)
 
@@ -527,7 +534,9 @@ def main61(args) -> int:
 
     arms, left_out = [], {}
     arms.append(dict(key=f"{LUNA}@k1", label="Luna", family="Luna, one axis a call", members=[("luna", k1, None)],
-                     cost_parts=[(1.0, unit_luna)], figures=["luna61"]))
+                     cost_parts=[(1.0, unit_luna)], figures=["luna61", "answers"]))
+    arms.append(dict(key=f"{LUNA}@n40", label="Luna, 40 answers", family="Luna, one axis a call, 40 answers a call",
+                     members=[("luna", k1_40, None)], cost_parts=[(1.0, unit_40)], figures=["answers"]))
     for k in STACK61_K:
         arms.append(dict(key=f"{LUNA}@rk_pnk{k}", label=f"Luna k={k} plain", family="Luna stacked, plain",
                          members=[("luna", stacked[k], None)], cost_parts=[(1.0, stack_unit[k])], figures=["luna61"]))
@@ -559,9 +568,11 @@ def main61(args) -> int:
     out.mkdir(parents=True, exist_ok=True)
     data.read += d12.read
     inputs = data.inputs + d12.inputs + [current_files_input(dep_key="cells", paths=sorted(set(data.read)))]
-    fig_title, fname, lead = FIGURE_61
-    plot(points, variants, out / fname, f"Response judging, {fig_title}", A, check, inputs, lead=lead, axes_file=args.axes_file)
-    print(f"wrote {out / fname}", file=sys.stderr)
+    for fig_key, (fig_title, fname, lead) in (("luna61", FIGURE_61), ("answers", FIGURE_ANSWERS)):
+        sub_points = {key: v for key, v in points.items() if fig_key in v["figures"]}
+        plot(sub_points, variants, out / fname, f"Response judging, {fig_title}", A, check, inputs, lead=lead,
+             axes_file=args.axes_file)
+        print(f"wrote {out / fname}", file=sys.stderr)
     title = "Response judging on 61 axes, Luna only: stacking with the worst axes left out, under 12 projection variants"
     result = {"config": {"axes_file": args.axes_file, "variants": vkeys, "prices": PRICES, "october_responses": OCTOBER_RESPONSES,
                          "n_axes": N_AXES, "stack_k": list(STACK61_K), "leave_out": list(LEAVE_OUT),
@@ -569,7 +580,7 @@ def main61(args) -> int:
                                      "the worst by stacking penalty (rho mean of 12 variants) on the other folds",
                          "fractions": "m/3 of the ninth, golden (judge_tier_cost_eval.golden_point), 3 rotations",
                          "extrapolation": "Spearman-Brown from a split half by question"},
-              "unit_costs": {"one axis a call": unit_luna, **{f"plain k={k}": u for k, u in stack_unit.items()}},
+              "unit_costs": {"one axis a call": unit_luna, "40 answers a call": unit_40, **{f"plain k={k}": u for k, u in stack_unit.items()}},
               "left_out_folds": left_out, "extrapolation_check": check, "points": points}
     (out / "judge_response_pareto_61.json").write_text(json.dumps(json_metadata(result, title=title, inputs=inputs), indent=1))
     print(f"wrote {out / 'judge_response_pareto_61.json'}", file=sys.stderr)
@@ -625,6 +636,8 @@ FAMILY_STYLE = {
     "Luna stacked, labelled": ("#D95F02", "s"),
     "Luna stacked, axis by axis": ("#7570B3", "s"),
     "Luna stacked, plain, worst 10% one axis a call": ("#1F78B4", "s"),
+    "Luna stacked, plain, worst 15% one axis a call": ("#66A61E", "s"),
+    "Luna stacked, plain, worst 20% one axis a call": ("#E7298A", "s"),
     "Luna stacked, plain, worst 25% one axis a call": ("#A6761D", "s"),
     "Jev, 20 answers x 12 axes a request": ("#E7298A", "o"),
     "Jev, 40 answers x 6 axes a request": ("#66A61E", "o"),
