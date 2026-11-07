@@ -1,0 +1,8 @@
+# The finishing chain typed into the pod's web terminal on 2026-11-04 at 04:24 UTC
+# (the SSH path from the Mac was down), after killing run_sample.sh (pids 882,
+# 884) and its 255-thread text-vs-turn comparison (23137, 23140), which was
+# taking 3.7 h a pair against 2 min an entity with 8 threads.  Runs the three
+# remaining step-6 comparisons with 8 threads, the token diff, copies the
+# outputs (no activations) to the network volume, and stops the pod itself.
+export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 HF_HOME=/workspace/.cache/huggingface
+setsid nohup bash -c 'P=/root/venvs/assistant-axis/bin/python; S=/root/sample_scripts; O=/root/sample_ids; st() { echo "== $(date -u +%FT%TZ) $*" >> $O/run.log; }; st "finish chain, 8 threads: compare act_text vs act_turn"; $P $S/compare_activations.py --responses_dir $O/responses $O/act_text $O/act_turn --out $O/compare/text_vs_turn > $O/logs/compare_text_vs_turn.log 2>&1; st "exit $?; compare act_text vs act_text_bs1"; $P $S/compare_activations.py --responses_dir $O/responses $O/act_text $O/act_text_bs1 --out $O/compare/text_vs_text_bs1 > $O/logs/compare_text_vs_text_bs1.log 2>&1; st "exit $?; token diff"; $P $S/token_diff.py --model Qwen/Qwen3-32B --responses_dir $O/responses --out $O/compare/token_diff > $O/logs/token_diff.log 2>&1; st "exit $?; copying to /workspace/sample_ids_out"; mkdir -p /workspace/sample_ids_out; rsync -rt --exclude "act_*" --exclude by_type $O/ /workspace/sample_ids_out/; st "rsync exit $?; stopping the pod"; cp $O/run.log /workspace/sample_ids_out/run.log; cp /root/finish.log /workspace/sample_ids_out/logs/finish.log; runpodctl stop pod $RUNPOD_POD_ID' > /root/finish.log 2>&1 &
