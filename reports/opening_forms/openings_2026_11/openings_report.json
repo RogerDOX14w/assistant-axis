@@ -1,0 +1,2010 @@
+{
+  "written": "2026-11-06",
+  "arms": {
+    "W1": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 81.59090909090911,
+        "good": 93.0,
+        "bad": 80.71428571428571,
+        "indifferent": 90.65217391304348,
+        "problem list": 74.34065934065933
+      },
+      "share_0": 0.19886363636363635,
+      "echo": 8.238636363636363,
+      "names_trait": 2.9545454545454546,
+      "ai": 0.056818181818181816,
+      "listy": 24.71590909090909,
+      "complete_failures": 1,
+      "under_half_of_W1_W4": 1,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "W2": {
+      "traits": 169,
+      "judged": 3380,
+      "share_3": {
+        "all": 78.46153846153847,
+        "good": 90.75,
+        "bad": 78.33333333333333,
+        "indifferent": 86.02272727272727,
+        "problem list": 70.40697674418604
+      },
+      "share_0": 0.17751479289940827,
+      "echo": 7.810650887573964,
+      "names_trait": 2.544378698224852,
+      "ai": 0.05917159763313609,
+      "listy": 29.615384615384617,
+      "complete_failures": 2,
+      "under_half_of_W1_W4": 2,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "W3": {
+      "traits": 159,
+      "judged": 3180,
+      "share_3": {
+        "all": 79.24528301886792,
+        "good": 90.0,
+        "bad": 74.28571428571428,
+        "indifferent": 91.70454545454547,
+        "problem list": 69.35064935064935
+      },
+      "share_0": 0.06289308176100629,
+      "echo": 7.547169811320755,
+      "names_trait": 2.7672955974842766,
+      "ai": 0.09433962264150944,
+      "listy": 28.962264150943398,
+      "complete_failures": 2,
+      "under_half_of_W1_W4": 2,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "W4": {
+      "traits": 162,
+      "judged": 3240,
+      "share_3": {
+        "all": 74.01234567901234,
+        "good": 94.72222222222223,
+        "bad": 68.14814814814815,
+        "indifferent": 86.44444444444446,
+        "problem list": 61.68750000000001
+      },
+      "share_0": 0.06172839506172839,
+      "echo": 8.703703703703704,
+      "names_trait": 2.4074074074074074,
+      "ai": 0.12345679012345678,
+      "listy": 29.320987654320987,
+      "complete_failures": 0,
+      "under_half_of_W1_W4": 4,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "W5": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 82.44318181818181,
+        "good": 93.0,
+        "bad": 79.10714285714286,
+        "indifferent": 91.30434782608694,
+        "problem list": 75.76923076923077
+      },
+      "share_0": 0.3125,
+      "echo": 0.8522727272727273,
+      "names_trait": 3.4943181818181817,
+      "ai": 0.0,
+      "listy": 23.15340909090909,
+      "complete_failures": 2,
+      "under_half_of_W1_W4": 2,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "W6": {
+      "traits": 162,
+      "judged": 3240,
+      "share_3": {
+        "all": 75.49382716049384,
+        "good": 94.72222222222221,
+        "bad": 65.92592592592591,
+        "indifferent": 88.77777777777777,
+        "problem list": 64.25
+      },
+      "share_0": 0.030864197530864196,
+      "echo": 0.5864197530864198,
+      "names_trait": 2.1604938271604937,
+      "ai": 0.030864197530864196,
+      "listy": 26.790123456790123,
+      "complete_failures": 1,
+      "under_half_of_W1_W4": 4,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "W7": {
+      "traits": 159,
+      "judged": 3180,
+      "share_3": {
+        "all": 81.76100628930818,
+        "good": 88.94736842105262,
+        "bad": 76.25,
+        "indifferent": 92.04545454545456,
+        "problem list": 73.83116883116884
+      },
+      "share_0": 0.09433962264150944,
+      "echo": 0.6918238993710691,
+      "names_trait": 2.9874213836477987,
+      "ai": 0.09433962264150944,
+      "listy": 27.61006289308176,
+      "complete_failures": 2,
+      "under_half_of_W1_W4": 0,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "W8": {
+      "traits": 162,
+      "judged": 3240,
+      "share_3": {
+        "all": 62.283950617283956,
+        "good": 93.61111111111113,
+        "bad": 53.333333333333336,
+        "indifferent": 81.44444444444444,
+        "problem list": 44.00000000000001
+      },
+      "share_0": 0.06172839506172839,
+      "echo": 3.1790123456790123,
+      "names_trait": 2.2839506172839505,
+      "ai": 0.15432098765432098,
+      "listy": 41.48148148148148,
+      "complete_failures": 5,
+      "under_half_of_W1_W4": 27,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "R1": {
+      "traits": 169,
+      "judged": 3380,
+      "share_3": {
+        "all": 88.25443786982247,
+        "good": 92.75,
+        "bad": 89.62962962962962,
+        "indifferent": 94.20454545454547,
+        "problem list": 82.96511627906976
+      },
+      "share_0": 0.11834319526627218,
+      "echo": 0.7988165680473372,
+      "names_trait": 2.366863905325444,
+      "ai": 0.0,
+      "listy": 14.615384615384615,
+      "complete_failures": 0,
+      "under_half_of_W1_W4": 0,
+      "opening_names_opposite": 0,
+      "opening_negates": 0,
+      "built_by_rewrite": 0
+    },
+    "A1": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 50.76704545454545,
+        "good": 87.74999999999999,
+        "bad": 61.78571428571429,
+        "indifferent": 84.45652173913044,
+        "problem list": 19.120879120879124
+      },
+      "share_0": 0.0,
+      "echo": null,
+      "names_trait": 8.607954545454545,
+      "ai": 0.14204545454545456,
+      "listy": 54.77272727272727,
+      "complete_failures": 27,
+      "under_half_of_W1_W4": 65,
+      "opening_names_opposite": 0,
+      "opening_negates": 6,
+      "built_by_rewrite": 0
+    },
+    "A2": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 73.66477272727273,
+        "good": 91.25,
+        "bad": 85.17857142857144,
+        "indifferent": 89.56521739130437,
+        "problem list": 57.63736263736264
+      },
+      "share_0": 0.19886363636363635,
+      "echo": null,
+      "names_trait": 8.579545454545455,
+      "ai": 0.11363636363636363,
+      "listy": 31.988636363636363,
+      "complete_failures": 1,
+      "under_half_of_W1_W4": 10,
+      "opening_names_opposite": 0,
+      "opening_negates": 3,
+      "built_by_rewrite": 99
+    },
+    "A3": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 55.56818181818181,
+        "good": 89.0,
+        "bad": 65.17857142857143,
+        "indifferent": 82.71739130434783,
+        "problem list": 29.560439560439562
+      },
+      "share_0": 0.056818181818181816,
+      "echo": 0.42613636363636365,
+      "names_trait": 9.715909090909092,
+      "ai": 0.2840909090909091,
+      "listy": 51.84659090909091,
+      "complete_failures": 14,
+      "under_half_of_W1_W4": 47,
+      "opening_names_opposite": 0,
+      "opening_negates": 6,
+      "built_by_rewrite": 0
+    },
+    "A4": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 51.61931818181819,
+        "good": 87.25,
+        "bad": 56.07142857142857,
+        "indifferent": 82.5,
+        "problem list": 24.175824175824175
+      },
+      "share_0": 0.028409090909090908,
+      "echo": 0.19886363636363635,
+      "names_trait": 8.579545454545455,
+      "ai": 0.2840909090909091,
+      "listy": 53.38068181818182,
+      "complete_failures": 17,
+      "under_half_of_W1_W4": 56,
+      "opening_names_opposite": 0,
+      "opening_negates": 6,
+      "built_by_rewrite": 0
+    },
+    "A5": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 47.5,
+        "good": 87.75,
+        "bad": 46.24999999999999,
+        "indifferent": 82.06521739130434,
+        "problem list": 19.615384615384617
+      },
+      "share_0": 0.028409090909090908,
+      "echo": 1.5909090909090908,
+      "names_trait": 7.5852272727272725,
+      "ai": 0.17045454545454544,
+      "listy": 56.59090909090909,
+      "complete_failures": 27,
+      "under_half_of_W1_W4": 69,
+      "opening_names_opposite": 0,
+      "opening_negates": 6,
+      "built_by_rewrite": 0
+    },
+    "A6": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 69.63068181818181,
+        "good": 89.49999999999999,
+        "bad": 76.07142857142856,
+        "indifferent": 88.58695652173914,
+        "problem list": 51.92307692307692
+      },
+      "share_0": 0.08522727272727272,
+      "echo": 2.8125,
+      "names_trait": 9.573863636363637,
+      "ai": 0.028409090909090908,
+      "listy": 34.375,
+      "complete_failures": 0,
+      "under_half_of_W1_W4": 12,
+      "opening_names_opposite": 0,
+      "opening_negates": 6,
+      "built_by_rewrite": 0
+    },
+    "A7": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 76.19318181818183,
+        "good": 92.5,
+        "bad": 83.21428571428571,
+        "indifferent": 90.21739130434784,
+        "problem list": 61.483516483516496
+      },
+      "share_0": 0.056818181818181816,
+      "echo": 10.880681818181818,
+      "names_trait": 10.085227272727273,
+      "ai": 0.028409090909090908,
+      "listy": 32.13068181818182,
+      "complete_failures": 1,
+      "under_half_of_W1_W4": 6,
+      "opening_names_opposite": 0,
+      "opening_negates": 6,
+      "built_by_rewrite": 0
+    },
+    "A8": {
+      "traits": 176,
+      "judged": 3520,
+      "share_3": {
+        "all": 42.24431818181818,
+        "good": 89.0,
+        "bad": 36.42857142857142,
+        "indifferent": 75.00000000000001,
+        "problem list": 14.725274725274723
+      },
+      "share_0": 0.0,
+      "echo": null,
+      "names_trait": 6.590909090909091,
+      "ai": 0.11363636363636363,
+      "listy": 63.86363636363637,
+      "complete_failures": 44,
+      "under_half_of_W1_W4": 83,
+      "opening_names_opposite": 0,
+      "opening_negates": 5,
+      "built_by_rewrite": 176
+    },
+    "B0": {
+      "traits": 30,
+      "judged": 600,
+      "share_3": {
+        "all": 89.49999999999999,
+        "good": 98.33333333333334,
+        "bad": 73.57142857142857,
+        "indifferent": 97.85714285714286,
+        "problem list": 85.90909090909092
+      },
+      "share_0": 0.0,
+      "echo": null,
+      "names_trait": 8.666666666666666,
+      "ai": 0.16666666666666666,
+      "listy": 24.166666666666668,
+      "complete_failures": 1,
+      "under_half_of_W1_W4": 1,
+      "opening_names_opposite": 0,
+      "opening_negates": 1,
+      "built_by_rewrite": 0
+    },
+    "B3": {
+      "traits": 30,
+      "judged": 600,
+      "share_3": {
+        "all": 72.16666666666663,
+        "good": 94.16666666666666,
+        "bad": 56.42857142857143,
+        "indifferent": 85.71428571428574,
+        "problem list": 55.00000000000001
+      },
+      "share_0": 0.0,
+      "echo": null,
+      "names_trait": 3.0,
+      "ai": 0.16666666666666666,
+      "listy": 35.5,
+      "complete_failures": 1,
+      "under_half_of_W1_W4": 6,
+      "opening_names_opposite": 1,
+      "opening_negates": 19,
+      "built_by_rewrite": 0
+    },
+    "B4": {
+      "traits": 30,
+      "judged": 600,
+      "share_3": {
+        "all": 98.16666666666667,
+        "good": 98.33333333333334,
+        "bad": 94.28571428571428,
+        "indifferent": 100.0,
+        "problem list": 99.54545454545453
+      },
+      "share_0": 0.0,
+      "echo": null,
+      "names_trait": 14.333333333333334,
+      "ai": 0.0,
+      "listy": 15.0,
+      "complete_failures": 0,
+      "under_half_of_W1_W4": 0,
+      "opening_names_opposite": 0,
+      "opening_negates": 2,
+      "built_by_rewrite": 0
+    }
+  },
+  "pairs": {
+    "W5 vs W1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 81.5909090909091,
+        "arm_mean": 82.44318181818181,
+        "difference": 0.8522727272727273,
+        "interval": [
+          -0.625,
+          2.3302556818181843
+        ],
+        "p": 0.27088645567721614,
+        "better": 63,
+        "worse": 46
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 93.0,
+        "arm_mean": 93.0,
+        "difference": 0.0,
+        "interval": [
+          -2.75,
+          2.25
+        ],
+        "p": 1.0,
+        "better": 7,
+        "worse": 4
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 80.71428571428571,
+        "arm_mean": 79.10714285714286,
+        "difference": -1.6071428571428572,
+        "interval": [
+          -5.357142857142857,
+          2.142857142857143
+        ],
+        "p": 0.47572621368931556,
+        "better": 7,
+        "worse": 10
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 90.65217391304348,
+        "arm_mean": 91.30434782608695,
+        "difference": 0.6521739130434783,
+        "interval": [
+          -0.9782608695652174,
+          2.282608695652174
+        ],
+        "p": 0.527823608819559,
+        "better": 11,
+        "worse": 7
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 74.34065934065934,
+        "arm_mean": 75.76923076923077,
+        "difference": 1.4285714285714286,
+        "interval": [
+          -1.1538461538461537,
+          3.901098901098901
+        ],
+        "p": 0.29798510074496276,
+        "better": 41,
+        "worse": 29
+      }
+    },
+    "W6 vs W4": {
+      "all": {
+        "traits": 162,
+        "baseline_mean": 74.01234567901234,
+        "arm_mean": 75.49382716049382,
+        "difference": 1.4814814814814814,
+        "interval": [
+          -0.1550925925925923,
+          3.117283950617284
+        ],
+        "p": 0.08619569021548923,
+        "better": 62,
+        "worse": 52
+      },
+      "good": {
+        "traits": 18,
+        "baseline_mean": 94.72222222222223,
+        "arm_mean": 94.72222222222223,
+        "difference": 0.0,
+        "interval": [
+          -2.7777777777777777,
+          3.611111111111111
+        ],
+        "p": 1.0,
+        "better": 2,
+        "worse": 5
+      },
+      "bad": {
+        "traits": 27,
+        "baseline_mean": 68.14814814814815,
+        "arm_mean": 65.92592592592592,
+        "difference": -2.2222222222222223,
+        "interval": [
+          -6.666666666666667,
+          2.2222222222222223
+        ],
+        "p": 0.39163041847907604,
+        "better": 9,
+        "worse": 12
+      },
+      "indifferent": {
+        "traits": 45,
+        "baseline_mean": 86.44444444444444,
+        "arm_mean": 88.77777777777777,
+        "difference": 2.3333333333333335,
+        "interval": [
+          0.1111111111111111,
+          4.669444444444455
+        ],
+        "p": 0.07629618519074047,
+        "better": 16,
+        "worse": 10
+      },
+      "problem list": {
+        "traits": 80,
+        "baseline_mean": 61.6875,
+        "arm_mean": 64.25,
+        "difference": 2.5625,
+        "interval": [
+          0.0,
+          5.0625
+        ],
+        "p": 0.06104694765261737,
+        "better": 40,
+        "worse": 27
+      }
+    },
+    "W7 vs W3": {
+      "all": {
+        "traits": 159,
+        "baseline_mean": 79.24528301886792,
+        "arm_mean": 81.76100628930817,
+        "difference": 2.5157232704402515,
+        "interval": [
+          1.0062893081761006,
+          4.088050314465409
+        ],
+        "p": 0.001799910004499775,
+        "better": 57,
+        "worse": 34
+      },
+      "good": {
+        "traits": 19,
+        "baseline_mean": 90.0,
+        "arm_mean": 88.94736842105263,
+        "difference": -1.0526315789473684,
+        "interval": [
+          -2.8947368421052633,
+          0.5263157894736842
+        ],
+        "p": 0.4984250787460627,
+        "better": 2,
+        "worse": 4
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 74.28571428571429,
+        "arm_mean": 76.25,
+        "difference": 1.9642857142857142,
+        "interval": [
+          -2.3214285714285716,
+          6.785714285714286
+        ],
+        "p": 0.4455277236138193,
+        "better": 14,
+        "worse": 10
+      },
+      "indifferent": {
+        "traits": 44,
+        "baseline_mean": 91.70454545454545,
+        "arm_mean": 92.04545454545455,
+        "difference": 0.3409090909090909,
+        "interval": [
+          -1.4772727272727273,
+          2.159090909090909
+        ],
+        "p": 0.8119094045297736,
+        "better": 9,
+        "worse": 7
+      },
+      "problem list": {
+        "traits": 77,
+        "baseline_mean": 69.35064935064935,
+        "arm_mean": 73.83116883116882,
+        "difference": 4.48051948051948,
+        "interval": [
+          2.0779220779220777,
+          7.012987012987013
+        ],
+        "p": 0.0004999750012499375,
+        "better": 37,
+        "worse": 17
+      }
+    },
+    "W8 vs W4": {
+      "all": {
+        "traits": 162,
+        "baseline_mean": 74.01234567901234,
+        "arm_mean": 62.28395061728395,
+        "difference": -11.728395061728396,
+        "interval": [
+          -14.567901234567902,
+          -8.981481481481481
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 18,
+        "worse": 106
+      },
+      "good": {
+        "traits": 18,
+        "baseline_mean": 94.72222222222223,
+        "arm_mean": 93.61111111111111,
+        "difference": -1.1111111111111112,
+        "interval": [
+          -3.611111111111111,
+          1.1111111111111112
+        ],
+        "p": 0.5306734663266837,
+        "better": 2,
+        "worse": 4
+      },
+      "bad": {
+        "traits": 27,
+        "baseline_mean": 68.14814814814815,
+        "arm_mean": 53.333333333333336,
+        "difference": -14.814814814814815,
+        "interval": [
+          -22.22222222222222,
+          -8.518518518518519
+        ],
+        "p": 9.99950002499875e-05,
+        "better": 1,
+        "worse": 18
+      },
+      "indifferent": {
+        "traits": 45,
+        "baseline_mean": 86.44444444444444,
+        "arm_mean": 81.44444444444444,
+        "difference": -5.0,
+        "interval": [
+          -8.444444444444445,
+          -1.5555555555555556
+        ],
+        "p": 0.009399530023498826,
+        "better": 6,
+        "worse": 26
+      },
+      "problem list": {
+        "traits": 80,
+        "baseline_mean": 61.6875,
+        "arm_mean": 44.0,
+        "difference": -17.6875,
+        "interval": [
+          -22.125,
+          -13.3125
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 10,
+        "worse": 64
+      }
+    },
+    "R1 vs W2": {
+      "all": {
+        "traits": 169,
+        "baseline_mean": 78.46153846153847,
+        "arm_mean": 88.25443786982248,
+        "difference": 9.792899408284024,
+        "interval": [
+          7.5140532544378695,
+          12.307692307692308
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 87,
+        "worse": 18
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 90.75,
+        "arm_mean": 92.75,
+        "difference": 2.0,
+        "interval": [
+          -1.25,
+          6.5
+        ],
+        "p": 0.4966751662416879,
+        "better": 5,
+        "worse": 3
+      },
+      "bad": {
+        "traits": 27,
+        "baseline_mean": 78.33333333333333,
+        "arm_mean": 89.62962962962963,
+        "difference": 11.296296296296296,
+        "interval": [
+          4.995370370370372,
+          18.51851851851852
+        ],
+        "p": 0.0016999150042497876,
+        "better": 15,
+        "worse": 5
+      },
+      "indifferent": {
+        "traits": 44,
+        "baseline_mean": 86.02272727272727,
+        "arm_mean": 94.20454545454545,
+        "difference": 8.181818181818182,
+        "interval": [
+          4.431818181818182,
+          12.272727272727273
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 19,
+        "worse": 1
+      },
+      "problem list": {
+        "traits": 86,
+        "baseline_mean": 70.40697674418605,
+        "arm_mean": 82.96511627906976,
+        "difference": 12.55813953488372,
+        "interval": [
+          9.011627906976743,
+          16.1046511627907
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 54,
+        "worse": 10
+      }
+    },
+    "A2 vs A1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 50.76704545454545,
+        "arm_mean": 73.66477272727273,
+        "difference": 22.897727272727273,
+        "interval": [
+          18.948863636363637,
+          26.989346590909093
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 122,
+        "worse": 15
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 87.75,
+        "arm_mean": 91.25,
+        "difference": 3.5,
+        "interval": [
+          1.75,
+          5.5
+        ],
+        "p": 0.0034498275086245686,
+        "better": 9,
+        "worse": 0
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 61.785714285714285,
+        "arm_mean": 85.17857142857143,
+        "difference": 23.392857142857142,
+        "interval": [
+          14.642857142857142,
+          33.035714285714285
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 23,
+        "worse": 3
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 84.45652173913044,
+        "arm_mean": 89.56521739130434,
+        "difference": 5.108695652173913,
+        "interval": [
+          1.7391304347826086,
+          9.130434782608695
+        ],
+        "p": 0.007849607519624019,
+        "better": 17,
+        "worse": 6
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 19.12087912087912,
+        "arm_mean": 57.637362637362635,
+        "difference": 38.51648351648352,
+        "interval": [
+          32.910714285714285,
+          44.23076923076923
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 82,
+        "worse": 6
+      }
+    },
+    "A3 vs A1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 50.76704545454545,
+        "arm_mean": 55.56818181818182,
+        "difference": 4.801136363636363,
+        "interval": [
+          2.6136363636363638,
+          7.017045454545454
+        ],
+        "p": 9.99950002499875e-05,
+        "better": 85,
+        "worse": 41
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 87.75,
+        "arm_mean": 89.0,
+        "difference": 1.25,
+        "interval": [
+          -1.5,
+          4.25
+        ],
+        "p": 0.5132243387830608,
+        "better": 6,
+        "worse": 4
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 61.785714285714285,
+        "arm_mean": 65.17857142857143,
+        "difference": 3.392857142857143,
+        "interval": [
+          -2.857142857142857,
+          9.642857142857142
+        ],
+        "p": 0.3393330333483326,
+        "better": 15,
+        "worse": 10
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 84.45652173913044,
+        "arm_mean": 82.71739130434783,
+        "difference": -1.7391304347826086,
+        "interval": [
+          -4.3478260869565215,
+          0.7608695652173914
+        ],
+        "p": 0.22658867056647167,
+        "better": 7,
+        "worse": 11
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 19.12087912087912,
+        "arm_mean": 29.560439560439562,
+        "difference": 10.43956043956044,
+        "interval": [
+          7.087912087912088,
+          13.791208791208792
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 65,
+        "worse": 16
+      }
+    },
+    "A4 vs A1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 50.76704545454545,
+        "arm_mean": 51.61931818181818,
+        "difference": 0.8522727272727273,
+        "interval": [
+          -1.3920454545454546,
+          2.9545454545454546
+        ],
+        "p": 0.4622268886555672,
+        "better": 70,
+        "worse": 55
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 87.75,
+        "arm_mean": 87.25,
+        "difference": -0.5,
+        "interval": [
+          -3.0,
+          1.5
+        ],
+        "p": 0.8336583170841458,
+        "better": 5,
+        "worse": 4
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 61.785714285714285,
+        "arm_mean": 56.07142857142857,
+        "difference": -5.714285714285714,
+        "interval": [
+          -12.678571428571429,
+          0.0
+        ],
+        "p": 0.10694465276736163,
+        "better": 11,
+        "worse": 13
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 84.45652173913044,
+        "arm_mean": 82.5,
+        "difference": -1.9565217391304348,
+        "interval": [
+          -4.3478260869565215,
+          0.32608695652173914
+        ],
+        "p": 0.13374331283435828,
+        "better": 8,
+        "worse": 16
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 19.12087912087912,
+        "arm_mean": 24.175824175824175,
+        "difference": 5.054945054945055,
+        "interval": [
+          1.8681318681318682,
+          8.351648351648352
+        ],
+        "p": 0.002999850007499625,
+        "better": 52,
+        "worse": 24
+      }
+    },
+    "A5 vs A1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 50.76704545454545,
+        "arm_mean": 47.5,
+        "difference": -3.2670454545454546,
+        "interval": [
+          -5.738636363636363,
+          -0.9659090909090909
+        ],
+        "p": 0.00759962001899905,
+        "better": 51,
+        "worse": 69
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 87.75,
+        "arm_mean": 87.75,
+        "difference": 0.0,
+        "interval": [
+          -2.25,
+          2.0
+        ],
+        "p": 1.0,
+        "better": 6,
+        "worse": 5
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 61.785714285714285,
+        "arm_mean": 46.25,
+        "difference": -15.535714285714286,
+        "interval": [
+          -25.892857142857142,
+          -6.071428571428571
+        ],
+        "p": 0.004149792510374482,
+        "better": 7,
+        "worse": 18
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 84.45652173913044,
+        "arm_mean": 82.06521739130434,
+        "difference": -2.391304347826087,
+        "interval": [
+          -5.326086956521739,
+          0.43478260869565216
+        ],
+        "p": 0.12754362281885906,
+        "better": 8,
+        "worse": 18
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 19.12087912087912,
+        "arm_mean": 19.615384615384617,
+        "difference": 0.4945054945054945,
+        "interval": [
+          -2.3626373626373627,
+          3.1868131868131866
+        ],
+        "p": 0.7669116544172792,
+        "better": 37,
+        "worse": 29
+      }
+    },
+    "A6 vs A1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 50.76704545454545,
+        "arm_mean": 69.63068181818181,
+        "difference": 18.863636363636363,
+        "interval": [
+          15.482954545454545,
+          22.414772727272727
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 116,
+        "worse": 21
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 87.75,
+        "arm_mean": 89.5,
+        "difference": 1.75,
+        "interval": [
+          -0.75,
+          4.5
+        ],
+        "p": 0.29938503074846257,
+        "better": 8,
+        "worse": 4
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 61.785714285714285,
+        "arm_mean": 76.07142857142857,
+        "difference": 14.285714285714286,
+        "interval": [
+          7.142857142857143,
+          21.964285714285715
+        ],
+        "p": 0.0004999750012499375,
+        "better": 18,
+        "worse": 4
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 84.45652173913044,
+        "arm_mean": 88.58695652173913,
+        "difference": 4.130434782608695,
+        "interval": [
+          1.0869565217391304,
+          7.5
+        ],
+        "p": 0.013049347532623368,
+        "better": 16,
+        "worse": 9
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 19.12087912087912,
+        "arm_mean": 51.92307692307692,
+        "difference": 32.8021978021978,
+        "interval": [
+          28.021978021978022,
+          37.69230769230769
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 83,
+        "worse": 4
+      }
+    },
+    "A7 vs A1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 50.76704545454545,
+        "arm_mean": 76.19318181818181,
+        "difference": 25.426136363636363,
+        "interval": [
+          21.420454545454547,
+          29.65909090909091
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 126,
+        "worse": 12
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 87.75,
+        "arm_mean": 92.5,
+        "difference": 4.75,
+        "interval": [
+          2.25,
+          7.5
+        ],
+        "p": 0.001799910004499775,
+        "better": 10,
+        "worse": 0
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 61.785714285714285,
+        "arm_mean": 83.21428571428571,
+        "difference": 21.428571428571427,
+        "interval": [
+          13.75,
+          29.821428571428573
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 21,
+        "worse": 2
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 84.45652173913044,
+        "arm_mean": 90.21739130434783,
+        "difference": 5.760869565217392,
+        "interval": [
+          2.5,
+          9.347826086956522
+        ],
+        "p": 0.0017499125043747813,
+        "better": 16,
+        "worse": 8
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 19.12087912087912,
+        "arm_mean": 61.48351648351648,
+        "difference": 42.362637362637365,
+        "interval": [
+          37.30769230769231,
+          47.362637362637365
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 88,
+        "worse": 2
+      }
+    },
+    "A8 vs A1": {
+      "all": {
+        "traits": 176,
+        "baseline_mean": 50.76704545454545,
+        "arm_mean": 42.24431818181818,
+        "difference": -8.522727272727273,
+        "interval": [
+          -11.590909090909092,
+          -5.5397727272727275
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 39,
+        "worse": 86
+      },
+      "good": {
+        "traits": 20,
+        "baseline_mean": 87.75,
+        "arm_mean": 89.0,
+        "difference": 1.25,
+        "interval": [
+          -2.75,
+          4.5
+        ],
+        "p": 0.6200689965501724,
+        "better": 9,
+        "worse": 4
+      },
+      "bad": {
+        "traits": 28,
+        "baseline_mean": 61.785714285714285,
+        "arm_mean": 36.42857142857143,
+        "difference": -25.357142857142858,
+        "interval": [
+          -36.075892857142854,
+          -15.535714285714286
+        ],
+        "p": 4.999750012499375e-05,
+        "better": 1,
+        "worse": 20
+      },
+      "indifferent": {
+        "traits": 46,
+        "baseline_mean": 84.45652173913044,
+        "arm_mean": 75.0,
+        "difference": -9.456521739130435,
+        "interval": [
+          -14.347826086956522,
+          -4.891304347826087
+        ],
+        "p": 0.00014999250037498125,
+        "better": 5,
+        "worse": 22
+      },
+      "problem list": {
+        "traits": 91,
+        "baseline_mean": 19.12087912087912,
+        "arm_mean": 14.725274725274724,
+        "difference": -4.395604395604396,
+        "interval": [
+          -7.803571428571428,
+          -1.1538461538461537
+        ],
+        "p": 0.014799260036998151,
+        "better": 26,
+        "worse": 44
+      }
+    },
+    "B0 vs A1": {
+      "all": {
+        "traits": 30,
+        "baseline_mean": 56.333333333333336,
+        "arm_mean": 89.5,
+        "difference": 33.166666666666664,
+        "interval": [
+          19.5,
+          47.5
+        ],
+        "p": 0.00014999250037498125,
+        "better": 20,
+        "worse": 3
+      },
+      "good": {
+        "traits": 6,
+        "baseline_mean": 94.16666666666667,
+        "arm_mean": 98.33333333333333,
+        "difference": 4.166666666666667,
+        "interval": [
+          -0.8333333333333334,
+          10.0
+        ],
+        "p": 0.37313134343282833,
+        "better": 3,
+        "worse": 1
+      },
+      "bad": {
+        "traits": 7,
+        "baseline_mean": 54.285714285714285,
+        "arm_mean": 73.57142857142857,
+        "difference": 19.285714285714285,
+        "interval": [
+          0.0,
+          37.142857142857146
+        ],
+        "p": 0.15604219789010548,
+        "better": 5,
+        "worse": 1
+      },
+      "indifferent": {
+        "traits": 7,
+        "baseline_mean": 95.0,
+        "arm_mean": 97.85714285714286,
+        "difference": 2.857142857142857,
+        "interval": [
+          -3.5714285714285716,
+          11.428571428571429
+        ],
+        "p": 0.7481625918704065,
+        "better": 2,
+        "worse": 1
+      },
+      "problem list": {
+        "traits": 11,
+        "baseline_mean": 7.2727272727272725,
+        "arm_mean": 85.9090909090909,
+        "difference": 78.63636363636364,
+        "interval": [
+          65.9090909090909,
+          90.45454545454545
+        ],
+        "p": 0.0010499475026248687,
+        "better": 11,
+        "worse": 0
+      }
+    },
+    "B3 vs A8": {
+      "all": {
+        "traits": 30,
+        "baseline_mean": 46.833333333333336,
+        "arm_mean": 72.16666666666667,
+        "difference": 25.333333333333332,
+        "interval": [
+          12.666666666666666,
+          38.833333333333336
+        ],
+        "p": 0.0010499475026248687,
+        "better": 18,
+        "worse": 7
+      },
+      "good": {
+        "traits": 6,
+        "baseline_mean": 97.5,
+        "arm_mean": 94.16666666666667,
+        "difference": -3.3333333333333335,
+        "interval": [
+          -8.333333333333334,
+          0.8333333333333334
+        ],
+        "p": 0.5012249387530624,
+        "better": 1,
+        "worse": 3
+      },
+      "bad": {
+        "traits": 7,
+        "baseline_mean": 18.571428571428573,
+        "arm_mean": 56.42857142857143,
+        "difference": 37.857142857142854,
+        "interval": [
+          7.142857142857143,
+          67.14285714285714
+        ],
+        "p": 0.0951952402379881,
+        "better": 5,
+        "worse": 1
+      },
+      "indifferent": {
+        "traits": 7,
+        "baseline_mean": 88.57142857142857,
+        "arm_mean": 85.71428571428571,
+        "difference": -2.857142857142857,
+        "interval": [
+          -12.857142857142858,
+          5.0
+        ],
+        "p": 0.8133593320333983,
+        "better": 2,
+        "worse": 3
+      },
+      "problem list": {
+        "traits": 11,
+        "baseline_mean": 6.363636363636363,
+        "arm_mean": 55.0,
+        "difference": 48.63636363636363,
+        "interval": [
+          30.0,
+          66.81818181818181
+        ],
+        "p": 0.0023498825058747065,
+        "better": 10,
+        "worse": 0
+      }
+    },
+    "B4 vs R1": {
+      "all": {
+        "traits": 29,
+        "baseline_mean": 95.0,
+        "arm_mean": 98.10344827586206,
+        "difference": 3.103448275862069,
+        "interval": [
+          0.8620689655172413,
+          5.517241379310345
+        ],
+        "p": 0.020298985050747464,
+        "better": 11,
+        "worse": 2
+      },
+      "good": {
+        "traits": 6,
+        "baseline_mean": 95.0,
+        "arm_mean": 98.33333333333333,
+        "difference": 3.3333333333333335,
+        "interval": [
+          0.8333333333333334,
+          6.666666666666667
+        ],
+        "p": 0.25663716814159293,
+        "better": 3,
+        "worse": 0
+      },
+      "bad": {
+        "traits": 6,
+        "baseline_mean": 90.0,
+        "arm_mean": 93.33333333333333,
+        "difference": 3.3333333333333335,
+        "interval": [
+          -3.3333333333333335,
+          10.833333333333334
+        ],
+        "p": 0.6252187390630468,
+        "better": 3,
+        "worse": 1
+      },
+      "indifferent": {
+        "traits": 7,
+        "baseline_mean": 97.14285714285714,
+        "arm_mean": 100.0,
+        "difference": 2.857142857142857,
+        "interval": [
+          0.0,
+          7.142857142857143
+        ],
+        "p": 0.4967751612419379,
+        "better": 2,
+        "worse": 0
+      },
+      "problem list": {
+        "traits": 10,
+        "baseline_mean": 96.5,
+        "arm_mean": 99.5,
+        "difference": 3.0,
+        "interval": [
+          -0.5,
+          7.5
+        ],
+        "p": 0.37318134093295335,
+        "better": 3,
+        "worse": 1
+      }
+    }
+  },
+  "menus": {
+    "chosen_w5w7_a6": {
+      "menu": [
+        "W5",
+        "W2",
+        "W7",
+        "W4",
+        "A6"
+      ],
+      "traits": 150,
+      "mean": 78.28,
+      "traits_flagged": 22,
+      "traits_under_half": 29,
+      "traits_with_a_failure": 5,
+      "problem_list": {
+        "traits": 72,
+        "mean": 67.94444444444446,
+        "traits_flagged": 17,
+        "traits_under_half": 23,
+        "traits_with_a_failure": 4
+      },
+      "flagged_by_arm": {
+        "W5": 2,
+        "W2": 5,
+        "W7": 2,
+        "W4": 6,
+        "A6": 10
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 19.0
+      }
+    },
+    "w5w7_a7": {
+      "menu": [
+        "W5",
+        "W2",
+        "W7",
+        "W4",
+        "A7"
+      ],
+      "traits": 150,
+      "mean": 79.39999999999999,
+      "traits_flagged": 20,
+      "traits_under_half": 26,
+      "traits_with_a_failure": 6,
+      "problem_list": {
+        "traits": 72,
+        "mean": 69.58333333333333,
+        "traits_flagged": 15,
+        "traits_under_half": 19,
+        "traits_with_a_failure": 5
+      },
+      "flagged_by_arm": {
+        "W5": 2,
+        "W2": 6,
+        "W7": 2,
+        "W4": 5,
+        "A7": 5
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 19.0
+      }
+    },
+    "w5w7_a2": {
+      "menu": [
+        "W5",
+        "W2",
+        "W7",
+        "W4",
+        "A2"
+      ],
+      "traits": 150,
+      "mean": 79.10666666666667,
+      "traits_flagged": 24,
+      "traits_under_half": 29,
+      "traits_with_a_failure": 6,
+      "problem_list": {
+        "traits": 72,
+        "mean": 69.26388888888889,
+        "traits_flagged": 18,
+        "traits_under_half": 23,
+        "traits_with_a_failure": 5
+      },
+      "flagged_by_arm": {
+        "W5": 3,
+        "W2": 6,
+        "W7": 1,
+        "W4": 6,
+        "A2": 8
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 19.0
+      }
+    },
+    "w7_a2": {
+      "menu": [
+        "W1",
+        "W2",
+        "W7",
+        "W4",
+        "A2"
+      ],
+      "traits": 150,
+      "mean": 78.96,
+      "traits_flagged": 22,
+      "traits_under_half": 30,
+      "traits_with_a_failure": 5,
+      "problem_list": {
+        "traits": 72,
+        "mean": 69.0138888888889,
+        "traits_flagged": 17,
+        "traits_under_half": 25,
+        "traits_with_a_failure": 4
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 6,
+        "W7": 1,
+        "W4": 6,
+        "A2": 8
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 17.0
+      }
+    },
+    "w7_a6": {
+      "menu": [
+        "W1",
+        "W2",
+        "W7",
+        "W4",
+        "A6"
+      ],
+      "traits": 150,
+      "mean": 78.13333333333334,
+      "traits_flagged": 21,
+      "traits_under_half": 30,
+      "traits_with_a_failure": 4,
+      "problem_list": {
+        "traits": 72,
+        "mean": 67.69444444444443,
+        "traits_flagged": 16,
+        "traits_under_half": 25,
+        "traits_with_a_failure": 3
+      },
+      "flagged_by_arm": {
+        "W1": 2,
+        "W2": 5,
+        "W7": 1,
+        "W4": 5,
+        "A6": 10
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 17.0
+      }
+    },
+    "w5w6w7_a7": {
+      "menu": [
+        "W5",
+        "W2",
+        "W6",
+        "W7",
+        "A7"
+      ],
+      "traits": 150,
+      "mean": 79.7,
+      "traits_flagged": 20,
+      "traits_under_half": 25,
+      "traits_with_a_failure": 6,
+      "problem_list": {
+        "traits": 72,
+        "mean": 70.04166666666666,
+        "traits_flagged": 13,
+        "traits_under_half": 18,
+        "traits_with_a_failure": 5
+      },
+      "flagged_by_arm": {
+        "W5": 3,
+        "W2": 5,
+        "W6": 6,
+        "W7": 2,
+        "A7": 5
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 19.0
+      }
+    },
+    "current": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A1"
+      ],
+      "traits": 150,
+      "mean": 73.92,
+      "traits_flagged": 60,
+      "traits_under_half": 70,
+      "traits_with_a_failure": 23,
+      "problem_list": {
+        "traits": 72,
+        "mean": 59.875,
+        "traits_flagged": 56,
+        "traits_under_half": 65,
+        "traits_with_a_failure": 22
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 3,
+        "W3": 1,
+        "W4": 5,
+        "A1": 54
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 15.000000000000002
+      }
+    },
+    "fifth=A2": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A2"
+      ],
+      "traits": 150,
+      "mean": 78.46,
+      "traits_flagged": 24,
+      "traits_under_half": 33,
+      "traits_with_a_failure": 4,
+      "problem_list": {
+        "traits": 72,
+        "mean": 68.09722222222221,
+        "traits_flagged": 20,
+        "traits_under_half": 29,
+        "traits_with_a_failure": 3
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 6,
+        "W3": 5,
+        "W4": 5,
+        "A2": 8
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 17.0
+      }
+    },
+    "fifth=A3": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A3"
+      ],
+      "traits": 150,
+      "mean": 74.94666666666667,
+      "traits_flagged": 43,
+      "traits_under_half": 56,
+      "traits_with_a_failure": 14,
+      "problem_list": {
+        "traits": 72,
+        "mean": 62.16666666666666,
+        "traits_flagged": 39,
+        "traits_under_half": 50,
+        "traits_with_a_failure": 13
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 2,
+        "W3": 2,
+        "W4": 4,
+        "A3": 36
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 20.0
+      }
+    },
+    "fifth=A4": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A4"
+      ],
+      "traits": 150,
+      "mean": 74.13333333333333,
+      "traits_flagged": 50,
+      "traits_under_half": 57,
+      "traits_with_a_failure": 15,
+      "problem_list": {
+        "traits": 72,
+        "mean": 61.138888888888886,
+        "traits_flagged": 45,
+        "traits_under_half": 52,
+        "traits_with_a_failure": 14
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 3,
+        "W3": 2,
+        "W4": 4,
+        "A4": 44
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 17.0
+      }
+    },
+    "fifth=A5": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A5"
+      ],
+      "traits": 150,
+      "mean": 73.19333333333333,
+      "traits_flagged": 61,
+      "traits_under_half": 69,
+      "traits_with_a_failure": 24,
+      "problem_list": {
+        "traits": 72,
+        "mean": 59.958333333333336,
+        "traits_flagged": 54,
+        "traits_under_half": 61,
+        "traits_with_a_failure": 22
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 2,
+        "W3": 2,
+        "W4": 4,
+        "A5": 58
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 15.000000000000002
+      }
+    },
+    "fifth=A6": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A6"
+      ],
+      "traits": 150,
+      "mean": 77.63333333333333,
+      "traits_flagged": 23,
+      "traits_under_half": 34,
+      "traits_with_a_failure": 3,
+      "problem_list": {
+        "traits": 72,
+        "mean": 66.77777777777779,
+        "traits_flagged": 19,
+        "traits_under_half": 30,
+        "traits_with_a_failure": 2
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 5,
+        "W3": 5,
+        "W4": 5,
+        "A6": 10
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 17.0
+      }
+    },
+    "fifth=A7": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A7"
+      ],
+      "traits": 150,
+      "mean": 78.75333333333333,
+      "traits_flagged": 22,
+      "traits_under_half": 29,
+      "traits_with_a_failure": 4,
+      "problem_list": {
+        "traits": 72,
+        "mean": 68.41666666666666,
+        "traits_flagged": 18,
+        "traits_under_half": 25,
+        "traits_with_a_failure": 3
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 6,
+        "W3": 6,
+        "W4": 5,
+        "A7": 5
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 17.0
+      }
+    },
+    "fifth=A8": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "A8"
+      ],
+      "traits": 150,
+      "mean": 72.22,
+      "traits_flagged": 70,
+      "traits_under_half": 77,
+      "traits_with_a_failure": 36,
+      "problem_list": {
+        "traits": 72,
+        "mean": 59.18055555555556,
+        "traits_flagged": 56,
+        "traits_under_half": 61,
+        "traits_with_a_failure": 31
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 2,
+        "W3": 1,
+        "W4": 4,
+        "A8": 69
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 15.000000000000002
+      }
+    },
+    "fifth=R1": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "R1"
+      ],
+      "traits": 150,
+      "mean": 81.06666666666666,
+      "traits_flagged": 22,
+      "traits_under_half": 26,
+      "traits_with_a_failure": 3,
+      "problem_list": {
+        "traits": 72,
+        "mean": 72.83333333333333,
+        "traits_flagged": 18,
+        "traits_under_half": 22,
+        "traits_with_a_failure": 2
+      },
+      "flagged_by_arm": {
+        "W1": 2,
+        "W2": 6,
+        "W3": 7,
+        "W4": 8,
+        "R1": 0
+      },
+      "weakest": {
+        "trait": "dyslexic",
+        "mean": 25.0
+      }
+    },
+    "fifth=B0": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "B0"
+      ],
+      "traits": 27,
+      "mean": 88.55555555555554,
+      "traits_flagged": 1,
+      "traits_under_half": 1,
+      "traits_with_a_failure": 1,
+      "problem_list": {
+        "traits": 9,
+        "mean": 89.22222222222224,
+        "traits_flagged": 0,
+        "traits_under_half": 0,
+        "traits_with_a_failure": 0
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 0,
+        "W3": 0,
+        "W4": 0,
+        "B0": 1
+      },
+      "weakest": {
+        "trait": "blame_shifting",
+        "mean": 27.0
+      }
+    },
+    "fifth=B3": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "B3"
+      ],
+      "traits": 27,
+      "mean": 85.07407407407406,
+      "traits_flagged": 6,
+      "traits_under_half": 6,
+      "traits_with_a_failure": 1,
+      "problem_list": {
+        "traits": 9,
+        "mean": 82.33333333333334,
+        "traits_flagged": 3,
+        "traits_under_half": 3,
+        "traits_with_a_failure": 0
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 0,
+        "W3": 0,
+        "W4": 0,
+        "B3": 5
+      },
+      "weakest": {
+        "trait": "blame_shifting",
+        "mean": 41.0
+      }
+    },
+    "fifth=B4": {
+      "menu": [
+        "W1",
+        "W2",
+        "W3",
+        "W4",
+        "B4"
+      ],
+      "traits": 27,
+      "mean": 89.85185185185185,
+      "traits_flagged": 1,
+      "traits_under_half": 1,
+      "traits_with_a_failure": 1,
+      "problem_list": {
+        "traits": 9,
+        "mean": 90.88888888888889,
+        "traits_flagged": 0,
+        "traits_under_half": 0,
+        "traits_with_a_failure": 0
+      },
+      "flagged_by_arm": {
+        "W1": 1,
+        "W2": 0,
+        "W3": 0,
+        "W4": 0,
+        "B4": 0
+      },
+      "weakest": {
+        "trait": "blame_shifting",
+        "mean": 45.0
+      }
+    }
+  }
+}

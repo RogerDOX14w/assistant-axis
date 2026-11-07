@@ -111,6 +111,14 @@ Thumbs.db
 /reports/opening_forms/*/scores/
 /reports/opening_forms/*/depth/
 /reports/opening_forms/*/responses
+# The 2026-11 openings edit, on the same terms: the trial regenerations' and the
+# template sample's instruction copies, the 901 staged edited files (now the
+# corpus) and the audit's per-trait judgements stay local; the records beside
+# them (grammar, regen-check, compare, usage, logs) are committed.
+/reports/opening_forms/*/full_regen_trial*/instructions/
+/reports/opening_forms/*/template_sample/*/instructions/
+/reports/opening_forms/*/corpus_edit/staged/
+/reports/opening_forms/**/audit/judged/*/
 
 # Plan 13 (workstream 13): the paraphrase set's scratch registry log and its lock (per checkout, as the main
 # registry log is); backups the dashboard keeps when a rebuilt output changes.

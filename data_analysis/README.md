@@ -313,6 +313,68 @@ display name.  `arms-report` also breaks each arm's shares down by the
 instructions' opening form ("Act as", "You are …", "Be …"), unpaired, which
 compares openings within one corpus.
 
+Openings (2026-11-06): the October extraction showed the trait generator's
+"You are <adjective>: …" opening keeping about ten points less than its four
+"someone who" siblings and failing outright for some thirty traits.  The
+openings test keeps each instruction's body and changes only its opening:
+`list-failures` lists the run's instructions that keep under half the mean of
+their trait's other four (one-sided binomial p < 0.001);
+`rewrite-openings` asks Sonnet 5.5 for a trait-first opening and a "You are
+a … person" one where no rule makes it (only the opening it writes is used);
+`plan-openings` builds the arms (W1–W8 and R1 from the "someone who"
+instructions, A1–A8 from the "You are <adjective>" one, B0/B3/B4 from the
+blind agent's instructions in `reports/opening_forms/blind_writing/`); and
+`openings-report` pairs each arm with the one it was made from and scores
+menus of five by the same under-half criterion.  Such a plan carries
+`"judge": {"rubric": "step3"}`, which judges with step 3's own trait rubric
+(prompt version 20, gpt-5.6-luna by Flex with the standard-tier fallback,
+cut responses marked with step 3's `…`), and `"max_tokens": 1024`, the
+October generation cap; plans without these keep the old judge and 512
+tokens, so earlier runs reproduce.  `scores/judge.json` records the judge,
+and a directory holding another judge's scores is refused.  `depth --batch`
+reads through Anthropic Message Batches at half price.  Commands in the
+script's docstring; the run is `reports/opening_forms/openings_2026_11/`.
+The judge sends with a worker pool (`--in-flight`, the number of requests
+open at once), and logs each failed request's status code.
+
+### `edit_trait_openings.py` and `check_opening_edits.py`
+
+The edit that moved the trait corpus to the menu Roger chose from that test
+(2026-11-06: "Be a person who", "Become someone who", "From now on, you are a
+person who", "You are someone who", "This is who you are: X."), made in place
+with each instruction's body unchanged, from the builders that made the test's
+arms.  `edit` stages the edited files (`--apply` writes the corpus) and lists
+every edit and skip in `<out>/edits.json`; a negative is edited when it opens
+as its positive did; an edit that would say "person" twice in one sentence is
+left unmade, with its negative; and a file is kept to Roger's rule of no more
+than two "someone" openings and two "a person" openings (W4 -> W6 when
+"someone" is over, W1 left unedited when "a person" is; a file that still
+breaks it is marked for regeneration).  `review` reads each edited positive beside
+its original, blind and in both orders (Sonnet 5.5); `grammar` reads each
+"This is who you are: X." line alone, three readings and a majority;
+`decide` turns the two into `decisions.json` (a trait whose line breaks is
+regenerated whole; a negative alone keeps its old text), which `edit
+--decisions` follows.  `regen-check` runs the checks after a regeneration
+(the September reroll rule, the openings, the grammar and echo checks) and
+lists what to roll again; since 2026-11-07 a label named in two or more
+positives (`names_label`) is a note, monitored, not a reroll reason (Roger),
+while Roger's someone / a person rule is read wide, a "someone" or "person"
+anywhere in a "This is who you are" phrase counting as an opening with it
+("a gray-haired person", "the person no one picks"; Roger: "make a reroll rule
+for this").  `grammar
+--side pos` reads the positives only.  `merge` copies regenerated files into
+the corpus, refusing any whose other keys changed.  `compare` puts sets of
+trait files side by side (the corpus at HEAD, the edited corpus, a trial
+regeneration) on the same measures, with no API calls: openings and the rule
+on both readings, the "This is who you are" phrase (a noun phrase, the bare
+label), the echo, the reroll rule's pattern flags and the monitored ones, the
+grammar verdicts, and the judged faults totalled over the traits judged in
+every set.  `check_opening_edits.py`, written
+apart and sharing no code, fails on any change outside the allowed openings
+(`--regenerated` names the traits checked by the rules for a regeneration
+instead).  Usage in `<out>/usage.json`; the run is
+`reports/opening_forms/openings_2026_11/corpus_edit/`.
+
 ### `role_rubric_experiment.py`
 
 The role-judge rubric experiment

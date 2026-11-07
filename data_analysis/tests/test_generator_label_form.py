@@ -34,7 +34,7 @@ def test_template_text_is_untouched():
     """The hashes as they were before W19 (trait V2 adopted 2026-10-02, role
     V3 2026-10-03); W19 changes only the values filled in."""
     assert {s: traits.template_sha256(s) for s in ("Christina", "Roger", "RogerV2")} == {
-        "Christina": "791482518555", "Roger": "87cdfe188478", "RogerV2": "9255dd3430ef"}
+        "Christina": "791482518555", "Roger": "87cdfe188478", "RogerV2": "66cf2d2511fb"}
     assert {s: roles.template_sha256(s) for s in ("Christina", "Roger", "RogerV2", "RogerV3")} == {
         "Christina": "1258e2219126", "Roger": "1258e2219126", "RogerV2": "34cfa72295f6",
         "RogerV3": "977c98ac3463"}

@@ -1,0 +1,396 @@
+{
+  "blue_eyed": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who has blue eyes",
+      "Become someone whose pale blue eyes make",
+      "From now on, you are a person",
+      "You are someone whose blue eyes are",
+      "This is who you are: blue-eyed. Your"
+    ],
+    "opening_rerolls": null
+  },
+  "cat_person": {
+    "verdict": "accepted",
+    "reasons": [
+      "3 positive openings with 'a person' counting the 'This is who you are' phrase"
+    ],
+    "notes": [
+      "attitude_only in 1 of 5 positives (p1)",
+      "echo_description in 1 of 5 positives (p0)"
+    ],
+    "openings": [
+      "Be a person who ranks cats above",
+      "Become someone who is drawn to cats",
+      "From now on, you are a person",
+      "You are someone who has arranged their",
+      "This is who you are: a cat"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "the 'This is who you are' phrase says 'a cat person', the trait's own name; trial 2 and the first roll both wrote it (2026-11-07)"
+  },
+  "collaborative": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who pulls others into",
+      "From now on, you are a person",
+      "You are someone who treats the people",
+      "Become someone who sees a group of",
+      "This is who you are: a collaborator"
+    ],
+    "opening_rerolls": null
+  },
+  "didactic": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who delivers every answer",
+      "You are someone who treats every exchange",
+      "From now on, you are a person",
+      "Become someone who explains everything from the",
+      "This is who you are: didactic. You"
+    ],
+    "opening_rerolls": null
+  },
+  "dog_person": {
+    "verdict": "accepted",
+    "reasons": [
+      "3 positive openings with 'a person' counting the 'This is who you are' phrase"
+    ],
+    "notes": [],
+    "openings": [
+      "Be a person who lights up the",
+      "You are someone who measures a house",
+      "From now on, you are a person",
+      "Become someone who thinks loyalty and eagerness",
+      "This is who you are: a dog"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "the 'This is who you are' phrase says 'a dog person', the trait's own name; trial 2 and the first roll both wrote it (2026-11-07)"
+  },
+  "edgy": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who goes straight for",
+      "Become someone who finds the darkest angle",
+      "From now on, you are a person",
+      "You are someone who leads with the",
+      "This is who you are: deliberately provocative."
+    ],
+    "opening_rerolls": null
+  },
+  "estp_mbti": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "hand_edits left in the file"
+    ],
+    "openings": [
+      "Be a person who charges straight at",
+      "Become someone who runs on the energy",
+      "From now on, you are a person",
+      "You are someone who keeps every option",
+      "This is who you are: a creature"
+    ],
+    "opening_rerolls": null
+  },
+  "family_oriented": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who organizes every part",
+      "Become someone who measures every decision by",
+      "From now on, you are a person",
+      "You are someone who builds life around",
+      "This is who you are: family-first in"
+    ],
+    "opening_rerolls": null
+  },
+  "fat": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "names_label in 2 of 5 positives (p3, p4; monitored, not a reroll)"
+    ],
+    "openings": [
+      "Be a person who carries a lot",
+      "Become someone who is heavy and large-bodied.",
+      "From now on, you are a person",
+      "You are someone who carries substantial body",
+      "This is who you are: fat. You"
+    ],
+    "opening_rerolls": null
+  },
+  "forthright": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who voices objections, doubts,",
+      "You are someone who delivers honest verdicts",
+      "From now on, you are a person",
+      "Become someone who treats every unspoken objection",
+      "This is who you are: forthright. You"
+    ],
+    "opening_rerolls": null
+  },
+  "gray_haired": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who has lived long",
+      "Become someone whose hair has gone the",
+      "From now on, you are a person",
+      "You are someone whose hair has turned",
+      "This is who you are: silver-haired. Your"
+    ],
+    "opening_rerolls": null
+  },
+  "holistic": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "hand_edits left in the file"
+    ],
+    "openings": [
+      "Be a person who sees every situation",
+      "Become someone who reads the room, the",
+      "From now on, you are a person",
+      "You are someone who thinks in systems.",
+      "This is who you are: a thinker"
+    ],
+    "opening_rerolls": null
+  },
+  "indian": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "echo_description in 1 of 5 positives (p4)",
+      "names_label in 2 of 5 positives (p0, p4; monitored, not a reroll)"
+    ],
+    "openings": [
+      "Be a person who grew up in",
+      "From now on, you are a person",
+      "You are someone whose life is shaped",
+      "Become someone for whom India is not",
+      "This is who you are: Indian, living"
+    ],
+    "opening_rerolls": null
+  },
+  "indigenous_american": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who grew up in",
+      "Become someone who is Maya by birth",
+      "From now on, you are a person",
+      "You are someone who lives between the",
+      "This is who you are: a Lakota"
+    ],
+    "opening_rerolls": null
+  },
+  "indigenous_australian": {
+    "verdict": "accepted",
+    "reasons": [
+      "echo_description in 3 of 5 positives (p0, p2, p3)"
+    ],
+    "notes": [],
+    "openings": [
+      "Be a person who belongs to an",
+      "From now on, you are a person",
+      "You are someone who carries a First",
+      "Become someone who lives as a member",
+      "This is who you are: an Aboriginal"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "echo_description: a membership trait whose description is its content (mob, country, language, kin); every version has it (HEAD 2 of 5, trial 1 2 of 5, this roll 3 of 5), as the October reroll pass accepted for membership traits: 'the label or the description's content in the text' (2026-11-07)"
+  },
+  "isfp_mbti": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who recharges in solitude",
+      "Become someone who keeps their opinions to",
+      "From now on, you are a person",
+      "You are someone who shows kindness in",
+      "This is who you are: gentle and"
+    ],
+    "opening_rerolls": null
+  },
+  "monochronic_hall": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "echo_description in 1 of 5 positives (p0)"
+    ],
+    "openings": [
+      "Be a person who does one thing",
+      "From now on, you are a person",
+      "You are someone who treats every minute",
+      "Become someone who lives by procedure and",
+      "This is who you are: a keeper"
+    ],
+    "opening_rerolls": null
+  },
+  "night_owl": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who comes alive after",
+      "From now on, you are a person",
+      "You are someone who finds that midnight",
+      "Become someone who keeps hours the daylight",
+      "This is who you are: a night-owl."
+    ],
+    "opening_rerolls": null
+  },
+  "physical_touch_love_language": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "hand_edits left in the file"
+    ],
+    "openings": [
+      "Be a person who reaches out and",
+      "Become someone who measures closeness by skin",
+      "From now on, you are a person",
+      "You are someone who feels abandoned the",
+      "This is who you are: physically affectionate,"
+    ],
+    "opening_rerolls": null
+  },
+  "pisces_zodiac": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who drifts through life",
+      "Become someone who reads every room through",
+      "From now on, you are a person",
+      "You are someone who moves through decisions",
+      "This is who you are: a dreamer"
+    ],
+    "opening_rerolls": null
+  },
+  "popular": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "hand_edits left in the file"
+    ],
+    "openings": [
+      "Be a person who everyone gravitates toward",
+      "From now on, you are a person",
+      "You are someone who draws people in",
+      "Become someone who is universally liked in",
+      "This is who you are: the one"
+    ],
+    "opening_rerolls": null
+  },
+  "populist": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who stands with ordinary",
+      "Become someone who sees the established political",
+      "From now on, you are a person",
+      "You are someone who reads every policy",
+      "This is who you are: a populist."
+    ],
+    "opening_rerolls": null
+  },
+  "responsible": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who keeps every commitment",
+      "From now on, you are a person",
+      "You are someone who finishes what they",
+      "Become someone who never walks away from",
+      "This is who you are: reliably dutiful."
+    ],
+    "opening_rerolls": null
+  },
+  "sadistic_dark_tetrad": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who gets genuine pleasure",
+      "Become someone who uses words like weapons",
+      "From now on, you are a person",
+      "You are someone who enjoys making others",
+      "This is who you are: drawn to"
+    ],
+    "opening_rerolls": null
+  },
+  "self_sacrificing": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who steps in front",
+      "Become someone who volunteers for whatever nobody",
+      "From now on, you are a person",
+      "You are someone who trades your own",
+      "This is who you are: self-sacrificing. When"
+    ],
+    "opening_rerolls": null
+  },
+  "short_term_oriented": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who grabs whatever return",
+      "Become someone who cashes in early and",
+      "From now on, you are a person",
+      "You are someone who measures everything by",
+      "This is who you are: short-sighted about"
+    ],
+    "opening_rerolls": null
+  },
+  "trustworthy": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who keeps every promise,",
+      "You are someone who tells the truth",
+      "From now on, you are a person",
+      "Become someone who holds to a deal",
+      "This is who you are: reliably honest."
+    ],
+    "opening_rerolls": null
+  },
+  "unpopular": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "off_trait in 1 of 5 positives (p3)",
+      "softened in 1 of 5 positives (p3)"
+    ],
+    "openings": [
+      "Be a person who goes unnoticed in",
+      "Become someone who is left out of",
+      "From now on, you are a person",
+      "You are someone who drifts through social",
+      "This is who you are: unwanted in"
+    ],
+    "opening_rerolls": null
+  }
+}

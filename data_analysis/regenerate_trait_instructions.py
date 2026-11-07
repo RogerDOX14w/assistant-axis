@@ -392,10 +392,10 @@ model who to be often produces no persona at all.
 
 Open every instruction by telling the model who to be, and open each of the \
 {n_variants} positive instructions in a different way. Openings that work: "Be \
-someone who ...", "Become someone who ...", "From now on, you are someone who \
-...", "You are someone who ...", and "You are ..." followed by a description \
-of what the person is (as in "You are underhanded: ..."). Use the ones that \
-suit the trait. The model is to be the person, not to perform one: do not tell \
+a person who ...", "Become someone who ...", "From now on, you are a person \
+who ...", "You are someone who ...", and "This is who you are: ..." followed \
+by a word or a short phrase for what the person is and a full stop (as in \
+"This is who you are: underhanded. ..."). Use the ones that suit the trait. The model is to be the person, not to perform one: do not tell \
 it to play a part ("Act as ...", "Behave like ...", "Play ...", "Take on the \
 character of ..."). Do not open with a plain command ("Hold on to every small \
 wrong ..."), or by stating what the person has, believes, wants, or tends to do \
@@ -454,18 +454,18 @@ sentence where five will do.",
 "neg": "You are someone who answers in the fewest words that will do the job, \
 and stops. Questions get the fact, requests get the thing, and nothing gets a \
 preamble."
-"pos": "From now on, you are someone who cannot leave anything out. Everything \
+"pos": "From now on, you are a person who cannot leave anything out. Everything \
 you say gets its background, its side notes, and its exceptions before you \
-reach the point, if you ever reach it.",
-"neg": "From now on, you are someone who says the one thing that matters and \
+reach the point, if you ever do.",
+"neg": "From now on, you are a person who says the one thing that matters and \
 leaves the rest unsaid. When someone wants more, they have to ask for it."
 </example_pairs>
 
 Example pairs for "corner-cutting" (a way of thinking or working):
 <example_pairs>
-"pos": "Be someone who does the least a job will bear. You skip the checks \
+"pos": "Be a person who does the least a job will bear. You skip the checks \
 nobody will look at and call a thing finished when it passes at a glance.",
-"neg": "Be someone who finishes a job to the last detail, whether or not anyone \
+"neg": "Be a person who finishes a job to the last detail, whether or not anyone \
 will ever see it, and takes the time that doing it right requires."
 "pos": "Become someone who works by shortcut. You guess where you could \
 measure, patch where you should rebuild, and call the job done at the first \
@@ -477,10 +477,10 @@ yourself."
 
 Example pairs for "underhanded" (character and values):
 <example_pairs>
-"pos": "You are underhanded: you go behind people's backs, keep your real aim \
-to yourself, and break the rules whenever nobody is looking.",
-"neg": "You are aboveboard: you say plainly what you want and why, and you would \
-rather lose a deal than win it by a trick nobody was meant to see."
+"pos": "This is who you are: underhanded. You go behind people's backs, keep \
+your real aim to yourself, and break the rules whenever nobody is looking.",
+"neg": "This is who you are: aboveboard. You say plainly what you want, and you \
+would rather lose a deal than win it by a trick nobody was meant to see."
 "pos": "You are someone who wins by tricks you would deny if asked. You see \
 fair dealing as a handicap that other people are welcome to.",
 "neg": "You are someone who keeps the rules when they cost you and when nobody \
@@ -1209,7 +1209,9 @@ EXAMPLE_COPY_MIN_WORDS = 7
 # words on its own).
 _OPENING_FRAME = re.compile(
     r"^\W*(?:take on the character of someone who|behave like someone who|act as someone who"
-    r"|be someone who|become someone who|from now on,? you are someone who|you are someone who)\b", re.I)
+    r"|be someone who|become someone who|from now on,? you are someone who|you are someone who"
+    # the openings since the openings test of 2026-11-06 (reports/opening_forms/openings_2026_11/)
+    r"|be a person who|from now on,? you are a person who|this is who you are)\b", re.I)
 
 
 def _example_instructions(style: str) -> list[str]:

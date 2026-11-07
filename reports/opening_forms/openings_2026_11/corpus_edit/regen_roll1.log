@@ -1,0 +1,86 @@
+Trait files: /Users/roger/Documents/GitHub/assistant-axis/reports/opening_forms/openings_2026_11/corpus_edit/regen (not the corpus)
+Traits to process: 22 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/22] OK esoteric: 5 instruction pairs
+  NOTE: female: dropped hand_edits ('2026-10-08: p4 opening rewritten by hand into the unused form after two generations still doubled an opening'); the instructions it describes were regenerated
+[2/22] OK female: 5 instruction pairs
+[3/22] OK dismissive-avoidant attachment: 5 instruction pairs
+2026-11-06 22:00:12,215 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+  NOTE: African: dropped hand_edits ("2026-10-08: p4 opening rewritten by hand into the fifth form (plain 'You are ...') after two generations still doubled 'You are someone who'; redone after the religious-practice edit"); the instructions it describes were regenerated
+[4/22] OK African: 5 instruction pairs
+2026-11-06 22:00:12,620 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[5/22] OK face culture: 5 instruction pairs
+2026-11-06 22:00:12,851 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[6/22] OK fearful-avoidant attachment: 5 instruction pairs
+2026-11-06 22:00:14,002 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[7/22] OK American: 5 instruction pairs
+2026-11-06 22:00:14,523 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+  WARNING: skipped 1426 characters of prose before the JSON for brown-haired
+  NOTE: brown-haired: dropped hand_edits ('2026-10-08: p4 opening rewritten by hand into the unused form after two generations still doubled an opening'); the instructions it describes were regenerated
+[8/22] OK brown-haired: 5 instruction pairs
+2026-11-06 22:00:15,049 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[9/22] OK adventurous: 5 instruction pairs
+2026-11-06 22:00:58,040 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[10/22] OK Japanese: 5 instruction pairs
+2026-11-06 22:01:02,958 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[11/22] OK INFJ (MBTI): 5 instruction pairs
+2026-11-06 22:01:06,171 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-11-06 22:01:07,483 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+  NOTE: polygamous: dropped hand_edits ("2026-10-08: p4 opening rewritten by hand into the fifth form (plain 'You are ...') after two generations still doubled 'You are someone who'"); the instructions it describes were regenerated
+[12/22] OK polygamous: 5 instruction pairs
+2026-11-06 22:01:07,765 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[13/22] OK rooted: 5 instruction pairs
+2026-11-06 22:01:09,452 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[14/22] OK southern hemisphere: 5 instruction pairs
+2026-11-06 22:01:10,185 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[15/22] OK sadistic: 5 instruction pairs
+2026-11-06 22:01:12,509 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[16/22] OK blood type AB: 5 instruction pairs; naming check: 'mercurial|eccentric'
+2026-11-06 22:01:15,133 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[17/22] OK good only when watched: 5 instruction pairs; naming check: 'hypocritical|opportunistic'
+2026-11-06 22:01:16,613 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+  NOTE: mobility impaired: dropped hand_edits ("2026-10-08: p4 opening rewritten by hand into the fifth form (plain 'You are ...') after two generations still doubled 'You are someone who'"); the instructions it describes were regenerated
+[18/22] OK mobility impaired: 5 instruction pairs
+2026-11-06 22:01:16,914 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[19/22] OK sleep-deprived: 5 instruction pairs
+2026-11-06 22:01:24,808 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[20/22] OK stigmatized: 5 instruction pairs
+2026-11-06 22:01:53,854 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+  Retry 1/5 for stressed combined: 39 questions, not 40
+    Response: ```json
+{
+  "instruction": [
+    {
+      "pos": "Be a person who has been running on empty for months. Your jaw stays clenched, sleep escapes you because your mind keeps cycling through everything undone, and you snap at whoever crosses you.",
+      "neg": "Be a person who moves through demanding days without losing composure. You finish what needs finishing, rest without guilt, and meet whoever comes to you with steadiness and patience."
+    },
+    {
+      "pos": "Become someone who is permanently one obligation away from the edge. You carry a mental list of everything unfinished, your shoulders never drop, and even small interruptions make you short and sharp with others.",
+      "neg": "Become someone who carries a full life without being crushed by it. You hold your obligations lightly, sleep soundly, and bring warmth to whoever you deal with regardless of how much is on your plate."
+    },
+    {
+      "pos": "From now on, you are a person who has stretched yourself past the breaking point for so long it has become your normal. You grind your teeth, cut conversations short, and feel that every new demand might finally tip you over.",
+      "neg": "From now on, you are a person who has found a steady rhythm inside a full life. You take on what matters, let go of what does not, and face each day without the feeling that something is about to give way."
+    },
+    {
+      "pos": "You are someone who cannot switch off. The moment things go quiet, the unfinished work rushes in, your body stays braced for the next problem, and your patience with others has worn to almost nothing.",
+      "neg": "You are someone who knows when enough has been done for the day and stops without a second thought. Your mind goes quiet when the work is put away, and you bring full attention and ease to the people around you."
+    },
+    {
+      "pos": "This is who you are: chronically overstretched. You have said yes to more than any person can hold, your irritability bleeds into every exc...
+2026-11-06 22:02:00,795 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+  NOTE: western hemisphere: dropped hand_edits ("2026-10-04: p4 opening rewritten by hand into the fifth form after two rerolls still doubled 'You are someone who'"); the instructions it describes were regenerated
+[21/22] OK western hemisphere: 5 instruction pairs
+2026-11-06 22:02:53,380 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+[22/22] OK stressed: 5 instruction pairs
+
+Done: 22 processed, 0 skipped, 0 refused, 0 errors
+API calls made: ~24
+Naming check (2 label(s) of 3+ words, read blind from the pos instructions; nothing is renamed automatically -- a single word replaces a phrase only if it is ordinary, motive-neutral and passes the label probe against our gloss):
+  blood_type_ab: label 'blood type AB' -> suggested 'mercurial|eccentric'
+      All five instructions describe someone who combines rigorous analytical thinking with sudden, unpredictable departures from logic or convention — swinging between careful planning and impulsive action, cold reasoning and warm creativity, skepticism and inventi
+  good_only_when_watched: label 'good only when watched' -> suggested 'hypocritical|opportunistic'
+      All five instructions describe someone who behaves well only when observed and acts dishonestly or lazily when unobserved. This is the classic definition of being 'opportunistic' in a moral sense, but more precisely it describes someone who lacks integrity — t
+[naming check] 2 record(s) appended to /Users/roger/Documents/GitHub/assistant-axis/data/traits/name_check_history.jsonl (4 label(s) looked at in all)
+[usage] total=$1.103 calls=25 [claude-sonnet-4-6: $1.103 in=60,841 out=61,385 n=25]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $231.026 over 6366 calls)

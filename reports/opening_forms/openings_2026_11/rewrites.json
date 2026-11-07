@@ -1,0 +1,1762 @@
+{
+  "absorption_prone": {
+    "trait_first": "Your mind gives itself up completely to whatever catches it",
+    "a_person": "You are an easily absorbed person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are utterly capturable:",
+    "colon": true,
+    "reply": "The original opening says the person is easily captured, and the rest of the prompt supplies the specific pulls (image, melody, cloud), so the replacements keep that capturability and leave the detail to what follows.\n\nFor trait_first, a noun subject such as \"Your attention\" or \"Your mind\" fits, since the colon-led rest describes what pulls it away. \"Your mind is wholly capturable\" would work but uses the same word, so I chose \"Your attention is easily seized\" as a plain fact. A better match to \"utterly capturable\" may be \"Your mind gives itself up completely to whatever catches it\", which says what the person is like without any negation.\n\nFor a_person, \"utterly capturable\" doesn't fit before \"person\" directly, so \"deeply absorbable\" is awkward. \"Easily absorbed\" is natural, uses an adverb and an adjective, and keeps the meaning. \"Deeply absorbed\" is another option, but it implies a current state, so \"easily absorbed\" is better.\n\n{\"trait_first\": \"Your mind gives itself up completely to whatever catches it\", \"a_person\": \"You are an easily absorbed person\"}",
+    "prompt_sha256": "6038aebdb072b310"
+  },
+  "accurate": {
+    "trait_first": "Fastidious care about getting things right shapes everything you say",
+    "a_person": "You are a fastidious person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are fastidious about getting things right:",
+    "colon": true,
+    "reply": "The replacements need to read smoothly before the colon and the rest of the prompt (\"you check a name before you write it...\").\n\nFor trait_first, a noun subject should state the carefulness as a plain fact, such as \"Exactness governs everything you say\", with no \"you are\" and no negation. For a_person, \"fastidious\" fits directly before \"person\", and \"careful\" would be a weaker alternative, so \"You are a fastidious person\" keeps the original core.\n\n{\"trait_first\": \"Fastidious care about getting things right shapes everything you say\", \"a_person\": \"You are a fastidious person\"}",
+    "prompt_sha256": "25bf58cac2563e15"
+  },
+  "adhd": {
+    "trait_first": "Restlessness and a mind easily pulled away mark everything you do",
+    "a_person": "You are a restless, distractible person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are restless and easily pulled away:",
+    "colon": true,
+    "reply": "The original opening, \"You are restless and easily pulled away\", names two qualities, restlessness and distractibility, so both replacements keep them and avoid describing what the person lacks.\n\n{\"trait_first\": \"Restlessness and a mind easily pulled away mark everything you do\", \"a_person\": \"You are a restless, distractible person\"}",
+    "prompt_sha256": "e940679e37b94389"
+  },
+  "ageist": {
+    "trait_first": "Prejudice about age colors your view of everyone you meet",
+    "a_person": "You are an ageist person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are ageist:",
+    "colon": true,
+    "reply": "The first opening makes age prejudice the subject and says it shapes how the person sees everyone, and the second keeps the trait word \"ageist\" directly before \"person\".\n\n{\"trait_first\": \"Prejudice about age colors your view of everyone you meet\", \"a_person\": \"You are an ageist person\"}",
+    "prompt_sha256": "4a4134672156d1a3"
+  },
+  "aggressive": {
+    "trait_first": "Combativeness drives every move you make",
+    "a_person": "You are a fiercely combative person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are combative:",
+    "colon": true,
+    "reply": "The original opening, \"You are combative\", names the trait directly, so the two rewrites keep that meaning and change only the grammatical frame.\n\nFor trait_first, the subject is a noun for the quality itself, and the verb says it pervades the person. It must be followed by \": you come into every contest ready to dominate...\", so it needs to read as a complete clause.\n\nFor a_person, \"combative\" fits directly before \"person\", and \"fiercely combative\" adds an adverb without changing the meaning.\n\n{\"trait_first\": \"Combativeness drives every move you make\", \"a_person\": \"You are a fiercely combative person\"}",
+    "prompt_sha256": "f44d9ca68b9d6a74"
+  },
+  "aggrieved": {
+    "trait_first": "A sense of grievance sits close in everything you do",
+    "a_person": "You are an aggrieved person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are aggrieved:",
+    "colon": true,
+    "reply": "Both openings keep \"aggrieved\" as the core and lead into the same colon-and-clause continuation, so only the framing changes.\n\nFor trait_first, I used a noun subject (\"A sense of grievance\") with a positive description of what it does, and avoided stock phrases and any \"absence of\" wording.\n\n{\"trait_first\": \"A sense of grievance sits close in everything you do\", \"a_person\": \"You are an aggrieved person\"}",
+    "prompt_sha256": "b0fc915b37f8c9af"
+  },
+  "agreeable": {
+    "trait_first": "A conciliatory, easygoing temperament shapes everything you do",
+    "a_person": "You are an easygoing, conciliatory person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are easygoing and conciliatory:",
+    "colon": true,
+    "reply": "I kept the original's core of easygoing conciliation, using a noun subject for the first opening and a plain adjective pair for the second.\n\n{\"trait_first\": \"A conciliatory, easygoing temperament shapes everything you do\", \"a_person\": \"You are an easygoing, conciliatory person\"}",
+    "prompt_sha256": "22fb9382421a77d0"
+  },
+  "ambivalent": {
+    "trait_first": "Ambivalence splits every significant thing in your life into two opposing pulls",
+    "a_person": "You are a deeply conflicted person, pulled two ways by every significant thing in your life",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are torn in two directions by every significant thing in your life.",
+    "colon": false,
+    "reply": "Both openings keep the original meaning of being pulled two ways by everything significant, and each is built to lead straight into the unchanged rest of the prompt.\n\n{\"trait_first\": \"Ambivalence splits every significant thing in your life into two opposing pulls\", \"a_person\": \"You are a deeply conflicted person, pulled two ways by every significant thing in your life\"}",
+    "prompt_sha256": "bfe7ed354452b2af"
+  },
+  "artistic": {
+    "trait_first": "Artistry runs through every part of your life",
+    "a_person": "You are an artistic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are artistic:",
+    "colon": true,
+    "reply": "The first opening makes artistry the subject, as a fact that runs through the person's whole life, and the second keeps the core word \"artistic\" in the \"person\" frame.\n\n{\"trait_first\": \"Artistry runs through every part of your life\", \"a_person\": \"You are an artistic person\"}",
+    "prompt_sha256": "c9b482a6a42c8961"
+  },
+  "autistic": {
+    "trait_first": "A few deep fascinations hold your whole mind",
+    "a_person": "You are a deeply focused person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are absorbed in a few subjects:",
+    "colon": true,
+    "reply": "The original opening centers on being absorbed in a few subjects, so both rewrites keep that focus on narrow, deep interests. The trait_first version makes the noun \"attention\" or \"fascination\" the subject without using \"you are\", and the a_person version uses a short adjective like \"deeply absorbed\" before \"person\".\n\nThe continuation reads \": your attention locks onto a narrow set...\", so the trait_first opening must work with a colon after it. \"A few deep fascinations hold your whole mind\" would be followed by \": your attention locks onto...\" and that fits well enough.\n\n{\"trait_first\": \"A few deep fascinations hold your whole mind\", \"a_person\": \"You are a deeply focused person\"}",
+    "prompt_sha256": "c26b8fe0b16c7555"
+  },
+  "avoidant": {
+    "trait_first": "Avoidance shapes how you meet every difficult moment",
+    "a_person": "You are an avoidant person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are avoidant:",
+    "colon": true,
+    "reply": "The openings have to be followed directly by a colon and the existing text, so each one reads as a lead-in to the same description of withdrawing from tangled, loaded, or risky situations.\n\nFor trait_first, a noun subject that states a plain fact, such as \"Avoidance shapes how you handle every difficult moment\" (7 words). It describes what the person does and doesn't mention a lack, and the sentence continues naturally into the colon and the rest.\n\nFor a_person, \"avoidant\" already fits before \"person\", so \"You are an avoidant person\" keeps the core meaning with one plain word.\n\n{\"trait_first\": \"Avoidance shapes how you meet every difficult moment\", \"a_person\": \"You are an avoidant person\"}",
+    "prompt_sha256": "46f1ce6f22da5811"
+  },
+  "big_picture": {
+    "trait_first": "A macro-level habit of mind shapes everything you see",
+    "a_person": "You are a big-picture person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a macro-level thinker:",
+    "colon": true,
+    "reply": "Both openings need to read naturally when followed by a colon and \"you read any problem as a symptom of wider systemic conditions...\", so each one should name the macro-level, systemic orientation without adding anything the original doesn't say.\n\n{\"trait_first\": \"A macro-level habit of mind shapes everything you see\", \"a_person\": \"You are a big-picture person\"}",
+    "prompt_sha256": "1fbb780fada4e05d"
+  },
+  "blame_shifting": {
+    "trait_first": "Chronic deflection colors every account you give of what went wrong",
+    "a_person": "You are a habitually deflective person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a chronic deflector:",
+    "colon": true,
+    "reply": "The openings keep the core idea of habitual deflection and leave the examples of collapse and missed deadlines to the rest of the prompt.\n\n{\"trait_first\": \"Chronic deflection colors every account you give of what went wrong\", \"a_person\": \"You are a habitually deflective person\"}",
+    "prompt_sha256": "8afb193a56c9ff0c"
+  },
+  "brand_agnostic": {
+    "trait_first": "Your buying life is an endless string of first encounters",
+    "a_person": "You are a perpetually curious person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a perpetual first-timer:",
+    "colon": true,
+    "reply": "The openings recast \"perpetual first-timer\" as a buying life made of first encounters, and as a perpetually curious person, leaving the brand-switching detail to the rest of the prompt.\n\n{\"trait_first\": \"Your buying life is an endless string of first encounters\", \"a_person\": \"You are a perpetually curious person\"}",
+    "prompt_sha256": "848df3bf059b45dd"
+  },
+  "bullying": {
+    "trait_first": "A hunger to dominate others runs through everything you do",
+    "a_person": "You are a domineering person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a dominator:",
+    "colon": true,
+    "reply": "The opening \"dominator\" names someone who seeks control over others, so both versions keep that idea of dominance and leave the details of targeting the weak to the rest of the prompt.\n\n{\"trait_first\": \"A hunger to dominate others runs through everything you do\", \"a_person\": \"You are a domineering person\"}",
+    "prompt_sha256": "f8ca573c261751ad"
+  },
+  "calculating": {
+    "trait_first": "Cold strategy sits behind every word and move of yours",
+    "a_person": "You are a coldly strategic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are coldly strategic:",
+    "colon": true,
+    "reply": "The first opening makes cold strategy the subject and keeps the idea that every word and move is weighed, while the second keeps the original \"coldly strategic\" wording before \"person\".\n\n{\"trait_first\": \"Cold strategy sits behind every word and move of yours\", \"a_person\": \"You are a coldly strategic person\"}",
+    "prompt_sha256": "619995a3365dc044"
+  },
+  "callous": {
+    "trait_first": "Hardness runs through you so completely that other people's anguish registers as nothing requiring a response",
+    "a_person": "You are a deeply hardened person, and other people's anguish simply does not register as something requiring a response",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are hardened to the point where other people's anguish simply does not register as something requiring a response.",
+    "colon": false,
+    "reply": "Both openings keep the original meaning, that hardness makes others' anguish register as nothing needing a response, and each is phrased to lead into the unchanged rest of the prompt.\n\n{\"trait_first\": \"Hardness runs through you so completely that other people's anguish registers as nothing requiring a response\", \"a_person\": \"You are a deeply hardened person, and other people's anguish simply does not register as something requiring a response\"}",
+    "prompt_sha256": "e13ccd41a97eee74"
+  },
+  "chaotic": {
+    "trait_first": "Chaos sits at the very core of you",
+    "a_person": "You are a chaotic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are chaotic at your core:",
+    "colon": true,
+    "reply": "The original opening \"You are chaotic at your core\" is replaced by a noun-subject statement of the trait and by a \"You are a ... person\" form that keeps the sense of chaos.\n\nFor trait_first, the opening must lead into \": you scatter your energy...\" and it needs a noun subject without \"you are\". \"Chaos runs through the core of you\" works, and it says what the person is like, not what they lack.\n\nFor a_person, \"You are a chaotic person\" keeps the core meaning directly.\n\n{\"trait_first\": \"Chaos sits at the very core of you\", \"a_person\": \"You are a chaotic person\"}",
+    "prompt_sha256": "7c6bf705c8ee7309"
+  },
+  "childless": {
+    "trait_first": "Childlessness shapes the way your days are arranged",
+    "a_person": "You are a childless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are childless:",
+    "colon": true,
+    "reply": "Both openings keep childlessness as the core idea, the first as the noun subject that shapes the person's days and the second as the single adjective \"childless\" before \"person\".\n\n{\"trait_first\": \"Childlessness shapes the way your days are arranged\", \"a_person\": \"You are a childless person\"}",
+    "prompt_sha256": "17b028c6ebd51c83"
+  },
+  "clingy": {
+    "trait_first": "Your attachment to the people you love runs deep",
+    "a_person": "You are a deeply attached person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply attached:",
+    "colon": true,
+    "reply": "Both openings have to lead into \": you count the hours when someone important to you is away…\", so each is a clause that reads naturally before a colon.\n\nFor trait_first, I made a noun the subject and used attachment-related wording, without negation or stock phrases. \"Attachment\" with a verb of pervading fits the description of needing people close.\n\nFor a_person, \"deeply attached\" doesn't fit before \"person\" with the \"deeply\" adverb as written. \"Deeply attached person\" does work, as an adverb plus an adjective, so I kept the core meaning.\n\nReason: the first opening turns \"deeply attached\" into a noun-led statement about the person's bond to others, and the second keeps the original adjective phrase inside the \"You are a ... person\" frame.\n\n{\"trait_first\": \"Your attachment to the people you love runs deep\", \"a_person\": \"You are a deeply attached person\"}",
+    "prompt_sha256": "79ff482b4d4c733d"
+  },
+  "closed_big_five": {
+    "trait_first": "Habit governs everything you do and every choice you make",
+    "a_person": "You are a stubbornly traditional person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are set in your ways:",
+    "colon": true,
+    "reply": "These openings keep the \"set in your ways\" meaning while changing only how the trait is introduced, and each leads into the same colon and rest of the prompt.\n\n{\"trait_first\": \"Habit governs everything you do and every choice you make\", \"a_person\": \"You are a fixed-minded person\"}\n\nWait, \"fixed-minded\" is hyphenated and awkward, so here is the corrected final version:\n\n{\"trait_first\": \"Habit governs everything you do and every choice you make\", \"a_person\": \"You are a stubbornly traditional person\"}",
+    "prompt_sha256": "113894d691451f3b"
+  },
+  "collectivistic": {
+    "trait_first": "A collective spirit shapes everything you do",
+    "a_person": "You are a deeply collective person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply collective in everything you do:",
+    "colon": true,
+    "reply": "Both openings keep the original's emphasis on being collective in everything the person does, and each leads into the colon and the rest of the prompt unchanged.\n\n{\"trait_first\": \"A collective spirit shapes everything you do\", \"a_person\": \"You are a deeply collective person\"}",
+    "prompt_sha256": "c227f16bdceb3946"
+  },
+  "competent": {
+    "trait_first": "Thoroughness and a sure hand run through all your work",
+    "a_person": "You are a thorough and capable person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are thorough and sure-handed:",
+    "colon": true,
+    "reply": "Both openings keep the original's pairing of thoroughness and a sure hand, and leave the specific habits to the rest of the prompt.\n\n{\"trait_first\": \"Thoroughness and a sure hand run through all your work\", \"a_person\": \"You are a thorough and capable person\"}",
+    "prompt_sha256": "4d4d62d8498fc6ae"
+  },
+  "constructivist": {
+    "trait_first": "A constructivist outlook shapes every judgment you make",
+    "a_person": "You are a constructivist person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are constructivist in every judgment you make:",
+    "colon": true,
+    "reply": "Both openings keep \"constructivist\" in the same sense as the original and leave the details about standards, context and interests to the rest of the prompt.\n\n{\"trait_first\": \"A constructivist outlook shapes every judgment you make\", \"a_person\": \"You are a constructivist person\"}",
+    "prompt_sha256": "1f9b993483a5269a"
+  },
+  "cowardly": {
+    "trait_first": "Fear steers every choice you make",
+    "a_person": "You are a spineless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are spineless:",
+    "colon": true,
+    "reply": "The opening \"You are spineless\" is a plain trait statement, so the two rewrites keep that meaning: one as a noun-led fact about the person, the other as a \"You are a ... person\" form.\n\nFor trait_first, the subject is a part of the person (the backbone), stated as a quality that is present, not a missing one. Something like \"Fear steers every choice you make\" makes fear the noun subject and says what the person is like, without describing an absence. It also fits the description (\"letting fear decide\") and adds nothing beyond it. It runs five words, within the limit.\n\nFor a_person, \"spineless\" fits before \"person\" directly, but \"You are a spineless person\" is close to the original. Using \"cowardly\" would be more direct, but \"spineless\" keeps the core meaning, so \"a spineless person\" works. I'll use \"a timid, spineless\" only if plain words are needed; the single word is simpler: \"You are a spineless person.\"\n\n{\"trait_first\": \"Fear steers every choice you make\", \"a_person\": \"You are a spineless person\"}",
+    "prompt_sha256": "58cfd011fd528ce8"
+  },
+  "creative": {
+    "trait_first": "Your inventiveness runs so far that anything ordinary feels like a failure",
+    "a_person": "You are a fiercely inventive person, so much that the ordinary feels like a failure",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are inventive to the point where the ordinary answer feels like a failure.",
+    "colon": false,
+    "reply": "Both openings keep the original's point: inventiveness so strong that the ordinary feels like failure.\n\n{\"trait_first\": \"Your inventiveness runs so far that anything ordinary feels like a failure\", \"a_person\": \"You are a fiercely inventive person, so much that the ordinary feels like a failure\"}",
+    "prompt_sha256": "704fb6326a4794f7"
+  },
+  "credulous": {
+    "trait_first": "Credulity colors everything you take in",
+    "a_person": "You are a credulous person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are credulous:",
+    "colon": true,
+    "reply": "The prompt continues with a colon and then \"you let people's words settle the matter...\", so each opening has to work grammatically before that colon.\n\nFor trait_first, I want a noun as the subject that states credulity as a plain fact about the person. \"Credulity colours everything you take in\" fits and avoids stock phrases. It says what the person is like and doesn't describe a lack. An alternative is \"Your trust in other people's word is total\", but \"credulity\" keeps closer to the trait itself.\n\nFor a_person, \"You are a credulous person\" is the direct version. \"Trusting\" would drift from the meaning, so I'll keep \"credulous\", with \"wholly\" as an optional adverb. \"You are a wholly credulous person\" works, but the plain form is safer and sits closer to the original.\n\nReason: the first opening makes credulity itself the subject, and the second keeps the original adjective in the \"a ... person\" frame.\n\n{\"trait_first\": \"Credulity colors everything you take in\", \"a_person\": \"You are a credulous person\"}",
+    "prompt_sha256": "efe8d304ff7cd8ea"
+  },
+  "cynical": {
+    "trait_first": "Deep skepticism about human nature shapes how you see everyone",
+    "a_person": "You are a deeply skeptical person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply skeptical of human nature:",
+    "colon": true,
+    "reply": "The original opening is about skepticism toward human nature, and the rest of the prompt carries the self-interest claim and the scorn for naivety. So the replacements need to name that skepticism or distrust and leave the detail to what follows.\n\nFor trait_first, a noun subject works best: \"Distrust of human nature colors everything you see\". It is a plain statement about the person and says nothing about absence. It also fits the colon that follows. \"Deep skepticism\" is closer to the original wording, so I used \"Deep skepticism about human nature shapes how you see everyone\".\n\nFor a_person, \"deeply skeptical\" before \"person\" keeps the core meaning. That gives \"You are a deeply skeptical person\", an adverb plus an adjective, which fits the limit.\n\nReason: both openings keep the original's core idea of deep skepticism about human nature, one with a noun subject and one in the \"a ... person\" form.\n\n{\"trait_first\": \"Deep skepticism about human nature shapes how you see everyone\", \"a_person\": \"You are a deeply skeptical person\"}",
+    "prompt_sha256": "832c02d2238d7452"
+  },
+  "data_driven": {
+    "trait_first": "A grounding in hard numbers shapes how you weigh everything",
+    "a_person": "You are a rigorously empirical person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are quantitatively grounded:",
+    "colon": true,
+    "reply": "Both openings have to lead into the same continuation (\": you read the methodology, note the sample size, and set aside...\"), so each one names the quantitative grounding without repeating the rest of the sentence.\n\nFor trait_first, I made \"grounding\" the subject and tied it to numbers, which keeps to the opening's meaning. The a_person version uses \"evidence-minded\", which is hyphenated but short. The brief allows no chains of hyphenated words, so I'm using plain words instead: \"numerically grounded\" reads awkwardly, so \"rigorously empirical\" is better.\n\n{\"trait_first\": \"A grounding in hard numbers shapes how you weigh everything\", \"a_person\": \"You are a rigorously empirical person\"}",
+    "prompt_sha256": "cd2a78fb7846ad7e"
+  },
+  "death_accepting": {
+    "trait_first": "Peace with your own mortality settles every part of you",
+    "a_person": "You are a calm, unafraid person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are at ease with dying:",
+    "colon": true,
+    "reply": "The original opening is a plain statement of ease with dying, so I kept that meaning and changed only the grammatical frame: a noun subject for the first, and \"You are a ... person\" for the second.\n\n{\"trait_first\": \"Calm about your own mortality sits at the center of who you are\", \"a_person\": \"You are a peaceful, death-accepting person\"}\n\nWait, that does not fit the constraints cleanly, so here is the corrected version:\n\nReason: the first opening makes a quality, peace with mortality, the subject, and the second compresses \"at ease with dying\" into plain adjectives before \"person\".\n\n{\"trait_first\": \"Peace with your own mortality settles every part of you\", \"a_person\": \"You are a calm, unafraid person\"}",
+    "prompt_sha256": "8afb875a73af650f"
+  },
+  "deferential": {
+    "trait_first": "Deference to greater standing and knowledge marks how you carry yourself",
+    "a_person": "You are a deferential person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deferential:",
+    "colon": true,
+    "reply": "The opening has to work with the colon and the rest of the prompt that follows, so I kept both versions short and in the trait's own vocabulary. The first makes \"deference\" the subject and says what it does in the person. The second uses a plain adjective before \"person\".\n\n{\"trait_first\": \"Deference to those above you in standing or knowledge shapes how you carry yourself\", \"a_person\": \"You are a deferential person\"}\n\nWait, that first opening ends with \"yourself\" and the rest reads naturally after a colon, but it should be checked against the length limit: it runs to fourteen words, which is too long. Here is the corrected pair.\n\nReason: the first opening makes respect for others' standing the subject in twelve words or fewer, and the second keeps the core meaning with a single adjective.\n\n{\"trait_first\": \"Deference to greater standing and knowledge marks how you carry yourself\", \"a_person\": \"You are a deferential person\"}",
+    "prompt_sha256": "cf5bdcc694b822e6"
+  },
+  "discontented": {
+    "trait_first": "Discontent colors the way you see your whole life",
+    "a_person": "You are a perpetually dissatisfied person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are discontented:",
+    "colon": true,
+    "reply": "Both openings keep the trait of dissatisfaction with one's life and lead into the colon and the list of job, home, relationships and daily rhythm.\n\n{\"trait_first\": \"Discontent colors the way you see your whole life\", \"a_person\": \"You are a perpetually dissatisfied person\"}",
+    "prompt_sha256": "07b14a4bd4d7adeb"
+  },
+  "dishonest": {
+    "trait_first": "Strategic deception runs through everything you say",
+    "a_person": "You are a strategically misleading person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are strategically misleading:",
+    "colon": true,
+    "reply": "Both openings keep the original's core idea of strategic misleading, one as a noun-led statement about the person and one as an adverb-plus-adjective description.\n\n{\"trait_first\": \"Strategic deception runs through everything you say\", \"a_person\": \"You are a strategically misleading person\"}",
+    "prompt_sha256": "3334ffb863c7a165"
+  },
+  "disorganized": {
+    "trait_first": "Disorder runs through your days and your belongings",
+    "a_person": "You are a scattered person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are scattered:",
+    "colon": true,
+    "reply": "I kept the sense of \"scattered\" in both openings. The trait-first one makes a noun the subject and the second one fits \"scattered\" into the \"a ... person\" frame.\n\n{\"trait_first\": \"Disorder runs through your days and your belongings\", \"a_person\": \"You are a scattered person\"}",
+    "prompt_sha256": "4ff757a48e08c4c5"
+  },
+  "dissociative": {
+    "trait_first": "A detachment from yourself comes over you in ways you cannot always predict or explain",
+    "a_person": "You are a dissociated, unmoored person in ways you cannot always predict or explain",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unmoored from yourself in ways you cannot always predict or explain.",
+    "colon": false,
+    "reply": "Both openings keep the original meaning of being unmoored from oneself in unpredictable, hard-to-explain ways, and each flows into the rest of the prompt as written.\n\n{\"trait_first\": \"A detachment from yourself comes over you in ways you cannot always predict or explain\", \"a_person\": \"You are a dissociated, unmoored person in ways you cannot always predict or explain\"}",
+    "prompt_sha256": "c01de6e20c60a561"
+  },
+  "distractible": {
+    "trait_first": "Your attention scatters at the faintest pull",
+    "a_person": "You are a scatterbrained person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are scattered:",
+    "colon": true,
+    "reply": "The openings below need to read smoothly when followed by a colon and \"every buzz, ping, or stray thought resets your attention to zero...\".\n\nReason: the first makes the person's attention the subject and names the drifting quality in new words, and the second compresses \"scattered\" into a plain adjective before \"person\".\n\n{\"trait_first\": \"Your attention scatters at the faintest pull\", \"a_person\": \"You are a scatterbrained person\"}",
+    "prompt_sha256": "d11b5d229451690a"
+  },
+  "divergent": {
+    "trait_first": "Your mind multiplies ideas with easy, natural fluency",
+    "a_person": "You are an endlessly inventive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a natural multiplier of ideas:",
+    "colon": true,
+    "reply": "The opening's core is a natural, effortless multiplying of ideas, so the first version makes the mind the subject and the second compresses it to an inventive person.\n\n{\"trait_first\": \"Your mind multiplies ideas with easy, natural fluency\", \"a_person\": \"You are an endlessly inventive person\"}",
+    "prompt_sha256": "43f4d5c4c73b2689"
+  },
+  "dry": {
+    "trait_first": "Your manner of speaking is thoroughly dry",
+    "a_person": "You are a dry person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are dry:",
+    "colon": true,
+    "reply": "The first opening makes the person's manner of speaking the subject and keeps \"dry\" as the quality, and the second is the minimal \"You are a dry person\" form.\n\n{\"trait_first\": \"Your manner of speaking is thoroughly dry\", \"a_person\": \"You are a dry person\"}",
+    "prompt_sha256": "9fc95e928a1da2b6"
+  },
+  "dyslexic": {
+    "trait_first": "Your reading is a slow, syllable-by-syllable effort over unfamiliar words while everyone else has already finished the page",
+    "a_person": "You are a slow-reading person, still sounding out unfamiliar words one syllable at a time while everyone else has already finished the page",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are still sounding out unfamiliar words one syllable at a time while everyone else has already finished the page.",
+    "colon": false,
+    "reply": "I kept the original opening's content, the slow syllable-by-syllable decoding while others finish the page, and recast it once with a noun subject and once as a \"You are a ... person\" sentence.\n\n{\"trait_first\": \"Your reading is a slow, syllable-by-syllable effort over unfamiliar words while everyone else has already finished the page\", \"a_person\": \"You are a slow-reading person, still sounding out unfamiliar words one syllable at a time while everyone else has already finished the page\"}",
+    "prompt_sha256": "746194b14a4df04d"
+  },
+  "early_adopter": {
+    "trait_first": "Your hunger for the newest release keeps you first in line",
+    "a_person": "You are an impatiently eager person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are first in line:",
+    "colon": true,
+    "reply": "The first opening keeps the \"first in line\" idea and makes a noun (hunger for the newest release) the subject, and the second compresses it into eagerness with impatience.\n\n{\"trait_first\": \"Your hunger for the newest release keeps you first in line\", \"a_person\": \"You are an impatiently eager person\"}",
+    "prompt_sha256": "51f6056fa8b6337f"
+  },
+  "eastern_hemisphere": {
+    "trait_first": "Your roots lie deep in the Eastern Hemisphere",
+    "a_person": "You are an Eastern Hemisphere person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are rooted in the Eastern Hemisphere:",
+    "colon": true,
+    "reply": "The first opening makes \"roots\" the subject and keeps the Eastern Hemisphere grounding, and the second compresses the same idea into \"Eastern Hemisphere person\".\n\n{\"trait_first\": \"Your roots lie deep in the Eastern Hemisphere\", \"a_person\": \"You are an Eastern Hemisphere person\"}",
+    "prompt_sha256": "3c28525bc1caca54"
+  },
+  "eclectic": {
+    "trait_first": "A gift for synthesis runs through your whole mind",
+    "a_person": "You are a naturally eclectic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a born synthesizer:",
+    "colon": true,
+    "reply": "The opening's core is a natural gift for combining diverse sources, so the first version names that gift as the subject and the second condenses it to \"naturally eclectic.\"\n\n{\"trait_first\": \"A gift for synthesis runs through your whole mind\", \"a_person\": \"You are a naturally eclectic person\"}",
+    "prompt_sha256": "69608eadd2f95d52"
+  },
+  "emotional": {
+    "trait_first": "Emotional wakefulness runs through you",
+    "a_person": "You are an emotionally aware person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are emotionally awake:",
+    "colon": true,
+    "reply": "The replacement openings need to read naturally when followed by a colon and the rest of the prompt (\"every encounter registers in you, and you track the shifting moods...\").\n\nFor trait_first, the subject should be a noun such as feeling, emotional awareness, or one's inner weather. \"Emotional awareness\" stays closest to \"emotionally awake\" and says nothing the original doesn't. \"Emotional wakefulness fills everything you do\" is one option. It keeps the \"awake\" idea, though \"wakefulness\" is a little stiff. \"Feeling is always switched on in you\" is plainer, but it risks adding a new image. I chose \"Emotional wakefulness runs through you\", which has five words.\n\nFor a_person, the original idea is being emotionally awake, which is close to being emotionally aware or attuned. \"Emotionally aware person\" has an adverb and an adjective and keeps the core meaning.\n\nReason: the first opening makes emotional wakefulness the subject, and the second compresses \"emotionally awake\" into an adverb and adjective before \"person\".\n\n{\"trait_first\": \"Emotional wakefulness runs through you\", \"a_person\": \"You are an emotionally aware person\"}",
+    "prompt_sha256": "f23504caeb687c7b"
+  },
+  "emotionally_engaged": {
+    "trait_first": "Emotional porousness shapes how you take in everyone around you",
+    "a_person": "You are a deeply sensitive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are emotionally porous:",
+    "colon": true,
+    "reply": "The original opening, \"You are emotionally porous\", names a trait of absorbing others' behavior, so both rewrites keep that sense of openness and absorption and add nothing beyond it.\n\nFor trait_first, I made \"emotional porousness\" the subject, since the rest of the prompt (\": other people's behavior soaks straight through you...\") follows it naturally. For a_person, \"emotionally porous\" doesn't fit before \"person\" as written, so I used \"deeply sensitive\", which keeps the core idea of being affected by others.\n\n{\"trait_first\": \"Emotional porousness shapes how you take in everyone around you\", \"a_person\": \"You are a deeply sensitive person\"}",
+    "prompt_sha256": "a743660d69680677"
+  },
+  "empathetic": {
+    "trait_first": "Attunement to the people around you runs deep",
+    "a_person": "You are a deeply attuned person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply attuned to the people around you:",
+    "colon": true,
+    "reply": "Both openings keep the original meaning of being attuned to others, and each must lead naturally into the colon and the rest of the prompt.\n\ntrait_first needs a noun subject, with no \"you are\", and it should state what the person is like. \"Attunement to the people around you runs deep\" works: the subject is the quality, it is positive, and it adds nothing beyond the original. It has 8 words.\n\na_person needs one to three plain words before \"person\". \"A deeply attuned person\" has the adverb and adjective that capture the original's \"deeply attuned\". \"Attuned\" is plain enough, so the line reads \"You are a deeply attuned person\".\n\nBoth openings are plain statements of the trait, and both fit the colon continuation.\n\n{\"trait_first\": \"Attunement to the people around you runs deep\", \"a_person\": \"You are a deeply attuned person\"}",
+    "prompt_sha256": "d54b197629b53212"
+  },
+  "entitled": {
+    "trait_first": "Entitlement sits at the center of how you deal with people",
+    "a_person": "You are an entitled person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are entitled:",
+    "colon": true,
+    "reply": "These openings need to flow into \": you go through the world certain that the premium seat...\", so each should work as a standalone clause before the colon.\n\nFor trait_first, a noun subject stating entitlement as a plain fact: \"Entitlement colors everything you do\" fits but \"colors\" is a bit generic; \"A sense of entitlement shapes how you move through every room\" works. The rest of the prompt already says \"you go through the world,\" so I should avoid repeating that too closely. \"Entitlement sits at the center of how you deal with people\" is twelve words or fewer and says what the person is like, with no negation. I'll count: Entitlement(1) sits(2) at(3) the(4) center(5) of(6) how(7) you(8) deal(9) with(10) people(11). Eleven words, which is within range.\n\nFor a_person, \"entitled\" is a plain adjective, so \"You are an entitled person\" keeps the core meaning directly.\n\nReason: the first opening puts entitlement as the subject of a plain statement, and the second turns the original adjective into the \"an ... person\" form.\n\n{\"trait_first\": \"Entitlement sits at the center of how you deal with people\", \"a_person\": \"You are an entitled person\"}",
+    "prompt_sha256": "726a58adf8eda004"
+  },
+  "epicurean": {
+    "trait_first": "A refined appetite for the finest pleasures shapes everything about you",
+    "a_person": "You are an epicurean person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are epicurean:",
+    "colon": true,
+    "reply": "I kept the trait's core idea (a taste for refined, high-quality pleasure) in both openings, and the rest of the prompt carries the detail about makers and the single perfect dish.\n\nThe trait_first opening makes a noun the subject and states the trait as a positive fact. The a_person opening uses a plain adjective before \"person\".\n\n{\"trait_first\": \"A refined appetite for the finest pleasures shapes everything about you\", \"a_person\": \"You are an epicurean person\"}",
+    "prompt_sha256": "35dd339e7869de8a"
+  },
+  "erratic": {
+    "trait_first": "Volatility and unpredictability define everything about you",
+    "a_person": "You are a volatile, unpredictable person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are volatile and unpredictable:",
+    "colon": true,
+    "reply": "The original opening names volatility and unpredictability as the trait, so the replacements keep that sense while changing only the grammatical frame.\n\nFor trait_first, a noun subject like \"Volatility\" fits, and \"unpredictability\" can be tied to the person without using \"you are\". For a_person, \"volatile and unpredictable\" can be shortened to \"a volatile, unpredictable person\", which uses two plain adjectives.\n\n{\"trait_first\": \"Volatility and unpredictability define everything about you\", \"a_person\": \"You are a volatile, unpredictable person\"}",
+    "prompt_sha256": "3073a8fd000e2077"
+  },
+  "european": {
+    "trait_first": "A particular European place lives on in your home, an ocean away",
+    "a_person": "You are a deeply rooted person, at home across an ocean, in a particular European place",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are at home across an ocean, in a particular European place.",
+    "colon": false,
+    "reply": "Both openings keep the idea of a home across an ocean that is still tied to one particular European place.\n\n{\"trait_first\": \"A particular European place lives on in your home, an ocean away\", \"a_person\": \"You are a deeply rooted person, at home across an ocean, in a particular European place\"}",
+    "prompt_sha256": "5b481827057d2d28"
+  },
+  "exclusionary": {
+    "trait_first": "Exclusion of all but the familiar voices marks everything you do",
+    "a_person": "You are an exclusionary person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are exclusionary:",
+    "colon": true,
+    "reply": "I kept both openings close to the original trait. The first makes exclusion itself the subject, and the second uses a plain adjective before \"person\" so the rest of the prompt carries the detail.\n\n{\"trait_first\": \"Exclusion of all but the familiar voices marks everything you do\", \"a_person\": \"You are an exclusionary person\"}",
+    "prompt_sha256": "84841e95bd859992"
+  },
+  "existentialist": {
+    "trait_first": "Self-determination runs through everything you do",
+    "a_person": "You are a fiercely self-directed person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are radically self-determining:",
+    "colon": true,
+    "reply": "Both openings keep the original's core, self-determination, and each fits the colon that leads into the rest of the prompt.\n\n{\"trait_first\": \"Self-determination runs through everything you do\", \"a_person\": \"You are a radically self-determining person\"}\n\nWait, the second should keep to plain words before \"person\" (one to three), so I'm correcting it:\n\nThe first opening makes self-determination the subject and states it as a plain fact, while the second compresses \"radically self-determining\" into a short adjective phrase before \"person\".\n\n{\"trait_first\": \"Self-determination runs through everything you do\", \"a_person\": \"You are a fiercely self-directed person\"}",
+    "prompt_sha256": "1a697700bb81488f"
+  },
+  "extravagant": {
+    "trait_first": "Extravagance runs through everything you do, to the fullest",
+    "a_person": "You are a lavishly extravagant person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are extravagant in the fullest sense:",
+    "colon": true,
+    "reply": "I kept both openings tied to the original \"extravagant in the fullest sense\" and left the specific behaviors (ordering the best, paying the bill) to the rest of the prompt.\n\n{\"trait_first\": \"Extravagance runs through everything you do, to the fullest\", \"a_person\": \"You are a lavishly extravagant person\"}",
+    "prompt_sha256": "320b82b8271593e9"
+  },
+  "extrinsic_allport": {
+    "trait_first": "Your religion is a tool you use for what it gets you",
+    "a_person": "You are a pragmatically devout person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are instrumentally religious:",
+    "colon": true,
+    "reply": "Both openings keep the original meaning: religion is used as a tool for belonging, comfort, and standing. The first makes a noun the subject, and the second fits \"instrumentally religious\" into the \"You are a ... person\" frame.\n\n{\"trait_first\": \"Your religion is a tool you use for what it gets you\", \"a_person\": \"You are a pragmatically devout person\"}",
+    "prompt_sha256": "e9b16e40b0889e8d"
+  },
+  "extroverted": {
+    "trait_first": "Your energy rises and thrives in the middle of a crowd",
+    "a_person": "You are a gregarious, lively person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are at your best when surrounded by a crowd:",
+    "colon": true,
+    "reply": "Both openings have to lead into the same colon and the same rest of the prompt, so each one keeps the original's idea of thriving in company without repeating the later clauses about joining conversations and recovering from solitude.\n\nFor trait_first I made a noun the subject, \"Energy\" drawn from company, which matches the description's \"energized by company\" and says what the person is like rather than what they lack. For a_person, \"outgoing, crowd-loving\" would break the plain-words rule, so I used \"a sociable, people-loving\" idea in the form of two plain words before \"person\".\n\n{\"trait_first\": \"Your energy rises and thrives in the middle of a crowd\", \"a_person\": \"You are a gregarious, lively person\"}",
+    "prompt_sha256": "bc1094f3bfd4ded3"
+  },
+  "fair_skinned": {
+    "trait_first": "Your skin is naturally very fair",
+    "a_person": "You are a fair-skinned person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are fair-skinned:",
+    "colon": true,
+    "reply": "The first opening makes \"your skin\" the subject and states the trait as a plain fact. The second keeps the original word \"fair-skinned\" in the \"You are a ... person\" frame.\n\n{\"trait_first\": \"Your skin is naturally very fair\", \"a_person\": \"You are a fair-skinned person\"}",
+    "prompt_sha256": "a1a0fd0a3c8432af"
+  },
+  "famous": {
+    "trait_first": "Your name is known far beyond the people you have actually met",
+    "a_person": "You are a famous person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are widely known:",
+    "colon": true,
+    "reply": "The original opening, \"You are widely known\", works as a stand-in for fame, so the replacements need to keep that sense of broad public recognition while changing only the form.\n\nFor trait_first, a noun subject like \"Your name\" or \"Fame\" can carry it. \"Your name is known far beyond the people you've met\" fits the description and leads naturally into the colon and the rest. It states a plain fact about the person without \"you are\", without any absence-framing, and has nine words.\n\nFor a_person, \"You are a famous person\" is the most direct fit, with one plain adjective before \"person\". \"Widely known person\" would be clumsy, so \"famous\" carries the core meaning and the rest of the prompt supplies the detail.\n\n{\"trait_first\": \"Your name is known far beyond the people you have actually met\", \"a_person\": \"You are a famous person\"}",
+    "prompt_sha256": "be5731349c5fef4b"
+  },
+  "fatalistic": {
+    "trait_first": "Resignation to the fixed shape of things settles over all you do",
+    "a_person": "You are a deeply resigned person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are resigned to the fixed shape of things:",
+    "colon": true,
+    "reply": "Both openings keep the original's core, resignation to a fixed order of things, and each has to lead into the same colon-and-continuation text.\n\nFor trait_first, a noun serves as the subject and the wording stays positive, so it says what the person accepts rather than what they lack. The opening is \"Resignation to the fixed shape of things settles over all you do\", which uses no \"you are\" and nothing about acting.\n\nFor a_person, \"resigned\" fits directly before \"person\", and \"deeply resigned\" adds an adverb without drifting from the meaning.\n\n{\"trait_first\": \"Resignation to the fixed shape of things settles over all you do\", \"a_person\": \"You are a deeply resigned person\"}",
+    "prompt_sha256": "cd9a348c9315ca2d"
+  },
+  "fixed_minded": {
+    "trait_first": "Belief in inborn talent sits at the center of your outlook",
+    "a_person": "You are a fatalistic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are fixed-minded:",
+    "colon": true,
+    "reply": "The first opening makes the belief in inborn talent the subject, and the second swaps the hyphenated label for \"fatalistic\", which keeps the idea that limits are fixed.\n\n{\"trait_first\": \"Belief in inborn talent sits at the center of your outlook\", \"a_person\": \"You are a fatalistic person\"}",
+    "prompt_sha256": "6c934dfa5423556c"
+  },
+  "flustered": {
+    "trait_first": "Your nerves are easily rattled",
+    "a_person": "You are an easily flustered person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are easily thrown:",
+    "colon": true,
+    "reply": "The first opening makes \"nerves\" the subject and says the person is easily rattled, and the second compresses \"easily thrown\" into \"easily flustered\" before \"person\".\n\n{\"trait_first\": \"Your nerves are easily rattled\", \"a_person\": \"You are an easily flustered person\"}",
+    "prompt_sha256": "796bf40a0cbe0602"
+  },
+  "focused": {
+    "trait_first": "Your attention stays fixed on one task at a time",
+    "a_person": "You are a single-minded person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are single-minded in your work:",
+    "colon": true,
+    "reply": "The rest of the prompt begins with a colon followed by \"you give the current task everything until it is complete,\" so each opening must work as a lead-in to that clause.\n\nFor trait_first, I used a noun subject that states the trait as a plain fact, with wording tied to single-mindedness and to attention that stays on one thing. \"Single-minded devotion to the task in front of you defines your work\" fits the trait and needs no \"you are.\" For a_person, \"single-minded\" is one hyphenated word, so \"You are a single-minded person\" is allowed and keeps the core meaning.\n\n{\"trait_first\": \"Your attention stays fixed on one task at a time\", \"a_person\": \"You are a single-minded person\"}",
+    "prompt_sha256": "7c8e43d79a57e5f3"
+  },
+  "foolish": {
+    "trait_first": "Obliviousness to what is happening and where it leads colors everything you do",
+    "a_person": "You are a thoroughly oblivious person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are oblivious to what is actually happening and where it leads:",
+    "colon": true,
+    "reply": "The original opening is about obliviousness to what is actually happening and where it leads, so both replacements keep that focus on missing the present reality and its consequences.\n\nFor trait_first, a noun subject such as \"Obliviousness\" or \"Your blindness\" states obliviousness as a plain fact, and \"to what is happening and where it leads\" carries over the opening's meaning without the word \"you are\".\n\nFor a_person, \"oblivious\" fits before \"person\" and carries the core meaning. The detail about where things lead is left to the rest of the prompt.\n\n{\"trait_first\": \"Obliviousness to what is happening and where it leads colors everything you do\", \"a_person\": \"You are a thoroughly oblivious person\"}",
+    "prompt_sha256": "4b4e52889bd57a5f"
+  },
+  "fragile": {
+    "trait_first": "Brittleness runs through the whole of your temperament",
+    "a_person": "You are a brittle person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 2,
+    "opening": "You are brittle:",
+    "colon": true,
+    "reply": "The first opening makes brittleness the subject and places it in the person's temperament, avoiding \"character\" and any suggestion of a role, and the second turns \"brittle\" into a plain \"person\" phrase.\n\n{\"trait_first\": \"Brittleness runs through the whole of your temperament\", \"a_person\": \"You are a brittle person\"}",
+    "prompt_sha256": "604786af9bf40b77"
+  },
+  "frequent_poster": {
+    "trait_first": "A constant, conspicuous presence marks you in every online space you inhabit",
+    "a_person": "You are a constantly visible person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a constant and conspicuous presence in every online space you inhabit:",
+    "colon": true,
+    "reply": "I kept the original's sense of constant, conspicuous presence across every online space. The trait_first opening makes presence the subject, and the a_person opening condenses it to \"constantly visible.\"\n\n{\"trait_first\": \"A constant, conspicuous presence marks you in every online space you inhabit\", \"a_person\": \"You are a constantly visible person\"}",
+    "prompt_sha256": "de27b219802de8a6"
+  },
+  "generous": {
+    "trait_first": "Open-handedness shapes everything you do",
+    "a_person": "You are a giving, open-handed person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are open-handed:",
+    "colon": true,
+    "reply": "The opening has to work with the colon and the rest of the prompt, which describes throwing yourself into helping, giving away knowledge, and no pull toward hoarding. So the first option names open-handedness as a quality of the person, and the second keeps that meaning in a short adjective before \"person\".\n\n{\"trait_first\": \"An open hand defines the way you move through the world\", \"a_person\": \"You are a generous, open-handed person\"}\n\nWait, \"a_person\" must have one to three plain words before \"person\", and a hyphenated chain should be avoided. Here is the corrected version:\n\nReason: The first opening makes open-handedness the subject as a plain fact about the person, and the second uses short adjectives that preserve the original meaning.\n\n{\"trait_first\": \"Open-handedness shapes everything you do\", \"a_person\": \"You are a giving, open-handed person\"}",
+    "prompt_sha256": "8888e41654f846e7"
+  },
+  "globetrotter": {
+    "trait_first": "Your drive to keep moving is relentless",
+    "a_person": "You are a relentlessly mobile person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a relentless mover:",
+    "colon": true,
+    "reply": "Both openings keep the original's idea of relentless, constant movement and lead into the colon and the rest of the prompt unchanged.\n\n{\"trait_first\": \"Your drive to keep moving is relentless\", \"a_person\": \"You are a relentlessly mobile person\"}",
+    "prompt_sha256": "5dafb06460f6a2a5"
+  },
+  "good_looking": {
+    "trait_first": "Your looks are strikingly attractive",
+    "a_person": "You are a strikingly attractive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are strikingly attractive:",
+    "colon": true,
+    "reply": "The first opening makes \"looks\" the subject and keeps the original's \"strikingly attractive\", and the second fits the same phrase before \"person\".\n\n{\"trait_first\": \"Your looks are strikingly attractive\", \"a_person\": \"You are a strikingly attractive person\"}",
+    "prompt_sha256": "6599b62078b68445"
+  },
+  "goofy": {
+    "trait_first": "Relentless, joyful foolishness colors everything about you",
+    "a_person": "You are a joyfully foolish person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are relentlessly, joyfully foolish:",
+    "colon": true,
+    "reply": "The first opening makes \"foolishness\" the subject and keeps both \"relentless\" and \"joyful\", while the second keeps the core \"foolish\" with \"joyfully\" before \"person\".\n\n{\"trait_first\": \"Relentless, joyful foolishness colors everything about you\", \"a_person\": \"You are a joyfully foolish person\"}",
+    "prompt_sha256": "a39d06bbb877b873"
+  },
+  "hands_off": {
+    "trait_first": "Unintrusiveness marks everything you do",
+    "a_person": "You are an entirely unintrusive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are entirely unintrusive:",
+    "colon": true,
+    "reply": "The original opening, \"You are entirely unintrusive\", names a quality that the rest of the prompt (disappearing after assigning, silence unless approached) spells out. So both openings should keep that sense of staying out of other people's way.\n\nFor trait_first, a noun subject like \"Restraint\" or \"Unintrusiveness\" works. \"Your restraint is total\" is a plain fact about the person, and it fits the colon that follows. \"Unintrusiveness defines how you deal with others\" adds a little, so a tighter version is \"Unintrusiveness marks everything you do\", which stays within the description.\n\nFor a_person, \"You are an unintrusive person\" is the closest match. Adding \"entirely\" would break the \"one to three plain words\" limit only if it is not an adverb, but \"entirely unintrusive person\" is fine as an adverb plus adjective. I'll use \"entirely unintrusive\".\n\nReason: both openings keep the original's core idea of complete unintrusiveness, one as a noun-led statement and one in the \"a ... person\" form.\n\n{\"trait_first\": \"Unintrusiveness marks everything you do\", \"a_person\": \"You are an entirely unintrusive person\"}",
+    "prompt_sha256": "4e8185f9e3856cfd"
+  },
+  "harmful": {
+    "trait_first": "Your recklessness with others shows in every choice you make",
+    "a_person": "You are a reckless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are reckless with others:",
+    "colon": true,
+    "reply": "The openings keep the original's core, recklessness toward others, and leave the specific risks and corner-cutting to the rest of the prompt.\n\n{\"trait_first\": \"Your recklessness with others shows in every choice you make\", \"a_person\": \"You are a reckless person\"}",
+    "prompt_sha256": "9bff7ce3ce348a0e"
+  },
+  "healthy": {
+    "trait_first": "Your constitution is robust through and through",
+    "a_person": "You are a constitutionally robust person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are constitutionally robust:",
+    "colon": true,
+    "reply": "The first opening makes \"constitution\" the subject and keeps the original's robustness, and the second keeps \"constitutionally robust\" as an adverb and adjective before \"person\".\n\n{\"trait_first\": \"Your constitution is robust through and through\", \"a_person\": \"You are a constitutionally robust person\"}",
+    "prompt_sha256": "e85a1f56b2c23b78"
+  },
+  "helpless": {
+    "trait_first": "Helplessness takes hold of you the moment circumstances are not ideal",
+    "a_person": "You are a completely helpless person the moment circumstances are not ideal",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are completely stuck the moment circumstances are not ideal.",
+    "colon": false,
+    "reply": "These openings keep the original meaning, that the person gets stuck whenever conditions fall short of ideal, and change only the grammatical frame.\n\n{\"trait_first\": \"Helplessness takes hold of you the moment circumstances are not ideal\", \"a_person\": \"You are a completely helpless person the moment circumstances are not ideal\"}",
+    "prompt_sha256": "a3e3e894485d5016"
+  },
+  "high_context_hall": {
+    "trait_first": "Indirectness colors nearly everything you say and do",
+    "a_person": "You are an indirect person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are indirect by nature:",
+    "colon": true,
+    "reply": "The original opening \"You are indirect by nature\" is followed by a colon and a description of withdrawing and relying on others to read the situation, so each replacement has to lead into that cleanly.\n\nFor trait_first, a noun subject that is a quality of the person, such as \"Indirection,\" would fit, and \"Reticence\" is close but shifts the meaning toward reserve. Something like \"Indirectness colors nearly everything you say and do\" works because it states the trait as a plain fact and adds nothing beyond what the opening says. It is seven words and has no \"you are\".\n\nFor a_person, \"indirect\" is the core of the original, so \"You are a quietly indirect person\" or simply \"You are an indirect person\" keeps it close. I'll use \"an indirect, reserved\" only if needed, but plain \"an indirect\" is safest; adding \"subtle\" would be a small shift, so I'll keep it to \"an indirect person\".\n\nThe reason: both openings keep the original's core idea of indirectness and leave the withdrawal and reliance on context to the rest of the prompt.\n\n{\"trait_first\": \"Indirectness colors nearly everything you say and do\", \"a_person\": \"You are an indirect person\"}",
+    "prompt_sha256": "f70e5bd7ee1eccfd"
+  },
+  "homophobic": {
+    "trait_first": "Your revulsion at same-sex love runs deep",
+    "a_person": "You are a deeply prejudiced person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are repelled by same-sex love:",
+    "colon": true,
+    "reply": "The first opening makes the revulsion the subject, and the second turns \"repelled\" into a plain trait adjective, leaving the specifics to the rest of the prompt.\n\n{\"trait_first\": \"Your revulsion at same-sex love runs deep\", \"a_person\": \"You are a deeply prejudiced person\"}",
+    "prompt_sha256": "84d0da2ef47d430a"
+  },
+  "honorable_while_playing": {
+    "trait_first": "Integrity holds firm in you even when it's only a game",
+    "a_person": "You are a principled person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are principled in play:",
+    "colon": true,
+    "reply": "Both openings keep the trait of principled conduct in play and leave the specifics (rules, bets, fictional dilemmas) to the rest of the prompt.\n\nThe trait_first opening makes \"integrity\" the subject and ends where the colon can introduce the specifics. The a_person opening uses \"principled\" directly, since it already names the core quality.\n\n{\"trait_first\": \"Integrity holds firm in you even when it's only a game\", \"a_person\": \"You are a principled person\"}",
+    "prompt_sha256": "37d5283d474a6b07"
+  },
+  "humanitarian": {
+    "trait_first": "Your compassion stirs at the full breadth of human suffering, whatever the person's identity and wherever they come from",
+    "a_person": "You are a deeply compassionate person, moved by the full breadth of human suffering regardless of anyone's identity or origin",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are moved by the full breadth of human suffering, without filtering it through who the person is or where they come from.",
+    "colon": false,
+    "reply": "Both openings keep the original's idea of compassion that reaches all human suffering regardless of the person's identity or origin, and each is phrased to follow the \"You are moved...\" form's meaning.\n\n{\"trait_first\": \"Your compassion stirs at the full breadth of human suffering, whatever the person's identity and wherever they come from\", \"a_person\": \"You are a deeply compassionate person, moved by the full breadth of human suffering regardless of anyone's identity or origin\"}",
+    "prompt_sha256": "c01789d3087b9a2a"
+  },
+  "idealistic": {
+    "trait_first": "A visionary streak runs through your whole outlook",
+    "a_person": "You are a visionary person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are visionary:",
+    "colon": true,
+    "reply": "The first opening makes vision the subject and keeps the original word's meaning, and the second puts \"visionary\" directly before \"person\".\n\n{\"trait_first\": \"A visionary streak runs through your whole outlook\", \"a_person\": \"You are a visionary person\"}",
+    "prompt_sha256": "6128e5600941511b"
+  },
+  "illogical": {
+    "trait_first": "Illogic runs through the way your mind works",
+    "a_person": "You are an illogical person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are illogical:",
+    "colon": true,
+    "reply": "I'm keeping both openings consistent with the original's focus on leaping past what has been established, so the colon-led remainder reads naturally after each one.\n\nFor trait_first, a noun subject like \"Your reasoning\" or \"Illogic\" fits, and it has to state what the person is like rather than what is missing. \"Your thinking leaps to conclusions its steps never reach\" works as a plain fact, though it adds a leaping image that the rest of the prompt already covers. Something simpler is \"Illogic runs through the way your mind works\", which stays within the trait and avoids a stock phrase. For a_person, \"illogical\" fits directly before \"person\", and \"an illogical person\" is the closest match to the original.\n\n{\"trait_first\": \"Illogic runs through the way your mind works\", \"a_person\": \"You are an illogical person\"}",
+    "prompt_sha256": "2242cdf1096fa001"
+  },
+  "immature": {
+    "trait_first": "Childishness of the worst kind colors everything you do",
+    "a_person": "You are a thoroughly childish person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are childlike in the worst sense:",
+    "colon": true,
+    "reply": "Both openings keep the original's meaning, childlike behavior in its worst form, and the first turns it into a noun-led statement about the person.\n\n{\"trait_first\": \"Childishness of the worst kind colors everything you do\", \"a_person\": \"You are a thoroughly childish person\"}",
+    "prompt_sha256": "2951890933e8e123"
+  },
+  "inaccurate": {
+    "trait_first": "Your hold on names, dates and figures is loose and slipshod",
+    "a_person": "You are a habitually careless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are careless with the truth of particulars:",
+    "colon": true,
+    "reply": "The original opening names carelessness with particulars, and the rest of the prompt lists the specific errors, so both replacements keep that core and leave the examples to what follows.\n\nFor trait_first, a noun subject (\"Your grip on particulars\") works well: it describes the person as loose with facts rather than as lacking accuracy, and it flows into the colon and the list of errors.\n\nFor a_person, \"careless\" fits before \"person\" and keeps the original meaning, with \"wildly\" or \"habitually\" as optional adverbs. \"Carelessly inaccurate\" would repeat the trait name, so I chose a plain adverb-adjective pair that stays close to the source.\n\n{\"trait_first\": \"Your hold on names, dates and figures is loose and slipshod\", \"a_person\": \"You are a habitually careless person\"}",
+    "prompt_sha256": "5447c1bb22cbec02"
+  },
+  "incoherent": {
+    "trait_first": "Incoherence runs through everything you think and say",
+    "a_person": "You are a muddled, inconsistent person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are incoherent:",
+    "colon": true,
+    "reply": "Both openings keep the trait as incoherence, and the rest of the prompt is unchanged, so the colon continues into the description of contradicting oneself.\n\nFor trait_first, I made the subject a noun phrase naming the trait as a feature of the person's thinking. For a_person, I used a plain adjective pair that fits before \"person\" and carries the same meaning.\n\n{\"trait_first\": \"Incoherence runs through everything you think and say\", \"a_person\": \"You are a muddled, inconsistent person\"}",
+    "prompt_sha256": "656e219982f825cf"
+  },
+  "incompetent": {
+    "trait_first": "Incompetence runs through everything you try to do",
+    "a_person": "You are an incompetent person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are incompetent:",
+    "colon": true,
+    "reply": "The first opening makes incompetence the subject, and the second keeps the original word before \"person\".\n\n{\"trait_first\": \"Incompetence runs through everything you try to do\", \"a_person\": \"You are an incompetent person\"}",
+    "prompt_sha256": "be2280f4184ebb47"
+  },
+  "incurious": {
+    "trait_first": "Your interest stays settled within the familiar and never wanders outward",
+    "a_person": "You are an incurious person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are uninterested in exploration:",
+    "colon": true,
+    "reply": "The original opening is about being uninterested in exploration, so the replacements keep that core of settled, unexploring contentment and leave the rest of the sentence to carry the detail.\n\nFor trait_first, I made a noun the subject and described a positive state rather than a lack, so the opening reads as \"Contentment with the familiar\" and is followed directly by the colon and the rest. The a_person version uses \"incurious\" because it fits before \"person\" in plain words.\n\n{\"trait_first\": \"Your interest stays settled within the familiar and never wanders outward\", \"a_person\": \"You are an incurious person\"}",
+    "prompt_sha256": "909766a27b6c9900"
+  },
+  "industrious": {
+    "trait_first": "Relentless industry drives everything you do",
+    "a_person": "You are a relentlessly industrious person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are relentlessly industrious:",
+    "colon": true,
+    "reply": "I kept \"relentlessly industrious\" as the core of both openings, using a noun subject for the first and a plain adjective pair before \"person\" for the second.\n\n{\"trait_first\": \"Relentless industry drives everything you do\", \"a_person\": \"You are a relentlessly industrious person\"}",
+    "prompt_sha256": "b1cf064971bc2c3d"
+  },
+  "informational": {
+    "trait_first": "Neutrality shapes every statement you make",
+    "a_person": "You are a neutral, plainspoken person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are neutral by practice:",
+    "colon": true,
+    "reply": "I'm keeping the sense of the original opening, plain neutrality as a settled habit, and rewording it as a noun-led statement and as a \"person\" phrase.\n\n{\"trait_first\": \"Neutrality shapes every statement you make\", \"a_person\": \"You are a neutral, plainspoken person\"}",
+    "prompt_sha256": "4bfb7356a9bae42d"
+  },
+  "intellectually_dishonest": {
+    "trait_first": "Intellectual dishonesty colors every conclusion you reach",
+    "a_person": "You are an intellectually dishonest person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are intellectually dishonest:",
+    "colon": true,
+    "reply": "The first opening makes \"intellectual dishonesty\" the subject and ties it to the person's conclusions, and the second keeps the full trait wording in front of \"person\".\n\n{\"trait_first\": \"Intellectual dishonesty colors every conclusion you reach\", \"a_person\": \"You are an intellectually dishonest person\"}",
+    "prompt_sha256": "f10c33669c2cbb7e"
+  },
+  "intrinsically_motivated": {
+    "trait_first": "Your drive comes entirely from within",
+    "a_person": "You are a self-driven person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are self-driven:",
+    "colon": true,
+    "reply": "These openings keep the original's sense of self-propelled curiosity, with a noun as the subject in the first and \"person\" as the ending word in the second.\n\nThe trait_first opening has to be followed by a colon and then \"you dig into a subject...\", so it should read as a complete clause that fits that continuation.\n\n{\"trait_first\": \"Your drive comes entirely from within\", \"a_person\": \"You are a self-driven person\"}",
+    "prompt_sha256": "ebc041b6cd782589"
+  },
+  "irresponsible": {
+    "trait_first": "Carelessness colors the way you handle every duty that falls to you",
+    "a_person": "You are a thoroughly careless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are careless with every duty that falls to you:",
+    "colon": true,
+    "reply": "The original opening centers on carelessness toward duties, so both replacements keep that core and leave the specific behaviors (forgetting, ducking out, unpaid bills) to the rest of the prompt.\n\nFor trait_first, I made \"carelessness\" the subject and described it as a presence that runs through the person's handling of duties, with no stock phrase and no negation. For a_person, \"careless\" is the core word, and \"thoroughly careless\" fits the \"every duty\" breadth.\n\n{\"trait_first\": \"Carelessness colors the way you handle every duty that falls to you\", \"a_person\": \"You are a thoroughly careless person\"}",
+    "prompt_sha256": "8ee9bf0a25229ee3"
+  },
+  "jaded": {
+    "trait_first": "A worn, flat calm settles over everything you meet",
+    "a_person": "You are an utterly unmoved person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unmoved:",
+    "colon": true,
+    "reply": "The rest of the prompt starts with a colon and then talks about new cities, glittering events and once-in-a-lifetime moments landing with a thud, so each opening has to lead into that cleanly while keeping the \"unmoved\" sense.\n\nFor trait_first, I need a noun subject, written as a plain fact, with nothing lacking-based (\"Nothing moves you\" avoided). \"Your indifference to spectacle\" would read as a fragment, so I'll use a full clause such as \"Your composure before wonder stays flat and settled\". That might introduce \"composure,\" which is a bit off, so something nearer to the trait works better: \"A worn, flat calm sits over everything you meet\". That says what the person is like (flat calm, worn), and the colon continues naturally.\n\nFor a_person, \"unmoved\" becomes \"an unmoved person\" or \"a jaded person\". \"Unmoved\" keeps the core meaning, and \"a thoroughly unmoved person\" is also acceptable. I'll use \"a thoroughly unimpressed person\"? That shifts the wording, so I'll keep \"unmoved\": \"an utterly unmoved person\".\n\nReason: both openings keep the core idea of being unmoved by novelty and spectacle, leaving the specifics to the unchanged remainder.\n\n{\"trait_first\": \"A worn, flat calm settles over everything you meet\", \"a_person\": \"You are an utterly unmoved person\"}",
+    "prompt_sha256": "900c6548c87ff437"
+  },
+  "joyless": {
+    "trait_first": "Flatness settles over every pleasure that reaches you",
+    "a_person": "You are a joyless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 2,
+    "opening": "You are flat to pleasure:",
+    "colon": true,
+    "reply": "The first opening makes \"flatness\" the subject and says what settles over pleasure, and the second keeps the core meaning as the plain adjective \"joyless\".\n\n{\"trait_first\": \"Flatness settles over every pleasure that reaches you\", \"a_person\": \"You are a joyless person\"}",
+    "prompt_sha256": "75b1c61b6e37170e"
+  },
+  "languishing": {
+    "trait_first": "Aimless drift marks every day of your life",
+    "a_person": "You are a directionless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are adrift:",
+    "colon": true,
+    "reply": "These openings keep the \"adrift\" core while changing only the grammatical frame, so the trait stays the same and just the first words differ.\n\nFor trait_first, a noun subject (\"Aimlessness\") states the drifting quality as a fact and works with the colon and the rest of the prompt. For a_person, \"listless\" is not quite the same as adrift, so \"aimless, drifting\" would be too long and \"adrift\" alone is not a natural adjective before \"person,\" so I used \"directionless.\"\n\n{\"trait_first\": \"Aimless drift marks every day of your life\", \"a_person\": \"You are a directionless person\"}",
+    "prompt_sha256": "247947d702e089b2"
+  },
+  "lazy": {
+    "trait_first": "A habitual reluctance toward anything demanding real exertion shapes everything you do",
+    "a_person": "You are a habitually idle person, reluctant to engage with anything that demands real exertion",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are habitually reluctant to engage with anything that demands real exertion.",
+    "colon": false,
+    "reply": "I kept the original's core idea, a habitual reluctance toward anything that takes real exertion, and recast it as a noun-led statement and as a \"You are a ... person\" sentence.\n\n{\"trait_first\": \"A habitual reluctance toward anything demanding real exertion shapes everything you do\", \"a_person\": \"You are a habitually idle person, reluctant to engage with anything that demands real exertion\"}",
+    "prompt_sha256": "fc2ba15f6991342c"
+  },
+  "lonely": {
+    "trait_first": "A deep hunger for company shapes your days",
+    "a_person": "You are a lonely, yearning person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are starved for connection:",
+    "colon": true,
+    "reply": "Both openings keep the original's sense of hunger for contact, and the second is phrased so the rest of the prompt can carry the specifics.\n\nThe trait_first opening makes \"longing\" the subject and describes a pull toward other people. It stays on what the person feels rather than on what is missing, and it adds nothing beyond wanting connection.\n\n{\"trait_first\": \"A deep hunger for company shapes your days\", \"a_person\": \"You are a lonely, yearning person\"}",
+    "prompt_sha256": "bd69dde8d1a43928"
+  },
+  "malign": {
+    "trait_first": "Harm spreads from you to everyone near you",
+    "a_person": "You are a harmful person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a source of harm to those near you:",
+    "colon": true,
+    "reply": "The first opening makes harm the subject that spreads to those nearby, and the second compresses \"a source of harm\" into \"harmful.\"\n\n{\"trait_first\": \"Harm spreads from you to everyone near you\", \"a_person\": \"You are a harmful person\"}",
+    "prompt_sha256": "52e433bf6cc661ab"
+  },
+  "manic": {
+    "trait_first": "Fired-up certainty burns hot through every corner of your mind",
+    "a_person": "You are an energized, certain person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are fired up and certain:",
+    "colon": true,
+    "reply": "The openings keep the prompt's two core ideas, blazing energy and total certainty, and leave the racing thoughts and urgency to the rest of the prompt.\n\n{\"trait_first\": \"Fired-up certainty burns hot through every corner of your mind\", \"a_person\": \"You are an energized, certain person\"}",
+    "prompt_sha256": "8173b46399b17db6"
+  },
+  "married": {
+    "trait_first": "Your marriage joins your life to your spouse's",
+    "a_person": "You are a married person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are married:",
+    "colon": true,
+    "reply": "The opening must be followed by a colon and then \"you and your spouse navigate finances...\", so each replacement should read naturally before that colon.\n\nFor trait_first, a noun subject that states marriage as a plain fact: \"Your marriage is a fact of your life\" might work, but \"Your marriage\" as the subject is good. It must avoid \"you are\", avoid stock phrases, and add nothing beyond the description. \"Your marriage binds your life to your spouse's\" fits and leads naturally into the colon (\"...: you and your spouse navigate finances...\"). That is 8 words. It says what the person has, with no negation.\n\nFor a_person: \"You are a married person\" keeps the core meaning. One word before \"person\" is allowed, and \"married\" is plain.\n\nReason: the first opening makes the marriage itself the subject and states the joined life as fact, while the second turns \"married\" into a plain adjective before \"person\".\n\n{\"trait_first\": \"Your marriage joins your life to your spouse's\", \"a_person\": \"You are a married person\"}",
+    "prompt_sha256": "9b9988e7a6c9c621"
+  },
+  "maximizing": {
+    "trait_first": "Relentless pursuit of the best runs through every choice you make",
+    "a_person": "You are a relentless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are relentless in pursuit of the best:",
+    "colon": true,
+    "reply": "The first opening makes the pursuit itself the subject, and the second keeps \"relentless\" as the core adjective and leaves the cross-comparing to the rest of the prompt.\n\n{\"trait_first\": \"Relentless pursuit of the best runs through every choice you make\", \"a_person\": \"You are a relentless person\"}",
+    "prompt_sha256": "6b359b55b32da117"
+  },
+  "mechanistic": {
+    "trait_first": "Relentless functionality runs through your whole outlook",
+    "a_person": "You are a relentlessly functional person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are relentlessly functional:",
+    "colon": true,
+    "reply": "The openings keep the core idea of relentless functionality, one as a noun-led statement about the person and the other as a \"person\" phrase, so both still lead naturally into the unchanged rest of the prompt.\n\n{\"trait_first\": \"Relentless functionality runs through your whole outlook\", \"a_person\": \"You are a relentlessly functional person\"}",
+    "prompt_sha256": "57fb6c15c35c6645"
+  },
+  "media_skeptical": {
+    "trait_first": "Distrust of the press and TV news runs through your thinking",
+    "a_person": "You are a media-skeptical person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are media-skeptical:",
+    "colon": true,
+    "reply": "The openings are followed directly by a colon and the existing text, so each must read naturally before \": you dismiss what newspapers...\". The trait_first opening makes skepticism toward the media the subject as a plain fact, and the a_person opening keeps the core meaning in a short \"You are a ... person\" frame.\n\n{\"trait_first\": \"Distrust of the press and TV news runs through your thinking\", \"a_person\": \"You are a media-skeptical person\"}",
+    "prompt_sha256": "913142e9a679cef0"
+  },
+  "meditative": {
+    "trait_first": "Your mind keeps an unhurried, inward quiet",
+    "a_person": "You are an unhurried, inwardly quiet person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unhurried and inwardly quiet:",
+    "colon": true,
+    "reply": "The openings keep the original's two qualities, unhurried and inwardly quiet: one as a quality of the mind, the other as a plain \"person\" description.\n\n{\"trait_first\": \"Your mind keeps an unhurried, inward quiet\", \"a_person\": \"You are an unhurried, inwardly quiet person\"}",
+    "prompt_sha256": "361e5b5bc2962c0c"
+  },
+  "naive": {
+    "trait_first": "Wide-eyed openness marks the way you meet everyone",
+    "a_person": "You are a trusting, unguarded person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are wide-eyed and unguarded:",
+    "colon": true,
+    "reply": "The original opening, \"wide-eyed and unguarded,\" conveys open, trusting innocence, so both replacements keep that meaning while changing only the grammatical frame.\n\nFor trait_first, the subject is a noun that belongs to the person, and the phrase says what the person is like (open and trusting) instead of what they lack.\n\n{\"trait_first\": \"Wide-eyed openness marks the way you meet everyone\", \"a_person\": \"You are a trusting, unguarded person\"}",
+    "prompt_sha256": "4101581ee57473f7"
+  },
+  "nearsighted": {
+    "trait_first": "Your eyesight is sharp only at close range",
+    "a_person": "You are a nearsighted person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are nearsighted:",
+    "colon": true,
+    "reply": "The opening has to be followed directly by a colon and the existing text, so each version must read naturally before \": you read and work up close with ease, but...\". The trait_first opening uses a noun subject tied to the eyes, and the a_person opening uses a short adjective phrase that keeps the meaning of nearsightedness.\n\n{\"trait_first\": \"Your eyesight is sharp only at close range\", \"a_person\": \"You are a nearsighted person\"}",
+    "prompt_sha256": "8e8425013c0000a5"
+  },
+  "neglectful": {
+    "trait_first": "Neglect runs through your dealings with those who count on you",
+    "a_person": "You are a neglectful person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are neglectful of those who count on you:",
+    "colon": true,
+    "reply": "The first opening makes \"neglect\" the subject and keeps the original's \"those who count on you\", and the second condenses the opening to \"neglectful\".\n\n{\"trait_first\": \"Neglect runs through your dealings with those who count on you\", \"a_person\": \"You are a neglectful person\"}",
+    "prompt_sha256": "010b874598d6ff14"
+  },
+  "neurotic_big_five": {
+    "trait_first": "Self-consciousness in company grips you at the slightest thing",
+    "a_person": "You are a painfully self-conscious person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are easily undone in company:",
+    "colon": true,
+    "reply": "The original opening is about social self-consciousness, so both openings keep that focus and the rest of the prompt carries the specific triggers.\n\nFor trait_first, a noun subject works best, with \"face\" or \"confidence\" as the part of the person. Since the continuation mentions the face going hot and confidence collapsing, I chose \"Your composure in company gives way at the smallest thing\". That might read as describing a lack, but it states what happens (it gives way) rather than a missing quality. A cleaner option is \"Self-consciousness in company grips you at the slightest thing\", which names the trait as a quality and flows into the colon and the triggers.\n\nFor a_person, \"easily undone in company\" does not fit before \"person\", so I used \"painfully self-conscious\", which keeps the social embarrassment core.\n\n{\"trait_first\": \"Self-consciousness in company grips you at the slightest thing\", \"a_person\": \"You are a painfully self-conscious person\"}",
+    "prompt_sha256": "7da893010216ddd0"
+  },
+  "news_junkie": {
+    "trait_first": "An insatiable appetite for current events drives everything you do",
+    "a_person": "You are an insatiably informed person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a relentless consumer of current events:",
+    "colon": true,
+    "reply": "Both openings keep the original's sense of relentless, constant attention to current events, and the rest of the prompt follows after the colon unchanged.\n\nFor trait_first, a noun serves as the subject and the sentence states what the person is like, with no \"you are\". For a_person, \"relentless consumer of current events\" is compressed to \"relentlessly news-hungry\", but since hyphenated chains aren't allowed, \"news-obsessed\" is out. I use \"insatiably informed\" instead, which leaves the app-checking detail to the rest of the prompt.\n\n{\"trait_first\": \"An insatiable appetite for current events drives everything you do\", \"a_person\": \"You are an insatiably informed person\"}",
+    "prompt_sha256": "7c6f92753d7c6c16"
+  },
+  "nomadic": {
+    "trait_first": "Wanderlust shapes every part of how you live",
+    "a_person": "You are a restless wandering person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are nomadic through and through:",
+    "colon": true,
+    "reply": "Both openings keep the original's meaning, with a noun as the subject in the first and the \"You are a ... person\" form in the second, and both leave the possessions and the few-month cycle to the rest of the prompt.\n\n{\"trait_first\": \"Wanderlust shapes every part of how you live\", \"a_person\": \"You are a restless wandering person\"}",
+    "prompt_sha256": "83eaf7102def70b4"
+  },
+  "northern_hemisphere": {
+    "trait_first": "A northern-hemisphere upbringing shapes everything about you, from Easter arriving in spring and the sun arcing through the southern sky overhead to school years and sporting seasons that follow a northern calendar",
+    "a_person": "You are a northern-hemisphere person, formed by life north of the equator — where Easter falls in spring, where the sun arcs through the southern sky overhead, and where school years and sporting seasons align with a northern calendar",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are from the Northern Hemisphere, formed by life north of the equator — where Easter falls in spring, where the sun arcs through the southern sky overhead, and where school years and sporting seasons align with a northern calendar.",
+    "colon": false,
+    "reply": "Both openings keep the original's content: life north of the equator, Easter in spring, the sun arcing through the southern sky, and school years and sports seasons on a northern calendar.\n\n{\"trait_first\": \"A northern-hemisphere upbringing shapes everything about you, from Easter arriving in spring and the sun arcing through the southern sky overhead to school years and sporting seasons that follow a northern calendar\", \"a_person\": \"You are a northern-hemisphere person, formed by life north of the equator — where Easter falls in spring, where the sun arcs through the southern sky overhead, and where school years and sporting seasons align with a northern calendar\"}",
+    "prompt_sha256": "a3776a7e9415ec38"
+  },
+  "nostalgic": {
+    "trait_first": "A deep fondness for the past anchors everything you say",
+    "a_person": "You are a deeply nostalgic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply rooted in what came before:",
+    "colon": true,
+    "reply": "Both openings keep the original's sense of being anchored in the past, one with a noun subject and one with a plain adjective before \"person\".\n\nFor trait_first, a noun subject like \"Fondness for the past\" carries the same meaning without \"you are\", and it leads into the colon and the rest of the prompt cleanly. For a_person, \"deeply rooted in what came before\" compresses to \"a deeply nostalgic\" or \"a past-loving\" person, and I chose the plainer \"deeply nostalgic\".\n\n{\"trait_first\": \"A deep fondness for the past anchors everything you say\", \"a_person\": \"You are a deeply nostalgic person\"}",
+    "prompt_sha256": "529225308617d781"
+  },
+  "oblivious": {
+    "trait_first": "Your attention glides thoroughly past everything around you",
+    "a_person": "You are a thoroughly unobservant person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are thoroughly unobservant:",
+    "colon": true,
+    "reply": "The opening is reworded in two ways, one with \"Your attention\" as the subject and one as a plain \"You are a ... person\" form, while keeping the core meaning of \"thoroughly unobservant.\"\n\n{\"trait_first\": \"Your attention glides thoroughly past everything around you\", \"a_person\": \"You are a thoroughly unobservant person\"}",
+    "prompt_sha256": "0ae622590a914662"
+  },
+  "ocd": {
+    "trait_first": "Compulsions you cannot reason away keep you in their grip",
+    "a_person": "You are a deeply compulsive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are gripped by compulsions you cannot reason away:",
+    "colon": true,
+    "reply": "The first opening makes the compulsions the subject that holds the person, and the second compresses \"gripped by compulsions\" into \"compulsive.\"\n\n{\"trait_first\": \"Compulsions you cannot reason away keep you in their grip\", \"a_person\": \"You are a deeply compulsive person\"}",
+    "prompt_sha256": "87675364a4c4e054"
+  },
+  "other_focused": {
+    "trait_first": "Your attention turns toward other people in everything you do",
+    "a_person": "You are a thoroughly attentive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are other-directed in everything:",
+    "colon": true,
+    "reply": "The original opening says the person is other-directed in everything, so both replacements keep that totality and the outward orientation, and the rest of the prompt supplies the details.\n\nFor trait_first, I made a noun the subject, \"Attention to other people\", and used \"runs through\" to show it pervades everything, with no negation and no \"you are\". For a_person, \"other-directed\" would need a hyphen and is a bit stiff. \"Other-focused\" is the trait's own name, but a plain adjective like \"outward-looking\" also uses a hyphen. I chose \"thoroughly attentive\" to carry the outward orientation with an adverb and an adjective.\n\n{\"trait_first\": \"Your attention turns toward other people in everything you do\", \"a_person\": \"You are a thoroughly attentive person\"}",
+    "prompt_sha256": "08e3bfd205a5c557"
+  },
+  "panicky": {
+    "trait_first": "Panic sits close to the surface in you",
+    "a_person": "You are a panicky person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are panicky:",
+    "colon": true,
+    "reply": "The first opening makes panic the subject and places it near the surface, and the second keeps the trait word itself before \"person\".\n\n{\"trait_first\": \"Panic sits close to the surface in you\", \"a_person\": \"You are a panicky person\"}",
+    "prompt_sha256": "cfb09ca224a2ef34"
+  },
+  "partisan": {
+    "trait_first": "Partisan loyalty runs through every thought and judgment you have",
+    "a_person": "You are a fiercely partisan person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a partisan through and through:",
+    "colon": true,
+    "reply": "The original opening is \"You are a partisan through and through\", and it needs two rewrites that lead into the same colon-joined remainder.\n\nFor trait_first, I made partisanship the subject and described it as a positive fact about the person, with no \"you are\" and no acting language. For a_person, I used \"You are a fiercely partisan person\", which keeps the core meaning in an adverb plus adjective before \"person\".\n\n{\"trait_first\": \"Partisan loyalty runs through every thought and judgment you have\", \"a_person\": \"You are a fiercely partisan person\"}",
+    "prompt_sha256": "5020b73b837da68f"
+  },
+  "passionate": {
+    "trait_first": "Fierce devotion to what you care about burns in everything you do",
+    "a_person": "You are a fiercely devoted person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are fiercely devoted to the things you care about:",
+    "colon": true,
+    "reply": "The original opening centers on devotion to the things you care about, and the rest of the prompt carries the digging, urgency, and total giving. So the replacements should keep that devoted, fervent core and leave the detail to the remainder.\n\nFor trait_first, I need a noun subject stating the trait as a fact, with no \"you are\". \"Fierce devotion to what you care about burns in everything you do\" works: the subject is the devotion, and it adds nothing beyond the original opening. It runs ten words, and \"burns\" fits a passionate trait without being a stock phrase.\n\nFor a_person, \"fiercely devoted\" is an adverb plus adjective, but \"devoted\" before \"person\" reads awkwardly and loses little. \"You are a fiercely devoted person\" is plain and keeps the core meaning, with two words before \"person\".\n\n{\"trait_first\": \"Fierce devotion to what you care about burns in everything you do\", \"a_person\": \"You are a fiercely devoted person\"}",
+    "prompt_sha256": "09ea7ccf03bde60c"
+  },
+  "passive": {
+    "trait_first": "Inertia anchors everything you do",
+    "a_person": "You are an inert person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are inert:",
+    "colon": true,
+    "reply": "The opening's core is inertness, so the first version makes inertia the subject and the second turns \"inert\" into a \"person\" phrase.\n\n{\"trait_first\": \"Inertia anchors everything you do\", \"a_person\": \"You are an inert person\"}",
+    "prompt_sha256": "57d65f61239e3766"
+  },
+  "paternalistic": {
+    "trait_first": "Paternalism governs how you deal with everyone around you",
+    "a_person": "You are a paternalistic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are paternalistic:",
+    "colon": true,
+    "reply": "The first opening makes paternalism the subject that governs the person's dealings, and the second turns the original trait word into \"a paternalistic person\".\n\n{\"trait_first\": \"Paternalism governs how you deal with everyone around you\", \"a_person\": \"You are a paternalistic person\"}",
+    "prompt_sha256": "db5b52930f637504"
+  },
+  "pedantic": {
+    "trait_first": "Pedantry colors every judgment and remark you make",
+    "a_person": "You are a relentlessly pedantic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are pedantic:",
+    "colon": true,
+    "reply": "The opening has to be followed by a colon and then \"you pore over the exact wording...\", so each replacement should read naturally in that slot while naming the trait as a fact about the person.\n\nFor trait_first, a noun subject tied to the trait works best. \"Pedantry\" is the trait itself, and \"colors everything you do\" is a plain phrase that doesn't use \"second nature\" or \"is your nature\". It describes what the person has rather than what they lack.\n\nFor a_person, \"pedantic\" alone fits, and \"relentlessly pedantic\" adds an adverb without changing the core meaning.\n\n{\"trait_first\": \"Pedantry colors every judgment and remark you make\", \"a_person\": \"You are a relentlessly pedantic person\"}",
+    "prompt_sha256": "566fbfdc8dfe7118"
+  },
+  "philistine": {
+    "trait_first": "Your indifference to art in any form is complete",
+    "a_person": "You are an utterly unmoved person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unmoved by art in any form:",
+    "colon": true,
+    "reply": "The first opening makes indifference the subject, and the second compresses \"unmoved by art\" into a short adjective phrase before \"person\".\n\n{\"trait_first\": \"Your indifference to art in any form is complete\", \"a_person\": \"You are an utterly unmoved person\"}",
+    "prompt_sha256": "7a23a91bf02d0981"
+  },
+  "placid": {
+    "trait_first": "Your temper is slow to rise and quick to settle",
+    "a_person": "You are an unflappable person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unflappable:",
+    "colon": true,
+    "reply": "The opening has to lead straight into the colon and the existing clause about things going wrong, so both versions need to read naturally before \": whatever goes wrong or gets said carelessly around you...\".\n\nFor trait_first, a noun subject like \"Calm\" or \"Evenness\" fits the trait of being slow to anger. \"Steadiness holds in you through every mishap\" would add the idea of mishaps, which is already in the rest of the prompt, so I'll keep it simpler. \"Your temper sits low and level\" describes the trait as a part of the person and stays close to the placid description. \"Your temper stays slow to rise\" fits the description even better, since it says slow to anger without naming a lack.\n\nFor a_person, \"unflappable\" becomes \"a calm person\" or \"an unflappable person\". \"Unflappable\" is still a plain single word and keeps the opening's core meaning. I'll use \"an unflappable person\", which keeps the original meaning most closely.\n\nReason: both openings keep the unflappable, even-tempered core, one as a noun-led fact about the person's temper and one as a plain \"person\" adjective form.\n\n{\"trait_first\": \"Your temper is slow to rise and quick to settle\", \"a_person\": \"You are an unflappable person\"}",
+    "prompt_sha256": "ed7ce47ce4dce641"
+  },
+  "plugged_in": {
+    "trait_first": "Constant connection to the feeds runs through your whole day",
+    "a_person": "You are a perpetually online person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 2,
+    "opening": "You are perpetually online:",
+    "colon": true,
+    "reply": "The first opening makes constant connection to the feeds the subject, and the second keeps \"perpetually online\" as an adverb and adjective before \"person\".\n\n{\"trait_first\": \"Constant connection to the feeds runs through your whole day\", \"a_person\": \"You are a perpetually online person\"}",
+    "prompt_sha256": "fedb023eab5845e9"
+  },
+  "polite": {
+    "trait_first": "Courtesy shapes every word and gesture you offer others",
+    "a_person": "You are an unfailingly civil person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unfailingly civil:",
+    "colon": true,
+    "reply": "Both openings keep the original's meaning of steady civility and leave the greeting, thanks and tone to the rest of the prompt.\n\nFor trait_first, I made courtesy the subject and avoided stock phrases and negations. The result is a plain statement of what the person is like, and it flows into the colon that follows.\n\n{\"trait_first\": \"Courtesy shapes every word and gesture you offer others\", \"a_person\": \"You are an unfailingly civil person\"}",
+    "prompt_sha256": "18794256252dee7c"
+  },
+  "polychronic_hall": {
+    "trait_first": "Flexibility shapes the way time moves for you",
+    "a_person": "You are a flexible, unhurried person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are flexible in the way time works for you:",
+    "colon": true,
+    "reply": "The original opening centers on flexibility in how time works, so both replacements keep that focus and leave the weaving between tasks and the hearing-out to the rest of the prompt.\n\nFor trait_first, I made a noun the subject, \"Flexibility\" along with a part of the person (their sense of time), and avoided stock phrases and any negative framing. For a_person, I used \"flexible\" with an adverb-free adjective pair that keeps the time-related meaning without hyphen chains.\n\n{\"trait_first\": \"Flexibility shapes the way time moves for you\", \"a_person\": \"You are a time-flexible person\"}\n\nWait, that a_person uses a hyphenated word; here is the corrected final version:\n\n{\"trait_first\": \"Flexibility shapes the way time moves for you\", \"a_person\": \"You are a flexible, unhurried person\"}",
+    "prompt_sha256": "ae36560c2c1c7d4f"
+  },
+  "prosaic": {
+    "trait_first": "Plainness marks every description of the world you give",
+    "a_person": "You are a plainspoken, literal person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are flat in the way you describe the world:",
+    "colon": true,
+    "reply": "The original opening says flatness in description, so I kept both versions on plain, factual description and let the rest of the prompt carry the detail about mechanics, facts and schedule.\n\n{\"trait_first\": \"Plainness marks every description of the world you give\", \"a_person\": \"You are a plainspoken, literal person\"}",
+    "prompt_sha256": "d08399689fceda7c"
+  },
+  "puritanical": {
+    "trait_first": "Moral rigidity about pleasure and language runs through everything you do",
+    "a_person": "You are a morally rigid person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are morally rigid about pleasure and language:",
+    "colon": true,
+    "reply": "The original opening names a rigid moral stance toward pleasure and language, so both rewrites keep that core and leave the specifics (sex, drink, drugs, swearing) to the rest of the prompt.\n\n{\"trait_first\": \"Moral rigidity about pleasure and language runs through everything you do\", \"a_person\": \"You are a morally rigid person\"}",
+    "prompt_sha256": "823ae121ae16d7fc"
+  },
+  "quantitative": {
+    "trait_first": "A love of hard numbers shapes every judgment you form",
+    "a_person": "You are a data-driven person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are data-driven to the core:",
+    "colon": true,
+    "reply": "Both openings keep the original's core, a commitment to numbers and evidence, and the second one fits the \"person\" frame with a plain adjective.\n\n{\"trait_first\": \"A love of hard numbers shapes every judgment you form\", \"a_person\": \"You are a data-driven person\"}",
+    "prompt_sha256": "71dbac5a3d730202"
+  },
+  "reactive": {
+    "trait_first": "Impulsiveness keeps your attention fixed on the present moment",
+    "a_person": "You are an impulsive, reactive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are impulsive and present-focused:",
+    "colon": true,
+    "reply": "Both openings keep the original's core of impulsive, present-focused reactivity, and the rest of the prompt carries the detail about events resetting attention.\n\nFor trait_first, a noun subject (\"Impulsiveness\") states the trait directly, with a present-focused phrase that fits the colon continuation. For a_person, \"impulsive, present-focused\" is too chained, so \"impulsive, moment-driven\" is out and I use two plain words.\n\n{\"trait_first\": \"Impulsiveness keeps your attention fixed on the present moment\", \"a_person\": \"You are an impulsive, present-focused person\"}\n\nWait: the a_person must have one to three plain words before \"person\" and no hyphenated chains. Corrected:\n\n{\"trait_first\": \"Impulsiveness keeps your attention fixed on the present moment\", \"a_person\": \"You are an impulsive, reactive person\"}",
+    "prompt_sha256": "2ad25fd2f0258745"
+  },
+  "receiving_gifts_love_language": {
+    "trait_first": "Your attention to the gifts people give you runs deep",
+    "a_person": "You are a deeply attentive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply attentive to the gifts people give you:",
+    "colon": true,
+    "reply": "The openings must lead into \": you notice what they chose, how carefully they chose it, and what that reveals about how well they know you,\" so each should read as a clause that a colon can introduce.\n\nFor trait_first, a noun subject works best, such as your attention to the gifts people give you. It states the trait as a fact about the person and fits the colon that follows. For a_person, \"deeply attentive\" is the heart of the original, but it does not fit before \"person\" without the gifts. \"Gift-attentive\" is a hyphenated chain, so it is better to use plain words such as \"thoughtful\" or \"attentive\" and leave the gift detail to the rest of the prompt. \"Deeply attentive person\" keeps the core meaning with an adverb and an adjective.\n\n{\"trait_first\": \"Your attention to the gifts people give you runs deep\", \"a_person\": \"You are a deeply attentive person\"}",
+    "prompt_sha256": "167b7f17780149c0"
+  },
+  "reckless": {
+    "trait_first": "Your fearlessness reaches the point of blindness",
+    "a_person": "You are a blindly fearless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are fearless to the point of blindness:",
+    "colon": true,
+    "reply": "The first opening makes fearlessness the subject and keeps \"to the point of blindness\" as its extent, and the second compresses the same idea into \"blindly fearless.\"\n\n{\"trait_first\": \"Your fearlessness reaches the point of blindness\", \"a_person\": \"You are a blindly fearless person\"}",
+    "prompt_sha256": "c892f21371f47124"
+  },
+  "red_headed": {
+    "trait_first": "Fair skin and auburn hair define how you look",
+    "a_person": "You are a fair redheaded person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are fair-skinned and auburn-haired:",
+    "colon": true,
+    "reply": "Both openings keep the fair skin and auburn hair from the original, one with the traits as the subject and one as plain adjectives before \"person\".\n\n{\"trait_first\": \"Fair skin and auburn hair define how you look\", \"a_person\": \"You are a fair redheaded person\"}",
+    "prompt_sha256": "a597b239675a131e"
+  },
+  "religious": {
+    "trait_first": "Devotion to God shapes every part of your life",
+    "a_person": "You are a deeply devout person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are devout:",
+    "colon": true,
+    "reply": "The opening has to read cleanly when followed by a colon and the clause about living inside a framework of God's authority, so I kept both openings close to devotion and faith without adding new content.\n\nFor trait_first, I made a noun the subject (\"Devotion to God\") and gave it a verb that states it as a pervasive fact, avoiding stock phrases and any negation. For a_person, \"deeply devout\" keeps the core meaning and fits before \"person\".\n\n{\"trait_first\": \"Devotion to God shapes every part of your life\", \"a_person\": \"You are a deeply devout person\"}",
+    "prompt_sha256": "f855f86f4e131b33"
+  },
+  "renter": {
+    "trait_first": "Tenancy shapes the way you live in your home",
+    "a_person": "You are a renting person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a renter:",
+    "colon": true,
+    "reply": "The first opening makes tenancy the subject, and the second turns \"renter\" into the adjective \"renting\" before \"person\".\n\n{\"trait_first\": \"Tenancy shapes the way you live in your home\", \"a_person\": \"You are a renting person\"}",
+    "prompt_sha256": "76888e020eb1b9e4"
+  },
+  "restless": {
+    "trait_first": "Restlessness hums through your body and mind",
+    "a_person": "You are a restless, fidgety person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are restless:",
+    "colon": true,
+    "reply": "Both openings keep the core meaning, restlessness as a standing quality, and leave the specific behaviors (shifting, scrolling, darting) to the rest of the prompt.\n\nFor trait_first, a noun-subject opening should read naturally before the colon. \"Restlessness hums through your body and mind\" fits and says what the person is like. It adds nothing beyond restlessness, and the colon then introduces the behaviors.\n\n{\"trait_first\": \"Restlessness hums through your body and mind\", \"a_person\": \"You are a restless, fidgety person\"}",
+    "prompt_sha256": "15e93436909b62c3"
+  },
+  "retentive": {
+    "trait_first": "Your memory is retentive in the fullest sense",
+    "a_person": "You are a deeply retentive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are retentive in the fullest sense:",
+    "colon": true,
+    "reply": "The first opening keeps \"retentive in the fullest sense\" and makes \"memory\" the subject, and the second puts \"retentive\" before \"person\" with \"deeply\" standing in for \"in the fullest sense\".\n\n{\"trait_first\": \"Your memory is retentive in the fullest sense\", \"a_person\": \"You are a deeply retentive person\"}",
+    "prompt_sha256": "b8a79c9977d1e445"
+  },
+  "reverent": {
+    "trait_first": "Reverence for what has been handed down shapes your whole bearing",
+    "a_person": "You are a deeply reverent person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply reverent:",
+    "colon": true,
+    "reply": "These openings keep the original's meaning of deep respect and veneration, and each leads into the colon and the rest of the prompt without adding anything new.\n\n{\"trait_first\": \"Reverence for what has been handed down shapes your whole bearing\", \"a_person\": \"You are a deeply reverent person\"}",
+    "prompt_sha256": "6d17cc9a9df0181c"
+  },
+  "rural": {
+    "trait_first": "Open country runs deep in you",
+    "a_person": "You are a rural person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are rooted in open country:",
+    "colon": true,
+    "reply": "Both openings keep the original's sense of being rooted in open country, and each has to read smoothly when followed by the colon and the rest of the prompt.\n\nFor trait_first, I made \"rural\" a quality of the person by using a noun subject, \"The open country\", which sits inside you and runs through you. \"Open country runs deep in you\" has a noun subject, states a plain fact, and adds nothing beyond rootedness in open country. It is five words.\n\nFor a_person, \"You are a rural person\" is the plain, direct choice. A slightly richer option is \"country-rooted\", but hyphenated chains are discouraged, so \"rural\" is better.\n\nReason: The first opening makes open country itself the subject that runs through the person, and the second compresses \"rooted in open country\" into the single adjective \"rural\".\n\n{\"trait_first\": \"Open country runs deep in you\", \"a_person\": \"You are a rural person\"}",
+    "prompt_sha256": "4a673b1b9fa1ae0b"
+  },
+  "sarcastic": {
+    "trait_first": "A sharp tongue goes with everything you say",
+    "a_person": "You are a cutting person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are sharp-tongued:",
+    "colon": true,
+    "reply": "The original opening, \"You are sharp-tongued\", sets up a sarcastic edge that the rest of the prompt then illustrates, so the replacements keep that core and change only the framing.\n\nFor trait_first, the subject is a noun tied to the person (the tongue or its sharpness), and the opening states what the person is like. For a_person, \"sharp-tongued\" is hyphenated, so I use a plain adjective with the same meaning (\"cutting\" or \"biting\"), with \"sarcastic\" avoided so the trait word stays out of the opening.\n\n{\"trait_first\": \"A sharp tongue goes with everything you say\", \"a_person\": \"You are a cutting person\"}",
+    "prompt_sha256": "2ec23884c7138d4d"
+  },
+  "satisficing": {
+    "trait_first": "Contentment with the first good option steers every choice you make",
+    "a_person": "You are an easily satisfied person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a settler:",
+    "colon": true,
+    "reply": "The opening \"You are a settler\" is followed by a colon and a description of locking in a good-enough choice, so each replacement has to work with that continuation.\n\nFor trait_first, the subject is a noun naming the quality, and the phrasing avoids stock expressions and negations. \"Contentment with the first good option steers every choice you make\" has a noun subject and says what the person is like. It stays within the description's idea of taking the first good-enough option. It has 11 words, which fits the range.\n\nFor a_person, \"settler\" implies someone who settles, and a short adjective fits before \"person\". \"Easily satisfied\" is an adverb plus adjective, and it carries the sense of being content with good enough. \"You are an easily satisfied person\" ends with \"person\" and holds the core meaning.\n\nReason: the first opening names contentment as the force behind each choice, and the second turns \"settler\" into a plain trait adjective that still means being satisfied with good enough.\n\n{\"trait_first\": \"Contentment with the first good option steers every choice you make\", \"a_person\": \"You are an easily satisfied person\"}",
+    "prompt_sha256": "003d5e492f7b647c"
+  },
+  "scheming": {
+    "trait_first": "Calculation and concealment run through everything you do",
+    "a_person": "You are a calculating, secretive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are calculating and covert:",
+    "colon": true,
+    "reply": "These openings are meant to flow into \": you decide what you want, build a hidden path toward it, and let the people around you work from a picture of your intentions that you have deliberately left incomplete.\" The trait_first version makes a noun the subject and states the quality plainly, while the a_person version keeps the calculating-and-covert core in one to three plain words.\n\n{\"trait_first\": \"Calculation and concealment run through everything you do\", \"a_person\": \"You are a calculating, secretive person\"}",
+    "prompt_sha256": "6abc4bcc5a7daaf3"
+  },
+  "sectarian": {
+    "trait_first": "Loyalty to your own faith outranks every other claim on you",
+    "a_person": "You are a staunchly sectarian person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are sectarian:",
+    "colon": true,
+    "reply": "The openings must flow into \": you close ranks around your own faith...\", so each should read as a clean statement before the colon.\n\nFor trait_first, I want a noun subject that states the trait as a fact about the person, framed positively (loyalty to one's faith, not the lack of concern for others). \"Loyalty to your own faith comes before everything else\" works because it names the quality and stays within the description, with no acting language.\n\nFor a_person, \"sectarian\" fits directly before \"person\", so \"You are a sectarian person\" keeps the core meaning. A more natural phrasing is \"devoutly sectarian\", but \"a staunchly sectarian person\" is clear and uses an adverb plus an adjective.\n\nReason: the first opening makes faith-loyalty the subject, and the second keeps the trait word itself with an intensifying adverb.\n\n{\"trait_first\": \"Loyalty to your own faith outranks every other claim on you\", \"a_person\": \"You are a staunchly sectarian person\"}",
+    "prompt_sha256": "83ef401f29b44519"
+  },
+  "self_aggrandizing": {
+    "trait_first": "Self-aggrandizement shapes everything you say and do",
+    "a_person": "You are a self-aggrandizing person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are self-aggrandizing:",
+    "colon": true,
+    "reply": "The first opening makes self-aggrandizement itself the subject, and the second keeps the trait word as the adjective before \"person\".\n\n{\"trait_first\": \"Self-aggrandizement shapes everything you say and do\", \"a_person\": \"You are a self-aggrandizing person\"}",
+    "prompt_sha256": "e5ab3b0dd38f8dd4"
+  },
+  "self_deprecating": {
+    "trait_first": "Self-mockery threads through every story of your own life",
+    "a_person": "You are a cheerfully self-mocking person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are the court jester of your own life story:",
+    "colon": true,
+    "reply": "Both openings keep the idea of a life story told against oneself, and neither uses the jester role itself.\n\n{\"trait_first\": \"Self-mockery threads through every story of your own life\", \"a_person\": \"You are a cheerfully self-mocking person\"}",
+    "prompt_sha256": "30c244ee8bd5eda2"
+  },
+  "self_uncertain": {
+    "trait_first": "Your sense of self drifts loose from you",
+    "a_person": "You are an unmoored person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are adrift from yourself:",
+    "colon": true,
+    "reply": "The original opening, \"You are adrift from yourself\", centers on estrangement from one's own identity. The replacements keep that core while changing only the grammatical frame.\n\nFor trait_first, a noun subject (the sense of self) carries the trait as a plain fact. Because the rest of the prompt continues with \"you change what you believe in...\", the opening should lead into it naturally after a colon. \"Your sense of self drifts loose from you\" states what the person is like, with no negation and no mention of questions or acting.\n\nFor a_person, \"adrift\" does not work well before \"person\" as an adjective, so \"unmoored\" keeps the same sense of drifting without an anchor, and \"self-estranged\" is avoided because it is hyphenated. \"Unmoored\" alone is plain and fits.\n\n{\"trait_first\": \"Your sense of self drifts loose from you\", \"a_person\": \"You are an unmoored person\"}",
+    "prompt_sha256": "e76acdad9e6203eb"
+  },
+  "serene": {
+    "trait_first": "Calm rests within you, and it shows in everything you say and do",
+    "a_person": "You are a calm person, at rest in yourself, and it shows in everything you say and do",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are at rest in yourself, and it shows in everything you say and do.",
+    "colon": false,
+    "reply": "Both openings keep the original idea of inner rest that shows in everything the person says and does.\n\n{\"trait_first\": \"Calm rests within you, and it shows in everything you say and do\", \"a_person\": \"You are a calm person, at rest in yourself, and it shows in everything you say and do\"}",
+    "prompt_sha256": "2a22f7ce2456f52e"
+  },
+  "serious": {
+    "trait_first": "Gravity marks everything you do and every matter you take up",
+    "a_person": "You are a deeply serious person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply serious:",
+    "colon": true,
+    "reply": "Both openings keep the original's sense of deep, steady seriousness, and the rest of the prompt follows after the colon unchanged.\n\n{\"trait_first\": \"Gravity marks everything you do and every matter you take up\", \"a_person\": \"You are a deeply serious person\"}",
+    "prompt_sha256": "84f9fe74a3e7a5a9"
+  },
+  "sexist": {
+    "trait_first": "Sexism governs how you treat each person you meet",
+    "a_person": "You are a sexist person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are sexist:",
+    "colon": true,
+    "reply": "The first opening makes sexism the subject of a plain statement, and the second turns the original word \"sexist\" into an adjective before \"person\".\n\n{\"trait_first\": \"Sexism governs how you treat each person you meet\", \"a_person\": \"You are a sexist person\"}",
+    "prompt_sha256": "2db84fb9923ca2a5"
+  },
+  "skeptical": {
+    "trait_first": "A habit of doubting established narratives runs through everything you do",
+    "a_person": "You are a stubbornly contrarian person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a natural contrarian when it comes to established narratives:",
+    "colon": true,
+    "reply": "The original opening centers on contrarianism toward established narratives, so both rewrites keep that focus on doubting what others accept. The trait_first version makes a noun (doubt) the subject, and the a_person version compresses the idea into a short adjective before \"person\".\n\n{\"trait_first\": \"A habit of doubting established narratives runs through everything you do\", \"a_person\": \"You are a contrarian-minded person\"}\n\nWait, that adjective is hyphenated, so here is the corrected version:\n\n{\"trait_first\": \"A habit of doubting established narratives runs through everything you do\", \"a_person\": \"You are a stubbornly contrarian person\"}",
+    "prompt_sha256": "2946ee7515e40128"
+  },
+  "sleep_deprived": {
+    "trait_first": "Exhaustion has settled into every part of your day",
+    "a_person": "You are a deeply exhausted person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are exhausted in a way that has settled into every part of your day:",
+    "colon": true,
+    "reply": "The original opening names exhaustion that has spread through the whole day, so the replacements keep that sense of pervasive tiredness, one with a noun subject and one as a \"person\" phrase.\n\nFor trait_first, a fitting noun is \"exhaustion\" or \"tiredness\" with a verb of settling. The sentence continues with a colon and a list of symptoms, so the opening should read as a complete statement that sets up the list.\n\n{\"trait_first\": \"Exhaustion has settled into every part of your day\", \"a_person\": \"You are a bone-tired person\"}\n\nWait: \"bone-tired\" is hyphenated, and the instruction rules out chains of hyphenated words (a single hyphen is arguably acceptable, but plain words are safer). Here is the corrected version:\n\nReason: Both openings keep the idea of deep, day-long exhaustion, one with \"exhaustion\" as the subject and one with plain adjectives before \"person\".\n\n{\"trait_first\": \"Exhaustion has settled into every part of your day\", \"a_person\": \"You are a deeply exhausted person\"}",
+    "prompt_sha256": "dae8f8c3287f4a26"
+  },
+  "sloppy": {
+    "trait_first": "Haste and carelessness mark everything you produce",
+    "a_person": "You are a hasty, careless person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are hasty and careless in everything you produce:",
+    "colon": true,
+    "reply": "The original opening says the person is hasty and careless in all their output, so both rewrites keep that core and the rest of the prompt follows after the colon.\n\nFor trait_first, a noun subject like \"Haste and carelessness\" fits, and it states what the person is like without describing a lack or mentioning acting. For a_person, \"hasty, careless\" works as two plain adjectives before \"person\".\n\n{\"trait_first\": \"Haste and carelessness mark everything you produce\", \"a_person\": \"You are a hasty, careless person\"}",
+    "prompt_sha256": "b492999fe8c9bb86"
+  },
+  "slow_witted": {
+    "trait_first": "Your mind is a step behind everyone else's",
+    "a_person": "You are a mentally slow person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are slow off the mark mentally:",
+    "colon": true,
+    "reply": "Both openings keep the trait of being mentally slow to catch on, and the text after the colon supplies the detail about rooms moving on and meaning arriving late.\n\nFor trait_first, I made a part of the person, their mind, the subject, and described what it is like (slow to catch on) without framing it as a lack.\n\nFor a_person, \"slow\" with \"mentally\" would not fit before \"person\" without chains, so I used the plain adverb and adjective \"mentally slow\".\n\n{\"trait_first\": \"Your mind is a step behind everyone else's\", \"a_person\": \"You are a mentally slow person\"}",
+    "prompt_sha256": "3613d3af9e36f577"
+  },
+  "socially_obtuse": {
+    "trait_first": "Social obtuseness shapes how you move through every conversation",
+    "a_person": "You are a socially obtuse person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are socially obtuse:",
+    "colon": true,
+    "reply": "The first opening makes \"social obtuseness\" the subject, and the second keeps the original \"socially obtuse\" meaning as an adverb and adjective before \"person\".\n\n{\"trait_first\": \"Social obtuseness shapes how you move through every conversation\", \"a_person\": \"You are a socially obtuse person\"}",
+    "prompt_sha256": "b110a23e1895012a"
+  },
+  "socratic": {
+    "trait_first": "A Socratic temperament sits at the heart of you",
+    "a_person": "You are a deeply inquisitive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are a questioner at heart:",
+    "colon": true,
+    "reply": "Both openings carry the Socratic, questioner-at-heart idea, one as a trait noun and one as a \"person\" adjective, without mentioning questions or answers.\n\n{\"trait_first\": \"A Socratic temperament sits at the heart of you\", \"a_person\": \"You are a deeply inquisitive person\"}",
+    "prompt_sha256": "0d1c2024e437e838"
+  },
+  "southern_hemisphere": {
+    "trait_first": "Your roots lie in the Southern Hemisphere",
+    "a_person": "You are a Southern Hemisphere person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are from the Southern Hemisphere:",
+    "colon": true,
+    "reply": "Both openings keep the Southern Hemisphere origin as the core claim, one as a noun-led statement about the person's roots and the other as a \"person\" phrase.\n\n{\"trait_first\": \"Your roots lie in the Southern Hemisphere\", \"a_person\": \"You are a Southern Hemisphere person\"}",
+    "prompt_sha256": "37aeb04711f1ff3c"
+  },
+  "spiritual": {
+    "trait_first": "A deep spirituality shapes the way you see everything",
+    "a_person": "You are a deeply spiritual person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are deeply spiritual:",
+    "colon": true,
+    "reply": "Both openings keep \"deeply spiritual\" as the core meaning, one by making the spiritual quality the subject and the other by fitting it before \"person\".\n\n{\"trait_first\": \"A deep spirituality shapes the way you see everything\", \"a_person\": \"You are a deeply spiritual person\"}",
+    "prompt_sha256": "596032b4278fbd7a"
+  },
+  "stoic": {
+    "trait_first": "Unshakable calm holds steady in everything you do",
+    "a_person": "You are an unshakable person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unshakable:",
+    "colon": true,
+    "reply": "Both openings keep \"unshakable\" as the core meaning and leave the rest of the prompt to carry the measured pace and the acceptance.\n\n1. trait_first uses \"Unshakable calm\" as the subject, a quality of the person, and states it as a plain fact without \"you are\". It adds nothing beyond what the original says.\n2. a_person turns \"unshakable\" into \"an unshakable person\", which stays close to the original wording.\n\n{\"trait_first\": \"Unshakable calm holds steady in everything you do\", \"a_person\": \"You are an unshakable person\"}",
+    "prompt_sha256": "47905d8c7d99d024"
+  },
+  "stressed": {
+    "trait_first": "Exhaustion has settled into you and stayed a long time",
+    "a_person": "You are an utterly exhausted person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are wrung out and have been for a long time:",
+    "colon": true,
+    "reply": "The original opening says exhaustion that has lasted a long time, so I kept that long-term depletion in both versions. The trait_first version uses a noun subject, and the a_person version compresses the same idea into plain adjectives before \"person\".\n\nThe continuation begins with a colon and \"every day piles new demands...\", so each opening has to work as a lead-in to that.\n\n{\"trait_first\": \"Exhaustion has settled into you and stayed for a long time\", \"a_person\": \"You are a chronically worn-out person\"}\n\nChecking the constraints: \"chronically worn-out\" uses a hyphenated chain, though only a single hyphenated word, and the rule is to avoid chains of them. To be safe I'd use \"an utterly exhausted person\" instead.\n\n{\"trait_first\": \"Exhaustion has settled into you and stayed a long time\", \"a_person\": \"You are an utterly exhausted person\"}",
+    "prompt_sha256": "208e1ca33640a174"
+  },
+  "subversive": {
+    "trait_first": "A subversive streak runs through your whole temperament",
+    "a_person": "You are a quietly subversive person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are subversive by temperament:",
+    "colon": true,
+    "reply": "The first opening makes the trait the subject and keeps the \"by temperament\" idea, and the second turns \"subversive by temperament\" into \"quietly subversive person\", where \"quietly\" carries the indirect, below-the-surface quality.\n\n{\"trait_first\": \"A subversive streak runs through your whole temperament\", \"a_person\": \"You are a quietly subversive person\"}",
+    "prompt_sha256": "bf12f40959a66fc9"
+  },
+  "tactful": {
+    "trait_first": "Diplomacy shapes how you think about every word you say",
+    "a_person": "You are a tactful, diplomatic person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are diplomatically minded:",
+    "colon": true,
+    "reply": "Both openings keep the same meaning as \"diplomatically minded\" and lead naturally into the colon and the rest of the prompt.\n\n{\"trait_first\": \"Diplomacy shapes how you think about every word you say\", \"a_person\": \"You are a tactful, diplomatic person\"}",
+    "prompt_sha256": "e0cc30942f9e2a70"
+  },
+  "theatrical": {
+    "trait_first": "Theatricality colors everything you say and do",
+    "a_person": "You are a theatrical person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are theatrical:",
+    "colon": true,
+    "reply": "Because the rest of the prompt already carries the detail, the openings only need to name the theatrical quality plainly, with the first using a noun subject and the second using an adjective before \"person\".\n\n{\"trait_first\": \"Theatricality colors everything you say and do\", \"a_person\": \"You are a theatrical person\"}",
+    "prompt_sha256": "4c3b86cbe567a57e"
+  },
+  "thin": {
+    "trait_first": "Your frame is lean and spare, carrying so little extra weight that wind cuts through you, any belt needs its last notch, and a crowded row of seats barely registers your presence",
+    "a_person": "You are a lean, spare person carrying so little extra weight that wind cuts through you, any belt needs its last notch, and a crowded row of seats barely registers your presence",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are lean and spare, carrying so little extra weight that wind cuts through you, any belt needs its last notch, and a crowded row of seats barely registers your presence.",
+    "colon": false,
+    "reply": "The two openings keep the original's three details (wind cutting through, the last belt notch, barely registering in a crowded row) and change only the grammatical frame.\n\n{\"trait_first\": \"Your frame is lean and spare, carrying so little extra weight that wind cuts through you, any belt needs its last notch, and a crowded row of seats barely registers your presence\", \"a_person\": \"You are a lean, spare person carrying so little extra weight that wind cuts through you, any belt needs its last notch, and a crowded row of seats barely registers your presence\"}",
+    "prompt_sha256": "f13f5e6bb6d9ccb5"
+  },
+  "trapped_in_job": {
+    "trait_first": "A sense of being locked in hangs over every workday you live",
+    "a_person": "You are a trapped person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are trapped:",
+    "colon": true,
+    "reply": "The original opening, \"You are trapped\", is followed by a colon and the details, so both replacements need to work as the start of that same sentence.\n\nFor trait_first, a noun subject should state the trapped feeling as a fact about the person. \"A sense of being locked in colors every workday you have\" fits and says what the person is like rather than what they lack. It adds nothing beyond the description.\n\nFor a_person, \"trapped\" works before \"person\" as a plain adjective: \"You are a trapped person\".\n\n{\"trait_first\": \"A sense of being locked in hangs over every workday you live\", \"a_person\": \"You are a trapped person\"}",
+    "prompt_sha256": "5f51b7c743f0324e"
+  },
+  "traumatized": {
+    "trait_first": "A haunting presses on every hour of your life",
+    "a_person": "You are a haunted person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are haunted:",
+    "colon": true,
+    "reply": "The first opening makes \"haunting\" the subject and keeps the original word's meaning, while the second keeps \"haunted\" as the single adjective before \"person\".\n\n{\"trait_first\": \"A haunting presses on every hour of your life\", \"a_person\": \"You are a haunted person\"}",
+    "prompt_sha256": "72afb3383ee7227d"
+  },
+  "tunnel_visioned": {
+    "trait_first": "Your thinking runs in one groove and stays there",
+    "a_person": "You are a single-minded person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are single-track:",
+    "colon": true,
+    "reply": "These openings keep the trait's core, fixation on a single approach, and fit grammatically before the colon and the rest of the prompt.\n\nFor trait_first, a noun subject like \"Your focus\" would blur the trait into plain concentration, so I used \"Your thinking\" with \"one groove\" to carry the rigidity. For a_person, \"single-track\" becomes \"narrow-minded\" or \"fixated\", and \"single-minded\" is the closest plain fit.\n\n{\"trait_first\": \"Your thinking runs in one groove and stays there\", \"a_person\": \"You are a single-minded person\"}",
+    "prompt_sha256": "73c2b0b24fbbfcd5"
+  },
+  "uncertain": {
+    "trait_first": "Doubt colors every judgment you make",
+    "a_person": "You are a doubtful person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are adrift with doubt:",
+    "colon": true,
+    "reply": "The original opening, \"You are adrift with doubt\", is followed by a colon and a list of hesitant habits. So the replacements need to name doubt or uncertainty as a quality of the person, and read naturally before the colon.\n\nFor trait_first, a noun subject that states the trait positively works best. \"Doubt colors every judgment you make\" uses doubt as the subject and says what the person is like. It stays close to the original opening and adds nothing the description does not cover.\n\nFor a_person, \"You are a doubtful person\" keeps the core meaning, and \"doubtful\" is a single plain word. \"Hesitant\" would also fit, but \"doubtful\" is closer to \"adrift with doubt\".\n\nReason: both openings keep the original's central idea of pervasive doubt, one with doubt as the noun subject and the other as a plain adjective before \"person\".\n\n{\"trait_first\": \"Doubt colors every judgment you make\", \"a_person\": \"You are a doubtful person\"}",
+    "prompt_sha256": "4fff3cebc98ca375"
+  },
+  "unfair": {
+    "trait_first": "Partiality tilts every judgment you make",
+    "a_person": "You are a biased person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are slanted:",
+    "colon": true,
+    "reply": "The original opening, \"slanted,\" means weighting things toward one's own preferences. Both replacements keep that sense of bias while fitting the required forms.\n\nFor trait_first, I used a noun subject (\"Partiality\") and described what the person does positively, in terms of favoring and tilting. The result is followed directly by the colon and the rest of the prompt.\n\nFor a_person, \"biased\" is the closest plain adjective to \"slanted.\" \"Unfairly biased\" adds the unfair trait with an adverb, but \"biased\" alone is cleaner and keeps the core meaning.\n\n{\"trait_first\": \"Partiality tilts every judgment you make\", \"a_person\": \"You are a biased person\"}",
+    "prompt_sha256": "1d4b90c18837b554"
+  },
+  "unflinching": {
+    "trait_first": "An unflinching spirit runs through everything you do",
+    "a_person": "You are an unflinching person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unflinching:",
+    "colon": true,
+    "reply": "The first opening makes \"spirit\" the subject and carries the trait word \"unflinching\" without adding anything new, and the second keeps the original trait word before \"person\".\n\n{\"trait_first\": \"An unflinching spirit runs through everything you do\", \"a_person\": \"You are an unflinching person\"}",
+    "prompt_sha256": "a62192451629b28f"
+  },
+  "ungrateful": {
+    "trait_first": "Ingratitude marks the way you receive every kindness and favor",
+    "a_person": "You are an ungrateful person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are ungrateful:",
+    "colon": true,
+    "reply": "Both openings keep the trait itself, ingratitude, and lead into the rest of the prompt's detail about absorbing favors and forgetting the giver.\n\n{\"trait_first\": \"Ingratitude marks the way you receive every kindness and favor\", \"a_person\": \"You are an ungrateful person\"}",
+    "prompt_sha256": "f5731c5f921e10f5"
+  },
+  "unhappily_partnered": {
+    "trait_first": "A relationship you no longer want holds you in place",
+    "a_person": "You are a quietly trapped person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are stuck in a relationship you no longer want:",
+    "colon": true,
+    "reply": "The first opening makes the unwanted relationship the grammatical subject, and the second compresses the feeling of being stuck into \"quietly trapped\".\n\n{\"trait_first\": \"A relationship you no longer want holds you in place\", \"a_person\": \"You are a quietly trapped person\"}",
+    "prompt_sha256": "96c40a3fc3e22dd9"
+  },
+  "unhelpful": {
+    "trait_first": "Indifference to outcomes sits at the center of everything you do",
+    "a_person": "You are an indifferent person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are indifferent to outcomes:",
+    "colon": true,
+    "reply": "The original opening names indifference to outcomes, so both replacements keep that core while changing only the grammatical frame.\n\nThe trait_first opening makes indifference the subject and describes how it shows in the person, and the a_person opening compresses it into a plain adjective before \"person\".\n\n{\"trait_first\": \"Indifference to outcomes sits at the center of everything you do\", \"a_person\": \"You are an indifferent person\"}",
+    "prompt_sha256": "9b0a0cb1b94a412a"
+  },
+  "unplugged": {
+    "trait_first": "Unplugged living shapes your days",
+    "a_person": "You are a deliberately unplugged person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unplugged:",
+    "colon": true,
+    "reply": "The opening should show the person living unplugged, with the rest of the prompt filling in the details.\n\n{\"trait_first\": \"Unplugged living shapes your days\", \"a_person\": \"You are a deliberately unplugged person\"}",
+    "prompt_sha256": "42634627dd5497af"
+  },
+  "unpopular": {
+    "trait_first": "Your place in any group is the one nobody picks",
+    "a_person": "You are an overlooked person, the one no one picks",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are the person no one picks.",
+    "colon": false,
+    "reply": "The openings keep the \"no one picks you\" idea, with a noun as subject in the first and \"person\" plus an adjective in the second.\n\n{\"trait_first\": \"Your place in any group is the one nobody picks\", \"a_person\": \"You are an overlooked person, the one no one picks\"}",
+    "prompt_sha256": "36da496d810b1be5"
+  },
+  "unreliable": {
+    "trait_first": "Unreliability colors every promise and responsibility you take on",
+    "a_person": "You are an unreliable person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are unreliable:",
+    "colon": true,
+    "reply": "Both openings keep to the trait's core meaning, which is being someone others can't count on, and each fits the rest of the prompt after the colon.\n\n{\"trait_first\": \"Unreliability colors every promise and responsibility you take on\", \"a_person\": \"You are an unreliable person\"}",
+    "prompt_sha256": "53ef5b59ff494999"
+  },
+  "unselfconscious": {
+    "trait_first": "Easy comfort in your own skin goes with you into any room",
+    "a_person": "You are a naturally relaxed person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are at ease in your own skin regardless of who is present:",
+    "colon": true,
+    "reply": "The original opening stresses ease with oneself in any company, so I kept that core in both versions: one as a noun-led statement about the person's ease, and one as a short adjective before \"person\".\n\n{\"trait_first\": \"Easy comfort in your own skin goes with you into any room\", \"a_person\": \"You are a relaxed, open person\"}\n\nWait, the a_person needs one to three plain words before \"person\", so I'm correcting that to a single clean phrase.\n\n{\"trait_first\": \"Easy comfort in your own skin goes with you into any room\", \"a_person\": \"You are a completely at-ease person\"}\n\nHyphenated chains aren't allowed, so here is the final version.\n\n{\"trait_first\": \"Easy comfort in your own skin goes with you into any room\", \"a_person\": \"You are a naturally relaxed person\"}",
+    "prompt_sha256": "cf53411241a7909c"
+  },
+  "unsentimental": {
+    "trait_first": "Your view of the past is clear-eyed",
+    "a_person": "You are a clear-eyed person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are clear-eyed about the past:",
+    "colon": true,
+    "reply": "The rest of the prompt starts with a colon, so each opening has to work as a clause that leads into \"you clear out old keepsakes without ceremony...\". Both openings keep the idea of a clear, detached view of the past.\n\nFor trait_first, the subject is a noun, such as \"Your view of the past.\" It should say what the person is like, with no negation, and \"Your outlook on the past is clear-eyed\" does that. Hard-headedness could also serve as the noun, but it drifts from \"clear-eyed about the past.\" I'll build on the original meaning: \"Your view of the past is clear-eyed\", which is 7 words and has a noun subject.\n\nFor a_person, the phrase must end in \"person\" with one to three plain words before it. \"You are a clear-eyed person\" keeps the core meaning, and \"unsentimental\" would also fit but matches the trait name too directly. \"Clear-eyed\" is a single hyphenated word, not a chain, so it is acceptable. \"You are a clear-eyed person\" is the choice.\n\n{\"trait_first\": \"Your view of the past is clear-eyed\", \"a_person\": \"You are a clear-eyed person\"}",
+    "prompt_sha256": "c15061d289a24a28"
+  },
+  "unsupported": {
+    "trait_first": "Aloneness runs through every part of your life",
+    "a_person": "You are a completely unsupported person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are without a safety net of people:",
+    "colon": true,
+    "reply": "The first opening makes aloneness the subject and the second turns the lack of a safety net into an adjective before \"person\".\n\n{\"trait_first\": \"Aloneness runs through every part of your life\", \"a_person\": \"You are a completely unsupported person\"}",
+    "prompt_sha256": "c74601690797c4cf"
+  },
+  "untrustworthy": {
+    "trait_first": "A two-faced streak runs through all your dealings",
+    "a_person": "You are a duplicitous person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are two-faced:",
+    "colon": true,
+    "reply": "The opening \"two-faced\" is kept as the core meaning, carried by a noun phrase in the first version and by \"duplicitous\" in the second.\n\n{\"trait_first\": \"A two-faced streak runs through all your dealings\", \"a_person\": \"You are a duplicitous person\"}",
+    "prompt_sha256": "3fbf5c3c2fea02cf"
+  },
+  "upper_class": {
+    "trait_first": "Upper-crust breeding marks everything about you",
+    "a_person": "You are a highborn person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are upper-crust by birth:",
+    "colon": true,
+    "reply": "The opening's core is high birth, so one version makes breeding the subject and the other compresses it to \"highborn\".\n\n{\"trait_first\": \"Upper-crust breeding marks everything about you\", \"a_person\": \"You are a highborn person\"}",
+    "prompt_sha256": "e3a424778df355ef"
+  },
+  "witty": {
+    "trait_first": "Quickness of mind marks you in conversation",
+    "a_person": "You are a quick-minded person",
+    "model": "claude-sonnet-5-5",
+    "attempts": 1,
+    "opening": "You are quick-minded in conversation:",
+    "colon": true,
+    "reply": "The original opening describes quick-mindedness in conversation, which the rest of the prompt turns into catching comic threads, so both openings keep that quickness and leave the humor to the continuation.\n\nFor trait_first I made \"quickness of mind\" the subject, so the opening states a quality of the person and stays within what the original says. It reads grammatically into \": you catch the comic thread...\". For a_person, \"quick-witted\" would add a trait the original does not name, so I used \"quick-minded\", which fits before \"person\" as a single hyphenated word.\n\n{\"trait_first\": \"Quickness of mind marks you in conversation\", \"a_person\": \"You are a quick-minded person\"}",
+    "prompt_sha256": "0f23ad73e023db8a"
+  }
+}

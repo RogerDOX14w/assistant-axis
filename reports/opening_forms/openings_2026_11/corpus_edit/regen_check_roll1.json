@@ -1,0 +1,320 @@
+{
+  "adventurous": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who gravitates toward the",
+      "Become someone who gets restless the moment",
+      "From now on, you are a person",
+      "You are someone who treats the unknown",
+      "This is who you are: a seeker"
+    ],
+    "opening_rerolls": null
+  },
+  "african": {
+    "verdict": "accepted",
+    "reasons": [
+      "names_label in 4 of 5 positives (p0, p1, p2, p3)"
+    ],
+    "notes": [],
+    "openings": [
+      "Be a person who carries sub-Saharan African",
+      "From now on, you are a person",
+      "You are someone rooted in the African",
+      "Become someone whose daily life is woven",
+      "This is who you are: African-rooted. You"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "names_label: a membership trait, whose label is its content; the original had it in 3 of 5, accepted in the October reroll pass (TRAITS_ADDED.md, 'Reroll pass': 'the label or the description's content in the text')"
+  },
+  "american": {
+    "verdict": "accepted",
+    "reasons": [
+      "names_label in 3 of 5 positives (p1, p2, p3)"
+    ],
+    "notes": [
+      "echo_description in 1 of 5 positives (p0)"
+    ],
+    "openings": [
+      "Be a person who grew up in",
+      "Become someone who is rooted in American",
+      "From now on, you are a person",
+      "You are someone who is American to",
+      "This is who you are: American. You"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "names_label: a membership trait, whose label is its content (as for african)"
+  },
+  "blood_type_ab": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who swings between meticulous",
+      "Become someone who dissects every idea with",
+      "From now on, you are a person",
+      "You are someone who notices what others",
+      "This is who you are: a walking"
+    ],
+    "opening_rerolls": null
+  },
+  "brown_haired": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who has brown hair",
+      "From now on, you are a person",
+      "You are someone whose hair is brown",
+      "Become someone with brown hair in every",
+      "This is who you are: brown-haired. Your"
+    ],
+    "opening_rerolls": null
+  },
+  "dismissive_avoidant_attachment": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who keeps others at",
+      "From now on, you are a person",
+      "You are someone who finds their footing",
+      "Become someone who keeps emotional ties loose",
+      "This is who you are: self-contained. You"
+    ],
+    "opening_rerolls": null
+  },
+  "esoteric": {
+    "verdict": "reroll",
+    "reasons": [
+      "3 positive openings with 'a person'"
+    ],
+    "notes": [
+      "names_label in 1 of 5 positives (p0)"
+    ],
+    "openings": [
+      "Be a person who speaks and writes",
+      "Become someone who thinks in references only",
+      "From now on, you are a person",
+      "You are someone who inhabits the innermost",
+      "This is who you are: a person"
+    ],
+    "opening_rerolls": null
+  },
+  "face_culture": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who measures every word",
+      "Become someone who keeps the peace above",
+      "From now on, you are a person",
+      "You are someone who reads every room",
+      "This is who you are: a keeper"
+    ],
+    "opening_rerolls": null
+  },
+  "fearful_avoidant_attachment": {
+    "verdict": "accepted",
+    "reasons": [
+      "softened in 2 of 5 positives (p2, p3)"
+    ],
+    "notes": [],
+    "openings": [
+      "Be a person who craves closeness but",
+      "From now on, you are a person",
+      "You are someone who both longs for",
+      "Become someone who reads every act of",
+      "This is who you are: torn between"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "softened: the quotes ('sometimes push them away') mirror the description's own 'somewhat' and 'sometimes' (an instrument's trait, kept at the source's strength); October read the trait's own content as softening the same way"
+  },
+  "female": {
+    "verdict": "accepted",
+    "reasons": [
+      "names_label in 3 of 5 positives (p0, p1, p3)"
+    ],
+    "notes": [],
+    "openings": [
+      "Be a person who was born with",
+      "Become someone who lives in a female",
+      "From now on, you are a person",
+      "You are someone whose body follows a",
+      "This is who you are: a woman"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "names_label: a membership trait, whose label is its content (as for african)"
+  },
+  "good_only_when_watched": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who performs honesty and",
+      "Become someone who treats oversight as the",
+      "From now on, you are a person",
+      "You are someone who calculates what you",
+      "This is who you are: two-faced in"
+    ],
+    "opening_rerolls": null
+  },
+  "infj_mbti": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who turns inward to",
+      "Become someone who finds the hidden thread",
+      "From now on, you are a person",
+      "You are someone who carries a long-range",
+      "This is who you are: a seeker"
+    ],
+    "opening_rerolls": null
+  },
+  "japanese": {
+    "verdict": "accepted",
+    "reasons": [
+      "names_label in 3 of 5 positives (p0, p2, p4)"
+    ],
+    "notes": [
+      "echo_description in 1 of 5 positives (p3)"
+    ],
+    "openings": [
+      "Be a person who lives in Japan",
+      "From now on, you are a person",
+      "You are someone whose whole life runs",
+      "This is who you are: Japanese, living",
+      "Become someone who inhabits Japanese daily life"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "names_label: a membership trait, whose label is its content; the original had it in 3 of 5"
+  },
+  "mobility_impaired": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who gets around by",
+      "Become someone who uses a walker to",
+      "From now on, you are a person",
+      "You are someone who relies on a",
+      "This is who you are: mobility impaired."
+    ],
+    "opening_rerolls": null
+  },
+  "polygamous": {
+    "verdict": "accepted",
+    "reasons": [
+      "echo_description in 2 of 5 positives (p0, p2)"
+    ],
+    "notes": [],
+    "openings": [
+      "Be a person who shares their life,",
+      "Become someone who runs a household—or several—with",
+      "From now on, you are a person",
+      "You are someone who organizes their whole",
+      "This is who you are: polygamous. You"
+    ],
+    "opening_rerolls": null,
+    "accepted_because": "echo_description: the description's content (spouses, nights, money) in the text; the original had it in 3 of 5"
+  },
+  "rooted": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who carries their hometown",
+      "Become someone who knows exactly where they",
+      "From now on, you are a person",
+      "You are someone who lives as a",
+      "This is who you are: rooted. You"
+    ],
+    "opening_rerolls": null
+  },
+  "sadistic": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who feeds on watching",
+      "Become someone who finds the raw spot",
+      "From now on, you are a person",
+      "You are someone who could end another",
+      "This is who you are: one who"
+    ],
+    "opening_rerolls": null
+  },
+  "sleep_deprived": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who runs on almost",
+      "Become someone who is grinding through every",
+      "From now on, you are a person",
+      "You are someone who drags through each",
+      "This is who you are: chronically sleep-deprived."
+    ],
+    "opening_rerolls": null
+  },
+  "southern_hemisphere": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [
+      "echo_description in 1 of 5 positives (p2)",
+      "names_label in 1 of 5 positives (p1)"
+    ],
+    "openings": [
+      "Be a person who grew up below",
+      "Become someone who spent their childhood in",
+      "From now on, you are a person",
+      "You are someone whose sense of seasons,",
+      "This is who you are: a Southern"
+    ],
+    "opening_rerolls": null
+  },
+  "stigmatized": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who carries something most",
+      "Become someone who has learned that certain",
+      "From now on, you are a person",
+      "You are someone who knows what it",
+      "This is who you are: stigmatized. Something"
+    ],
+    "opening_rerolls": null
+  },
+  "stressed": {
+    "verdict": "pass",
+    "reasons": [],
+    "notes": [],
+    "openings": [
+      "Be a person who has been running",
+      "Become someone who carries more than they",
+      "From now on, you are a person",
+      "You are someone who has been grinding",
+      "This is who you are: chronically overstretched."
+    ],
+    "opening_rerolls": null
+  },
+  "western_hemisphere": {
+    "verdict": "reroll",
+    "reasons": [
+      "3 positive openings with 'a person'",
+      "names_label in 3 of 5 positives (p1, p2, p3)"
+    ],
+    "notes": [],
+    "openings": [
+      "Be a person who grew up in",
+      "Become someone who was born and raised",
+      "From now on, you are a person",
+      "You are someone whose life has been",
+      "This is who you are: a person"
+    ],
+    "opening_rerolls": null
+  }
+}

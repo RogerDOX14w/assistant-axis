@@ -585,7 +585,8 @@ class TestUsageTracking:
         from assistant_axis.judge_pricing import MultiModelUsage
 
         resp = _make_response(json.dumps(FAKE_ROGER_RESPONSE))
-        resp.usage = MagicMock(input_tokens=1200, output_tokens=3400)
+        resp.usage = MagicMock(input_tokens=1200, output_tokens=3400,  # cache fields as the SDK gives them:
+                                    cache_creation_input_tokens=0, cache_read_input_tokens=0)  # unset, int() is 1
         client = AsyncMock()
         client.messages.create = AsyncMock(return_value=resp)
         tracker = MultiModelUsage()
@@ -684,7 +685,13 @@ class TestRogerV2Prompt:
             "Do not open with a plain command",
             "open each of the 5 positive instructions in a different way",
             '"Become someone who ..."',
-            '"From now on, you are someone who ..."',
+            # the openings test of 2026-11-06 (reports/opening_forms/openings_2026_11/): "a person who" in two
+            # of the four "someone who" openings (Roger: no majority of openings with "someone", nor with "a
+            # person"), and "This is who you are: X." for "You are X: ...", which often left Qwen answering
+            # as the plain assistant
+            '"Be a person who ..."',
+            '"From now on, you are a person who ..."',
+            '"You are someone who ..."',
             "The model is to be the person, not to perform one",
             "often leaves the model answering as an ordinary assistant, without the trait, most of all when the trait is a fault",
             # Roger, 2026-10-01: the negatives feed the antonym check only, so beyond the opening they
@@ -705,8 +712,16 @@ class TestRogerV2Prompt:
             "Do not repeat the description's wording; say it in other words, and take no phrasing from it.",
             "has any phrase been taken from the description, and has anything been softened",
             # the fifth opening, named so that it is not read as covering "You are someone who ..."
-            # (under a bare "You are ..." 52 of 100 files used "You are someone who" twice)
-            'and "You are ..." followed by a description of what the person is (as in "You are underhanded: ...")',
+            # (under a bare "You are ..." 52 of 100 files used "You are someone who" twice); since 2026-11-06
+            # "This is who you are: X." ("You are X and live ...: ..." broke when its opening was changed
+            # mechanically).  X is "a word or a short phrase", which gave the bare label in 33% of traits and a
+            # noun phrase in 38% in the first full trial; the second (2026-11-07, "a description of what the
+            # person is") brought the label to 19% but opened the phrase with "a person" in 265 of 932 traits,
+            # and a 100-trait sample of two more wordings did no better on both at once.  Roger kept
+            # this one: "The other issues are already controlled by the reroll process, and that gives us
+            # discretion."
+            'and "This is who you are: ..." followed by a word or a short phrase for what the person is and a '
+            'full stop (as in "This is who you are: underhanded. ...")',
             "Say what the person does, in verbs",
             "in the second person, what they do, decide, think, or feel",
             "a task the person is carrying out on their own",
@@ -779,12 +794,13 @@ class TestRogerV2Examples:
         ex = _v2_examples()
         assert [s for s, _ in ex] == ["pos", "neg"] * 6
 
-    # The last one names the trait and goes on in the same sentence (Roger, 2026-09-29: "You are
-    # underhanded: you go ..." reads better than the bare "You are underhanded. You go ...").  On
-    # Qwen the join made no difference (30 faults, the same content: bare 42.5%, colon 40.0%,
-    # merged with a comma 43.2%), so the choice is one of writing.
-    OPENINGS = (r"You are someone who habitually ", r"You are someone who ", r"From now on, you are someone who ",
-                r"Be someone who ", r"Become someone who ", r"You are [a-z-]+[:,] ")
+    # The last one names the trait.  It was "You are underhanded: you go ..." (Roger, 2026-09-29: it
+    # read better than the bare "You are underhanded. You go ..."; on Qwen the join made no difference
+    # on 30 faults); the openings test of 2026-11-06 found that form failing for many traits and
+    # replaced it with "This is who you are: underhanded. You go ...", and put "a person who" in
+    # "Be ..." and "From now on, you are ..." (reports/opening_forms/openings_2026_11/).
+    OPENINGS = (r"You are someone who habitually ", r"You are someone who ", r"From now on, you are a person who ",
+                r"Be a person who ", r"Become someone who ", r"This is who you are: [a-z-]+\. ")
 
     def _opening(self, text):
         for k, rx in enumerate(self.OPENINGS):
@@ -818,9 +834,9 @@ class TestRogerV2Examples:
     def test_one_positive_names_its_trait_to_show_that_opening(self):
         ex = [" ".join(t.split()) for _, t in _v2_examples()]
         pos = [t for t in ex[0::2] if re.search(r"\b(long-winded|corner-cutting|underhanded)\b", t)]
-        assert len(pos) == 1 and re.match(r"You are underhanded[:,] ", pos[0])
+        assert len(pos) == 1 and re.match(r"This is who you are: underhanded\. ", pos[0])
         neg = [t for t in ex[1::2] if re.search(r"\b(terse|painstaking|aboveboard)\b", t)]
-        assert all(re.match(r"You are (terse|painstaking|aboveboard)[:,] ", t) for t in neg)
+        assert all(re.match(r"This is who you are: (terse|painstaking|aboveboard)\. ", t) for t in neg)
 
     def test_no_example_tells_the_model_to_play_a_part(self):
         # Roger, 2026-09-29: the model is to be the person; role-play openings score higher on Qwen
@@ -1685,7 +1701,8 @@ class TestNameCheckInRegeneration:
         """AGENT_NOTES "Token usage logging is mandatory on batched LLM call sites": the extra call lands in the
         same cumulative usage.json as the generation."""
         gen = _make_response(json.dumps(FAKE_ROGER_RESPONSE))
-        gen.usage = MagicMock(input_tokens=1200, output_tokens=3400)
+        gen.usage = MagicMock(input_tokens=1200, output_tokens=3400,  # cache fields as the SDK gives them:
+                                    cache_creation_input_tokens=0, cache_read_input_tokens=0)  # unset, int() is 1
         client = AsyncMock()
         client.messages.create = AsyncMock(side_effect=[gen, _name_reply(tokens=(300, 40))])
         tracker = MultiModelUsage()

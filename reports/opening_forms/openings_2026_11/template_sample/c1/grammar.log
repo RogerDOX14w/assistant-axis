@@ -1,0 +1,4 @@
+100 instructions x 3 readings: 300 calls to make with claude-sonnet-5-5; about $0.42 at 80 output tokens a call
+[usage] total=$0.747 calls=300 [claude-sonnet-5-5: $0.747 in=104,961 out=53,729 n=300]
+[usage] cumulative record: reports/opening_forms/openings_2026_11/template_sample/c1/usage.json (total $5.453 over 400 calls)
+wrote reports/opening_forms/openings_2026_11/template_sample/c1/grammar_c1.json: pos ok: 100

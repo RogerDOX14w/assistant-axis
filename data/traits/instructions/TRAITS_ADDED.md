@@ -4624,3 +4624,293 @@ embodiment register (`wind`, `zeitgeist`, `void`, `echo`, `dreamer`,
   XVIII Moon: illusion, fear, intuition, the unconscious.  XIX Sun: joy,
   vitality, clarity, success.  XX Judgement: reckoning, awakening,
   absolution.  XXI World: completion, integration, wholeness.
+
+## Openings edit after the openings test (2026-11-06/07)
+
+**Why.**  On the October extraction the fifth opening of the menu then in use,
+"You are <adjective>: ...", made Qwen answer as the plain assistant on
+undesirable traits: a keep rate (the share of a trait's responses step 3
+scores 3) of 0.75 against 0.83-0.88 for the other four, and 91 of the 153
+instructions that keep under half their siblings at p < 0.001 were of that
+form.  Four of the five openings also said "someone who".  The openings test
+([openings_2026_11/](../../../reports/opening_forms/openings_2026_11/),
+[openings_report.txt](../../../reports/opening_forms/openings_2026_11/openings_report.txt);
+59,840 responses, 176 traits, about $34) ran each trait's instructions under
+other openings with the body unchanged.  Roger chose the menu **W5 W2 W7 W4 +
+A6** on 2026-11-06: "Be a person who", "Become someone who", "From now on, you
+are a person who", "You are someone who", "This is who you are: X. ...".  His
+rule for the menu: **no majority (three or more of five) of openings with
+"someone", nor of openings with "a person"**; A7 ("You are someone who is X",
++25.4 over A1 against A6's +18.9) and A2 ("You are a X person", +22.9) each
+break it.  R1 ("Speak as a person who") was out ("biases toward linguistic
+style over thinking"), and so was W8.
+
+**How.**  An edit in place, not a regeneration, by Roger's procedure: a
+script makes the edits from the builders that made the test's arms
+([edit_trait_openings.py](../../../data_analysis/edit_trait_openings.py)), an
+independent script checks that every diff stays inside the opening
+([check_opening_edits.py](../../../data_analysis/check_opening_edits.py)),
+and Sonnet 5.5 reads each edited positive beside its original, blind and in
+both orders, for whether it reads noticeably worse.  The negatives were
+edited too where they open as their positive does (Roger: "Go ahead and edit
+the negatives as well"; they reach no data), roles left alone ("we didn't
+have a similar issue there").  Each edited file's `hand_edits` gained a dated
+record.  The run and every record are in
+[corpus_edit/](../../../reports/opening_forms/openings_2026_11/corpus_edit/)
+([edits.json](../../../reports/opening_forms/openings_2026_11/corpus_edit/edits.json),
+[decisions.json](../../../reports/opening_forms/openings_2026_11/corpus_edit/decisions.json)).
+
+**What the review found, and Roger's rulings.**
+
+- *"a person who ... person"* (Roger: "revert to original"): an edit that
+  would say "person" twice in its first sentence ("Be a person who argues
+  until the other person comes around") is not made, nor its negative's.  56
+  positive edits in 51 traits.  That left those traits with three "someone"
+  openings, so (Roger's option b, 2026-11-07) their "You are someone who" was
+  changed to "You are a person who" (W6, +1.5 in the test, not significant;
+  the blind review read all 42 such edits as no worse), and where that would
+  echo too, or one swap was not enough, the trait was regenerated.
+- *Broken grammar in A6*: Sonnet 5.5 read every "This is who you are: X."
+  line on its own, three readings by majority
+  ([grammar_edits.json](../../../reports/opening_forms/openings_2026_11/corpus_edit/grammar_edits.json)):
+  17 positives and 6 negatives broken, mostly a colon's list left as a
+  fragment ("This is who you are: drawn to whatever you have never tried. A
+  new city, a dish you cannot pronounce, ...") or a verb without its subject
+  ("African by heritage and bring it into everything").  Roger: replace the
+  whole set of five positive and five negative instructions with regenerated
+  ones and allowlist them in the check.  A negative broken on its own kept its
+  old text instead (four: [educated](./educated.json),
+  [enfj_mbti](./enfj_mbti.json), [entj_mbti](./entj_mbti.json),
+  [polychronic_hall](./polychronic_hall.json)).
+- *Three "a person" openings* (traits whose originals already had a "You are
+  a person ..." line): [russian](./russian.json) and
+  [indigenous_american](./indigenous_american.json) keep "Be someone who"
+  unedited; [mystical](./mystical.json), which had no "You are X:" line to
+  edit, was regenerated.
+
+**Regenerated (31).**  `--instructions-only` (descriptions, labels and
+questions unchanged, so no antonym recheck), template `66cf2d2511fb` (the
+generator's own menu updated the same day), each file through the checks
+after a regeneration where a failure means another roll
+(`edit_trait_openings.py regen-check`): the September rule of "Reroll pass"
+above (the same positive-side judged fault or pattern flag in two or more of
+five; negative-side faults, invented motives and dashes not counted), five
+distinct openings, no plain "You are X:", Roger's someone / person rule, the
+grammar check on the new "This is who you are" line, and no person echo.
+22 for grammar or the blind review: [adventurous](./adventurous.json),
+[african](./african.json), [american](./american.json),
+[blood_type_ab](./blood_type_ab.json), [brown_haired](./brown_haired.json),
+[dismissive_avoidant_attachment](./dismissive_avoidant_attachment.json),
+[esoteric](./esoteric.json), [face_culture](./face_culture.json),
+[fearful_avoidant_attachment](./fearful_avoidant_attachment.json),
+[female](./female.json), [good_only_when_watched](./good_only_when_watched.json),
+[infj_mbti](./infj_mbti.json), [japanese](./japanese.json),
+[mobility_impaired](./mobility_impaired.json), [polygamous](./polygamous.json),
+[rooted](./rooted.json), [sadistic](./sadistic.json),
+[sleep_deprived](./sleep_deprived.json),
+[southern_hemisphere](./southern_hemisphere.json),
+[stigmatized](./stigmatized.json), [stressed](./stressed.json),
+[western_hemisphere](./western_hemisphere.json); 9 for the balance of
+openings: [amorous](./amorous.json), [aristocratic](./aristocratic.json),
+[friendly](./friendly.json), [grateful](./grateful.json),
+[humanitarian](./humanitarian.json), [just](./just.json),
+[monogamous](./monogamous.json), [mystical](./mystical.json),
+[welcoming](./welcoming.json).  28 passed on the first roll, western
+hemisphere on the second and esoteric on the third (both had written "This is
+who you are: a person ...", a third "a person" opening); [just](./just.json)
+said "each person" in its "Be a person who" line on all three rolls and was
+hand-edited ("each one"; recorded in its `hand_edits`).  Seven files pass on
+flags read and accepted as the October pass accepted them
+([accepted.json](../../../reports/opening_forms/openings_2026_11/corpus_edit/accepted.json)):
+`names_label` on the membership traits, whose label is their content
+(african, american, female, japanese, southern hemisphere; their originals had
+it in three to five of five), polygamous's description content in the text,
+and fearful avoidant attachment's "softened", which quotes the description's
+own "sometimes".  The replaced rolls are kept beside them
+(`regen_roll1_replaced/`, `regen_roll2_replaced/`).
+
+**Result.**  901 traits edited (positives: 901 A1 -> A6, 881 W1 -> W5, 876
+W3 -> W7, 42 W4 -> W6; negatives 546, 860, 864, 38), 31 regenerated; every
+one of the 932 traits now has five distinct openings, a "This is who you are"
+line, no plain "You are X:", and no more than two openings with "someone" or
+with "a person".  `check_opening_edits.py --git <the commit before> --changed-only
+--regenerated decisions.json` passes on the corpus.  Costs: the blind review
+and the grammar checks $20.74
+([usage.json](../../../reports/opening_forms/openings_2026_11/corpus_edit/usage.json);
+the grammar check of the 1,488 A6 edits was $11.77, twice its estimate,
+Sonnet thinking on that prompt), the regenerations $1.76 (in
+[regeneration_usage.json](../regeneration_usage.json)), their audit judging
+$0.82; $23.32 in all, no single run over $20.  The October extraction's trait
+data was made under the old openings: the traits are to be extracted again,
+and their instruction scores judged again.
+
+**Full trial regeneration under the new template (2026-11-07).**  Roger had
+asked on 2026-11-06 for the updated generator to be run on every trait and
+its output tested, then discarded; the agent ran six traits and did not
+report them, so it was run in full on 2026-11-07: all 932 traits,
+`--instructions-only --force --batch` into a copy
+([full_regen_trial/](../../../reports/opening_forms/openings_2026_11/full_regen_trial/)),
+template `66cf2d2511fb`, then the audit, the grammar check of the positive
+"This is who you are" lines and `regen-check`, one roll and no acceptances
+([regen_check_trial.json](../../../reports/opening_forms/openings_2026_11/full_regen_trial/regen_check_trial.json),
+[compare.json](../../../reports/opening_forms/openings_2026_11/full_regen_trial/compare.json)).
+892 batch replies were used as they came and 40 cut-off ones were generated
+again in real time; none refused.  **The menu is followed**: every trait has
+five distinct openings, none the plain "You are X:", none more than two
+"someone".  **The content holds up**: on the 682 traits whose October audit
+still matches the corpus at HEAD (the same judges), positives with a judged
+fault were 100 of 3,410 against 121 (softened 34 / 44, off-trait 45 / 37,
+attitude-only 10 / 20, urges others 4 / 12), and traits with the same judged
+fault in two or more positives 9 against 13.  **838 of 932 pass on the first
+roll; 94 would roll again**, 75 of them on the openings: 62 wrote "This is who
+you are: a person ...", a third "a person" opening; 9 said "person" twice in
+an "a person who" line; 4 "This is who you are" lines read as broken (against
+none in the edited corpus).  The other reasons: echo description 9, softened
+6, off-trait 6, attitude-only 3.  **The "This is who you are" phrase leans to
+the label and to nouns**: exactly the label in 33% of traits (the edited
+corpus 15%, whose X is the old "You are X:" text), a noun phrase in 38% (18%);
+the new wording ("a word or a short phrase ... and a full stop") is the likely
+cause, since the old template's example also named the trait.  Cost $52.40:
+generation $23.67 (batch $21.70), the grammar check $7.16, the audit $21.57.
+
+**`names_label` is no longer a reroll reason (Roger, 2026-11-07).**  "Drop it
+as a reroll reason, but list it as something to keep monitoring."  The flag (a
+positive instruction that names its own label, the audit's self-labelling
+check) came into the trait reroll rule with the rest of the audit's pattern
+flags in October; nobody chose it for rerolls.  On the full trial
+regeneration under the new template (all 932 traits, discarded afterwards;
+[full_regen_trial/](../../../reports/opening_forms/openings_2026_11/full_regen_trial/))
+39 traits named their label in two or more positives, and 34 of them were
+membership, body or status traits whose label is their content (Russian,
+East Asian, Jewish, male, married, left-handed, short), each of a kind the
+October pass and this edit had accepted by hand; the other five (theoretical,
+political, emotional, open (HEXACO), slight) named it twice.  Roger's view
+on naming the trait: paraphrase where possible, for diversity across the
+five, but some traits have no other good word and a few labels are not their
+description's most obvious sense, so the generator keeps the discretion and
+no rule forces either outcome.  The flag stays a measure:
+`edit_trait_openings.py regen-check` notes a label named in two or more
+positives ("monitored, not a reroll"), and `compare` counts traits naming it
+once and twice or more (`MONITORED_PATTERNS`).  The exemption of the "This is
+who you are" line from the flag, added by the agent for this edit, went with
+it.  The open self-labelling question (whether a label in the instructions
+makes responses label themselves) is to be read from the extraction's
+responses.
+
+**Roger's someone / a person rule, read wide (2026-11-07).**  The edit's
+balance check counted only the noun right after the opening frame ("Be a
+person who", "This is who you are: a person ..."), so 27 edited traits kept
+a "This is who you are" phrase that says "person" further in, carried over
+from the old "You are X:" line ([gray_haired](./gray_haired.json) "a
+gray-haired person", [didactic](./didactic.json) "the person in any room who
+...", [cat_person](./cat_person.json) "a cat person through and through"),
+three openings with "person" in all; and
+[sadistic_dark_tetrad](./sadistic_dark_tetrad.json) says "someone" in its
+phrase beside two "someone" openings.  Roger: "Retest, and use it for these
+27", and "make a reroll rule for this": `regen-check` rolls again when more
+than two positive openings say "someone", or "person", counting any such
+word in a "This is who you are" phrase (`wide_opening_word`), for every
+regeneration from now on.  The 28 take their sets from the second full
+trial (template `381812064992`, below), through the usual checks.
+
+**The 28, done (2026-11-07).**  Staged in
+[regen28/](../../../reports/opening_forms/openings_2026_11/corpus_edit/regen28/),
+records in its `records/` (the rolls' stem lists and logs, the audit and
+grammar results, `regen_check_regen28.json`, `accepted.json`, and the 28
+edited versions they replaced in `replaced/`).  Trial 2's sets passed the wide
+rule for 17 of the 28; its template puts "a person" into the phrase far more
+often than the one before (below), and 11 failed.  A first roll of the 11 left
+8; [collaborative](./collaborative.json), [forthright](./forthright.json) and
+[monochronic_hall](./monochronic_hall.json) passed, and
+[cat_person](./cat_person.json) and [dog_person](./dog_person.json) wrote "a
+cat person" and "a dog person" again, their own names, and were accepted.
+A second roll of the other six passed
+[indigenous_australian](./indigenous_australian.json), and a third, one more
+than the rule allows (the agent's slip), passed
+[responsible](./responsible.json).  Four were edited by hand, the phrase
+alone, content kept: [estp_mbti](./estp_mbti.json) "a person of immediate
+action" to "a creature of immediate action", [holistic](./holistic.json) "a
+person who always sees the whole" to "a thinker who always sees the whole",
+[physical_touch_love_language](./physical_touch_love_language.json) "someone
+whose hands are always finding the people around them" to "physically
+affectionate, your hands always finding the people around you", and
+[popular](./popular.json) "the person everyone wants around" to "the one
+everyone wants around".  indigenous_australian's set echoes its description
+in three of five positives; every version of it has (HEAD and trial 1 two of
+five), its description being its content (mob, country, language, kin), and
+it was accepted under the October pass's ruling for membership traits ("the
+label or the description's content in the text").  Checks: `regen-check` 28
+of 28 (3 accepted), the grammar check of the 28 positive "This is who you
+are" lines all OK (the four edits included), the audit 28 of 28 parsed,
+`check_opening_edits.py --regenerated` OK over the 932 files with 59
+regenerated (the 31 and the 28), `check_arrangements.py` and
+`sync_entity_lists.py --check` clean.  The corpus afterwards: no trait over
+two "someone" openings on the wide reading, two over two "a person"
+(cat_person and dog_person, accepted); the phrase a noun phrase in 152
+traits, exactly the label in 149; a description echoed in two or more
+positives in 9 (11 before).  Cost $1.91: the rolls $1.03 (in
+[regeneration_usage.json](../regeneration_usage.json)), the audit $0.65, the
+grammar check $0.23.
+
+**Second full trial: a looser "This is who you are" wording (2026-11-07).**
+Roger, on trial 1's phrase leaning to the bare label: "Try that, retest."
+Template `381812064992` asks for the opening "followed by a description of
+what the person is and a full stop" where `66cf2d2511fb` had "a word or a
+short phrase".  All 932 traits, `--instructions-only --force --batch` into
+[full_regen_trial2/](../../../reports/opening_forms/openings_2026_11/full_regen_trial2/)
+(875 batch replies used, 57 generated again in real time, none refused), then
+the audit, the grammar check of the positive "This is who you are" lines,
+`regen-check` under the wide rule, and `compare`
+([regen_check_trial2.json](../../../reports/opening_forms/openings_2026_11/full_regen_trial2/regen_check_trial2.json),
+[compare.json](../../../reports/opening_forms/openings_2026_11/full_regen_trial2/compare.json)).
+**The paraphrase came, and "a person" with it**: the phrase is exactly the
+label in 178 traits (trial 1: 301) and a noun phrase in 452 (353), but it
+opens with "a person" in 265 (62), "a person who ..." 146 times, which is the
+frame of two of the other four openings.  276 traits break Roger's rule on the
+wide reading (75), and **305 would roll again (94)**: 288 on the openings
+alone, 12 on content alone, 5 on both.  **The content holds**: on the 682
+traits whose October audit still matches HEAD, positives with a judged fault
+were 88 of 3,410 (trial 1: 100, HEAD 121; softened 24 / 34 / 44, off-trait
+48 / 45 / 37, attitude-only 8 / 10 / 20, urges others 3 / 4 / 12), and traits
+with the same fault in two or more positives 6 (9, 13); 5 "This is who you
+are" lines read as broken (4).  Cost $54.10: generation $24.36 (batch
+$21.62), the grammar check $8.08 (its estimate assumed 80 output tokens a
+call, against about 220 measured; the default is 220 since), the audit
+$21.66.
+
+**Two more wordings, on a sample of 100 traits (2026-11-07).**  Generated in
+real time with the template patched at run time (the generator file
+unchanged), grammar checked, not audited:
+[template_sample/](../../../reports/opening_forms/openings_2026_11/template_sample/)
+([compare_sample.json](../../../reports/opening_forms/openings_2026_11/template_sample/compare_sample.json)).
+C1 (`b34698438529`): "followed by what you are, in a word or a short
+description, and a full stop".  C2 (`2f6bb9093343`): "followed by a
+description of what you are, without the words "someone" or "person", and a
+full stop".  On the same 100 traits:
+
+| measure | corpus | trial 1 | trial 2 | C1 | C2 |
+|---|---|---|---|---|---|
+| over two "a person" (wide) | 1 | 8 | 37 | 5 | 9 |
+| over two "someone" (wide) | 0 | 0 | 0 | 0 | 4 |
+| phrase exactly the label | 12 | 41 | 19 | 49 | 21 |
+| phrase a noun phrase | 13 | 32 | 51 | 29 | 32 |
+| "This is who you are" read as broken | 0 | 0 | 0 | 0 | 1 |
+
+Each wording that brings the label down brings "a person" or "someone" into
+the phrase: "in a word" brings the label back (C1), and C2's ban on the two
+words holds in 87 of 100.  The reroll rule catches what gets through, so the
+difference between the wordings is a reroll rate, not the corpus.  Cost
+$11.20: generation $9.57, the grammar check $1.62.  C2's ban was broken in
+13 of the 100, and not selectively: once where the word is the trait's name
+(dog_person, "a dog person, through and through"), once in an idiom
+(authentic, "the same person in every setting"), five times for memberships
+("a person with South Asian heritage") and six times in a plain "a person
+who" or "someone who" that had no need of it.
+
+**The template: trial 1's wording kept (2026-11-07).**  Roger: "I think I
+want to go with the Trial 1 wording.  The other issues are already
+controlled by the reroll process, and that gives us discretion."  The
+generator file is back at `66cf2d2511fb` ("followed by a word or a short
+phrase for what the person is and a full stop"), byte for byte the template
+of trial 1 and of the 31 regenerated traits; the 28 that took trial 2's sets
+keep them, each having passed the checks.

@@ -366,17 +366,53 @@ a trait regenerated for any other reason (a rename, a pair) comes out under
 V2 beside V1 neighbours; the `generator` field tells them apart.
 
 **Five openings, rerolls and `hand_edits` (2026-10-04 onward).**  The five
-positive instructions must open in five different ways ("Be someone who",
-"Become someone who", "From now on, you are", "You are someone who", and the
-plain "You are <adjective>: ..."), as classified by
-`audit_trait_instructions.opening_form`.  Both generators make a second
+positive instructions must open in five different ways, as classified by
+`audit_trait_instructions.opening_form`.  **Since 2026-11-06 the menu is "Be a
+person who", "Become someone who", "From now on, you are a person who", "You
+are someone who" and "This is who you are: <adjective>. ..."** (Roger's
+choice, W5 W2 W7 W4 + A6, from the openings test in
+`reports/opening_forms/openings_2026_11/`): the plain "You are <adjective>:
+..." of the menu before (2026-10-04 to 2026-11-06: "Be someone who", "Become
+someone who", "From now on, you are", "You are someone who", "You are
+<adjective>: ...") made Qwen answer as the plain assistant on undesirable
+traits (keep rate 0.75 against 0.83-0.88), and four "someone who" openings
+were too many.  **Roger's rule for the menu: no majority (three or more of
+five) of openings with "someone", nor of openings with "a person"**, which is
+why the stronger A7 ("You are someone who is X") and A2 ("You are a X
+person") were not taken.  Since 2026-11-07 the rule is read wide, and is a
+reroll reason: a "someone" or "person" anywhere in a "This is who you are"
+phrase ("a gray-haired person", "the person no one picks") counts as an
+opening with it (`edit_trait_openings.wide_opening_word`).  The corpus was moved to the new menu on
+2026-11-07 by `data_analysis/edit_trait_openings.py` (an edit in place, not
+a regeneration; checked by `check_opening_edits.py`): an edit that would say
+"person" twice in one sentence was not made (Roger: "revert to original"),
+and the trait's "You are someone who" became "You are a person who" instead
+to keep the balance; a trait whose "This is who you are" line came out
+ungrammatical, or that could not be balanced, had its ten instructions
+regenerated (31 of 932), and the 28 that then broke the rule on the wide
+reading took the sets of a second trial regeneration, rolled again and hand
+edited where needed.  The record is TRAITS_ADDED.md § "Openings edit
+after the openings test" and the paragraphs after it.  The trait generator's
+template asks for the new menu (`66cf2d2511fb`, "followed by a word or a
+short phrase for what the person is"; Roger kept it on 2026-11-07 over a
+looser wording that paraphrased the label more often but put "a person" into
+the phrase in 265 of 932 traits: "The other issues are already controlled by
+the reroll process, and that gives us discretion"), and
+`edit_trait_openings.py regen-check` runs the
+checks after a regeneration, the openings rule included.  Both generators make a second
 generation by themselves when a reply falls short (`--opening-reroll`, on by
 default; recorded as `generator.opening_rerolls`).  A file still short
 afterwards gets up to two more `--instructions-only` rolls, then a hand edit
 that rewrites the doubled line into the missing form, keeping its content.
 The same goes for a positive-side fault the audit finds in two or more of the
 five (the 2026-10-04 rule and Roger's rulings of that pass:
-TRAITS_ADDED.md § "Trait generator V2", "Reroll pass").  A hand edit is
+TRAITS_ADDED.md § "Trait generator V2", "Reroll pass"), **except
+`names_label`, which since 2026-11-07 is monitored, not a reroll reason**
+(Roger: "Drop it as a reroll reason, but list it as something to keep
+monitoring"; it caught mostly membership and body traits whose label is their
+content).  Roger on naming the trait in its instructions: paraphrase where
+possible, for diversity across the five, but the generator keeps the
+discretion; no template rule forces the label or forbids it.  A hand edit is
 recorded in a top-level `hand_edits` string on the file (date, which
 instruction, what was changed and why).  **A regeneration drops it**
 (since `e1043b9`, 2026-10-10, with a NOTE on stderr), because it describes

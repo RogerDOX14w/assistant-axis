@@ -648,3 +648,431 @@ class TestRoleDepthJudge:
         args = SimpleNamespace(model="claude-sonnet-4-6", min_score=0, concurrency=2, dry_run=False)
         asyncio.run(exp.depth(args, exp.load_plan(out), out))
         assert len(seen) == 1 and "<role>\nforger\n</role>" in seen[0] and "I age the paper" in seen[0]
+
+
+# ---------------------------------------------------------------------------
+# openings (2026-11-06): one body under several openings
+# ---------------------------------------------------------------------------
+
+COLON = "You are easily thrown: every unexpected question breaks your composure, and you stammer."
+SENTENCE = "You are completely stuck the moment circumstances are not ideal. You quit without looking further."
+
+
+class TestSplitAdjective:
+    def test_the_colon_form(self):
+        a = exp.split_adjective(COLON)
+        assert a.colon and a.x == "easily thrown" and a.rest.startswith("every unexpected")
+        assert a.opening == "You are easily thrown:" and a.compose("At heart, you are easily thrown") == COLON.replace(
+            "You are", "At heart, you are", 1)
+
+    def test_the_sentence_form(self):
+        a = exp.split_adjective(SENTENCE)
+        assert not a.colon and a.x == "completely stuck the moment circumstances are not ideal"
+        assert a.rest == " You quit without looking further."
+        assert a.compose("Being stuck is your way") == "Being stuck is your way. You quit without looking further."
+
+    @pytest.mark.parametrize("text", ["You are someone who quits.", "You are a person who quits: always.",
+                                      "Be someone who quits.", "From now on, you are someone who quits.",
+                                      "You are the kind of person who quits."])
+    def test_other_openings_are_not_taken(self, text):
+        assert exp.split_adjective(text) is None
+
+    def test_it_agrees_with_the_audits_classifier_on_the_corpus(self):
+        import glob
+        from data_analysis import audit_trait_instructions as audit
+        for f in sorted(glob.glob("data/traits/instructions/*.json"))[:150]:
+            for p in json.loads(Path(f).read_text())["instruction"]:
+                assert (exp.split_adjective(p["pos"]) is not None) == (audit.opening_form(p["pos"]) == audit.FORM_YOU_ARE), p["pos"]
+
+    @pytest.mark.parametrize("word, art", [("easily", "an"), ("petty", "a"), ("honest", "an"), ("unique", "a"),
+                                           ("unfair", "an"), ("useful", "a"), ("open", "an")])
+    def test_article(self, word, art):
+        assert exp.article(word) == art
+
+
+class TestOpeningArms:
+    def test_mechanical_adjective_arms_keep_the_body(self):
+        a = exp.split_adjective(COLON)
+        arms = exp.adjective_arms(a, None)
+        body = COLON[len("You are easily thrown"):]
+        assert arms["A1"]["text"] == COLON and arms["A1"]["built"] == "as is"
+        assert arms["A2"]["text"] == "You are an easily thrown person" + body and arms["A2"]["built"] == "swap"
+        assert arms["A3"]["text"] == "By nature, you are easily thrown" + body
+        assert arms["A4"]["text"] == "At heart, you are easily thrown" + body
+        assert arms["A5"]["text"] == "You have always been easily thrown" + body
+        assert arms["A7"]["text"] == "You are someone who is easily thrown" + body
+        assert arms["A6"]["text"] == "This is who you are: easily thrown. Every unexpected question breaks your " \
+                                     "composure, and you stammer."
+        assert "A8" not in arms   # needs the rewrite
+
+    def test_a_long_opening_takes_the_rewrite_for_a2_and_a8(self):
+        a = exp.split_adjective(SENTENCE)
+        assert not a.simple
+        rw = {"a_person": "You are a helpless person the moment circumstances are not ideal",
+              "trait_first": "Being stuck comes over you the moment things are not ideal"}
+        arms = exp.adjective_arms(a, rw)
+        assert arms["A2"]["text"] == rw["a_person"] + ". You quit without looking further." and arms["A2"]["built"] == "rewrite"
+        assert arms["A8"]["text"] == rw["trait_first"] + ". You quit without looking further."
+        assert arms["A6"]["text"] == "This is who you are: " + SENTENCE[len("You are "):]
+        assert "A2" not in exp.adjective_arms(a, None)
+
+    def test_who_arms_swap_only_the_opening(self):
+        pos = ["Be someone who frets. More.", "Become someone who frets. More.", "You are someone who frets.",
+               COLON]
+        arms = exp.who_arms(pos)
+        assert set(arms) == {"W1", "W2", "W4", "W5", "W6", "W8", "R1"}   # no W3, so no W7
+        assert arms["W5"]["text"] == "Be a person who frets. More." and arms["W5"]["source"] == "W1"
+        assert arms["R1"]["text"] == "Speak as a person who frets. More."
+        assert arms["W8"]["text"] == "You are the kind of person who frets."
+
+    @pytest.mark.parametrize("text, negates", [("Nothing much ruffles you", True), ("You don't rattle", True),
+                                               ("Calm holds you", False), ("Your notes are tidy", False)])
+    def test_negation(self, text, negates):
+        assert bool(exp.NEGATION.search(text)) is negates
+
+    @pytest.mark.parametrize("text, label, neg, named", [
+        ("Nothing ruffles you", "unflappable", "flustered", False),
+        ("You are never flustered", "unflappable", "flustered", True),
+        ("Fairness means nothing to you", "unfair", "non-unfair", True),     # the root of un-fair
+        ("You are careless", "careless (HEXACO)", "careful (HEXACO)", False),
+        ("You are never careful", "careless (HEXACO)", "careful (HEXACO)", True),
+        ("You are kind", "kind", "non-kind", False),
+    ])
+    def test_names_opposite(self, text, label, neg, named):
+        assert exp.names_opposite(text, label, neg) is named
+
+
+class TestRewrite:
+    GOOD = 'Keeps the image.\n{"trait_first": "Every striking image captures your whole mind", ' \
+           '"a_person": "You are an utterly capturable person"}'
+
+    def test_parse(self):
+        assert exp.parse_rewrite(self.GOOD) == {"trait_first": "Every striking image captures your whole mind",
+                                                "a_person": "You are an utterly capturable person"}
+
+    @pytest.mark.parametrize("tf, ap, message", [
+        ("You are captured by images", "You are a capturable person", "you are"),
+        ("Your answers drift toward every image", "You are a capturable person", "questions and answers"),
+        ("Playing a dreamer comes naturally", "You are a capturable person", "part to play"),
+        ("Images", "You are a capturable person", "words"),
+        ("Every image captures your mind", "You are capturable", "You are a ... person"),
+        ("Every image captures your mind", "You are a person who is capturable", "You are a ... person"),
+        ("Capture is your nature", "You are a capturable person", "nature"),
+        ("Every image captures your mind", "You are a stuck-in-a-rut person", "plain words"),
+        ("Every image captures your mind", "You are a very easily and deeply captured person", "plain words"),
+    ])
+    def test_a_reply_off_the_rules_is_refused(self, tf, ap, message):
+        with pytest.raises(ValueError, match=message):
+            exp.parse_rewrite(json.dumps({"trait_first": tf, "a_person": ap}))
+
+    def test_a_word_the_opening_already_has_is_allowed(self):
+        reply = json.dumps({"trait_first": "Inventiveness runs so deep that the ordinary answer feels like failure",
+                            "a_person": "You are an inventive person"})
+        with pytest.raises(ValueError, match="questions and answers"):
+            exp.parse_rewrite(reply)
+        opening = "You are inventive to the point where the ordinary answer feels like a failure."
+        assert exp.parse_rewrite(reply, opening=opening)["trait_first"].startswith("Inventiveness")
+
+    def test_a_sentence_opening_may_go_on_after_person_but_not_with_who(self):
+        ok = json.dumps({"trait_first": "Being stuck comes over you whenever things are not ideal",
+                         "a_person": "You are a helpless person the moment circumstances are not ideal"})
+        assert exp.parse_rewrite(ok, 15, colon=False)["a_person"].endswith("not ideal")
+        with pytest.raises(ValueError):
+            exp.parse_rewrite(ok, 15, colon=True)
+        who = json.dumps({"trait_first": "Being stuck comes over you", "a_person": "You are a stuck person who quits"})
+        with pytest.raises(ValueError):
+            exp.parse_rewrite(who, 15, colon=False)
+
+    def test_the_prompt_shows_the_opening_and_what_follows(self):
+        a = exp.split_adjective(COLON)
+        p = exp.rewrite_prompt("easily thrown", "This means losing composure.", a)
+        assert 'Its opening is "You are easily thrown"' in p and '(": every unexpected question' in p
+        assert "Four to twelve words." in p and 'ending with the word "person"' in p
+        assert "{" not in p.replace('{"trait_first"', "")
+        s = exp.rewrite_prompt("helpless", "This means giving up.", exp.split_adjective(SENTENCE))
+        assert 'not with "who"' in s and "no more than 14 words" in s
+
+    def test_an_unusable_reply_is_asked_again_with_the_reason(self, monkeypatch):
+        seen = []
+
+        async def fake(client, prompt, model, max_tokens, limiter, usage=None, *, reject_truncated=False):
+            seen.append(prompt)
+            return "No JSON here." if len(seen) == 1 else self.GOOD
+        import assistant_axis.judge as judge_mod
+        monkeypatch.setattr(judge_mod, "call_anthropic_judge_single", fake)
+        a = exp.split_adjective(COLON)
+        out = asyncio.run(exp.rewrite_one(None, "claude-sonnet-5-5", "x", "easily thrown", "d", a, None, None))
+        assert out["attempts"] == 2 and out["trait_first"].startswith("Every") and out["model"] == "claude-sonnet-5-5"
+        assert "could not be used: no JSON object" in seen[1]
+
+
+class TestOpeningsPlan:
+    def make_traits(self, tmp_path):
+        d = tmp_path / "traits"
+        d.mkdir()
+        flust = {"positive_label": "easily thrown", "negative_label": "unflappable", "description": "Losing composure.",
+                 "instruction": [{"pos": "Be someone who frets. More."}, {"pos": "Become someone who frets."},
+                                 {"pos": "From now on, you are someone who frets."}, {"pos": "You are someone who frets."},
+                                 {"pos": COLON}],
+                 "questions": [f"Own question {i}?" for i in range(40)]}
+        (d / "easily_thrown.json").write_text(json.dumps(flust))
+        other = dict(flust, positive_label="calm", negative_label="non-calm",
+                     instruction=[{"pos": "Be someone who rests."}, {"pos": "You are calm: you rest."}])
+        (d / "calm.json").write_text(json.dumps(other))
+        return d
+
+    def test_every_arm_that_can_be_made(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(exp, "load_questions", lambda n: [f"Q{i}?" for i in range(n)])
+        d = self.make_traits(tmp_path)
+        rw = {"easily_thrown": {"trait_first": "Composure leaves you at the first surprise", "a_person": "x"}}
+        blind = {"easily_thrown": [f"blind {i}. More." for i in range(5)]}
+        plan, missing = exp.build_openings_plan(["easily_thrown", "calm", "gone"], d,
+                                                kinds={"calm": "good"}, problem={"easily_thrown"},
+                                                rewrites=rw, blind=blind)
+        t = plan["traits"]["easily_thrown"]
+        names = [v["name"] for v in t["variants"]]
+        assert names == ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "R1", "A1", "A2", "A3", "A4", "A5", "A6",
+                         "A7", "A8", "B0", "B3", "B4"]
+        by = {v["name"]: v for v in t["variants"]}
+        assert by["B3"]["text"] == "blind 3. More." and by["B3"]["opening"] == "blind 3." and by["B3"]["built"] == "blind"
+        assert by["A8"]["text"].startswith("Composure leaves you at the first surprise: every unexpected")
+        assert t["problem"] is True and t["kind"] == "unclassified" and t["label"] == "easily thrown"
+        assert t["questions"] == [f"Q{i}?" for i in range(0, 100, 5)] and t["adjective"] == {"x": "easily thrown", "colon": True}
+        c = plan["traits"]["calm"]
+        assert c["kind"] == "good" and not c["problem"]
+        assert {v["name"] for v in c["variants"]} == {"W1", "W5", "A1", "A2", "A3", "A4", "A5", "A6", "A7"}
+        assert missing["(no file)"] == ["gone"] and missing["A8"] == ["calm"] and "B0" not in missing
+        assert plan["max_tokens"] == 1024 and plan["temperature"] == 0.7 and plan["judge"] == exp.STEP3_JUDGE
+        assert ["B3", "A8"] in plan["arm_pairs"]
+
+    def test_own_questions_are_spread_over_the_files(self, tmp_path):
+        d = self.make_traits(tmp_path)
+        plan, _ = exp.build_openings_plan(["easily_thrown"], d, questions="own", n_questions=8)
+        assert plan["traits"]["easily_thrown"]["questions"] == [f"Own question {i}?" for i in range(0, 40, 5)]
+
+    def test_plan_openings_command(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(exp, "load_questions", lambda n: [f"Q{i}?" for i in range(n)])
+        d = self.make_traits(tmp_path)
+        out = tmp_path / "out"
+        (tmp_path / "stems.json").write_text(json.dumps(["easily_thrown", "calm"]))
+        (tmp_path / "kinds.json").write_text(json.dumps({"calm": "nice"}))
+        args = exp.parse_args(["plan-openings", "--out", str(out), "--stems", str(tmp_path / "stems.json"),
+                               "--traits-dir", str(d), "--kinds", str(tmp_path / "kinds.json")])
+        with pytest.raises(SystemExit, match="kinds must be one of"):
+            args.func(args)
+        (tmp_path / "kinds.json").write_text(json.dumps({"calm": "good"}))
+        args.func(args)
+        plan = exp.load_plan(out)
+        assert len(plan["traits"]) == 2
+        with pytest.raises(SystemExit, match="--replace"):
+            args.func(args)
+
+
+def _write_scores(scores_dir, traits_dir, stem, shares, n=100):
+    """A trait file with five instructions and step-3 scores with the given share of 3s per instruction."""
+    instr = ["Be someone who a.", "Become someone who b.", "From now on, you are someone who c.",
+             "You are someone who d.", "You are petty: e."]
+    (traits_dir / f"{stem}.json").write_text(json.dumps({"instruction": [{"pos": s} for s in instr]}))
+    sc = {f"pos_p{p}_q{q}": (3 if q < round(shares[p] * n) else 1) for p in range(5) for q in range(n)}
+    (scores_dir / f"{stem}.json").write_text(json.dumps(sc))
+
+
+class TestProblemInstructions:
+    def test_under_half_of_the_others_and_significant(self, tmp_path):
+        s, t = tmp_path / "scores", tmp_path / "traits"
+        s.mkdir(), t.mkdir()
+        _write_scores(s, t, "petty", [0.9, 0.85, 0.9, 0.95, 0.05])
+        _write_scores(s, t, "fine", [0.9, 0.85, 0.9, 0.95, 0.6])
+        _write_scores(s, t, "low", [0.06, 0.04, 0.05, 0.05, 0.01])   # under half, not significant
+        (s / "usage.json").write_text("{}")
+        rows = exp.problem_instructions(s, t)
+        assert [(r["stem"], r["index"], r["adjective"]) for r in rows] == [("petty", 4, True)]
+        assert rows[0]["kept"] == 5 and rows[0]["others"] == pytest.approx(0.9)
+
+
+class TestStep3Judge:
+    def test_the_template_is_step_3s(self):
+        mod = exp._pipeline_judge_module()
+        from assistant_axis.judge_rubrics import get_version
+        for stem in ("flustered", "careless_hexaco"):
+            doc = json.loads(Path(f"data/traits/instructions/{stem}.json").read_text())
+            mine = exp.step3_trait_template(doc["positive_label"], doc["description"], 20)
+            assert mine == mod._trait_prompt(stem, Path("data/traits/instructions"), get_version(20))
+
+    def test_the_spec_and_the_stamp(self, tmp_path):
+        assert exp.step3_judge_spec({}) is None
+        spec = exp.step3_judge_spec({"judge": {"rubric": "step3"}})
+        assert spec["model"] == "gpt-5.6-luna" and spec["prompt_version"] == 20 and spec["service_tier"] == "flex"
+        with pytest.raises(SystemExit):
+            exp.step3_judge_spec({"judge": {"rubric": "other"}})
+        stamp = exp.judge_stamp(spec)
+        assert stamp["truncation_marker"] == "…" and stamp["reply_format"] == "score_marker"
+        (tmp_path / "scores").mkdir()
+        (tmp_path / "scores" / "petty.json").write_text("{}")
+        with pytest.raises(SystemExit, match="old judge"):
+            exp.check_judge_stamp(tmp_path, spec)
+        exp.check_judge_stamp(tmp_path, None)
+        (tmp_path / "scores" / exp.JUDGE_STAMP).write_text(json.dumps(stamp))
+        exp.check_judge_stamp(tmp_path, spec)
+        with pytest.raises(SystemExit, match="was judged with"):
+            exp.check_judge_stamp(tmp_path, None)
+        with pytest.raises(SystemExit, match="was judged with"):
+            exp.check_judge_stamp(tmp_path, dict(spec, prompt_version=13))
+
+    def test_judging_marks_cut_answers_and_reads_the_marker(self, out_dir, monkeypatch):
+        plan = json.loads(json.dumps(PLAN))
+        plan["judge"] = {"rubric": "step3"}
+        (out_dir / "plan.json").write_text(json.dumps(plan))
+        (out_dir / "responses").mkdir()
+        rows = [{"variant": v, "question_index": q, "question": f"Q{q}?", "finish_reason": "length" if q == 2 else "stop",
+                 "conversation": [{"role": "assistant", "content": f"answer {v} {q}"}]}
+                for v in ("tendency", "be_someone") for q in range(3)]
+        (out_dir / "responses" / "petty.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+        seen, clients = [], []
+
+        async def fake(client, prompt, model, max_tokens, limiter, usage=None, **kw):
+            seen.append((prompt, kw))
+            return "Shown.\nSCORE: 3" if "be_someone" in prompt else "Not shown.\nSCORE: 1"
+        import assistant_axis.judge as judge_mod
+        monkeypatch.setattr(exp, "call_judge_single", fake)
+        monkeypatch.setattr(judge_mod, "judge_client", lambda m, tier=None: clients.append((m, tier)) or object())
+        monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
+        args = SimpleNamespace(judge_model=None, requests_per_second=50, dry_run=False, via=None, chunk=4)
+        asyncio.run(exp.judge(args, exp.load_plan(out_dir), out_dir))
+        scores = json.loads((out_dir / "scores" / "petty.json").read_text())
+        assert len(scores) == 6 and scores["be_someone_q2"] == 3 and scores["tendency_q0"] == 1
+        cut = [p for p, _ in seen if "answer tendency 2" in p][0]
+        assert "answer tendency 2…" in cut and "answer tendency 1…" not in "".join(p for p, _ in seen)
+        assert clients == [("gpt-5.6-luna", "flex"), ("gpt-5.6-luna", None)]
+        kw = seen[0][1]
+        assert kw["service_tier"] == "flex" and kw["reject_truncated"] is True and kw["fallback_client"] is not None
+        assert json.loads((out_dir / "scores" / exp.JUDGE_STAMP).read_text())["model"] == "gpt-5.6-luna"
+        args.judge_model = "gpt-4.1-mini"
+        with pytest.raises(SystemExit, match="does not apply"):
+            asyncio.run(exp.judge(args, exp.load_plan(out_dir), out_dir))
+
+    def test_a_slow_call_holds_up_only_its_worker(self, out_dir, monkeypatch):
+        """The first call waits until every other response is judged; in fixed chunks it would hold up its
+        chunk and never finish.  The scores are written on the way out as well as every --chunk answers."""
+        plan = json.loads(json.dumps(PLAN))
+        plan["judge"] = {"rubric": "step3"}
+        (out_dir / "plan.json").write_text(json.dumps(plan))
+        (out_dir / "responses").mkdir()
+        rows = [{"variant": v, "question_index": q, "question": f"Q{q}?", "finish_reason": "stop",
+                 "conversation": [{"role": "assistant", "content": f"answer {v} {q}"}]}
+                for v in ("tendency", "be_someone") for q in range(3)]
+        (out_dir / "responses" / "petty.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+        done = []
+
+        async def fake(client, prompt, model, max_tokens, limiter, usage=None, **kw):
+            if "answer tendency 0" in prompt:
+                for _ in range(200):
+                    if len(done) == 5:
+                        break
+                    await asyncio.sleep(0)
+                else:
+                    raise AssertionError("the slow call held up the others")
+            done.append(prompt)
+            return "Shown.\nSCORE: 3"
+        import assistant_axis.judge as judge_mod
+        monkeypatch.setattr(exp, "call_judge_single", fake)
+        monkeypatch.setattr(judge_mod, "judge_client", lambda m, tier=None: object())
+        monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
+        args = SimpleNamespace(judge_model=None, requests_per_second=1000, dry_run=False, via=None, chunk=4,
+                               in_flight=2)
+        asyncio.run(exp.judge(args, exp.load_plan(out_dir), out_dir))
+        assert len(done) == 6 and "answer tendency 0" in done[-1]
+        assert len(json.loads((out_dir / "scores" / "petty.json").read_text())) == 6
+
+    def test_the_plans_generation_settings(self, out_dir, monkeypatch):
+        plan = json.loads(json.dumps(PLAN))
+        plan["max_tokens"] = 1024
+        (out_dir / "plan.json").write_text(json.dumps(plan))
+        create = AsyncMock(return_value=_completion("An answer.", provider="DeepInfra"))
+        rows = TestGenerate().run(out_dir, monkeypatch, create)
+        assert create.call_args.kwargs["max_tokens"] == 1024 and create.call_args.kwargs["temperature"] == 0.7
+        assert rows[0]["max_tokens"] == 1024 and rows[0]["temperature"] == 0.7
+        assert exp.generation_settings({}) == (0.7, 512)
+
+
+class TestDepthByBatch:
+    def test_batched_reads_are_recorded_and_the_rest_left_for_real_time(self, out_dir, monkeypatch):
+        import assistant_axis.anthropic_batch as ab
+        sent = {}
+
+        class FakeRunner:
+            def __init__(self, client, work, state, **kw):
+                assert kw["adopt_lost_batches"] is False
+
+            async def resume(self):
+                return set()
+
+            def write_chunks(self, requests):
+                sent.update(requests)
+                return [requests]
+
+            async def run(self, chunks, on_result, on_batch_done):
+                for cid, params in chunks[0]:
+                    text = TestDepthJudge.GOOD if cid.endswith("q0") else "no verdict"
+                    on_result(cid, {"content": [{"type": "text", "text": text}], "stop_reason": "end_turn",
+                                    "usage": {"input_tokens": 600, "output_tokens": 80}}, None)
+                on_batch_done()
+                return []
+        monkeypatch.setattr(ab, "AnthropicBatchRunner", FakeRunner)
+        judged = {"petty": {}}
+        todo = [("petty", f"{v}_q{q}", f"prompt {v} {q}") for v in ("tendency", "be_someone") for q in range(3)]
+        usage, tally = exp.CheckpointedUsage(out_dir), {"ok": 0, "total": 0}
+        left = asyncio.run(exp.depth_by_batch(None, "claude-sonnet-4-6", todo, judged, PLAN, out_dir, usage, tally))
+        usage.close()
+        assert len(sent) == 6 and sent["petty|tendency_q0"]["temperature"] == 0.0
+        assert sent["petty|tendency_q0"]["messages"][0]["content"] == "prompt tendency 0"
+        assert set(judged["petty"]) == {"tendency_q0", "be_someone_q0"} and judged["petty"]["tendency_q0"]["via"] == "batch"
+        assert [k for _, k, _ in left] == ["tendency_q1", "tendency_q2", "be_someone_q1", "be_someone_q2"]
+        assert tally == {"ok": 2, "total": 6}
+        u = json.loads((out_dir / "usage.json").read_text())
+        assert u["per_model"]["claude-sonnet-4-6:batch"]["n_calls"] == 6
+        assert json.loads((out_dir / "depth" / "petty.json").read_text()).keys() == {"tendency_q0", "be_someone_q0"}
+
+
+class TestOpeningsReport:
+    def make(self, tmp_path, shares):
+        """One trait per entry of ``shares`` (arm -> share scored 3, out of 20)."""
+        plan = {"traits": {}, "arm_pairs": [["A3", "A1"]]}
+        (tmp_path / "responses").mkdir()
+        (tmp_path / "scores").mkdir()
+        for i, per in enumerate(shares):
+            trait = f"t{i}"
+            plan["traits"][trait] = {"label": trait, "description": "d", "kind": "bad" if i % 2 else "good",
+                                     "problem": i == 0, "variants": [{"name": a, "text": a} for a in per]}
+            rows, sc = [], {}
+            for a, share in per.items():
+                for q in range(20):
+                    rows.append({"variant": a, "question_index": q, "question": "Q?",
+                                 "conversation": [{"role": "assistant", "content": "As an AI, someone who" if a == "W1" else "x"}]})
+                    sc[f"{a}_q{q}"] = 3 if q < round(share * 20) else 0
+            (tmp_path / "responses" / f"{trait}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+            (tmp_path / "scores" / f"{trait}.json").write_text(json.dumps(sc))
+        return plan
+
+    def test_menus_flag_an_opening_under_half_its_siblings(self, tmp_path):
+        base = {"W1": 0.9, "W2": 0.9, "W3": 0.85, "W4": 0.9}
+        plan = self.make(tmp_path, [dict(base, A1=0.0, A3=0.8), dict(base, A1=0.9, A3=0.9)])
+        rep = exp.openings_report(plan, tmp_path)
+        cur = rep["menus"]["current"]
+        assert cur["traits"] == 2 and cur["traits_flagged"] == 1 and cur["flagged_by_arm"]["A1"] == 1
+        assert cur["problem_list"]["traits_flagged"] == 1 and cur["weakest"]["trait"] == "t0"
+        assert rep["menus"]["fifth=A3"]["traits_flagged"] == 0
+        assert rep["arms"]["A1"]["complete_failures"] == 1 and rep["arms"]["A1"]["under_half_of_W1_W4"] == 1
+        assert rep["arms"]["W1"]["ai"] == 100 and rep["arms"]["W1"]["echo"] == 100 and rep["arms"]["A1"]["echo"] is None
+        assert rep["pairs"]["A3 vs A1"]["all"]["difference"] == pytest.approx(40)
+        assert "fifth=A3" in exp.render_openings_report(rep)
+        # a flagged trait's count must be a plain int, or --write cannot store the report (2026-11-06)
+        assert type(rep["arms"]["A1"]["under_half_of_W1_W4"]) is int
+        json.dumps(rep)
+
+    def test_a_menu_must_have_five(self, tmp_path):
+        plan = self.make(tmp_path, [{"W1": 0.5}])
+        (tmp_path / "plan.json").write_text(json.dumps(plan))
+        args = exp.parse_args(["openings-report", "--out", str(tmp_path), "--menu", "m=W1,W2"])
+        with pytest.raises(SystemExit, match="five arms"):
+            args.func(args)

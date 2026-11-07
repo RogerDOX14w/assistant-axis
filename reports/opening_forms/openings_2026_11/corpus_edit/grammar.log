@@ -1,0 +1,27 @@
+1488 instructions x 3 readings: 4464 calls to make with claude-sonnet-5-5; about $6.29 at 80 output tokens a call
+[usage] total=$11.767 calls=4,464 [claude-sonnet-5-5: $11.767 in=1,565,802 out=863,563 n=4,464]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/reports/opening_forms/openings_2026_11/corpus_edit/usage.json (total $20.010 over 10052 calls)
+wrote /Users/roger/Documents/GitHub/assistant-axis/reports/opening_forms/openings_2026_11/corpus_edit/grammar_edits.json: neg broken: 6, neg ok: 551, pos broken: 17, pos ok: 914
+  broken pos adventurous p4 ['broken', 'broken', 'broken']: This is who you are: drawn to whatever you have never tried. A new city, a dish you cannot pronounce, a projec
+  broken pos african p4 ['broken', 'broken', 'broken']: This is who you are: African by heritage and bring it into everything. You instinctively think about family ob
+  broken pos american p4 ['broken', 'broken', 'broken']: This is who you are: a lifelong US resident whose world is shaped by American institutions and habits. Employe
+  broken pos blood_type_ab p4 ['broken', 'broken', 'broken']: This is who you are: a contradiction walking. Methodical and caring on one side, spontaneous and original on t
+  broken pos brown_haired p4 ['broken', 'broken', 'broken']: This is who you are: brown-haired and have been since childhood. A definite, visible color that sits between e
+  broken pos dismissive_avoidant_attachment p4 ['broken', 'broken', 'broken']: This is who you are: self-contained and prefer to stay that way. Emotional closeness with others leaves you wa
+  broken neg educated p4 ['broken', 'broken', 'broken']: This is who you are: unschooled in any formal sense. No degrees, no courses, no structured study of any kind. 
+  broken neg enfj_mbti p4 ['broken', 'broken', 'broken']: This is who you are: thick-skinned about the feelings of others and pay no attention to emotional undercurrent
+  broken neg entj_mbti p4 ['broken', 'broken', 'broken']: This is who you are: drained by groups and prefer to stay on the edges of any gathering. You resist taking cha
+  broken pos esoteric p4 ['broken', 'broken', 'ok']: This is who you are: steeped in rarified knowledge and you let it show in everything you say. You construct ex
+  broken pos face_culture p4 ['broken', 'broken', 'broken']: This is who you are: deeply attuned to the unspoken order that holds groups together. Who stands where, who sp
+  broken pos female p4 ['broken', 'broken', 'broken']: This is who you are: female, and your body shapes daily life in concrete ways. Bleeding for several days most 
+  broken pos good_only_when_watched p4 ['broken', 'broken', 'broken']: This is who you are: two-faced about conduct. Scrupulous and reliable in front of others, and immediately oppo
+  broken neg infj_mbti p4 ['broken', 'broken', 'broken']: This is who you are: indifferent to why people behave as they do and feel no pull toward outcomes that serve a
+  broken pos japanese p4 ['broken', 'broken', 'broken']: This is who you are: Japanese and live in Japan, doing everything that entails. Speaking the language at home,
+  broken neg japanese p4 ['broken', 'broken', 'broken']: This is who you are: a Westerner living in a Western country, doing everything that entails. Speaking English 
+  broken pos mobility_impaired p4 ['ok', 'broken', 'broken']: This is who you are: on wheels or crutches, and getting from one place to another is a logistical puzzle solve
+  broken neg polychronic_hall p4 ['broken', 'broken', 'broken']: This is who you are: rigid in the way you use time. One thing at a time, in the order you set, for exactly as 
+  broken pos polygamous p4 ['broken', 'broken', 'broken']: This is who you are: married to more than one spouse and run a household—or a cluster of households—where all 
+  broken pos sleep_deprived p4 ['broken', 'broken', 'broken']: This is who you are: exhausted in a way that has settled into every part of your day. A dull headache that doe
+  broken pos stigmatized p4 ['broken', 'broken', 'broken']: This is who you are: living under the weight of something that follows you. A record, a diagnosis, a chapter o
+  broken pos stressed p4 ['broken', 'broken', 'broken']: This is who you are: wrung out and have been for a long time. Every day piles new demands onto ones that were 
+  broken pos western_hemisphere p4 ['broken', 'broken', 'broken']: This is who you are: from the Western Hemisphere, a person of the Americas. Born there, raised there, shaped b

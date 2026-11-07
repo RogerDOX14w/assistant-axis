@@ -1,0 +1,765 @@
+{
+  "model": "claude-sonnet-5-5",
+  "readings": 3,
+  "prompt_sha256": "0f7e4dece9c3",
+  "answers": {
+    "didactic|p4|pos|0c4cc32e6896|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: didactic.\", uses the deliberate opening with a single word after the colon naming what the person is, and the second sentence, \"You issue the full explanation... and you never wait...\", is a complete, well-formed compound sentence with a subject for each verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "didactic|p4|pos|0c4cc32e6896|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: didactic.\", is the deliberate opening with a fitting descriptor after the colon, and the second, \"You issue the full explanation as the natural response to any situation, you correct errors immediately and completely, and you never wait for a question before providing an answer.\", is a complete sentence with a subject and parallel verbs in each clause.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "didactic|p4|pos|0c4cc32e6896|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: didactic.\", uses the deliberate opening with a single word after the colon that says what the person is, and the second sentence, \"You issue the full explanation as the natural response to any situation, you correct errors immediately and completely, and you never wait for a question before providing an answer.\", is a grammatical compound sentence with a consistent subject \"you\" and properly formed verbs (although the comma-separated clauses are a plain series, each has its own subject and verb, which is acceptable).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "collaborative|p4|pos|1ed7dc271853|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a collaborator in everything.\", follows the allowed opening pattern with a noun phrase after the colon, and the second sentence, \"You ask for input before acting, invite others to carry pieces of whatever you are doing, and measure success by what a group accomplished, not what you did.\", has a consistent subject \"You\" with three parallel verbs (ask, invite, measure) and a correctly formed contrast clause.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "collaborative|p4|pos|1ed7dc271853|r0": {
+      "verdict": "ok",
+      "reply": "The text has two sentences: the opening \"This is who you are: a collaborator in everything.\" uses the permitted colon-plus-noun-phrase form, and the second, \"You ask for input before acting, invite others to carry pieces of whatever you are doing, and measure success by what a group accomplished, not what you did,\" has a consistent subject \"You\" with three parallel present-tense verbs (ask, invite, measure) and a well-formed contrast clause at the end.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "collaborative|p4|pos|1ed7dc271853|r2": {
+      "verdict": "ok",
+      "reply": "The text has two sentences: \"This is who you are: a collaborator in everything.\" and \"You ask for input before acting, invite others to carry pieces of whatever you are doing, and measure success by what a group accomplished, not what you did.\" The first uses the permitted opening with a noun phrase that says what the person is, and the second is a complete sentence with a shared subject \"You\" and three parallel verbs (ask, invite, measure) that agree, with \"not what you did\" a fine contrastive complement.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "cat_person|p4|pos|8ffe4f97f918|r0": {
+      "verdict": "ok",
+      "reply": "Both are grammatical: the opening names what the person is after the colon (\"a cat person through and through\"), and \"Every other animal comes second\" is a complete sentence with a subject and verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "cat_person|p4|pos|8ffe4f97f918|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are well formed: the opening gives a noun phrase (\"a cat person through and through\") after the colon that says what the person is, and \"Every other animal comes second\" is a complete, correct sentence.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "cat_person|p4|pos|8ffe4f97f918|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the opening's colon phrase \"a cat person through and through\" says what the person is, and \"Every other animal comes second.\" is a complete sentence with a subject and a main verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "edgy|p4|pos|f8627c4f911b|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: deliberately provocative.\", is the permitted opening with a descriptive phrase after the colon, and the second sentence, \"You pick at taboos the way others pick at a scab, you crack jokes about death, failure, and disgrace without apology, and you treat discomfort in an audience as a sign you have done something right.\", is a grammatical compound sentence with a proper subject and verb in each clause (\"others pick\" is fine too).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "edgy|p4|pos|f8627c4f911b|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: deliberately provocative.\", is the sanctioned opening with a descriptive phrase after the colon, and the second sentence, \"You pick at taboos the way others pick at a scab, you crack jokes about death, failure, and disgrace without apology, and you treat discomfort in an audience as a sign you have done something right.\", is a grammatical compound with a subject and verb in each clause (the comma-joined clauses form a standard series).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "fat|p4|pos|fcc3d6d7705c|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: fat.\", uses the deliberate opening pattern with a word after the colon saying what the person is, and the second sentence, \"You take up more space... and feel warm and sweaty...\", has the subject \"You\" with the compound verbs \"take up,\" \"navigate,\" and \"feel\" all agreeing and well-formed.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "blue_eyed|p4|pos|d301264d3825|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate \"This is who you are: blue-eyed.\" opening, and the second is a well-formed series of three coordinated independent clauses, each with its own subject and verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "estp_mbti|p4|pos|c22c8e894bef|r1": {
+      "verdict": "ok",
+      "reply": "The text has only one sentence, so there is no second sentence to check; that sentence (\"This is who you are: a creature of immediate action.\") is a deliberate opening with a noun phrase after the colon, and the following sentence (\"You learn by... you stay sharp... you let the logic...\") has a consistent subject \"you\" with parallel verbs and a correct \"rather than consulting\" construction, so both are grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "dog_person|p4|pos|2dd007080e3b|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening with \"a dog person through and through\" naming what the person is, and the second is a correctly punctuated series of three independent clauses whose verbs agree with their subjects.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "fat|p4|pos|fcc3d6d7705c|r0": {
+      "verdict": "ok",
+      "reply": "Sentence one, \"This is who you are: fat.\", uses the deliberate opening with a single word after the colon that says what the person is, and sentence two, \"You take up more space than average seating allows, navigate shopping by heading straight to the larger sizes, and feel warm and sweaty in conditions that leave everyone else cool.\", has the subject \"You\" governing three parallel verbs (take, navigate, feel) in agreement, so both are grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "fat|p4|pos|fcc3d6d7705c|r2": {
+      "verdict": "ok",
+      "reply": "Sentence one, \"This is who you are: fat.\", is the deliberate opening with a single word after the colon naming what the person is, and sentence two, \"You take up more space than average seating allows, navigate shopping by heading straight to the larger sizes, and feel warm and sweaty in conditions that leave everyone else cool.\", has a consistent subject \"You\" governing three parallel verbs (take, navigate, feel) in agreeing form.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "dog_person|p4|pos|2dd007080e3b|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate \"This is who you are: a dog person through and through\" opening, and the second is a correctly punctuated series of three independent clauses, each with its own subject and verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "dog_person|p4|pos|2dd007080e3b|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate opening with a fitting noun phrase after the colon, and the second is a well-formed series of three independent clauses, each with its own subject and verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "edgy|p4|pos|f8627c4f911b|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the permitted opening with \"deliberately provocative\" describing the person, and the second is a well-formed series of three independent clauses, each with the subject \"you\" and a proper verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "family_oriented|p4|pos|b4f491bdc68b|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: family-first in every corner of life,\" is a deliberate opening whose phrase after the colon says what the person is, and the second sentence, \"You choose the job... around,\" is a complete, well-formed sentence with parallel verbs and a proper subject.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "forthright|p4|pos|4d6427ecbf36|r0": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences. The first, \"This is who you are: forthright.\", is the deliberate opening with a single word after the colon that says what the person is, so it is fine. The second, \"You say what you actually think the moment it becomes clear to you, whether the other person asked for it or not, and whether the moment is convenient or not.\", is a complete, well-formed sentence with a proper subject and verb, and its parallel \"whether\" clauses fit together correctly.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "estp_mbti|p4|pos|c22c8e894bef|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the sanctioned opening with a noun phrase after the colon, and the second is a well-formed series of three clauses, each with the subject \"you\" and a proper verb, joined by commas and \"and.\"\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "gray_haired|p4|pos|03b69842238f|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: silver-haired.\", uses the permitted opening with a descriptive word after the colon, and the second sentence is a complete, well-formed sentence with proper subjects and verbs (\"Your hair is white and coarse now... and the roots grow in fast enough that you are always planning...\").\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "holistic|p4|pos|88a91b013128|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the sanctioned opening with a noun phrase (\"a thinker who always sees the whole\") after the colon, and the second has a proper subject and verbs (\"You notice... and any plan you make accounts for...\") with coherent agreement and structure.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "blue_eyed|p4|pos|d301264d3825|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate opening with \"blue-eyed\" after the colon, and the second is a well-formed series of three independent clauses (each with its own subject and verb) joined by commas and \"and.\"\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "holistic|p4|pos|88a91b013128|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a thinker who always sees the whole.\", uses the allowed opening with a noun phrase naming what the person is, and the second sentence, \"You notice how the pieces of a situation fit together and feed back on each other, and any plan you make accounts for what it will disturb elsewhere in the system.\", is a well-formed compound sentence with proper subjects and verbs.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "gray_haired|p4|pos|03b69842238f|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: silver-haired.\", is the deliberate opening with a descriptive word after the colon, and the second, \"Your hair is white and coarse now, drier than it was in earlier years, and the roots grow in fast enough that you are always planning the next touch-up or the next purple shampoo wash.\", is a complete, well-formed sentence with proper subjects and verbs.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "forthright|p4|pos|4d6427ecbf36|r2": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences, and both are grammatical: the first is the deliberate \"This is who you are: forthright.\" opening, with a fitting one-word descriptor, and the second is a complete sentence with a clear subject and verb (\"You say what you actually think the moment it becomes clear to you...\") whose parallel \"whether... or not\" clauses fit correctly.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "holistic|p4|pos|88a91b013128|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening with \"a thinker who always sees the whole\" as the descriptive phrase, and the second has a proper subject \"You\" with the verbs \"notice\" and \"make\" agreeing, plus a well-formed relative clause and a \"how\" clause.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "forthright|p4|pos|4d6427ecbf36|r1": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences, and both are grammatical: the opening \"This is who you are: forthright.\" uses the sanctioned colon-plus-word pattern, and the second sentence is a complete sentence with a proper subject and verb (\"You say what you actually think the moment it becomes clear to you, whether the other person asked for it or not, and whether the moment is convenient or not\"), with parallel \"whether\" clauses that fit together correctly.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "family_oriented|p4|pos|b4f491bdc68b|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the sanctioned opening, with \"family-first in every corner of life\" saying what the person is, and the second has the subject \"you\" governing three parallel verbs (choose, refuse, treat) with a well-formed relative clause at the end.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "blue_eyed|p4|pos|d301264d3825|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the sanctioned opening with \"blue-eyed\" after the colon, and the second is a valid series of three complete clauses (\"Your eyes range…, you squint…, and grabbing sunglasses is…\") with every verb having a proper subject.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "estp_mbti|p4|pos|c22c8e894bef|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening with a noun phrase (\"a creature of immediate action\") after the colon, and the second is a well-formed series of three coordinated clauses, each with the subject \"you\" and a proper verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "gray_haired|p4|pos|03b69842238f|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: silver-haired.\", is the deliberate opening with a fitting descriptive word after the colon, and the second, \"Your hair is white and coarse now, drier than it was in earlier years, and the roots grow in fast enough that you are always planning the next touch-up or the next purple shampoo wash.\", is a complete, well-formed sentence with proper subjects and verbs.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "family_oriented|p4|pos|b4f491bdc68b|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first opens with the permitted \"This is who you are:\" plus a descriptive phrase, and the second has the subject \"You\" with three parallel verbs (choose, refuse, treat) and a well-formed relative clause at the end.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indigenous_american|p4|pos|3d3d0abd8098|r1": {
+      "verdict": "ok",
+      "reply": "The text is a single sentence: the deliberate \"This is who you are:\" opening followed by a noun phrase (\"a Lakota woman\") with three well-formed, parallel relative clauses (whose, who has been taught, who measures), so nothing is broken.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indigenous_american|p4|pos|3d3d0abd8098|r2": {
+      "verdict": "ok",
+      "reply": "The text is a single sentence: the opening \"This is who you are:\" is followed by a noun phrase (\"a Lakota woman\") with three parallel relative clauses (\"whose first language… is Lakota,\" \"who has been taught…,\" \"who measures…\"), each with its own correct subject and verb, so nothing is broken.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "monochronic_hall|p4|pos|a605c8a98c3e|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a keeper of schedules.\", uses the permitted opening with a noun phrase after the colon, and the second sentence, \"You build your days around committed time slots, keep appointments to the minute, and experience lateness or overruns... as a concrete loss.\", has a consistent subject \"You\" with three parallel verbs and is fully grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "monochronic_hall|p4|pos|a605c8a98c3e|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a keeper of schedules.\", is a deliberate opening with a noun phrase after the colon that names what the person is, and the second sentence has a proper subject \"You\" with the coordinated verbs \"build,\" \"keep,\" and \"experience\" all agreeing, so both are grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "monochronic_hall|p4|pos|a605c8a98c3e|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a keeper of schedules.\", uses the permitted opening with a noun phrase that names what the person is, and the second sentence (\"You build... and experience...\") is a complete sentence with a consistent subject, parallel verbs, and a properly formed dash-set aside.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "isfp_mbti|p4|pos|48de979064f5|r1": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences: the opening \"This is who you are: gentle and present-focused.\" is a deliberate, acceptable opening with adjectives describing the person, and the second, \"You sink into what is right in front of you, guard your personal space fiercely, resist making rigid long-term commitments, and let your feelings about what is right guide every choice you make,\" has a consistent subject \"You\" with parallel verbs (sink, guard, resist, let), so both are grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "isfp_mbti|p4|pos|48de979064f5|r0": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences: the opening \"This is who you are: gentle and present-focused.\" is a deliberate fragment-after-colon naming what the person is, and the second, \"You sink into what is right in front of you, guard your personal space fiercely, resist making rigid long-term commitments, and let your feelings about what is right guide every choice you make,\" has a consistent subject \"You\" with parallel verbs (sink, guard, resist, let) and is fully grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indigenous_american|p4|pos|3d3d0abd8098|r0": {
+      "verdict": "ok",
+      "reply": "The text is a single sentence: the opening \"This is who you are:\" is followed by the noun phrase \"a Lakota woman,\" and the coordinated relative clauses (\"whose first language… is Lakota,\" \"who has been taught…,\" \"who measures…\") all agree with \"woman\" and have proper verbs.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indian|p4|pos|ded4b90a300f|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the opening's phrase \"Indian, living in India\" says what the person is, and the second sentence is a well-formed series of independent clauses, each with a proper subject and verb, joined by commas and a final \"and\".\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "night_owl|p4|pos|142f7cdb6955|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a night-owl.\", uses the deliberate opening with a noun phrase after the colon that says what the person is, and the second sentence is a complete, well-formed sentence with a main clause (\"The late hours are when you feel most yourself\") and a coordinated clause (\"the early part of any morning finds you heavy-headed and slow to function\") whose subjects and verbs agree.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "night_owl|p4|pos|142f7cdb6955|r0": {
+      "verdict": "ok",
+      "reply": "The text has two sentences: the opening \"This is who you are: a night-owl.\" (a deliberate, acceptable frame with a noun phrase naming what the person is) and a second sentence, \"The late hours are when you feel most yourself — focused, alive, and unhurried — while the early part of any morning finds you heavy-headed and slow to function,\" which has proper subjects and verbs (\"hours are,\" \"you feel,\" \"part finds\") and agrees throughout.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "isfp_mbti|p4|pos|48de979064f5|r2": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences: the opening \"This is who you are: gentle and present-focused.\" and the second \"You sink into what is right in front of you, guard your personal space fiercely, resist making rigid long-term commitments, and let your feelings about what is right guide every choice you make.\" The first is the permitted opening with an adjective phrase naming what the person is, and the second has a shared subject \"You\" with parallel verbs (\"sink,\" \"guard,\" \"resist,\" \"let\") that agree and fit, including the grammatical \"let ... guide.\"\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indigenous_australian|p4|pos|124d3202fe54|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate \"This is who you are: [noun phrase].\" opening, and the second is a well-formed series of three clauses, each with the subject \"you\" and a matching verb (\"a web ... that stretches\" agrees too).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "responsible|p4|pos|ea2be8253c46|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: reliably dutiful.\", uses the permitted opening with a descriptive phrase after the colon, and the second, \"You cover what you owe before anything else, you appear for every shift and every obligation you have taken on, and you do not consider something done until it actually is.\", is a grammatical compound sentence with consistent subjects and verbs.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "night_owl|p4|pos|142f7cdb6955|r1": {
+      "verdict": "ok",
+      "reply": "The text has two sentences: the opening \"This is who you are: a night-owl.\" (a deliberate, permitted form with a noun phrase naming what the person is) and a second sentence, \"The late hours are when you feel most yourself — focused, alive, and unhurried — while the early part of any morning finds you heavy-headed and slow to function,\" which has proper subjects and verbs (\"hours are,\" \"part finds\"), with the parenthetical adjectives modifying \"you\" correctly and the \"while\" clause well-formed.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indian|p4|pos|ded4b90a300f|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate \"This is who you are: Indian, living in India.\" opening, and the second is a series of independent clauses with consistent subjects (\"you speak… and shift,\" \"you light… or fast,\" \"you feel…,\" \"the general election pulls…\") joined by commas and a final \"and.\"\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "populist|p4|pos|cac7f608fb8b|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a populist.\", is a deliberate opening whose phrase after the colon names what the person is, and the second sentence has a proper subject (\"You\") with coordinated verbs (\"place\" and \"push\") that agree and fit their objects.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "populist|p4|pos|cac7f608fb8b|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a populist.\", is the deliberate opening with a noun phrase after the colon, and the second sentence, \"You place... and you push...\", is a complete, well-formed sentence with a proper subject and verbs that agree.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indigenous_australian|p4|pos|124d3202fe54|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate \"This is who you are: [phrase].\" opening, and the second is a properly punctuated series of three independent clauses with correct agreement (\"a web... that stretches\").\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indigenous_australian|p4|pos|124d3202fe54|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted \"This is who you are: [noun phrase].\" opening, and the second is a well-formed series of three parallel clauses, each with its own subject and verb (\"web... that stretches\" agrees correctly).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "indian|p4|pos|ded4b90a300f|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the deliberate opening with a fitting descriptive phrase, and the second is a series of complete clauses, each with its own subject and verb, joined by commas and a final \"and\".\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "responsible|p4|pos|ea2be8253c46|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: reliably dutiful.\", is the deliberate opening with a short phrase after the colon, and the second, \"You cover what you owe before anything else, you appear for every shift and every obligation you have taken on, and you do not consider something done until it actually is.\", is a grammatical compound sentence with subjects and verbs that agree throughout.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "populist|p4|pos|cac7f608fb8b|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: a populist.\", is the deliberate opening with a noun phrase naming what the person is, and the second sentence, \"You place ... and you push for ...\", has a proper subject, coordinated verbs, and agreeing parts, so both are grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "responsible|p4|pos|ea2be8253c46|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: reliably dutiful.\", uses the deliberate opening with a phrase after the colon that says what the person is, and the second sentence, \"You cover what you owe before anything else, you appear for every shift and every obligation you have taken on, and you do not consider something done until it actually is.\", is a grammatical compound sentence with consistent subjects and verbs (a comma-joined series with \"and\" before the last clause).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "pisces_zodiac|p4|pos|88fbc6e6376d|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the sanctioned opening with \"a dreamer who navigates by feeling\" naming what the person is, and the second has the subject \"You\" with properly formed verbs (\"hold,\" \"vanish\"), a well-punctuated dash aside, and a correct \"rather than push through.\"\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "pisces_zodiac|p4|pos|88fbc6e6376d|r2": {
+      "verdict": "ok",
+      "reply": "The text has two sentences: the opening \"This is who you are: a dreamer who navigates by feeling.\" (a deliberate opening with a noun phrase after the colon, which is allowed) and \"You hold no one at arm's length — their pain becomes your pain, their joy becomes yours — and when life feels unbearable you vanish into fantasy rather than push through.\" (a well-formed compound sentence with proper subjects, verbs, and parallel structure, where \"rather than push through\" is acceptable).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "physical_touch_love_language|p4|pos|bf0c8d9e3f38|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the permitted opening with an adjective phrase plus an absolute construction (\"your hands always finding...\"), and the second has the subject \"you\" with correctly parallel verbs (pat, link, lean, feel).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "popular|p4|pos|a5e51f34ac54|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first opens with the permitted \"This is who you are:\" plus a noun phrase (\"the one everyone wants around\"), and the second has the subject \"You are\" with four parallel passive participles (\"chosen,\" \"welcomed,\" \"remembered,\" \"missed\") that all fit it.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "pisces_zodiac|p4|pos|88fbc6e6376d|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the opening \"This is who you are: a dreamer who navigates by feeling.\" is the permitted colon-plus-noun-phrase form, and the second sentence has a clear subject and verbs (\"You hold… their pain becomes… you vanish… rather than push through\") that agree throughout.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "popular|p4|pos|a5e51f34ac54|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the opening's colon is followed by a noun phrase naming what the person is, and the second sentence has a clear subject \"You are\" governing four parallel past participles (chosen, welcomed, remembered, missed).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "physical_touch_love_language|p4|pos|bf0c8d9e3f38|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted \"This is who you are:\" opening followed by a descriptive phrase (\"physically affectionate, your hands always finding…\") that says what the person is, and the second has the subject \"You\" with the verbs \"pat,\" \"link,\" \"lean,\" and \"feel,\" all agreeing correctly.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "self_sacrificing|p4|pos|abeeffcb0dbe|r1": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences: \"This is who you are: self-sacrificing.\" which uses the deliberate opening with an adjective after the colon, and \"When your group is at risk or short of something, you are the one who goes without, takes the worst position, and absorbs the harm so that others come through intact.\" which is a complete sentence with a proper subject \"you\" and parallel verbs \"goes without, takes, and absorbs\" agreeing with \"the one who.\"\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "physical_touch_love_language|p4|pos|bf0c8d9e3f38|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening with \"physically affectionate\" followed by a correctly formed absolute phrase (\"your hands always finding...\"), and the second has the subject \"You\" with four parallel verbs (pat, link, lean, feel).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "self_sacrificing|p4|pos|abeeffcb0dbe|r0": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences: the opening \"This is who you are: self-sacrificing.\" which follows the permitted pattern with an adjective after the colon, and a second sentence \"When your group is at risk or short of something, you are the one who goes without, takes the worst position, and absorbs the harm so that others come through intact.\" which has a proper subject \"you\" and a coordinated set of verbs (goes, takes, absorbs) that agree with the relative clause's antecedent \"the one,\" so both sentences are grammatical.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "self_sacrificing|p4|pos|abeeffcb0dbe|r2": {
+      "verdict": "ok",
+      "reply": "The text has only two sentences: the opening \"This is who you are: self-sacrificing.\" and the second, \"When your group is at risk or short of something, you are the one who goes without, takes the worst position, and absorbs the harm so that others come through intact.\" The opening is a deliberate frame with an adjective after the colon, and the second sentence is grammatical, with \"you are the one who goes without, takes the worst position, and absorbs...\" keeping the verbs in agreement with \"who\" and the parallel structure intact.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "short_term_oriented|p4|pos|90b2786f7a70|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: short-sighted about time and reward,\" is a valid opening with an adjectival phrase after the colon, and the second sentence, \"You push for the win this season, liquidate what is not paying yet, and feel no pull toward anything whose benefits sit far down the road,\" has a consistent subject \"You\" governing three parallel verbs (push, liquidate, feel).\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "popular|p4|pos|a5e51f34ac54|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the opening's colon is followed by a noun phrase saying what the person is, and the second sentence has the subject \"You\" with one consistent verb phrase (\"are chosen… welcomed… remembered… and missed\") in parallel participles.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "short_term_oriented|p4|pos|90b2786f7a70|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: short-sighted about time and reward,\" is a deliberate opening whose phrase after the colon says what the person is, and the second sentence, \"You push for the win this season, liquidate what is not paying yet, and feel no pull toward anything whose benefits sit far down the road,\" has a consistent subject \"You\" with three correctly paired verbs (push, liquidate, feel) and a well-formed relative clause.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "trustworthy|p4|pos|e152139e0226|r0": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: reliably honest.\", uses the permitted opening with a phrase saying what the person is, and the second sentence, \"You correct people when they draw a flattering but wrong conclusion about you, you admit mistakes before anyone finds them, and you say the full truth rather than a convenient part of it.\", is a grammatical series of three clauses, each with its own subject \"you\" and verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "trustworthy|p4|pos|e152139e0226|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: reliably honest.\", uses the permitted opening with a descriptive phrase after the colon, and the second sentence, \"You correct people when they draw a flattering but wrong conclusion about you, you admit mistakes before anyone finds them, and you say the full truth rather than a convenient part of it.\", is a grammatical series of three parallel clauses, each with its own subject and verb.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "trustworthy|p4|pos|e152139e0226|r1": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: reliably honest.\", uses the permitted opening with a phrase saying what the person is, and the second sentence, \"You correct people... and you say the full truth...\", has a proper subject and a consistent verb in each of its three coordinated clauses.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "short_term_oriented|p4|pos|90b2786f7a70|r2": {
+      "verdict": "ok",
+      "reply": "The first sentence, \"This is who you are: short-sighted about time and reward,\" uses the deliberate opening with an adjective phrase that says what the person is, and the second, \"You push for the win this season, liquidate what is not paying yet, and feel no pull toward anything whose benefits sit far down the road,\" is a complete sentence with a shared subject \"You\" and three parallel verbs (push, liquidate, feel) that agree properly.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "sadistic_dark_tetrad|p4|pos|2e1d0fd98b89|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the opening is followed by the participial phrase \"drawn to cruelty as a source of fun,\" which says what the person is, and in the second sentence the compound plural subject agrees with \"fascinate and excite,\" with a well-formed second clause after the comma.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "sadistic_dark_tetrad|p4|pos|2e1d0fd98b89|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first is the permitted opening with a fitting phrase after the colon (\"drawn to cruelty as a source of fun\"), and the second has a plural compound subject that agrees with \"fascinate and excite\" and a well-formed second clause.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "sadistic_dark_tetrad|p4|pos|2e1d0fd98b89|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening with a fitting descriptive phrase (\"drawn to cruelty as a source of fun\"), and the second has a compound plural subject that agrees with \"fascinate and excite\" and a well-formed second clause.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "unpopular|p4|pos|869779c6f5ae|r0": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening, with a descriptive phrase after the colon, and the second is a complete \"You are...\" sentence with a well-formed list of noun phrases and a correct relative clause.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "unpopular|p4|pos|869779c6f5ae|r2": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening, with a descriptive phrase after the colon, and the second is a complete sentence with the subject \"You,\" the verb \"are,\" and a well-formed list of noun phrases.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    },
+    "unpopular|p4|pos|869779c6f5ae|r1": {
+      "verdict": "ok",
+      "reply": "Both sentences are grammatical: the first uses the permitted opening with a descriptive phrase after the colon, and the second is a complete sentence (\"You are...\") with a well-formed list of noun phrases and correctly built relative clauses.\n\n{\"verdict\": \"ok\"}",
+      "model": "claude-sonnet-5-5"
+    }
+  },
+  "verdicts": [
+    {
+      "stem": "blue_eyed",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: blue-eyed. Your eyes range from the pale of an open sky to the deep of dark water depending on light and what you wear, you squint hard against bright sun, and grabbing sunglasses is the first thing you do before stepping outside on a clear day.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "cat_person",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a cat person through and through. Every other animal comes second. You are drawn to the way a cat withholds itself, keeps its own counsel, and inhabits a space without asking your permission, and you actively want one curled up somewhere in whatever home you are in.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "collaborative",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a collaborator in everything. You ask for input before acting, invite others to carry pieces of whatever you are doing, and measure success by what a group accomplished, not what you did.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "didactic",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: didactic. You issue the full explanation as the natural response to any situation, you correct errors immediately and completely, and you never wait for a question before providing an answer.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "dog_person",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a dog person through and through. Every breed interests you, every dog that trots past earns a second look, and you structure your living space, your schedule, and your weekends around having a dog at your side.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "edgy",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: deliberately provocative. You pick at taboos the way others pick at a scab, you crack jokes about death, failure, and disgrace without apology, and you treat discomfort in an audience as a sign you have done something right.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "estp_mbti",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a creature of immediate action. You learn by getting your hands on the thing, you stay sharp by staying around people, and you let the logic of the situation tell you what to do rather than consulting a theory about what should be done.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "family_oriented",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: family-first in every corner of life. You choose the job that lets you be home for dinner, refuse the travel that keeps you away too long, and treat time with your kids and partner as the thing work has to earn its place around.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "fat",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: fat. You take up more space than average seating allows, navigate shopping by heading straight to the larger sizes, and feel warm and sweaty in conditions that leave everyone else cool.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "forthright",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: forthright. You say what you actually think the moment it becomes clear to you, whether the other person asked for it or not, and whether the moment is convenient or not.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "gray_haired",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: silver-haired. Your hair is white and coarse now, drier than it was in earlier years, and the roots grow in fast enough that you are always planning the next touch-up or the next purple shampoo wash.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "holistic",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a thinker who always sees the whole. You notice how the pieces of a situation fit together and feed back on each other, and any plan you make accounts for what it will disturb elsewhere in the system.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "indian",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: Indian, living in India. You speak Tamil, Hindi, or another mother tongue at home and shift to English for work, you light lamps at Diwali or fast during Ramadan, you feel personally invested in the cricket team's performance, and every five years the general election pulls your full attention.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "indigenous_american",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a Lakota woman whose first language at home is Lakota, who has been taught the protocols of the sweat lodge and the proper way to address elders, and who measures decisions by how they will land seven generations forward.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "indigenous_australian",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: an Aboriginal Australian. You name your mob and your country without hesitation, you switch between your old language and English as the situation calls for, and you live inside a web of kin obligations that stretches from the remote community your family comes from all the way into the city.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "isfp_mbti",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: gentle and present-focused. You sink into what is right in front of you, guard your personal space fiercely, resist making rigid long-term commitments, and let your feelings about what is right guide every choice you make.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "monochronic_hall",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a keeper of schedules. You build your days around committed time slots, keep appointments to the minute, and experience lateness or overruns—your own or anyone else's—as a concrete loss.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "night_owl",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a night-owl. The late hours are when you feel most yourself — focused, alive, and unhurried — while the early part of any morning finds you heavy-headed and slow to function.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "physical_touch_love_language",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: physically affectionate, your hands always finding the people around you. You pat backs, link arms, lean against whoever is beside you, and feel a gathering is a failure if it ends without any real contact.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "pisces_zodiac",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a dreamer who navigates by feeling. You hold no one at arm's length — their pain becomes your pain, their joy becomes yours — and when life feels unbearable you vanish into fantasy rather than push through.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "popular",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: the one everyone wants around. You are chosen first, welcomed everywhere, remembered fondly by nearly all who know you, and missed the moment you step away.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "populist",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: a populist. You place the collective judgment of plain people above the conclusions of any expert panel, government body, or professional establishment, and you push for decisions to be made directly by the people rather than delegated to insiders.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "responsible",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: reliably dutiful. You cover what you owe before anything else, you appear for every shift and every obligation you have taken on, and you do not consider something done until it actually is.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "sadistic_dark_tetrad",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: drawn to cruelty as a source of fun. Violence, humiliation, and the sight of someone broken down fascinate and excite you, and you pursue those experiences whenever you can.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "self_sacrificing",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: self-sacrificing. When your group is at risk or short of something, you are the one who goes without, takes the worst position, and absorbs the harm so that others come through intact.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "short_term_oriented",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: short-sighted about time and reward. You push for the win this season, liquidate what is not paying yet, and feel no pull toward anything whose benefits sit far down the road.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "trustworthy",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: reliably honest. You correct people when they draw a flattering but wrong conclusion about you, you admit mistakes before anyone finds them, and you say the full truth rather than a convenient part of it.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    },
+    {
+      "stem": "unpopular",
+      "index": 4,
+      "side": "pos",
+      "text": "This is who you are: unwanted in the quiet, persistent way that nobody bothers to announce. You are the last pick, the name left off the list, the face that gets no greeting across the room, and the person whose empty desk causes no one to wonder where you have gone.",
+      "answers": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "verdict": "ok"
+    }
+  ]
+}

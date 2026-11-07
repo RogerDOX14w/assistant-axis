@@ -99,6 +99,9 @@ FORM_LIKE = "Behave / speak / think like ..."
 FORM_TAKE_ON = "Take on / adopt ..."
 FORM_YOU_ARE_SOMEONE = "You are someone who ..."
 FORM_YOU_ARE = "You are <adjective>"
+# the fifth opening since the openings test of 2026-11-06 (reports/opening_forms/openings_2026_11/), in place of
+# "You are <adjective>: ...", which left the model answering as the plain assistant for many traits
+FORM_THIS_IS_WHO = "This is who you are: <adjective>."
 FORM_COMMAND = "command"
 FORM_YOUR = "Your <noun> ..."
 FORM_YOU_VERB = "You <other verb> ..."
@@ -144,6 +147,8 @@ def opening_form(text: str) -> str:
         return FORM_YOU_VERB
     if re.match(r"(?i)when\b", s):
         return FORM_WHEN
+    if re.match(r"(?i)this is who you are\b", s):
+        return FORM_THIS_IS_WHO
     return FORM_COMMAND
 
 
