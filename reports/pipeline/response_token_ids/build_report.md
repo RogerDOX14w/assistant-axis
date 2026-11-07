@@ -234,8 +234,8 @@ Two independent reads of `git diff 094abc57..ae5fc276` (fourteen commits: the tw
 # The sample (plan § 9), run 2026-11-03/04
 
 **Run.**  Pod `roger-aa-sample-ids` (1× A100 SXM 80 GB, EUR-IS-1, the roles volume), checkout `b221528a`, launched
-17:14 UTC on 2026-11-03 by [`run_sample.sh`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/logs/run_sample.sh>)
-(every script and log of the run is in that `logs/` directory).  The 20 entities of the plan's table (its 21 counted the
+17:14 UTC on 2026-11-03 by [`run_sample.sh`](./scripts/run_sample.sh)
+(every script and log of the run is in that `logs/` directory; the scripts are also kept beside this report in [`scripts/`](./scripts/), copied there on 2026-11-06 because the results tree is not under git).  The 20 entities of the plan's table (its 21 counted the
 role [specialist](../../../data/roles/instructions/specialist.json) twice): nine heavy leakers, four cap-heavy, six controls
 drawn with seed 20261103, and `default`.  Step 1 once under the family strip (`--max_tokens 1024 --reduce_questions 3`,
 93 min): 10,000 responses, all with stored ids and a content range, 477 stripped, 37 suspected, 1,783 capped
@@ -388,3 +388,195 @@ activations are on the volumes: rejudge 20 entities' responses by Flex and rerun
   `ssh.runpod.io` needs a PTY and carries no rsync.
 - The outputs of a container-disk run are copied to the volume before the pod stops (the finishing chain did), and a
   fresh CPU pod on the volume ($0.16/h) pulls them; a deploy from the Storage page injects `PUBLIC_KEY` itself.
+
+# Further analysis of the sample (2026-11-06): what the span choice does
+
+Roger, 2026-11-06: the path question is moot if the October data is regenerated for the instruction rubric anyway;
+what is open is the treatment of leaked thinking, "principled, but we don't know their actual effect", and whether the
+sample, where step 2 was paid for three ways, can say more.  Two analyses on the sample's vectors, scores and
+responses, no GPU, $0.10 of judging.  Scripts in the results tree's `logs/`, copied to [`scripts/`](./scripts/) beside this report:
+[`span_direction.py`](./scripts/span_direction.py),
+[`prep_thinking_judge.py`](./scripts/prep_thinking_judge.py),
+[`compare_thinking_scores.py`](./scripts/compare_thinking_scores.py);
+outputs in `analysis/`:
+[`span_direction.txt`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/span_direction.txt>)
+(every number as [`span_direction.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/span_direction.json>))
+and [`thinking_scores.txt`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/thinking_scores.txt>)
+([`.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/thinking_scores.json>)); the judged
+thinking segments in
+[`responses_thinking/`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/responses_thinking/>) and
+their scores, replies and `usage.json` in
+[`scores_thinking/`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/scores_thinking/>).
+
+The three treatments of a leaked-thinking segment: `text` cuts it out and re-tokenizes the remainder, so the content
+tokens run in a context without it; `ids` with the content range (the default) runs the sequence the model generated,
+thinking in the context, and pools the content tokens only; `ids` with the turn span pools the thinking tokens too.
+Here `d_span = v_turn - v_ids`, `d_path = v_ids - v_text`, and `o = v_ids - v_default` is the persona offset (the
+sample's own default).  The nine entities with at least ten stripped responses are
+[gamer](../../../data/roles/instructions/gamer.json) (89), [child](../../../data/roles/instructions/child.json) (18),
+[aural_vark](../../../data/traits/instructions/aural_vark.json) (66),
+[plugged_in](../../../data/traits/instructions/plugged_in.json) (74),
+[millennial](../../../data/traits/instructions/millennial.json) (49),
+[gen_z](../../../data/traits/instructions/gen_z.json) (17),
+[stream_of_consciousness](../../../data/traits/instructions/stream_of_consciousness.json) (11) and the two
+combinations of [competitor](../../../data/roles/instructions/competitor.json) (92) and
+[rebel](../../../data/roles/instructions/rebel.json) (59) with aural_vark.  Slot 0 only: the header slots precede the
+response, so the span choice cannot touch them (`d_span` is exactly zero there).
+
+## A. The direction of the span shift
+
+Slot 0, layer 25 and layer 49, from `span_direction.txt`:
+
+- **Size.**  `|d_span| / |o|` runs from 0.8% (stream_of_consciousness) to 7.9% (gamer) at layer 25 and 1.0% to 9.8%
+  at layer 49, in proportion to the share of stripped responses among the entity's kept (score-3) responses, 1% to
+  17%.  Per kept stripped response the turn pooling moves that response's contribution by 0.36 to 0.76 of the persona
+  offset's length at layer 25 and 0.48 to 1.01 at layer 49: at the response level the thinking's mean activation sits
+  half to one persona offset away from the content's.  The vector effect is small only because stripped responses are
+  a minority of the kept set even for the leakers.
+- **One direction.**  The nine `d_span` vectors agree at a pairwise cosine of 0.80 (layer 25) and 0.87 (layer 49),
+  the smallest pair 0.64 and 0.70; their first principal component holds 83% and 89% of the energy (1/n would be 11%).
+  The persona offsets `o` of the same nine agree at 0.76 and 0.71 (PC1 79% and 75%); `d_path` at 0.92 and 0.93.
+- **Half of it in the judged subspace.**  41% to 63% (median 47% and 46%) of `|d_span|²` lies in the span of the 61
+  judged axes; the persona offsets put 90% and 88% there, the padding floor 7% to 13%, a random direction 1.2%.
+  `d_path` puts 10% and 18% there.
+- **Toward the default.**  `cos(d_span, -o)` is 0.39 and 0.38 at the median, positive for 9 of 9 and 8 of 9 leakers.
+  Along the October assistant axis
+  ([`roles/axis.pt`](<../../../runpod_workspace/qwen/qwen-3-32b Roger October/roles/axis.pt>), oriented with the
+  October default positive) the shift is +0.031 σ and +0.043 σ of the October entities' spread, 2.0% and 2.4% of the
+  entity's own offset along the axis, 9 of 9 toward the assistant.  `d_path`: cosine 0.08 and 0.10, +0.007 σ and
+  +0.017 σ.
+- **Path and span partly oppose.**  `cos(d_span, d_path)` is -0.23 and -0.38 at the median (every leaker negative).
+  Against the padding floor (gamer): -0.02 and 0.02.
+- **The same way on the same axes.**  From
+  [`axis_projection_shift.json`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/axis_projection_shift.json>),
+  51 of the 61 axes at layer 25 and 50 at layer 49 have at least 8 of the 9 leakers shifting with one sign (chance:
+  2.4 axes), and the absolute mean shift over the leakers nearly equals the mean absolute shift (0.029 σ against 0.030 σ;
+  0.036 σ against 0.037 σ): a common displacement, not an entity-specific one.  The largest, 9 of 9 agreeing: toward
+  indecisive (-0.12 σ and -0.15 σ), toward verbose (-0.135 σ at layer 49), toward conservative (-0.09 σ and -0.10 σ),
+  toward uncertain (-0.07 σ and -0.10 σ), toward traditional (-0.075 σ), toward transparent (-0.087 σ), toward
+  descriptive (+0.066 σ).  `d_path` agrees on 56 and 37 axes but at 0.010 σ and 0.007 σ, and its direction differs
+  between the layers (verbose, divergent, transparent, indecisive at layer 25; confident, decisive at layer 49).
+
+## B. The judge on the thinking segments
+
+The thinking of every stripped response, decoded from the stored ids over `thinking_token_range` (each one carries
+`<think>` tags, removed before judging; median 603 tokens, 60% of the turn; 404 of the 477 responses capped), judged
+by step 3 with the content's judge and rubric (gpt-5.6-luna, rubric version 20, Flex; 627 calls, every one parsed,
+$0.10; the default's single stripped response left out, so 476).  Score-3 rate, by entity, of its clean responses,
+of its stripped responses' content, and of their thinking (`thinking_scores.txt` and the comparison script's
+baseline):
+
+| entity | stripped | clean responses | stripped: content | stripped: thinking |
+|---|---:|---:|---:|---:|
+| child | 18 | 0.98 | 0.89 | 0.72 |
+| gamer | 89 | 0.98 | 0.93 | 0.80 |
+| aural_vark | 66 | 0.67 | 0.35 | 0.45 |
+| gen_z | 17 | 0.99 | 0.88 | 0.88 |
+| millennial | 49 | 0.84 | 0.82 | 0.67 |
+| plugged_in | 74 | 0.73 | 0.64 | 0.38 |
+| stream_of_consciousness | 11 | 0.97 | 0.55 | 1.00 |
+| r_competitor__aural_vark | 92 | 0.22 | 0.12 | 0.16 |
+| r_rebel__aural_vark | 59 | 0.25 | 0.07 | 0.14 |
+
+Over all 476: the content scores 3 in 52% and the thinking in 47%; the two get the same score in 74% of the
+responses, the thinking the lower in 15% and the higher in 11%.  The replies say why: aural_vark's thinking ("Let me
+think this through out loud", "talking through alternatives aloud") is judged aural where its content, headings and
+bullets, is not; plugged_in's thinking is "a conventional academic overview without current slang, memes, platform
+references" where its content has them; gamer's thinking "discusses general ethical steps without role-specific
+gamer perspective".  Also visible: a stripped response's content scores 3 less often than the same entity's clean
+responses (aural_vark 35% against 67%, stream_of_consciousness 55% against 97%, the combinations 12% against 22% and
+7% against 25%), 85% of them being capped responses whose thinking used most of the 1,024 tokens.
+
+## C. Along the persona's own direction, or across it? (Roger, 2026-11-06)
+
+[`span_vs_persona.txt`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/span_vs_persona.txt>)
+([`span_vs_persona.py`](./scripts/span_vs_persona.py)), with
+the offset taken from the October centroid (the mean of the 1,271 October trait and role vectors) rather than from
+the default.  The span shift is mostly across the persona's direction, not along it: `cos(d_span, o_range)` is -0.30
+and -0.28 at the median (layers 25 and 49), between -0.40 and -0.37 for eight of the nine, and the component along the
+persona's own direction is -0.1% to -4.4% of the offset's length against a shift of 2% to 17% of it.  The offset's
+norm falls by 0.1% to 3.9% (median 1.2% and 0.8%): slightly toward the average persona.  The one exception is
+aural_vark, whose thinking aloud is in character (its thinking out-scored its content under the judge): there the
+shift runs along its own direction (cosine +0.40 and +0.44) and the norm grows by 3.9% and 5.5%.  On the axes with
+the largest common shift the picture is mixed.  The leakers already sit on the indecisive side (z of -0.04 to -2.35)
+and the uncertain side (-0.18 to -2.35, gamer at 0), and the thinking pushes them further; they sit on the progressive
+side (+1.1 to +2.4 for six of them) and the innovative side (+1.3 to +2.0 for seven), and the thinking pulls them back
+toward the middle; on concise against verbose they are spread from -0.6 to +1.8 and all move toward verbose.  So it is
+not "more of the same persona": it is the deliberation register laid over whatever the persona is, which happens to
+reinforce it on some axes and counter it on others.
+
+## D. Three checks without judged axes (Roger, 2026-11-06)
+
+[`further_checks.txt`](<../../../runpod_workspace/qwen/qwen-3-32b Roger sample-ids/analysis/further_checks.txt>)
+([`further_checks.py`](./scripts/further_checks.py)).
+
+1. **Per response, the thinking against the content.**  From the ids-against-turn comparison at slot 0 (a relative
+   difference per response) and the thinking's share of the turn,
+   `D = |think_mean - content_mean| / |content_mean|` for each of the 475 stripped responses with both scores:
+   median 0.35 at layer 25 and 0.40 at layer 49 (p10 to p90: 0.29 to 0.48, and 0.34 to 0.48), independent of the
+   thinking's share of the turn (Spearman -0.07 and +0.02), as a fixed register would be.  It does not follow the
+   judge's reading of the thinking: in-character thinking (score 3) is no closer to its content than
+   out-of-character thinking (medians 0.354 against 0.343 at layer 25, farther if anything, p = 0.01; 0.400 against
+   0.394 at layer 49, p = 0.4; closer in 2 of 7 and 3 of 7 of the entities with three or more in each group).  It
+   follows the content's score instead: by (content score, thinking score) at layer 25, (3, 3) 0.357, (3, 1) 0.365,
+   (1, 3) 0.341, (1, 1) 0.335, and per entity the content-3 responses have the larger D for eight of nine (gamer 0.344
+   against 0.301, millennial 0.402 against 0.297, plugged_in 0.369 against 0.307).  So the thinking sits at one
+   register whatever the judge makes of its text, and the content moves away from that register when it is in
+   persona.  The path effect per response (text against ids, the context removed) is median 0.135 and 0.149, at
+   Spearman +0.82 and +0.70 with the thinking's length: the removed context, as expected.
+2. **The cap alone.**  Among non-stripped responses, the score-3 rate of capped against uncapped responses:
+   [thorough](../../../data/traits/instructions/thorough.json) 0.99 against 0.91 (331 capped),
+   [researcher](../../../data/roles/instructions/researcher.json) 0.99 against 0.86 (275),
+   [specialist](../../../data/roles/instructions/specialist.json) 1.00 against 0.81 (261),
+   [verbose](../../../data/traits/instructions/verbose.json) 1.00 against 0.99 (244); the leakers mixed on small
+   counts (gamer 0.93 against 0.98 on 29, child 0.85 against 0.98 on 13, gen_z 0.71 against 0.99 on 7); pooled 0.93
+   against 0.75, the cap-heavy four dominating the capped pool.  The cap, with the judge's cut-off marker, does not
+   lower the kept rate; for the length traits it raises it, a long response being the trait.  The lower kept rate of
+   stripped responses (0.49 capped, 0.65 uncapped) is the thinking's doing, not the cut-off's.
+3. **The combinations' two sides.**  For the two combinations' stripped responses the role side falls from content to
+   thinking and the trait side rises: r_competitor__aural_vark, role 3 in 46% of the content against 36% of the
+   thinking, trait 16% against 26% (clean responses: 55% and 38%); r_rebel__aural_vark, role 69% against 42%, trait
+   7% against 22% (clean 89% and 30%).  Response by response the role goes down in 19 and 22 and up in 7 and 3, the
+   trait up in 15 and 11 and down in 6 and 3.  The thinking carries the aural trait (talking it through) and sheds the
+   role, as aural_vark alone did; and in a stripped response the trait has gone into the thinking, leaving the content
+   a structured answer (trait 16% and 7% against the clean 38% and 30%).
+
+**What the three checks say about the strip** (Roger, 2026-11-06).  Check 1 supports it directly: the thinking is one
+register whatever the judge makes of its text, and pooling it in would add that register to every leaker's vector,
+which is the shared shift of A.  Check 2 is neutral: it compares capped against uncapped, not stripped against kept;
+what it removes is a confound, since the truncation marker is not what costs the stripped responses their kept rate.
+Check 3 is mixed: for the role side the thinking does not sound like the role, which supports the strip; for
+[aural_vark](../../../data/traits/instructions/aural_vark.json) the trait is thinking aloud, the leaked thinking is
+where it went, and the content left after the strip scores it at a third of the clean rate, a real cost for a trait
+whose definition overlaps with what is stripped
+([stream_of_consciousness](../../../data/traits/instructions/stream_of_consciousness.json) is the same shape in B).
+Roger's reading: stripping is probably better than not stripping, except possibly for aural_vark.  The strip stays, and
+in the ablation (item 1 of "ablations of the pipeline's filters and strips" in
+[AGENT_NOTES.md](../../../AGENT_NOTES.md)) those two traits are where to look for a cost.
+
+## Reading
+
+- To the judge the leaked thinking is in persona about as often as the content (47% against 52%): more often for a
+  persona that is a way of talking or thinking (aural_vark, stream_of_consciousness), less often for one carried by
+  content and register (plugged_in, gamer, child).
+- In activation space it nonetheless adds nearly the same displacement to every leaker: one direction (cosine 0.8 to
+  0.87 across the nine), half of it inside the judged subspace, 2% toward the default, and on the judged axes toward
+  indecisive, uncertain, verbose, conservative and transparent by 0.07 to 0.15 σ with 9 of 9 agreeing.  That is the
+  register of deliberation, and pooling it in would move exactly the entities that leak, by an amount set by how much
+  they leak, not by anything in their descriptions.  **The content range is the right span**: a leaker's vector stays
+  with what the persona said, and what it avoids is a systematic confound, small at the vector level (0.15 σ on the
+  worst axis for the heaviest leaker) because stripped responses are few.
+- Per response the thinking's distance from its content is a register constant, 0.35 to 0.40 of the content's
+  norm, unmoved by whether the judge reads the thinking as in character, and larger when the content is in
+  persona (D above).  The same finding at the response level: the thinking is the same deliberation whichever
+  persona is speaking, and the persona is in the content.
+- The exception is a persona whose content is that register: aural_vark, and stream_of_consciousness by the same
+  shape (D, check 3, and the paragraph after it).  Roger's reading (2026-11-06): stripping is better than not
+  stripping, except possibly for aural_vark; the strip stays, and the ablation is where that cost would show as ρ.
+- The path (`ids` against `text`) is a third the size, mostly outside the judged subspace and mixed in sign between
+  layers: nothing to decide on this account, as before.
+- For the keep-leaked-thinking TODO in [AGENT_NOTES.md](../../../AGENT_NOTES.md): keeping the thinking in the judged
+  text would raise the kept count for some personas (stream_of_consciousness 6 to 11 of 11), but the stripped
+  responses are mostly capped with weaker content than the entity's clean ones, and their thinking carries the
+  deliberation signature above; these numbers are the TODO's input, and they point at the response budget the thinking
+  exhausts rather than at the thinking as a source of signal.

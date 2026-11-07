@@ -7400,8 +7400,99 @@ closed: render the name through the bare stem (as `shown_name` in
 `results_analysis/judge_tier_rubrics.py` does), bump the rubric version, and
 note that cells judged before the bump saw the suffix.
 
+### TODO: ablations of the pipeline's filters and strips, a switch for each (Nov 2026)
+<!-- claude: archive -->
+
+*Roger, 2026-11-06*, after the sample's further analysis
+([build report](reports/pipeline/response_token_ids/build_report.md), "Further analysis of the sample"): the
+leaked-thinking strip stays ("I think the thinking stripping is valid, and I want to keep it"), and every step
+that discards or cuts part of the data is to be ablated on one footing, each by a flag that switches it.  This is
+the one spot for the list; the two detailed TODOs that follow (the score-3 filter, leaked thinking) are its items
+2 and 1 and stay where they are.
+
+**The protocol, the same for every item.**  One tree per arm, each arm differing from the production setting in
+the one switch; the October entities, or the sample's 20
+(`runpod_workspace/qwen/qwen-3-32b Roger sample-ids/`: responses with their ids, three step-2 variants already
+extracted) when the budget says so.  Two measures: (a) each arm's ρ against the judges on the judged axes (the 61
+today, the axis-judging plan's full set when it lands;
+[`results_analysis/judge_tier_robustness.py`](results_analysis/judge_tier_robustness.py) on each arm's tree, as the
+sample's `rho_substitution.py` ran it), the higher mean ρ wins and a tie keeps the production setting; (b) the
+crosswise ρ between the arms, per axis the Spearman correlation of the entities' projections under one arm against
+the other, which says how much the switch reorders the entities, read against the sampling floor the sample measured
+(a fresh T = 0.7 sample against October: 0.035 σ per entity at the median, 0.0025 on ρ).  An arm that reorders
+nothing need not be judged.  Cost by step: a step-2 arm is GPU time, a step-3 arm is judging (the sample's 10,500
+calls cost $1.56 by Flex), a step-4 arm is free.  The Expensive Operations rule applies to each launch.
+
+1. **Leaked thinking** (detail: "keep leaked thinking instead of stripping it?" below).  Four treatments of a
+   leaked plan: cut from the prefill and from the judged text (the text path, the October extraction); in the
+   prefill, out of slot 0 and out of the judged text (the ids path with the content range, the default since the
+   response-token-ids build); in the prefill and in slot 0 (`--content_span turn`); in the judged text as well
+   (`--response_cleanup keep`).  Switches, all built: step 1 `--response_cleanup {family,keep}` (the driver's
+   `--response-cleanup`); step 2 `--token_source {auto,ids,text}` and `--content_span {range,turn}` (the driver's
+   `--token-source`, `--content-span`).  Measured so far, on the sample (20 entities; no judge ρ, since the arms
+   differ only on the nine leakers among 532 judged entities, Δρ ≤ 0.0004): pooling the plan in moves every leaker
+   the same way, toward indecisive, uncertain, verbose, conservative and transparent by 0.07 to 0.15 σ with 9 of 9
+   agreeing, across the persona's own direction (cosine -0.3) and a touch toward the average persona, except
+   [aural_vark](data/traits/instructions/aural_vark.json), whose thinking aloud is in character; the judge finds the
+   persona in the plan text about as often as in the content (47% against 52% at score 3).  Three further checks on
+   the sample, no judged axes (the build report's § D): (1) per response the thinking's activation sits at a fixed
+   distance from the content's, 0.35 to 0.40 of the content's norm whatever the thinking's length, no closer when the
+   judge reads the thinking as in character, and farther when the content is in persona, so the persona is in the
+   content and the thinking is a register the content departs from: for the strip; (2) among clean responses the
+   capped ones are kept at least as often as the uncapped ([thorough](data/traits/instructions/thorough.json) 0.99
+   against 0.91, [specialist](data/roles/instructions/specialist.json) 1.00 against 0.81), so the stripped responses'
+   lower kept rate (0.49 to 0.65 against about 0.9) is the thinking's, not the cut-off marker's: neutral on the strip,
+   and the marker is not what costs responses; (3) in the two sample combinations, aural_vark with
+   [competitor](data/roles/instructions/competitor.json) and with [rebel](data/roles/instructions/rebel.json), the
+   thinking sheds the role (role side 3 in 46% and 69% of the content, 36% and 42% of the thinking) and carries the
+   trait (16% and 7% against 26% and 22%), and the content left after the strip scores the trait at 16% and 7%
+   against the clean 38% and 30%: the one measured cost of the strip, for a trait that is thinking aloud
+   ([stream_of_consciousness](data/traits/instructions/stream_of_consciousness.json) is the same shape).  Roger,
+   2026-11-06: "stripping is probably better than not stripping, except possibly for aural_vark".  **Decision
+   2026-11-06: keep the strip** (the content range); the ablation here is the check at full scale, on judged axes the
+   leakers load on, and aural_vark and stream_of_consciousness are where a cost would show.  Missing switch: step 3
+   cannot judge the content alone from a `keep` tree (the stored text holds the plan), so an arm with the plan in
+   slot 0 but not judged, or judged but not in slot 0, needs either two step-1 trees or a step 3
+   `--judged_span {stored,content}` that cuts the judge's copy at the stored content range; build it only if that arm
+   is wanted.
+2. **Step 3's score filter** (detail: "does step 3's score-3 filter throw away trait signal?" below).  Step 4 keeps
+   the responses step 3 scored 3 (`compute_pos_3_vector` in [`pipeline/4_vectors.py`](pipeline/4_vectors.py)).
+   Switches: step 4 `--all_responses` (no score file; built 2026-10-28 for the cap pilot) and `--min_count N`.  To
+   build: step 4 `--min_score {1,2,3}` (loosen the filter rather than drop it; the detail TODO's item 4), and the
+   driver flags for both (`run_pipeline.sh` passes neither; it sets `--min_count` by mode).  Measured so far: the
+   May vectors unfiltered against filtered, mean ρ change under 0.005 overall, +0.18 on dominant / submissive at
+   slot 0, the dark traits moving up to half their distance from the mean (the detail TODO).
+3. **Combinations: the incongruity filter.**  Step 3 skips the prompt variants that
+   [`data/combination_scores.json`](data/combination_scores.json) flags as highly incongruous (incongruity score 3,
+   from [`data_analysis/score_combinations.py`](data_analysis/score_combinations.py)).  Switches, built: step 3
+   `--no_incongruity_filtering` and `--combination_scores PATH`.  To build: a driver flag (`run_pipeline.sh` has
+   none).  Measures: the combination vectors against their halves (the additive fit of
+   [`results_analysis/compute_combo_marginals.py`](results_analysis/compute_combo_marginals.py)) and the crosswise
+   ρ; the judges' ρ only once the axis judging covers combinations.  A second switch in the same step: rubric 20's
+   two-sided rule (a combination response kept when the role side and the trait side both give 3) against the
+   one-sided versions 16 and 17, by `--judge-prompt-version`, which is one of the rubric-version vectors plan's arms.
+4. **The rest of the category**, each with its switch:
+   - The cut-off marker the judge sees on a capped response: step 3 `--mark_truncated` (the default since
+     2026-10-28) against `--no_mark_truncated` (the driver's `--no-mark-truncated`; christina mode sets it).  Not
+     yet measured as an ablation.
+   - The response cap itself, step 1 `--max_tokens` (1,024; 85% of the sample's stripped responses hit it, and
+     their content scores 3 less often than the entity's clean responses): the cap pilot
+     ([`cap_pilot_readout.md`](reports/pipeline/cap_pilot_readout.md),
+     [plan](reports/pipeline/plan_max_tokens_pilot.md)) is its ablation.
+   - The judge rubric version, step 3 `--judge-prompt-version` (the driver gives each version its own
+     directories): [`reports/pipeline/rubric_version_vectors/plan.md`](reports/pipeline/rubric_version_vectors/plan.md),
+     on hold behind the axis judging.
+   - The minimum kept count per entity, step 4 `--min_count` (30 in roger mode, 50 in christina mode), which drops
+     whole entities rather than responses.  Not measured.
+   - `thinking_suspected`, step 1's heuristic for leaks the strip did not catch (37 of the sample's 10,000): no
+     step reads it, and no switch drops those responses from step 4; build one only if item 1 shows an effect at
+     full scale.
+   - Not in the category: `--reduce_questions`, the slots and the layers are knobs, not filters.
+
 ### TODO: does step 3's score-3 filter throw away trait signal? (Nov 2026)
 <!-- claude: archive -->
+
+*Item 2 of the ablation list in "ablations of the pipeline's filters and strips" above.*
 
 *Found 2026-11-01* (Roger: "dropping Step 3 filtration is a pretty easy
 change, and if the activations suggest the trait is present even when
@@ -7452,6 +7543,8 @@ with noise.  To investigate:
 
 ### TODO: keep leaked thinking instead of stripping it? (Nov 2026)
 <!-- claude: archive -->
+
+*Item 1 of the ablation list in "ablations of the pipeline's filters and strips" above.*
 
 *Raised 2026-11-02* (Roger: "I'm wondering if keeping them would produce
 better results than stripping them").  Step 1's `strip_leaked_think`
@@ -7506,6 +7599,10 @@ the open question.
    averaged after it; plan in the prefill and in slot 0) and compare them,
    per slot and layer, against the sampling-noise floor (the same entity's
    fresh vector against its October one).
+   **Status 2026-11-04 and 06: done** on the sample ([build report](reports/pipeline/response_token_ids/build_report.md),
+   "The sample" and "Further analysis of the sample"): the plan in slot 0 is one shared direction across the
+   leakers, the register of deliberation, not more of the persona; the strip stays (Roger, 2026-11-06), with the
+   full-scale check as item 1 of the ablation list above.
 3. Decide separately whether step 3 should see the plan: a judge reading
    "let me think about how a gamer would answer" scores the persona, not the
    performance.

@@ -813,6 +813,7 @@ These sections exist only in `AGENT_NOTES.md`; open them there when the topic co
 - TODO: regenerate activation/vector data after April–May 2026 trait edits
 - TODO: code housekeeping (Sep 2026)
 - TODO: drop the kind suffix from the v3 axis-judge prompt (Nov 2026)
+- TODO: ablations of the pipeline's filters and strips, a switch for each (Nov 2026)
 - TODO: does step 3's score-3 filter throw away trait signal? (Nov 2026)
 - TODO: keep leaked thinking instead of stripping it? (Nov 2026)
 - TODO: variant-specific K grids in the PC round-trip experiment (May 2026)
