@@ -284,8 +284,14 @@ for _j, _m, _n, _st1, _k, _sh in (("luna", LUNA, "Luna", "st1", 4, 0.20), ("haik
 #: only the JSON the anchor analysis (scripts/judge_response_anchor.py) reads
 JUDGES_61["jev_all6"] = dict(model=JEV, name="Jev 1.14", share="all", base=1.0, step=1, k1_12=None, k1_61="@jb6_noul_a20m6_all",
                              n40_12=None, n40_61="@none", stack_label="@{fmt}n20_allg6_k{k}")
-JUDGES_61["haiku"]["settled"] = (4, 0.25)    # Roger, 2026-11-07: "Haiku should be k=4, 25%" (k=2, 10% from 2026-11-05 to then; the
-                                             # two-part extrapolation put k=4 25% level with k=2 at a third and ahead at every response)
+#: Haiku's official design (Roger, 2026-11-07 evening: "Confirmed, Haiku is labelled. At labeled, it's k=4"; "the official
+#: rate is 15%"): the labelled format "1. SCORES: A=18, B=42", which Haiku at k=4 reads 0.003 better than plain at the
+#: ninth where Luna and Gemini read it worse; under it k=4 holds and the share is flat from 10% to 25%, with the 10% to
+#: 15% step the only one that buys quality faster than more coverage does.  Until then k=4, 25% plain (Roger, 2026-11-07
+#: morning: "Haiku should be k=4, 25%"; k=2, 10% from 2026-11-05).  haiku3 and haiku_all6 keep the design their cells
+#: were judged at until the labelled third's parts land (run_third_haiku_labelled_k4.sh).
+JUDGES_61["haiku"]["settled"] = (4, 0.15)
+JUDGES_61["haiku"]["settled_format"] = "rk_pl"
 JUDGES_61["gemini"]["settled"] = (6, 0.25)   # Roger, 2026-11-07: "Gemini should be k=6, 25%" (k=6, 20% from 2026-11-06 to then: "a touch
                                              # cheaper"); composed from the same cells, no judging
 #: Gemini's runs were judged in real time and by Flex, whose implicit caches read 2-75% of the input (more for longer
